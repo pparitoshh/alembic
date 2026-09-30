@@ -36,7 +36,7 @@ def run(cfg: dict) -> Path:
         gradient_accumulation_steps=tcfg["grad_accum"],
         learning_rate=tcfg["learning_rate"],
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
+        warmup_steps=0.03,  # float in [0, 1) = ratio of total steps (transformers 5 dropped warmup_ratio)
         max_length=tcfg["max_length"],
         completion_only_loss=True,
         fp16=tcfg["fp16"],
