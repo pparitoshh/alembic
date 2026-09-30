@@ -4,12 +4,23 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 
+import openai
 from openai import OpenAI
 from pydantic import BaseModel
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from .schemas import parse_json
 
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
+
+# Provider-side transient failures (429 "endpoint unavailable", 5xx, timeouts, dropped connections).
+_TRANSIENT = (openai.RateLimitError, openai.InternalServerError, openai.APITimeoutError, openai.APIConnectionError)
+_retry_transient = retry(
+    retry=retry_if_exception_type(_TRANSIENT),
+    wait=wait_random_exponential(multiplier=2, max=60),  # exponential backoff with jitter
+    stop=stop_after_attempt(8),
+    reraise=True,
+)
 
 
 class Teacher:
@@ -19,16 +30,20 @@ class Teacher:
         api_key = os.environ.get(t["api_key_env"]) if "api_key_env" in t else "none"
         if not api_key:
             raise SystemExit(f"[{section}] set the {t['api_key_env']} environment variable")
-        self.client = OpenAI(base_url=t["base_url"], api_key=api_key)
+        self.client = OpenAI(base_url=t["base_url"], api_key=api_key, max_retries=0)  # retries handled by tenacity in _create
         self.model = t["model"]
         self.temperature = t.get("temperature", 0.7)
         self.max_tokens = t.get("max_tokens", 1024)
         self.concurrency = t.get("concurrency", 4)
 
+    @_retry_transient
+    def _create(self, **kwargs):
+        return self.client.chat.completions.create(**kwargs)
+
     def chat(self, system: str, user: str, temperature: float | None = None, response_format: dict | None = None) -> str:
         # "/no_think" disables Qwen3 thinking; other models ignore it.
         extra = {"response_format": response_format} if response_format else {}
-        resp = self.client.chat.completions.create(
+        resp = self._create(
             model=self.model,
             messages=[
                 {"role": "system", "content": system + " /no_think"},

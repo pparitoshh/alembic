@@ -44,6 +44,7 @@ def run(cfg: dict) -> Path:
         gradient_checkpointing=True,
         logging_steps=1,
         save_strategy="no",
+        seed=tcfg.get("seed", 42),  # 42 = the SFTConfig default, so older configs behave as before
         report_to="none",
         # fp16 AMP needs fp32 master weights (GPUs without bf16, e.g. RTX 20xx)
         model_init_kwargs={"dtype": "float32" if tcfg["fp16"] else "bfloat16"},
