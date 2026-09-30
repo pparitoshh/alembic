@@ -1,0 +1,75 @@
+"""Cheap, deterministic answer checks shared by `verify` (training data) and `evaluate` (student outputs)."""
+
+import re
+import shlex
+import subprocess
+from pathlib import Path
+
+CODE_BLOCK = re.compile(r"```([\w+-]*)\n(.*?)```", re.DOTALL)
+SBATCH_LINE = re.compile(r"^\s*#SBATCH\s+(.*)$", re.MULTILINE)
+SLURM_CMDS = {"sbatch", "srun", "salloc"}
+
+
+def load_flags(path: str | Path) -> set[str]:
+    lines = Path(path).read_text().splitlines()
+    return {l.strip() for l in lines if l.strip() and not l.startswith("#")}
+
+
+def code_blocks(text: str) -> list[tuple[str, str]]:
+    return [(lang.lower(), body) for lang, body in CODE_BLOCK.findall(text)]
+
+
+def _long_opts(tokens: list[str]) -> list[str]:
+    """Leading options of a Slurm command, stopping at the program being launched."""
+    opts, expect_value = [], False
+    for tok in tokens:
+        if tok.startswith("--"):
+            opts.append(tok[2:].split("=", 1)[0])
+            expect_value = "=" not in tok
+        elif tok.startswith("-"):
+            expect_value = len(tok) == 2
+        elif expect_value:
+            expect_value = False
+        else:
+            break
+    return opts
+
+
+def slurm_flags_used(text: str) -> list[str]:
+    """Long options used in #SBATCH directives and sbatch/srun/salloc command lines."""
+    flags = []
+    for directive in SBATCH_LINE.findall(text):
+        flags += _long_opts(directive.split())
+    for _, body in code_blocks(text):
+        for line in body.splitlines():
+            if line.lstrip().startswith("#"):
+                continue
+            # split command substitutions / chains so `$(sbatch ...)` and `a; sbatch ...` are seen
+            line = re.sub(r"\$\(|[();|&]", " ", line)
+            try:
+                tokens = shlex.split(line, comments=True)
+            except ValueError:
+                tokens = line.split()
+            for i, tok in enumerate(tokens):
+                if tok in SLURM_CMDS:
+                    flags += _long_opts(tokens[i + 1 :])
+    return flags
+
+
+def bash_syntax_ok(script: str) -> bool:
+    r = subprocess.run(["bash", "-n"], input=script, text=True, capture_output=True)
+    return r.returncode == 0
+
+
+def check_answer(answer: str, valid_flags: set[str]) -> dict:
+    flags = slurm_flags_used(answer)
+    bad = sorted({f for f in flags if f not in valid_flags})
+    shell_blocks = [b for lang, b in code_blocks(answer) if lang in ("bash", "sh", "shell", "")]
+    syntax_ok = all(bash_syntax_ok(b) for b in shell_blocks)
+    return {
+        "n_flags": len(flags),
+        "bad_flags": bad,
+        "n_shell_blocks": len(shell_blocks),
+        "bash_ok": syntax_ok,
+        "passed": not bad and syntax_ok,
+    }
