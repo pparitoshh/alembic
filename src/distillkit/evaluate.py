@@ -5,6 +5,7 @@ Metrics: flag hallucination + bash syntax (deterministic) and pairwise LLM-judge
 """
 
 import json
+import re
 from pathlib import Path
 
 from .checks import check_answer, load_flags
@@ -66,10 +67,18 @@ def generate_answers(cfg: dict, questions: list[str]) -> dict[str, list[str]]:
     return results
 
 
-def judge(teacher: Teacher, q: dict, a: str, b: str) -> str:
-    v = teacher.chat(JUDGE_SYSTEM, JUDGE_PROMPT.format(question=q["question"], reference=q["reference"], a=a, b=b), temperature=0.0)
-    v = v.strip().upper()[:1]
-    return v if v in ("A", "B", "T") else "T"
+VERDICT = re.compile(r"\b([ABT])\b")
+
+
+def parse_verdict(text: str) -> str | None:
+    """Last standalone A/B/T in the reply (the judge may reason before its verdict); None if absent."""
+    found = VERDICT.findall(text.upper())
+    return found[-1] if found else None
+
+
+def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str, str]:
+    raw = teacher.chat(JUDGE_SYSTEM, JUDGE_PROMPT.format(question=q["question"], reference=q["reference"], a=a, b=b), temperature=0.0)
+    return parse_verdict(raw) or "T", raw
 
 
 def run(cfg: dict) -> dict:
@@ -93,15 +102,19 @@ def run(cfg: dict) -> dict:
 
     if "student" in answers:
         teacher = Teacher(cfg, section="judge")
-        score = 0.0
-        for row in per_q:
-            s, b = row["answer_student"], row["answer_base"]
-            v1 = judge(teacher, row, s, b)  # student is A
-            v2 = judge(teacher, row, b, s)  # student is B
+        # every question in both orders, judged in parallel: [q0 student=A, q0 student=B, q1 ...]
+        pairs = [(row, a, b) for row in per_q for a, b in ((row["answer_student"], row["answer_base"]), (row["answer_base"], row["answer_student"]))]
+        verdicts = teacher.map(lambda p: judge(teacher, *p), pairs)
+        score, unparsed = 0.0, 0
+        for i, row in enumerate(per_q):
+            (v1, raw1), (v2, raw2) = verdicts[2 * i], verdicts[2 * i + 1]  # student is A, then B
             pts = {"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]
             row["judge"] = [v1, v2]
+            row["judge_raw"] = [raw1, raw2]
+            unparsed += (parse_verdict(raw1) is None) + (parse_verdict(raw2) is None)
             score += pts / 2
         summary["student_vs_base_win_rate"] = score / len(per_q)
+        summary["judge_unparsed"] = unparsed  # counted as ties; should be 0
 
     write_jsonl(run_dir / "eval_outputs.jsonl", per_q)
     (run_dir / "eval_summary.json").write_text(json.dumps(summary, indent=2))
