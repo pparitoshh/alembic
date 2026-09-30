@@ -10,15 +10,35 @@
 | Eval set | ✅ | — | 10 hand-written Qs (target: ~50 before Oct 6) |
 | `generate` | ✅ | ✅ | 20 questions × 2 answers = 40 rows |
 | `verify` | ✅ | ✅ | 40/40 kept after fixing 2 checker false positives |
-| `train` (LoRA) | ✅ | ⏳ | Qwen3-0.6B, fp16 (RTX 2060) |
-| `evaluate` | ✅ | ⏳ | flag hallucination + pairwise judge (both orders) |
+| `train` (LoRA) | ✅ | ✅ | Qwen3-0.6B, fp16; 6 steps, loss 1.85 → 1.33 |
+| `evaluate` | ✅ | ✅ | student **loses**: 27.5% win rate, loops in 9/10 answers ([iter 0](docs/iter_0_learning.md)) |
 | `export` (GGUF/Ollama) | ❌ | ❌ | planned Oct 4 |
 
 ## Log
 
+### 2026-09-30 (evening): first `evaluate`
+
+Full write-up: [docs/iter_0_learning.md](docs/iter_0_learning.md).
+
+**Done**
+- Judge fixes: verdict was read from the reply's *first* character → now the last standalone A/B/T, raw replies saved, `judge_unparsed` count added. First run had 13/20 empty replies (reasoning hit `max_tokens: 512`) → raised to 4096.
+- Judge calls now run in parallel (`Teacher.map`, concurrency 4). Full evaluate: 3m11s.
+
+**Result**
+- Student vs base win rate **27.5%** (target > 60%). The student repeats itself and hits the 512-token limit in 9/10 answers (base: 0/10), even on its own training questions.
+- Training data checked and correct (prompt masked, stop token trained on). Likely cause: training too aggressive for 0.6B on 40 samples (lr 2e-4, LoRA r=64) and long teacher answers (median 245 tokens). Not yet tested.
+
+**Next**
+- Retrain with lr 5e-5, r=16 into a separate folder; check answer lengths before any judge run.
+
 ### 2026-09-30 (later)
 
 **Done**
+- **First `train` run** (Qwen3-0.6B, LoRA r=64 on all 7 linear layer types, fp16): 40 samples × 2 epochs = 6 optimizer steps, 28 s of training. Loss 1.85 → 1.33, token accuracy 59% → 69%. Adapter saved to `runs/toy/adapter` (162 MB, fp32; 40.4M trainable params = 6.3%). On 40 samples this is mostly memorisation, so it only proves the pipeline works.
+- Two fixes were needed to get there:
+  - transformers 5 dropped `warmup_ratio` → `warmup_steps=0.03` (a float < 1 is read as a ratio).
+  - torch 2.14 routes RoPE's `bmm` to a Triton kernel that needs a C compiler (none installed) → `cli.py` sets `TORCH_DISABLE_NATIVE_JIT=1`.
+- `docs/training.md`: plain-language onboarding guide to training (one sample, next-token prediction, micro-batches vs optimizer steps, frozen vs LoRA weights).
 - **First `verify` run:** initially kept 36/40. All 4 rejections were false positives in the checker, not bad answers:
   - 2 × `bad_flags`: `srun --jobid=...` is a real flag but was missing from the hand-written `slurm_flags.txt` → added `jobid`.
   - 2 × `bash_syntax`: doc-style placeholders like `<jobid>` parse as redirections under `bash -n` → `bash_syntax_ok` now replaces `<placeholder>` tokens before checking (new test added; 5 tests pass).
@@ -50,8 +70,8 @@
 ## Next steps
 
 1. ~~**`verify` on the toy data**: check rejection reasons in `runs/toy/rejected.jsonl` for false positives.~~ Done: 40/40 kept after checker fixes.
-2. **`train`**: LoRA on Qwen3-0.6B locally; confirm loss decreases and the adapter saves.
-3. **`evaluate`**: base vs. student on the 10 eval Qs; confirm the judge verdict parsing works.
+2. ~~**`train`**: LoRA on Qwen3-0.6B locally; confirm loss decreases and the adapter saves.~~ Done: loss 1.85 → 1.33, adapter saved.
+3. ~~**`evaluate`**: base vs. student on the 10 eval Qs; confirm the judge verdict parsing works.~~ Done: runs, but student loses (27.5%) due to looping. Fix before scaling: gentler LoRA settings, shorter teacher answers (see [iter 0](docs/iter_0_learning.md)).
 4. **Speed up generation**: raise `concurrency` (try 16), measure per-call latency, and log tokens/cost per run.
 5. **`export`**: merge LoRA → GGUF Q4_K_M → Ollama `Modelfile`.
 6. **Real data (by Oct 5)**:

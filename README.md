@@ -30,6 +30,7 @@ The demo use case is an **HPC Assistant**: a ≤2B-parameter student specialised
 - **[GOAL.md](GOAL.md):** mission, goals, success metrics, deliverables, team roles and timeline.
 - **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (data generation, filtering, the RAG/RAFT knowledge problem, training, quantization, evaluation).
 - **[docs/training.md](docs/training.md):** plain-language guide to how training works: one sample, what the student predicts, micro-batches and optimizer steps, and which weights are frozen or trained.
+- **[docs/iter_0_learning.md](docs/iter_0_learning.md):** first end-to-end toy run: what broke, the (negative) eval result, diagnosis and next experiments.
 
 ## Planned stack
 
