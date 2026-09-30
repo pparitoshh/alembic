@@ -6,15 +6,42 @@
 
 | Stage | Code | Ran on toy data | Notes |
 |---|---|---|---|
-| Seeds + doc-level split | ✅ | ✅ | 5 Slurm docs; `slurm_job_arrays` held out for eval |
-| Eval set | ✅ | — | 10 hand-written Qs (target: ~50 before Oct 6) |
-| `generate` | ✅ | ✅ | 20 questions × 2 answers = 40 rows |
-| `verify` | ✅ | ✅ | 40/40 kept after fixing 2 checker false positives |
-| `train` (LoRA) | ✅ | ✅ | Qwen3-0.6B, fp16; 6 steps, loss 1.85 → 1.33 |
-| `evaluate` | ✅ | ✅ | student **loses**: 27.5% win rate, loops in 9/10 answers ([iter 0](docs/iter_0_learning.md)) |
+| Seeds + doc-level split | ✅ | ✅ | 6 Slurm docs; `slurm_job_arrays` and `slurm_requeue_signals` held out for eval |
+| Eval set | ✅ | — | 26 hand-written Qs from 2 held-out docs (target: ~50 from 3+ docs before Oct 6) |
+| `generate` | ✅ | ✅ | 60 questions × 2 answers = 120 rows (12 min at concurrency 12); now with short-answer prompt and tenacity retries |
+| `verify` | ✅ | ✅ | 120/120 kept (40/40 earlier, after fixing checker false positives) |
+| `train` (LoRA) | ✅ | ✅ | Qwen3-0.6B, fp16; best setting lr 1e-4, r16/α32, 3 epochs (24 steps, loss ≈ 1.39); `train.seed` option |
+| `evaluate` | ✅ | ✅ | student **beats base on average**: 64.1% ± 4.8 over 3 seeds, 26 questions (range 59.6–69.2%) ([report](docs/report_iterations_0-4.md)) |
 | `export` (GGUF/Ollama) | ❌ | ❌ | planned Oct 4 |
 
 ## Log
+
+### 2026-09-30 (night): iterations 1-4, goal met on average
+
+Full write-up: [docs/report_iterations_0-4.md](docs/report_iterations_0-4.md); per-iteration notes in `docs/iter_1_learning.md` to `iter_3_learning.md`. Each experiment ran in a git worktree with its own config and `run_dir`.
+
+**Done**
+
+| Iter | Change | Win rate vs base |
+|---|---|---|
+| 1 | lr 2e-4 → 5e-5, LoRA r 64/α128 → 16/32 | 45.0% (looping 9/10 → 1/10) |
+| 2 | 3× data (120 samples), "short and direct" teacher prompt | 42.5% (no real change) |
+| 3 | lr 1e-4, 3 epochs (24 steps) | 77.5% (10 questions, 1 seed) |
+| 4 | seed test: seeds 42/1/2, 26 questions incl. a new held-out doc | **64.1% ± 4.8** (69.2 / 63.5 / 59.6) |
+
+- Added `train.seed` config option (default 42), second held-out doc `slurm_requeue_signals` with 16 eval questions (`data/eval/eval_req.jsonl`, combined `eval_all.jsonl`).
+- **API retries with tenacity** (exponential backoff + jitter, 8 attempts) after the judge endpoint returned `429: Endpoint is unavailable` and crashed two evaluations (re-run). `tenacity` added as a dependency.
+- Pushed `dev` to origin.
+
+**Findings**
+- Looping was caused by over-aggressive training (iteration 0), not the data.
+- The one change that clearly helped: more training signal at a moderate lr (1e-4, 3 epochs). Data volume alone did nothing. lr and epochs were changed together, so they are not separated yet.
+- The first 77.5% was optimistic. Seed spread is about ±5 points; on the new held-out doc the mean is 59.9%, right at the target line. Differences under ~10 points between settings cannot be trusted with this eval.
+- The student makes fewer invented flags than the base (≈0.066 vs 0.143 of flags used) but script answers are still often wrong (e.g. for-loop instead of `--array`).
+- **Gotcha:** plain `uv sync` removes the `train` extra (torch etc.) from the venv and silently broke the first seed runs. Use `uv sync --extra train`.
+
+**Next**
+- Ablate lr and epochs separately (3 seeds each on `eval_all`), grow the eval set to 50+ questions across 3+ docs, add more script/`--array` training examples, rebuild `slurm_flags.txt` from man pages.
 
 ### 2026-09-30 (evening): first `evaluate`
 
@@ -72,10 +99,12 @@ Full write-up: [docs/iter_0_learning.md](docs/iter_0_learning.md).
 1. ~~**`verify` on the toy data**: check rejection reasons in `runs/toy/rejected.jsonl` for false positives.~~ Done: 40/40 kept after checker fixes.
 2. ~~**`train`**: LoRA on Qwen3-0.6B locally; confirm loss decreases and the adapter saves.~~ Done: loss 1.85 → 1.33, adapter saved.
 3. ~~**`evaluate`**: base vs. student on the 10 eval Qs; confirm the judge verdict parsing works.~~ Done: runs, but student loses (27.5%) due to looping. Fix before scaling: gentler LoRA settings, shorter teacher answers (see [iter 0](docs/iter_0_learning.md)).
-4. **Speed up generation**: raise `concurrency` (try 16), measure per-call latency, and log tokens/cost per run.
+4. **Speed up generation**: concurrency 12 still took 12 min for 120 answers; measure per-call latency, try 16+, and log tokens/cost per run.
 5. **`export`**: merge LoRA → GGUF Q4_K_M → Ollama `Modelfile`.
 6. **Real data (by Oct 5)**:
    - replace the hand-written seeds with real Slurm man pages/docs (record licenses)
    - extract `slurm_flags.txt` from real `man sbatch`/`srun`/`salloc`
-   - write ~50 eval questions from the held-out docs
+   - grow the eval set from 26 to ~50 questions across 3+ held-out docs
 7. Add question-format diversity (short / long-with-logs) to the generation grid.
+8. **Ablate lr vs. epochs** (lr 1e-4 with 2 epochs; lr 5e-5 with 4-5 epochs), 3 seeds each.
+9. **Fix script answers** (e.g. `--array` misuse): more `script`/`howto` training examples, stricter verification of teacher scripts.
