@@ -5,14 +5,14 @@ Metrics: flag hallucination + bash syntax (deterministic) and pairwise LLM-judge
 """
 
 import json
-import re
 from pathlib import Path
 
 from .checks import check_answer, load_flags
 from .io import read_jsonl, write_jsonl
+from .schemas import JudgeVerdict
 from .teacher import Teacher
 
-JUDGE_SYSTEM = "You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Reply with exactly one character: A, B, or T (tie)."
+JUDGE_SYSTEM = "You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Reply only with JSON: {\"reasoning\": \"<short comparison>\", \"verdict\": \"A\" | \"B\" | \"T\"} (T = tie)."
 
 JUDGE_PROMPT = """Question: {question}
 
@@ -24,7 +24,7 @@ Answer A:
 Answer B:
 {b}
 
-Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Reply A, B, or T."""
+Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Reply with the JSON verdict."""
 
 
 def generate_answers(cfg: dict, questions: list[str]) -> dict[str, list[str]]:
@@ -67,18 +67,11 @@ def generate_answers(cfg: dict, questions: list[str]) -> dict[str, list[str]]:
     return results
 
 
-VERDICT = re.compile(r"\b([ABT])\b")
-
-
-def parse_verdict(text: str) -> str | None:
-    """Last standalone A/B/T in the reply (the judge may reason before its verdict); None if absent."""
-    found = VERDICT.findall(text.upper())
-    return found[-1] if found else None
-
-
-def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str, str]:
-    raw = teacher.chat(JUDGE_SYSTEM, JUDGE_PROMPT.format(question=q["question"], reference=q["reference"], a=a, b=b), temperature=0.0)
-    return parse_verdict(raw) or "T", raw
+def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
+    """(verdict, raw reply); verdict is None if the judge never returned valid JSON."""
+    prompt = JUDGE_PROMPT.format(question=q["question"], reference=q["reference"], a=a, b=b)
+    v, raw = teacher.chat_json(JUDGE_SYSTEM, prompt, JudgeVerdict, temperature=0.0)
+    return (v.verdict if v else None), raw
 
 
 def run(cfg: dict) -> dict:
@@ -108,10 +101,11 @@ def run(cfg: dict) -> dict:
         score, unparsed = 0.0, 0
         for i, row in enumerate(per_q):
             (v1, raw1), (v2, raw2) = verdicts[2 * i], verdicts[2 * i + 1]  # student is A, then B
+            unparsed += (v1 is None) + (v2 is None)
+            v1, v2 = v1 or "T", v2 or "T"
             pts = {"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]
             row["judge"] = [v1, v2]
             row["judge_raw"] = [raw1, raw2]
-            unparsed += (parse_verdict(raw1) is None) + (parse_verdict(raw2) is None)
             score += pts / 2
         summary["student_vs_base_win_rate"] = score / len(per_q)
         summary["judge_unparsed"] = unparsed  # counted as ties; should be 0

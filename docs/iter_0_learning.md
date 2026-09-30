@@ -116,6 +116,13 @@ So the looping is **caused by training**, not by the decoding method or the eval
 3. **Shorter teacher answers:** add a length limit and a "short & direct" instruction to the generation prompt.
 4. More data (40 samples is tiny) and ~50 eval questions, so a win rate means something.
 
+## Follow-up: structured outputs (after this run)
+
+- **Judge and question generator now reply in JSON**, checked against Pydantic schemas (`src/distillkit/schemas.py`): the judge returns `{reasoning, verdict: A|B|T}`, the question generator `{question}`. The schema is sent as `response_format` (both `qwen3.8-flash` and `deepseek-v4.1-flash` accept it) and validated locally anyway, with one retry. This replaces the "last A/B/T in the text" regex. `judge_unparsed` now counts replies that failed validation.
+- **Teacher answers stay free text** on purpose: the student learns whatever format the teacher writes. The answer prompt now also says "short and direct" (experiment 3); this only takes effect on the next `generate`.
+- **Outlines was considered and skipped for now.** Its grammar constraints need a local model, and teacher and judge are hosted APIs. Constraining the student at eval time would hide whether distillation worked. Possible later ablation: a grammar that only allows real Slurm flags.
+- This does **not** address the looping; that is still experiment 1.
+
 ## Other open issues found in this iteration
 - **Flag checker reports an empty flag (`''`)** on one student answer, probably a bare `--` token. Small checker bug.
 - **Judge position bias** visible on 2/10 questions (whichever answer is shown first wins). Judging in both orders cancels it, which is why we do it.

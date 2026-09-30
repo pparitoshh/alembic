@@ -5,10 +5,11 @@ import random
 from pathlib import Path
 
 from .io import write_jsonl
+from .schemas import GeneratedQuestion
 from .seeds import load_chunks
 from .teacher import Teacher
 
-Q_SYSTEM = "You write realistic questions that users of an HPC cluster ask. Output only the question text, nothing else."
+Q_SYSTEM = 'You write realistic questions that users of an HPC cluster ask. Reply only with JSON: {"question": "<the question>"}.'
 
 Q_PROMPT = """Reference documentation:
 <doc>
@@ -22,9 +23,10 @@ Write ONE question that {persona} might ask, of type "{task}":
 - debug: describe a concrete problem (error message, pending reason, failed job) and ask why/how to fix
 
 The question must be answerable from the documentation above, but must not mention "the documentation".
-Write it in the persona's own words. Output only the question."""
+Write it in the persona's own words. Reply only with JSON: {{"question": "<the question>"}}."""
 
 A_SYSTEM = """You are an expert HPC assistant. Answer concisely and correctly.
+- Keep it short and direct: a few sentences, plus at most one script or command block.
 - Put scripts and commands in fenced code blocks.
 - Only use options and commands you are sure exist.
 - If the answer depends on the cluster configuration, say what you assume.
@@ -53,10 +55,12 @@ def run(cfg: dict) -> Path:
     print(f"[generate] {len(train_chunks)} train chunks -> {len(jobs)} questions")
 
     def make_question(j):
-        q = teacher.chat(Q_SYSTEM, Q_PROMPT.format(chunk=j["text"], persona=j["persona"], task=j["task"]))
-        return {**j, "question": q.strip().strip('"')}
+        q, _ = teacher.chat_json(Q_SYSTEM, Q_PROMPT.format(chunk=j["text"], persona=j["persona"], task=j["task"]), GeneratedQuestion)
+        return {**j, "question": q.question.strip()} if q else None
 
-    questions = teacher.map(make_question, jobs)
+    questions = [q for q in teacher.map(make_question, jobs) if q]
+    if len(questions) < len(jobs):
+        print(f"[generate] dropped {len(jobs) - len(questions)} questions with invalid JSON")
 
     answer_jobs = [(q, k) for q in questions for k in range(gcfg["answers_per_question"])]
     print(f"[generate] {len(answer_jobs)} answers ({gcfg['answers_per_question']} per question)")
