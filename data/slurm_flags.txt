@@ -48,6 +48,7 @@ ignore-pbs
 immediate
 input
 job-name
+jobid
 kill-on-invalid-dep
 kill-on-bad-exit
 label

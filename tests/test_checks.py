@@ -29,6 +29,11 @@ def test_bash_syntax_error_is_caught():
     assert not check_answer(ans, FLAGS)["bash_ok"]
 
 
+def test_placeholders_are_not_syntax_errors():
+    ans = "```bash\nscontrol show job <jobid>\nsacct -j <job_id> --format=MaxRSS\n```"
+    assert check_answer(ans, FLAGS)["bash_ok"]
+
+
 def test_chunking_keeps_code_blocks_whole():
     text = "para one\n\n```bash\nline1\n\nline2\n```\n\npara two"
     chunks = chunk_text(text, max_chars=10)

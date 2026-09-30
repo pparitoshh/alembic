@@ -48,7 +48,7 @@ Everything else in GOAL.md (multi-node, 50k examples, Pareto frontier, RAFT, DPO
 ## 5. Local dev setup (this laptop)
 
 - RTX 2060, 6 GB, **no bf16** → fp16, Qwen3-0.6B for local training runs.
-- Toy teacher: `qwen3.6-plus` via OpenCode Zen (`https://opencode.ai/zen/v1`, key in `$OPENCODE_API_KEY`); judge: `deepseek-v4.1-flash` (different family). Ollama remains an offline fallback.
+- Toy teacher: `qwen3.8-flash` via OpenCode Zen (`https://opencode.ai/zen/v1`, key in `$OPENCODE_API_KEY`); `qwen3.6-plus` also works if a stronger teacher is needed. Judge: `deepseek-v4.1-flash` (different family). Ollama remains an offline fallback.
 - Python: **uv-managed `.venv` only** (`uv sync`, `uv run ...`). No system packages.
 
 ## 6. Pre-event schedule (Sep 30 – Oct 5)

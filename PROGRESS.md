@@ -9,12 +9,23 @@
 | Seeds + doc-level split | ✅ | ✅ | 5 Slurm docs; `slurm_job_arrays` held out for eval |
 | Eval set | ✅ | — | 10 hand-written Qs (target: ~50 before Oct 6) |
 | `generate` | ✅ | ✅ | 20 questions × 2 answers = 40 rows |
-| `verify` | ✅ | ⏳ | dedup, flag linter, `bash -n`, eval decontamination |
+| `verify` | ✅ | ✅ | 40/40 kept after fixing 2 checker false positives |
 | `train` (LoRA) | ✅ | ⏳ | Qwen3-0.6B, fp16 (RTX 2060) |
 | `evaluate` | ✅ | ⏳ | flag hallucination + pairwise judge (both orders) |
 | `export` (GGUF/Ollama) | ❌ | ❌ | planned Oct 4 |
 
 ## Log
+
+### 2026-09-30 (later)
+
+**Done**
+- **First `verify` run:** initially kept 36/40. All 4 rejections were false positives in the checker, not bad answers:
+  - 2 × `bad_flags`: `srun --jobid=...` is a real flag but was missing from the hand-written `slurm_flags.txt` → added `jobid`.
+  - 2 × `bash_syntax`: doc-style placeholders like `<jobid>` parse as redirections under `bash -n` → `bash_syntax_ok` now replaces `<placeholder>` tokens before checking (new test added; 5 tests pass).
+- After the fixes: **40/40 kept** in `runs/toy/verified.jsonl`.
+
+**Findings / issues**
+- The hand-written flag list will keep rejecting real-but-rare flags until it is rebuilt from the real man pages (next step 6).
 
 ### 2026-09-30
 
@@ -38,7 +49,7 @@
 
 ## Next steps
 
-1. **`verify` on the toy data**: check rejection reasons in `runs/toy/rejected.jsonl` for false positives.
+1. ~~**`verify` on the toy data**: check rejection reasons in `runs/toy/rejected.jsonl` for false positives.~~ Done: 40/40 kept after checker fixes.
 2. **`train`**: LoRA on Qwen3-0.6B locally; confirm loss decreases and the adapter saves.
 3. **`evaluate`**: base vs. student on the 10 eval Qs; confirm the judge verdict parsing works.
 4. **Speed up generation**: raise `concurrency` (try 16), measure per-call latency, and log tokens/cost per run.

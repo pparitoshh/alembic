@@ -8,6 +8,7 @@ from pathlib import Path
 CODE_BLOCK = re.compile(r"```([\w+-]*)\n(.*?)```", re.DOTALL)
 SBATCH_LINE = re.compile(r"^\s*#SBATCH\s+(.*)$", re.MULTILINE)
 SLURM_CMDS = {"sbatch", "srun", "salloc"}
+PLACEHOLDER = re.compile(r"<[A-Za-z_][\w.-]*>")
 
 
 def load_flags(path: str | Path) -> set[str]:
@@ -57,6 +58,8 @@ def slurm_flags_used(text: str) -> list[str]:
 
 
 def bash_syntax_ok(script: str) -> bool:
+    # doc-style placeholders like `<jobid>` would parse as redirections
+    script = PLACEHOLDER.sub("PLACEHOLDER", script)
     r = subprocess.run(["bash", "-n"], input=script, text=True, capture_output=True)
     return r.returncode == 0
 
