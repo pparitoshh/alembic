@@ -68,7 +68,7 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 
 - **G1 — End-to-end pipeline:** one config file runs generate → verify → train → quantize → evaluate for the HPC task, reproducibly, via Slurm job scripts.
 - **G2 — A better small model:** the distilled student beats its own non-distilled base on the held-out HPC eval set, on executable-check pass rate, LLM-judge score and tool-call validity.
-- **G3 — Runs locally:** the quantized student (+ RAG) runs on a laptop CPU in < 4 GB RAM, installable with one `ollama` command.
+- **G3 — Runs locally:** the quantized student (+ RAG) runs on a laptop CPU in < 4 GB RAM, installable with one `ollama` command, and answers as a streaming chat assistant at reading speed.
 - **G4 — Open release:** a public MIT repo with docs, a model card, and a "bring your own teacher/task" guide.
 
 ### Should-have
@@ -98,6 +98,10 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 
 *Targets are provisional. We fix the exact numbers after we measure the baselines in week 1.*
 
+*Laptop speed (decided 2026-10-04): replies stream, so generation only has to keep ahead of the reader
+(~4–8 tokens/s), and the wait before the first token matters more. The earlier "≥ 20 tokens/s" was out
+of reach for a 4B model on a CPU-only laptop at any quant level (12 tokens/s at Q3_K_M on the i7-9750H).*
+
 | Metric | Baseline | Target |
 |---|---|---|
 | Executable-check pass rate (Slurm/CUDA/MPI answers) | base student, zero-shot | +20 pp over base |
@@ -107,7 +111,9 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 | Hallucinated Slurm flags per answer | base student | −50% |
 | Q4_K_M vs. bf16 accuracy drop | — | ≤ 2 pp |
 | Laptop memory (Q4_K_M, model + RAG) | — | < 4 GB |
-| Laptop CPU speed | — | ≥ 20 tokens/s |
+| Laptop streaming generation (2,048 tokens in context) | — | ≥ 8 tokens/s |
+| Laptop time to first token, follow-up question (system prompt + tools already processed) | — | ≤ 3 s |
+| Laptop time to first token, first question of a session | — | measured and reported |
 | Verified examples produced | — | ≥ 10k (scale up if throughput allows) |
 
 ### Eval set (~150–200 questions, human-reviewed, strictly held out)

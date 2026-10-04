@@ -4,10 +4,15 @@ Metrics: flag hallucination + bash syntax (deterministic) and pairwise LLM-judge
 (judged in both orders to cancel position bias). The optional tool slice (`eval.tool_file`) is
 answered with the tool schemas in the prompt and scored by `toolcheck`: when-to-call accuracy,
 call validity, BFCL-style AST match and execution on the mock cluster.
+
+With `eval.gguf`, the exported quantized files answer too (gguf_eval.py) and the judge also compares
+each one with the full-precision model it came from (quantization loss: 0.5 = none) and, when there
+is a student, with the base model (does distillation still win after quantization?).
 """
 
 import json
 
+from . import gguf_eval
 from .checks import check_answer, load_flags
 from .config import Config
 from .io import read_jsonl, write_jsonl
@@ -101,26 +106,59 @@ def _eval_rows(cfg: Config) -> tuple[list[dict], list[dict]]:
 
 
 def run_answers(cfg: Config) -> dict[str, list[str]]:
-    """Stage `answer`: base/student answers for both eval slices, cached in run_dir/eval_answers.json.
+    """Stage `answer`: base/student answers for both eval slices, cached in run_dir/eval_answers.json,
+    plus "gguf_<Q>" for each `eval.gguf` quant (cached separately by gguf_eval).
 
     Separate from judging so a cluster job can free the GPU before it starts the judge server, and so
     a second judge (`eval.tag`) scores exactly the same answers. Reused while the questions and the
     adapter are unchanged."""
     eval_rows, tool_rows = _eval_rows(cfg)
     questions = [r["question"] for r in eval_rows + tool_rows]
+    # tool questions are asked with the tool schemas in the prompt
+    tools = [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows)
     cache = cfg.run_dir / "eval_answers.json"
     adapter = cfg.run_dir / "adapter" / "adapter_model.safetensors"
     stamp = adapter.stat().st_mtime if adapter.exists() else None
+    answers = None
     if cache.exists():
         c = json.loads(cache.read_text())
         if c["questions"] == questions and c["adapter_mtime"] == stamp:
             print(f"[answer] reusing {cache}")
-            return c["answers"]
-    # one model load for both slices; tool questions are asked with the tool schemas in the prompt
-    answers = generate_answers(cfg, questions, [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows))
-    cache.write_text(json.dumps({"questions": questions, "adapter_mtime": stamp, "answers": answers}, ensure_ascii=False))
-    print(f"[answer] {len(questions)} questions x {len(answers)} models -> {cache}")
+            answers = c["answers"]
+    if answers is None:
+        answers = generate_answers(cfg, questions, tools)  # one model load for both slices
+        cache.write_text(json.dumps({"questions": questions, "adapter_mtime": stamp, "answers": answers}, ensure_ascii=False))
+        print(f"[answer] {len(questions)} questions x {len(answers)} models -> {cache}")
+    for q in cfg.eval.gguf:
+        answers[f"gguf_{q}"] = gguf_eval.answers(cfg, q, questions, tools)
     return answers
+
+
+def comparisons(models: list[str]) -> list[tuple[str, str]]:
+    """(x, y) pairs to judge, x's win rate over y: student vs base, and each GGUF vs the
+    full-precision model it was exported from (and vs base, when that is the student)."""
+    ref = "student" if "student" in models else "base"
+    pairs = [("student", "base")] if ref == "student" else []
+    for m in models:
+        if m.startswith("gguf_"):
+            pairs += [(m, ref)] + ([(m, "base")] if ref == "student" else [])
+    return pairs
+
+
+def win_rate(teacher: Teacher, per_q: list[dict], x: str, y: str) -> tuple[float, int]:
+    """Judge x vs y on every question in both orders; (x's win rate, unparsed verdicts).
+    Verdicts go to row["judge"]["<x>_vs_<y>"] as [x shown as A, x shown as B]."""
+    pairs = [(row, a, b) for row in per_q for a, b in ((row[f"answer_{x}"], row[f"answer_{y}"]), (row[f"answer_{y}"], row[f"answer_{x}"]))]
+    verdicts = teacher.map(lambda p: judge(teacher, *p), pairs)  # in parallel: [q0 x=A, q0 x=B, q1 ...]
+    score, unparsed = 0.0, 0
+    for i, row in enumerate(per_q):
+        (v1, raw1), (v2, raw2) = verdicts[2 * i], verdicts[2 * i + 1]
+        unparsed += (v1 is None) + (v2 is None)
+        v1, v2 = v1 or "T", v2 or "T"
+        score += ({"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]) / 2
+        row.setdefault("judge", {})[f"{x}_vs_{y}"] = [v1, v2]
+        row.setdefault("judge_raw", {})[f"{x}_vs_{y}"] = [raw1, raw2]
+    return score / len(per_q), unparsed
 
 
 def run(cfg: Config) -> dict:
@@ -154,21 +192,14 @@ def run(cfg: Config) -> dict:
             summary[name] |= tool_summary(scores, tool_rows)
         write_jsonl(run_dir / "eval_tool_outputs.jsonl", per_tool)
 
-    if "student" in answers:
+    pairs = comparisons(list(answers))
+    if pairs:
         teacher = Teacher(cfg.judge, name="judge")
-        # every question in both orders, judged in parallel: [q0 student=A, q0 student=B, q1 ...]
-        pairs = [(row, a, b) for row in per_q for a, b in ((row["answer_student"], row["answer_base"]), (row["answer_base"], row["answer_student"]))]
-        verdicts = teacher.map(lambda p: judge(teacher, *p), pairs)
-        score, unparsed = 0.0, 0
-        for i, row in enumerate(per_q):
-            (v1, raw1), (v2, raw2) = verdicts[2 * i], verdicts[2 * i + 1]  # student is A, then B
-            unparsed += (v1 is None) + (v2 is None)
-            v1, v2 = v1 or "T", v2 or "T"
-            pts = {"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]
-            row["judge"] = [v1, v2]
-            row["judge_raw"] = [raw1, raw2]
-            score += pts / 2
-        summary["student_vs_base_win_rate"] = score / len(per_q)
+        unparsed = 0
+        for x, y in pairs:
+            rate, bad = win_rate(teacher, per_q, x, y)
+            summary[f"{x}_vs_{y}_win_rate"] = rate
+            unparsed += bad
         summary["judge_unparsed"] = unparsed  # counted as ties; should be 0
         summary["judge"] = cfg.judge.model
 

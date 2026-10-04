@@ -52,7 +52,7 @@
 
 - **Keep thinking off.** *The Reasoning Trap* (2025) reports that strengthening reasoning **amplifies tool hallucination**; *Small Models Struggle to Learn from Strong Reasoners* (ACL Findings 2025) found ≤3B students degrade on long CoT. Short reasoning before a tool call is fine; long `<think>` blocks are not.
 - **Size check:** Qwen3-4B at Q4_K_M is about **2.4–2.5 GB** (perplexity +0.30 vs. full precision, as reported by quant uploaders). That leaves ~1.5 GB for KV cache, the embedding model and the RAG index under the 4 GB target. Keep the default context small (4–8k) in the Modelfile.
-- **Laptop speed risk:** CPU decode is memory-bandwidth bound. Desktop CPUs reach ~30–35 tok/s on a 7B Q4_K_M; a 4B is ~1.7× smaller, but laptop DDR4/DDR5 bandwidth is much lower. **≥ 20 tok/s on a typical laptop CPU is not guaranteed.** Measure on the demo laptop in week 1 and report Q4_K_M vs. a smaller quant (or the 1.7B student) if needed.
+- **Laptop speed risk:** CPU decode is memory-bandwidth bound. Desktop CPUs reach ~30–35 tok/s on a 7B Q4_K_M; a 4B is ~1.7× smaller, but laptop DDR4/DDR5 bandwidth is much lower. **≥ 20 tok/s on a typical laptop CPU is not guaranteed.** Measure on the demo laptop in week 1 and report Q4_K_M vs. a smaller quant (or the 1.7B student) if needed. *Measured 2026-10-04 (i7-9750H, DDR4): 12 tok/s at Q3_K_M, 10.5 at Q4_K_M, empty context. Target changed to streaming ≥ 8 tok/s at 2,048 tokens of context plus time to first token ≤ 3 s on follow-up questions (GOAL.md).*
 
 ### 2.2 Teacher: Qwen3-32B, and how to serve it
 
@@ -211,7 +211,7 @@ Generation is the GPU-hour-heavy step; on one shared GPU it is the **critical pa
 | QDoRA + FSDP breaks on the cluster's library versions | Default to single-GPU runs (one seed per GPU); FSDP only when proven; plain QLoRA as fallback (one flag) |
 | Tool traces with inconsistent format | Gold anchors, Hermes format end to end, format checker, test SFT template rendering |
 | Student over-calls tools or invents tools/args | "Don't call / ask back" examples, irrelevance eval items, schema validation; DPO as stretch |
-| Laptop < 20 tok/s | Measure early; smaller quant or 1.7B student; report the trade-off on the Pareto plot |
+| Laptop too slow (streaming < 8 tok/s, or long time to first token) | Prompt reuse across turns; shorter tool schemas; smaller quant or 1.7B student; report the trade-off on the Pareto plot |
 | Name clash with Arcee's DistillKit | Decide on the release name before G4 |
 | Eval leakage | Doc-level split before generation + decontamination |
 | Licensing of seed docs | Record license per source; publish data only from permissive sources |
