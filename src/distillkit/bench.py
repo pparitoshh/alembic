@@ -140,15 +140,15 @@ def run(cfg: Config) -> dict:
     # interleaved passes: a burst of background load lands on every model, not on one
     for i in range(ecfg.bench_runs):
         p = {"pass": i + 1, "load": system_load(), "models": []}
+        report["passes"].append(p)
         for m in models:
             print(f"[bench] pass {i + 1}/{ecfg.bench_runs} {m.name} ({threads} threads, depths {ecfg.bench_depths})", flush=True)
             speed = llama_bench(llama_cpp, m, threads, ecfg.bench_depths, ecfg.bench_reps)
             rss = peak_rss_mb(llama_cpp, m, threads, ecfg.num_ctx)
             report |= {"build": speed["build"], "cpu": speed["cpu"]}
             p["models"].append({"name": m.stem.removeprefix("model-"), "file_gb": m.stat().st_size / 1e9, "peak_rss_mb": rss, **speed})
-        report["passes"].append(p)
-        report["models"] = summarize(report["passes"])
-        (out / "bench.json").write_text(json.dumps(report, indent=2))  # partial results survive an interruption
+            report["models"] = summarize(report["passes"])
+            (out / "bench.json").write_text(json.dumps(report, indent=2))  # partial results survive an interruption
     (out / "bench.md").write_text(markdown(report))
     print(markdown(report))
     return report

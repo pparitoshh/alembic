@@ -74,3 +74,33 @@ def test_summarize_over_passes():
 def test_system_load_is_recorded():
     load = system_load()
     assert load["loadavg_1m"] >= 0 and isinstance(load["busiest"], list)
+
+
+def test_results_saved_after_each_model(tmp_path, monkeypatch):
+    """An interrupted bench keeps every model measured so far, not just whole passes."""
+    import json
+
+    from distillkit import bench
+    from distillkit.config import load_config
+
+    cfg = load_config(Path(__file__).parent.parent / "configs/tools_pilot.yaml",
+                      [f"run_dir={tmp_path / 'run'}", "export.quants=[Q4_K_M,Q8_0]", "export.bench_runs=1"])
+    out = cfg.run_dir / "export"
+    out.mkdir(parents=True)
+    (out / "model-Q4_K_M.gguf").write_bytes(b"x")
+    (out / "model-Q8_0.gguf").write_bytes(b"xx")
+    calls = []
+
+    def fake_bench(llama_cpp, model, threads, depths, reps):
+        calls.append(model.name)
+        if len(calls) > 1:
+            raise KeyboardInterrupt
+        return {"results": {"pp512@0": {"tok_s": 50.0, "stddev": 1.0}}, "build": "b", "cpu": "c"}
+
+    monkeypatch.setattr(bench, "collect", lambda llama_cpp: {})
+    monkeypatch.setattr(bench, "llama_bench", fake_bench)
+    monkeypatch.setattr(bench, "peak_rss_mb", lambda *a: 3000.0)
+    with pytest.raises(KeyboardInterrupt):
+        bench.run(cfg)
+    saved = json.loads((out / "bench.json").read_text())
+    assert [m["name"] for m in saved["models"]] == ["Q4_K_M"]
