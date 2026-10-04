@@ -39,6 +39,9 @@ generate:
     - an ML engineer running multi-GPU training jobs
     - a sysadmin debugging stuck or failing jobs
   task_types: [concept, howto, script, debug]
+  tool_fraction: 0.3        # ~30% tool-calling traces (GOAL.md §6), split call/ask/none below
+  tool_mix: {call: 0.6, ask: 0.2, none: 0.2}
+  gold_dir: data/gold       # few-shot anchors: prose.json, tool_trace.json
 
 verify:
   dedup_threshold: 0.8
@@ -55,7 +58,7 @@ train:
   lora_r: 16
   lora_alpha: 32
   lora_dropout: 0.0   # DoRA's fast path
-  learning_rate: 1.0e-4   # toy-run value (0.6B, LoRA): re-tune on day 1
+  learning_rate: 1.0e-4   # starting point: re-tune with a short sweep on day 1
   epochs: 3
   seed: 42
   batch_size: 4
@@ -65,4 +68,5 @@ train:
 
 eval:
   file: data/eval/eval_all.jsonl
+  tool_file: data/eval/eval_tools.jsonl   # tool-calling slice (draft, needs human review)
   max_new_tokens: 512

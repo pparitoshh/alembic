@@ -1,6 +1,6 @@
-# Toy config: runs end-to-end on a laptop (RTX 2060 6GB + Ollama).
-# On the cluster, copy this file and change teacher.base_url/model and student.model.
-run_dir: runs/iter4_s2
+# Live pilot of tool-calling trace generation against the toy teacher API (small and cheap).
+# 3 questions per chunk, half of them tool-mode, 1 answer each, with the gold anchors.
+run_dir: runs/tools_pilot
 
 seeds:
   dir: data/seeds
@@ -29,8 +29,10 @@ judge:
   concurrency: 4
 
 generate:
-  questions_per_chunk: 12
-  answers_per_question: 2
+  questions_per_chunk: 3
+  answers_per_question: 1
+  tool_fraction: 0.5
+  gold_dir: data/gold
   personas:
     - a new PhD student who has never used a cluster
     - a research software engineer porting code to GPUs
@@ -55,7 +57,7 @@ train:
   lora_alpha: 32
   learning_rate: 1.0e-4
   epochs: 3
-  seed: 2
+  seed: 42
   batch_size: 4
   grad_accum: 4
   max_length: 1024
@@ -64,4 +66,5 @@ train:
 
 eval:
   file: data/eval/eval_all.jsonl
+  tool_file: data/eval/eval_tools.jsonl
   max_new_tokens: 512

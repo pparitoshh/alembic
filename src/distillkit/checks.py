@@ -24,6 +24,8 @@ def _long_opts(tokens: list[str]) -> list[str]:
     """Leading options of a Slurm command, stopping at the program being launched."""
     opts, expect_value = [], False
     for tok in tokens:
+        if tok == "--":  # end of options: what follows is the program
+            break
         if tok.startswith("--"):
             opts.append(tok[2:].split("=", 1)[0])
             expect_value = "=" not in tok

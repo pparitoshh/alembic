@@ -101,7 +101,7 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 | Metric | Baseline | Target |
 |---|---|---|
 | Executable-check pass rate (Slurm/CUDA/MPI answers) | base student, zero-shot | +20 pp over base |
-| LLM-judge win rate vs. base student (pairwise, mean over 3 seeds) | 50% | > 60% (toy run: 64.1% ± 4.8) |
+| LLM-judge win rate vs. base student (pairwise, mean over 3 seeds) | 50% | > 60% |
 | Gap to teacher (judge score) | teacher = 100% | student reaches ≥ 80% of teacher |
 | Tool-call validity (correct structure + arguments) | base student | +20 pp over base |
 | Hallucinated Slurm flags per answer | base student | −50% |
@@ -122,7 +122,7 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 - Human-review the core eval set.
 - Decontaminate training data against the eval set.
 - Report negative results as well as positive ones.
-- Report every score as **mean ± spread over at least 3 training seeds** (toy eval seeds differ by ~±5 points; see [PROGRESS.md](PROGRESS.md)).
+- Report every score as **mean ± spread over at least 3 training seeds**.
 
 ## 8. Expected outcomes / deliverables
 
@@ -155,7 +155,7 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 
 | When | Milestone |
 |---|---|
-| **Before Oct 6** | Seed corpus + document split; eval set started (~50 questions incl. tool-calling slice); tool schemas + 2 gold examples; toy pipeline running locally. *Status Sep 30: toy generate → evaluate beats base (64.1% ± 4.8); export, real corpus and eval set still open.* |
+| **Before Oct 6** | Seed corpus + document split; eval set started (~50 questions incl. tool-calling slice); tool schemas + 2 gold examples; toy pipeline running locally. |
 | **Week 1 (Oct 6–12)** | Kickoff; Leonardo access; pre-download teacher (Qwen3-32B Q4_K_M) and student (Qwen3-4B-Instruct-2507); smoke test of teacher generation with logprobs and QDoRA training + GGUF export; baselines measured; 10k pilot generation |
 | **Week 2 (Oct 13–19)** | Train first student; evaluate; targeted second generation batch on failure areas; verification at scale |
 | **Week 3 (Oct 20–26)** | Ablations (3 seeds each): filtering, data scale; quant levels; second student size if on track |

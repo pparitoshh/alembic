@@ -86,7 +86,7 @@ Qwen3-32B has no 2507 refresh; use it in **non-thinking mode** (`enable_thinking
 
 ### 3.3 Prose answers
 
-- **Grounded:** the teacher sees the chunk and answers from it; non-thinking; short and direct (our toy iteration 2 used this style).
+- **Grounded:** the teacher sees the chunk and answers from it; non-thinking; short and direct.
 - **Multiple answers per question** (OpenThoughts: 4×–16× is a cheap, effective way to scale). With one GPU, budget 1–2 answers/question for the 10k pilot and spend extra samples on failure areas (GOAL.md §6 step 5).
 
 ### 3.4 Tool-calling traces (new)
@@ -128,7 +128,7 @@ Order: **dedup → cheap checks → expensive checks.**
 - **Cost:** DoRA is roughly **1.5–1.8× slower** than LoRA in training (more with dropout > 0; PEFT's DoRA path is faster with `lora_dropout=0`). Budget for it in the seed × ablation plan. Memory overhead is small without caching.
 - **FSDP, not ZeRO-2:** PEFT docs report issues with QDoRA under DeepSpeed ZeRO-2. FSDP + 4-bit needs **`bnb_4bit_quant_storage` set to the training dtype (bf16)** and recent bitsandbytes/accelerate/transformers/TRL (PEFT ≥ 0.10 enabled QLoRA under FSDP/ZeRO-3).
 - **A 4B QDoRA run fits on one A100.** FSDP is for speed when 2–4 GPUs are free, not for memory. On a shared node, the default should be **one seed per GPU in parallel**; use FSDP only for single long runs. That also gives us seed variance cheaply.
-- **Hyperparameters:** carry over the toy result as a *starting point only*: r 16/α 32 on all linear layers, lr ~1e-4, 2–3 epochs, cosine with ~3% warmup, completion-only loss, packing, bf16 compute. The toy run used a 0.6B model with plain LoRA, so re-tune lr on day 1 (one short sweep, 3 seeds at the chosen point). *LoRA Without Regret* (Thinking Machines, 2025): LoRA on all layers at ~10× the full-FT lr matches full FT; low rank falls behind once data outgrows adapter capacity, so try r 64 if the 10k run underfits.
+- **Hyperparameters (starting point, re-tune on day 1):** r 16/α 32 on all linear layers, lr ~1e-4, 2–3 epochs, cosine with ~3% warmup, completion-only loss, packing, bf16 compute. One short lr sweep, then 3 seeds at the chosen point. *LoRA Without Regret* (Thinking Machines, 2025): LoRA on all layers at ~10× the full-FT lr matches full FT; low rank falls behind once data outgrows adapter capacity, so try r 64 if the 10k run underfits.
 - **Data scale:** expect plateaus per subtype (~6k in HPC-Coder-V2). Scale *coverage* (every tool, every topic) before raw count.
 
 ### Stretch beyond SFT
@@ -146,9 +146,9 @@ Order: **dedup → cheap checks → expensive checks.**
    - **Prose:** pairwise LLM judge vs. base, both orders, judge sees the reference chunk.
    - **Executable:** sbatch scripts parse/lint; CUDA/MPI snippets compile.
    - **Tool calling:** BFCL-style **AST match** of the call (name + arguments vs. expected) instead of string match, plus **relevance/irrelevance** items (should call / should not call / should ask), plus executing the call against the mock tools.
-3. **Hallucinated flags:** share of `#SBATCH --flag`/`srun --flag` not in the man pages (already implemented in the toy pipeline).
+3. **Hallucinated flags:** share of `#SBATCH --flag`/`srun --flag` not in the man pages (implemented in `checks.py`).
 4. **Baselines:** base student (same checkpoint), base + RAG, distilled student, distilled + RAG, teacher (upper bound for "≥ 80% of teacher").
-5. **Seeds:** ≥ 3 training seeds per setting, mean ± spread. Toy run: seeds differ by ~±5 points, so differences under ~10 points are noise at 26 questions. A 150–200 question set tightens this; report a bootstrap CI as well.
+5. **Seeds:** ≥ 3 training seeds per setting, mean ± spread; on a small eval set, seed noise can be several points. A 150–200 question set tightens this; report a bootstrap CI as well.
 6. **Speed and memory:** tokens/s and peak RAM on the laptop CPU per quant level.
 7. **External sanity checks:** a BFCL subset (general tool-calling regression: did HPC tuning break general tool use?), ParEval for parallel code.
 

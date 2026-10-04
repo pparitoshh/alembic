@@ -16,7 +16,7 @@ STAGES = {"generate": "generate", "verify": "verify", "train": "train", "evaluat
 def main() -> None:
     p = argparse.ArgumentParser(prog="distillkit", description="Teacher -> student sequence-level distillation")
     p.add_argument("stage", choices=[*STAGES, "all"])
-    p.add_argument("-c", "--config", default="configs/toy.yaml")
+    p.add_argument("-c", "--config", default="configs/toy_qdora.yaml")
     args = p.parse_args()
     cfg = load_config(args.config)
 

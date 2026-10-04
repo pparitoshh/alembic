@@ -26,7 +26,7 @@ def test_every_config_validates(path, tmp_path, monkeypatch):
 def _cfg_dict(tmp_path) -> dict:
     import yaml
 
-    d = yaml.safe_load((ROOT / "configs/iter4_s42.yaml").read_text())
+    d = yaml.safe_load((ROOT / "configs/toy_qdora.yaml").read_text())
     d["run_dir"] = str(tmp_path / "run")
     d["seeds"]["dir"] = str(ROOT / "data/seeds")
     d["verify"]["flag_list"] = str(ROOT / "data/slurm_flags.txt")

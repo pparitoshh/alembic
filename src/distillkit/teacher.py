@@ -79,6 +79,9 @@ class Teacher:
             extra |= {"logprobs": True, "top_logprobs": top_logprobs}
         if self.cfg.extra_body:
             extra["extra_body"] = self.cfg.extra_body
+        if messages and messages[0]["role"] == "system":
+            # "/no_think" disables Qwen3 hybrid thinking; other models ignore it
+            messages = [{**messages[0], "content": messages[0]["content"] + " /no_think"}, *messages[1:]]
         resp = self._create(
             model=self.model,
             messages=messages,
@@ -95,8 +98,7 @@ class Teacher:
         )
 
     def chat(self, system: str, user: str, temperature: float | None = None, **kwargs) -> Completion:
-        # "/no_think" disables Qwen3 hybrid thinking; other models ignore it.
-        messages = [{"role": "system", "content": system + " /no_think"}, {"role": "user", "content": user}]
+        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         return self.complete(messages, temperature, **kwargs)
 
     def chat_json[M: BaseModel](

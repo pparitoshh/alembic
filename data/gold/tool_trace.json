@@ -1,0 +1,32 @@
+{
+  "note": "Hand-written few-shot anchor for tool-calling traces: question -> one-line plan -> tool call -> tool result -> answer. Results come from the deterministic mock cluster (tools.py).",
+  "messages": [
+    {
+      "role": "user",
+      "content": "My training job 4718209 died after almost half an hour. What happened?"
+    },
+    {
+      "role": "assistant",
+      "content": "I'll check the job's accounting record to see how it ended.",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "job_accounting",
+            "arguments": {
+              "job_id": "4718209"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "content": "{\"job_id\": \"4718209\", \"state\": \"OUT_OF_MEMORY\", \"elapsed\": \"00:27:53\", \"time_limit\": \"00:30:00\", \"partition\": \"boost_qos_dbg\", \"exit_code\": \"0:125\", \"max_rss\": \"85G\", \"cpu_efficiency\": \"76%\", \"gpus\": 1, \"gpu_util_mean\": \"64%\", \"gpu_mem_peak\": \"63.4GiB\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "Job 4718209 ended with **OUT_OF_MEMORY** after 00:27:53: GPU memory peaked at 63.4 GiB, the full capacity of the A100 64 GB, so CUDA ran out of memory. Host RAM (85G) was not the problem. To fix it:\n\n- lower the per-GPU batch size, or enable gradient checkpointing;\n- or spread the model over more GPUs, e.g. `#SBATCH --gpus-per-node=4` with FSDP.\n\nNote that it ran in `boost_qos_dbg`, which has a 30-minute limit, so move longer runs to `boost_usr_prod`."
+    }
+  ]
+}

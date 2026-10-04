@@ -5,7 +5,7 @@ from typing import Literal
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class _Section(BaseModel):
@@ -38,6 +38,12 @@ class GenerateCfg(_Section):
     answers_per_question: int
     personas: list[str]
     task_types: list[str]
+    # share of questions that become tool-calling traces, split by mode:
+    # call = needs a tool, ask = needs a tool but a required detail is missing, none = tools offered but not needed
+    tool_fraction: float = Field(0.0, ge=0, le=1)
+    tool_mix: dict[Literal["call", "ask", "none"], float] = {"call": 0.6, "ask": 0.2, "none": 0.2}
+    max_tool_rounds: int = 3
+    gold_dir: Path | None = None  # prose.json / tool_trace.json few-shot anchors (data/gold)
 
 
 class VerifyCfg(_Section):
@@ -81,6 +87,7 @@ class TrainCfg(_Section):
 
 class EvalCfg(_Section):
     file: Path
+    tool_file: Path | None = None  # tool-calling slice: scored by toolcheck, not the judge
     max_new_tokens: int = 512
 
 

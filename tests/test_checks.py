@@ -17,6 +17,11 @@ jid=$(sbatch --parsable a.sh); sbatch --dependency=afterok:$jid b.sh
     assert check_answer(ans, FLAGS)["passed"]
 
 
+def test_double_dash_ends_options():
+    ans = "```bash\nsalloc --nodes=1 --time=01:00:00 -- /bin/bash -c 'srun --ntasks=4 hostname'\n```"
+    assert slurm_flags_used(ans) == ["nodes", "time"]  # no "" from the bare `--`
+
+
 def test_hallucinated_flag_is_caught():
     ans = "```bash\n#SBATCH --gpu-count=2\n#SBATCH --time=1:00:00\n```"
     res = check_answer(ans, FLAGS)

@@ -1,5 +1,5 @@
-# Local QDoRA smoke test (RTX 2060 6 GB): same data and settings as iter4_s42, but
-# 4-bit base + DoRA adapters, to check the cluster recipe end to end before Leonardo.
+# Local QDoRA smoke test (RTX 2060 6 GB): Qwen3-0.6B, 4-bit base + DoRA adapters, to check the
+# cluster recipe end to end before Leonardo. Run generate first to fill run_dir.
 run_dir: runs/toy_qdora
 
 seeds:

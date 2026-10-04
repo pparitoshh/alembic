@@ -1,7 +1,9 @@
 """Stage 4: base vs. distilled student on the held-out eval set.
 
 Metrics: flag hallucination + bash syntax (deterministic) and pairwise LLM-judge win rate
-(judged in both orders to cancel position bias).
+(judged in both orders to cancel position bias). The optional tool slice (`eval.tool_file`) is
+answered with the tool schemas in the prompt and scored by `toolcheck`: when-to-call accuracy,
+call validity, BFCL-style AST match and execution on the mock cluster.
 """
 
 import json
@@ -11,6 +13,8 @@ from .config import Config
 from .io import read_jsonl, write_jsonl
 from .schemas import JudgeVerdict
 from .teacher import Teacher
+from .toolcheck import score_tool_item
+from .tools import SCHEMAS
 
 JUDGE_SYSTEM = "You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Reply only with JSON: {\"reasoning\": \"<short comparison>\", \"verdict\": \"A\" | \"B\" | \"T\"} (T = tie)."
 
@@ -27,7 +31,9 @@ Answer B:
 Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Reply with the JSON verdict."""
 
 
-def generate_answers(cfg: Config, questions: list[str]) -> dict[str, list[str]]:
+def generate_answers(cfg: Config, questions: list[str], tools: list[list[dict] | None] | None = None) -> dict[str, list[str]]:
+    """Greedy answers from the base model and, if an adapter exists, the student. `tools[i]` are
+    the tool schemas offered with question i (None = plain question)."""
     import torch
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -56,7 +62,8 @@ def generate_answers(cfg: Config, questions: list[str]) -> dict[str, list[str]]:
             outs += tok.batch_decode(gen[:, enc["input_ids"].shape[1] :], skip_special_tokens=True)
         return [o.strip() for o in outs]
 
-    prompts = [render_prompt(tok, scfg.system_prompt, q) for q in questions]
+    tools = tools or [None] * len(questions)
+    prompts = [render_prompt(tok, scfg.system_prompt, q, t) for q, t in zip(questions, tools)]
     results = {}
     if has_adapter:
         with model.disable_adapter():
@@ -65,6 +72,21 @@ def generate_answers(cfg: Config, questions: list[str]) -> dict[str, list[str]]:
     else:
         results["base"] = run_batch(prompts)
     return results
+
+
+def tool_summary(scores: list[dict], rows: list[dict]) -> dict:
+    """Rates over the tool slice; validity/AST/execution only over items where a call was expected."""
+    expected = [(s, r) for s, r in zip(scores, rows) if r["expect"] == "call"]
+    called = [s for s, _ in expected if s["decision"] == "call"]
+    return {
+        "tool_decision_acc": sum(s["decision_ok"] for s in scores) / len(scores),
+        "tool_false_call_rate": sum(s["decision"] == "call" for s, r in zip(scores, rows) if r["expect"] == "no_call") / max(1, sum(r["expect"] == "no_call" for r in rows)),
+        "tool_valid_rate": sum(s["valid"] for s in called) / max(1, len(called)),
+        "tool_ast_acc": sum(s.get("ast_ok", False) for s, _ in expected) / max(1, len(expected)),
+        "tool_exec_ok_rate": sum(s["exec_ok"] for s in called) / max(1, len(called)),
+        # over every item where the model called anything: no invented job ids
+        "tool_grounded_rate": sum(s["grounded"] for s in scores if "grounded" in s) / max(1, sum("grounded" in s for s in scores)),
+    }
 
 
 def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
@@ -77,8 +99,12 @@ def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
 def run(cfg: Config) -> dict:
     run_dir = cfg.run_dir
     eval_rows = read_jsonl(cfg.eval.file)
+    tool_rows = read_jsonl(cfg.eval.tool_file) if cfg.eval.tool_file else []
     valid_flags = load_flags(cfg.verify.flag_list)
-    answers = generate_answers(cfg, [r["question"] for r in eval_rows])
+    # one model load for both slices; tool questions are asked with the tool schemas in the prompt
+    all_answers = generate_answers(cfg, [r["question"] for r in eval_rows + tool_rows], [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows))
+    answers = {k: v[: len(eval_rows)] for k, v in all_answers.items()}
+    tool_answers = {k: v[len(eval_rows) :] for k, v in all_answers.items()}
 
     summary = {}
     for name, outs in answers.items():
@@ -92,6 +118,15 @@ def run(cfg: Config) -> dict:
         }
 
     per_q = [{**r, **{f"answer_{k}": v[i] for k, v in answers.items()}} for i, r in enumerate(eval_rows)]
+
+    if tool_rows:
+        per_tool = [{**r, **{f"answer_{k}": v[i] for k, v in tool_answers.items()}} for i, r in enumerate(tool_rows)]
+        for name in tool_answers:
+            scores = [score_tool_item(row[f"answer_{name}"], row) for row in per_tool]
+            for row, sc in zip(per_tool, scores):
+                row[f"tool_score_{name}"] = sc
+            summary[name] |= tool_summary(scores, tool_rows)
+        write_jsonl(run_dir / "eval_tool_outputs.jsonl", per_tool)
 
     if "student" in answers:
         teacher = Teacher(cfg.judge, name="judge")

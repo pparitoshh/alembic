@@ -1,0 +1,13 @@
+{
+  "note": "Hand-written few-shot anchor for prose answers (GOAL.md §6). Fixes length, tone and code-block format.",
+  "messages": [
+    {
+      "role": "user",
+      "content": "How do I run the same Python script on 50 input files without submitting 50 jobs by hand?"
+    },
+    {
+      "role": "assistant",
+      "content": "Use a job array: one submission, one task per file, and `$SLURM_ARRAY_TASK_ID` picks the file.\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=process\n#SBATCH --array=0-49\n#SBATCH --cpus-per-task=1\n#SBATCH --mem=2G\n#SBATCH --time=00:30:00\n#SBATCH --output=logs/%x_%A_%a.out\n\nfiles=(inputs/*.dat)\npython process.py \"${files[$SLURM_ARRAY_TASK_ID]}\"\n```\n\n`%A` is the array job id and `%a` the task index, so each task gets its own log. Add `%10` to the range (`--array=0-49%10`) if you want at most 10 tasks running at once."
+    }
+  ]
+}
