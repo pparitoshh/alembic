@@ -108,6 +108,7 @@ class ExportCfg(_Section):
     bench_depths: list[int] = [0, 2048]  # tokens already in context: empty, and system + tools + RAG chunk
     bench_reps: int = 2  # llama-bench repetitions inside one pass
     bench_runs: int = 3  # independent passes over all models: spread from background load on a real laptop
+    bench_ttft: bool = True  # time to first token of a streaming chat on llama-server
 
 
 class Config(_Section):

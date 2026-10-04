@@ -84,7 +84,7 @@ def test_results_saved_after_each_model(tmp_path, monkeypatch):
     from distillkit.config import load_config
 
     cfg = load_config(Path(__file__).parent.parent / "configs/tools_pilot.yaml",
-                      [f"run_dir={tmp_path / 'run'}", "export.quants=[Q4_K_M,Q8_0]", "export.bench_runs=1"])
+                      [f"run_dir={tmp_path / 'run'}", "export.quants=[Q4_K_M,Q8_0]", "export.bench_runs=1", "export.bench_ttft=false"])
     out = cfg.run_dir / "export"
     out.mkdir(parents=True)
     (out / "model-Q4_K_M.gguf").write_bytes(b"x")
@@ -104,3 +104,53 @@ def test_results_saved_after_each_model(tmp_path, monkeypatch):
         bench.run(cfg)
     saved = json.loads((out / "bench.json").read_text())
     assert [m["name"] for m in saved["models"]] == ["Q4_K_M"]
+
+
+class ChatTokenizer:
+    def apply_chat_template(self, messages, tools=None, add_generation_prompt=False, **kw):
+        text = f"<tools:{len(tools or [])}>" + "".join(f"<{m['role']}>{m['content']}</{m['role']}>" for m in messages)
+        return text + ("<assistant>" if add_generation_prompt else "")
+
+
+def test_follow_up_extends_the_first_turn():
+    """The follow-up prompt must start with the cached first turn, or nothing is reused."""
+    from distillkit.bench import chat_prompts
+
+    first, _ = chat_prompts(ChatTokenizer(), "sys")
+    _, follow = chat_prompts(ChatTokenizer(), "sys", "ANSWER")
+    assert first.startswith("<tools:8><system>sys</system>")
+    assert follow.startswith(first.removesuffix("<assistant>") + "<assistant>ANSWER")
+
+
+def test_chat_latency_from_server_timings(monkeypatch, tmp_path):
+    from contextlib import contextmanager
+
+    from distillkit import bench, gguf_eval
+
+    replies = iter([
+        {"content": "A1", "timings": {"prompt_n": 1500, "prompt_ms": 30000.0, "predicted_n": 128, "predicted_ms": 12800.0, "predicted_per_second": 10.0}},
+        {"content": "A2", "timings": {"prompt_n": 40, "prompt_ms": 1000.0, "predicted_n": 128, "predicted_ms": 16000.0, "predicted_per_second": 8.0}},
+    ])
+    sent = []
+
+    @contextmanager
+    def server(cmd_for_port, log, timeout=600):
+        yield "http://fake"
+
+    monkeypatch.setattr(gguf_eval, "llama_server", server)
+    monkeypatch.setattr(gguf_eval, "post_completion", lambda url, prompt, n: sent.append(prompt) or next(replies))
+    c = bench.chat_latency(tmp_path, tmp_path / "m.gguf", 6, 8192, ChatTokenizer(), "sys", tmp_path / "log")
+    assert c == {"first_prompt_tokens": 1500, "ttft_first_s": 30.1, "followup_new_tokens": 40, "ttft_followup_s": 1.12, "stream_tok_s": 8.0}
+    assert "<assistant>A1</assistant>" in sent[1]  # the follow-up carries the model's own first answer
+
+
+def test_chat_summary_and_table():
+    def model(ttft):
+        chat = {"first_prompt_tokens": 1500, "ttft_first_s": 30.0, "followup_new_tokens": 40, "ttft_followup_s": ttft, "stream_tok_s": 8.0}
+        return {"name": "Q4_K_M", "file_gb": 2.5, "peak_rss_mb": 3500.0, "chat": chat,
+                "results": {"pp512@0": {"tok_s": 50.0}, "tg128@0": {"tok_s": 10.0}}}
+
+    models = summarize([{"models": [model(1.0)]}, {"models": [model(2.0)]}])
+    assert models[0]["chat"]["ttft_followup_s"] == 1.5 and models[0]["chat"]["ttft_followup_s_max"] == 2.0
+    md = markdown({"cpu": "i7", "threads": 6, "build": "b", "num_ctx": 8192, "depths": [0], "models": models})
+    assert "| Q4_K_M | 1500 | 30.0 | 40 | 1.5 (2.0) | 8.0 |" in md

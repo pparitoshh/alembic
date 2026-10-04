@@ -66,12 +66,17 @@ def llama_server(cmd_for_port, log: Path, timeout: float = 600):
             proc.kill()
 
 
-def complete(url: str, prompt: str, max_tokens: int) -> str:
-    """Greedy completion of an already rendered chat prompt (raw /completion, no server-side template)."""
+def post_completion(url: str, prompt: str, max_tokens: int) -> dict:
+    """Greedy completion of an already rendered chat prompt (raw /completion, no server-side template).
+    The reply has "content" and llama-server's "timings"; the processed prompt stays cached in the slot."""
     body = {"prompt": prompt, "n_predict": max_tokens, "temperature": 0.0, "top_k": 1, "cache_prompt": True}
     req = urllib.request.Request(f"{url}/completion", json.dumps(body).encode(), {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=3600) as r:
-        return json.loads(r.read())["content"].strip()
+        return json.loads(r.read())
+
+
+def complete(url: str, prompt: str, max_tokens: int) -> str:
+    return post_completion(url, prompt, max_tokens)["content"].strip()
 
 
 def _tokenizer(model: str):
