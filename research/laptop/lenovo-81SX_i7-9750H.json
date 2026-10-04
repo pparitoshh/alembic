@@ -1,0 +1,31 @@
+{
+  "vendor": "LENOVO",
+  "product": "81SX",
+  "cpu": {
+    "model": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+    "physical_cores": 6,
+    "logical_cpus": 12,
+    "max_mhz": 4500.0,
+    "l3_cache": "12 MiB (1 instance)",
+    "avx2": true,
+    "avx512": false
+  },
+  "memory": {
+    "ram_gb": 15.5,
+    "swap_gb": 4.0
+  },
+  "gpu": "NVIDIA GeForce RTX 2060, 6144 MiB, 580.178.04",
+  "os": "Ubuntu 24.04.4 LTS",
+  "kernel": "7.0.0-38-generic",
+  "python": "3.12.3",
+  "packages": {
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "trl": "1.14.1",
+    "peft": "0.21.1",
+    "bitsandbytes": "0.50.2",
+    "openai": "3.22.1"
+  },
+  "llama_cpp": "b11392",
+  "ollama": "0.32.3"
+}

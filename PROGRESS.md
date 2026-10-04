@@ -21,6 +21,19 @@
 
 ## Log
 
+### 2026-10-04: laptop benchmarks, GGUF eval mode (branch `feature/bench`)
+
+- `bench` stage: llama-bench speed (pp512, tg128 at 0 and 2,048 tokens of context) and peak RAM at
+  context 8,192 per quant, 3 interleaved passes under normal laptop load; saves after each model;
+  time to first token of a streaming chat on llama-server (implemented, not run live yet).
+- Base Qwen3-4B-Instruct-2507 on the i7-9750H ([report](research/bench/2026-10-04_qwen3-4b-instruct-2507_base/README.md)):
+  generation 7.2 tok/s at 2,048 tokens of context for Q4_K_M (7.6 Q3_K_M); Q4_K_M peak RAM 5.15 GiB by
+  default, **3.52 GiB with `--load-mode none`** (repacked weights + mmapped file were both resident).
+- GOAL speed target changed (user decision): streaming >= 8 tok/s at 2,048 tokens of context, TTFT <= 3 s
+  on follow-ups; replaces >= 20 tok/s.
+- GGUF eval mode (`eval.gguf`): eval answers from the exported quants on llama-server, judged against
+  the full-precision source and base. Hermetic tests only; live run pending.
+
 ### 2026-10-04: Leonardo workflow and judges (branch `feature/leonardo`)
 
 - **Judges:** gpt-oss-20b (main) and Gemma 4 26B-A4B (cross-check), both Apache 2.0 and served by vLLM on the cluster; no API at evaluation time. The teacher is also served locally from downloaded weights.

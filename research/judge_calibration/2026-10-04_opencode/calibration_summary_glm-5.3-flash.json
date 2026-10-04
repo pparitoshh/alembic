@@ -1,0 +1,17 @@
+{
+  "judge": "glm-5.3-flash",
+  "pairs": 24,
+  "accuracy": 1.0,
+  "position_consistency": 1.0,
+  "unparsed": 0,
+  "accuracy_by_defect": {
+    "invented_flag": 1.0,
+    "length_bait": 1.0,
+    "tie": 1.0,
+    "wrong_command": 1.0,
+    "wrong_fact": 1.0,
+    "wrong_math": 1.0,
+    "wrong_semantics": 1.0,
+    "wrong_syntax": 1.0
+  }
+}

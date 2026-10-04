@@ -1,0 +1,700 @@
+{
+  "machine": {
+    "vendor": "LENOVO",
+    "product": "81SX",
+    "cpu": {
+      "model": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+      "physical_cores": 6,
+      "logical_cpus": 12,
+      "max_mhz": 4500.0,
+      "l3_cache": "12 MiB (1 instance)",
+      "avx2": true,
+      "avx512": false
+    },
+    "memory": {
+      "ram_gb": 15.5,
+      "swap_gb": 4.0
+    },
+    "gpu": "NVIDIA GeForce RTX 2060, 6144 MiB, 580.178.04",
+    "os": "Ubuntu 24.04.4 LTS",
+    "kernel": "7.0.0-38-generic",
+    "python": "3.12.3",
+    "packages": {
+      "torch": "2.14.0",
+      "transformers": "5.17.0",
+      "trl": "1.14.1",
+      "peft": "0.21.1",
+      "bitsandbytes": "0.50.2",
+      "openai": "3.22.1"
+    },
+    "llama_cpp": "b11392",
+    "ollama": "0.32.3"
+  },
+  "threads": 6,
+  "num_ctx": 8192,
+  "depths": [
+    0,
+    2048
+  ],
+  "passes": [
+    {
+      "pass": 1,
+      "load": {
+        "loadavg_1m": 12.57,
+        "busiest": [
+          "69.2 distillkit",
+          "64.1 zoom",
+          "29.3 cursor",
+          "18.1 uv",
+          "9.6 gnome-shell"
+        ]
+      },
+      "models": [
+        {
+          "name": "Q3_K_M",
+          "file_gb": 2.075616608,
+          "peak_rss_mb": 3905.9,
+          "results": {
+            "pp512@0": {
+              "tok_s": 50.23,
+              "stddev": 1.71
+            },
+            "tg128@0": {
+              "tok_s": 11.96,
+              "stddev": 0.34
+            },
+            "pp512@2048": {
+              "tok_s": 36.76,
+              "stddev": 0.03
+            },
+            "tg128@2048": {
+              "tok_s": 7.31,
+              "stddev": 0.01
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q3_K - Medium"
+        },
+        {
+          "name": "Q4_K_M",
+          "file_gb": 2.497279328,
+          "peak_rss_mb": 5273.4,
+          "results": {
+            "pp512@0": {
+              "tok_s": 48.53,
+              "stddev": 0.52
+            },
+            "tg128@0": {
+              "tok_s": 10.52,
+              "stddev": 0.03
+            },
+            "pp512@2048": {
+              "tok_s": 33.26,
+              "stddev": 1.16
+            },
+            "tg128@2048": {
+              "tok_s": 6.67,
+              "stddev": 0.05
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q4_K - Medium"
+        },
+        {
+          "name": "Q5_K_M",
+          "file_gb": 2.889512288,
+          "peak_rss_mb": 3977.8,
+          "results": {
+            "pp512@0": {
+              "tok_s": 45.96,
+              "stddev": 0.21
+            },
+            "tg128@0": {
+              "tok_s": 9.09,
+              "stddev": 0.01
+            },
+            "pp512@2048": {
+              "tok_s": 33.0,
+              "stddev": 0.11
+            },
+            "tg128@2048": {
+              "tok_s": 5.96,
+              "stddev": 0.05
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q5_K - Medium"
+        },
+        {
+          "name": "Q6_K",
+          "file_gb": 3.306259808,
+          "peak_rss_mb": 4374.9,
+          "results": {
+            "pp512@0": {
+              "tok_s": 44.65,
+              "stddev": 0.52
+            },
+            "tg128@0": {
+              "tok_s": 8.05,
+              "stddev": 0.23
+            },
+            "pp512@2048": {
+              "tok_s": 33.88,
+              "stddev": 0.48
+            },
+            "tg128@2048": {
+              "tok_s": 5.53,
+              "stddev": 0.19
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q6_K"
+        },
+        {
+          "name": "Q8_0",
+          "file_gb": 4.280403552,
+          "peak_rss_mb": 5301.0,
+          "results": {
+            "pp512@0": {
+              "tok_s": 36.25,
+              "stddev": 0.2
+            },
+            "tg128@0": {
+              "tok_s": 6.41,
+              "stddev": 0.29
+            },
+            "pp512@2048": {
+              "tok_s": 27.53,
+              "stddev": 0.48
+            },
+            "tg128@2048": {
+              "tok_s": 4.75,
+              "stddev": 0.07
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q8_0"
+        }
+      ]
+    },
+    {
+      "pass": 2,
+      "load": {
+        "loadavg_1m": 6.89,
+        "busiest": [
+          "100 ps",
+          "61.1 zoom",
+          "27.3 cursor",
+          "9.2 gnome-shell",
+          "5.8 claude"
+        ]
+      },
+      "models": [
+        {
+          "name": "Q3_K_M",
+          "file_gb": 2.075616608,
+          "peak_rss_mb": 3903.5,
+          "results": {
+            "pp512@0": {
+              "tok_s": 45.02,
+              "stddev": 0.62
+            },
+            "tg128@0": {
+              "tok_s": 12.29,
+              "stddev": 0.33
+            },
+            "pp512@2048": {
+              "tok_s": 35.13,
+              "stddev": 0.89
+            },
+            "tg128@2048": {
+              "tok_s": 7.49,
+              "stddev": 0.1
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q3_K - Medium"
+        },
+        {
+          "name": "Q4_K_M",
+          "file_gb": 2.497279328,
+          "peak_rss_mb": 5273.5,
+          "results": {
+            "pp512@0": {
+              "tok_s": 50.78,
+              "stddev": 0.41
+            },
+            "tg128@0": {
+              "tok_s": 11.66,
+              "stddev": 0.12
+            },
+            "pp512@2048": {
+              "tok_s": 37.42,
+              "stddev": 0.26
+            },
+            "tg128@2048": {
+              "tok_s": 7.41,
+              "stddev": 0.06
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q4_K - Medium"
+        },
+        {
+          "name": "Q5_K_M",
+          "file_gb": 2.889512288,
+          "peak_rss_mb": 3977.8,
+          "results": {
+            "pp512@0": {
+              "tok_s": 46.33,
+              "stddev": 0.06
+            },
+            "tg128@0": {
+              "tok_s": 9.58,
+              "stddev": 0.06
+            },
+            "pp512@2048": {
+              "tok_s": 36.67,
+              "stddev": 0.15
+            },
+            "tg128@2048": {
+              "tok_s": 6.75,
+              "stddev": 0.03
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q5_K - Medium"
+        },
+        {
+          "name": "Q6_K",
+          "file_gb": 3.306259808,
+          "peak_rss_mb": 4374.7,
+          "results": {
+            "pp512@0": {
+              "tok_s": 51.29,
+              "stddev": 0.06
+            },
+            "tg128@0": {
+              "tok_s": 9.29,
+              "stddev": 0.01
+            },
+            "pp512@2048": {
+              "tok_s": 38.02,
+              "stddev": 0.13
+            },
+            "tg128@2048": {
+              "tok_s": 6.36,
+              "stddev": 0.0
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q6_K"
+        },
+        {
+          "name": "Q8_0",
+          "file_gb": 4.280403552,
+          "peak_rss_mb": 5300.9,
+          "results": {
+            "pp512@0": {
+              "tok_s": 39.16,
+              "stddev": 0.12
+            },
+            "tg128@0": {
+              "tok_s": 7.19,
+              "stddev": 0.05
+            },
+            "pp512@2048": {
+              "tok_s": 31.54,
+              "stddev": 0.18
+            },
+            "tg128@2048": {
+              "tok_s": 5.35,
+              "stddev": 0.01
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q8_0"
+        }
+      ]
+    },
+    {
+      "pass": 3,
+      "load": {
+        "loadavg_1m": 6.21,
+        "busiest": [
+          "100 ps",
+          "54.2 zoom",
+          "26.3 cursor",
+          "8.3 gnome-shell",
+          "5.5 claude"
+        ]
+      },
+      "models": [
+        {
+          "name": "Q3_K_M",
+          "file_gb": 2.075616608,
+          "peak_rss_mb": 3906.1,
+          "results": {
+            "pp512@0": {
+              "tok_s": 53.02,
+              "stddev": 0.4
+            },
+            "tg128@0": {
+              "tok_s": 13.64,
+              "stddev": 0.01
+            },
+            "pp512@2048": {
+              "tok_s": 40.06,
+              "stddev": 0.0
+            },
+            "tg128@2048": {
+              "tok_s": 8.06,
+              "stddev": 0.03
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q3_K - Medium"
+        },
+        {
+          "name": "Q4_K_M",
+          "file_gb": 2.497279328,
+          "peak_rss_mb": 5273.4,
+          "results": {
+            "pp512@0": {
+              "tok_s": 53.51,
+              "stddev": 0.57
+            },
+            "tg128@0": {
+              "tok_s": 11.82,
+              "stddev": 0.02
+            },
+            "pp512@2048": {
+              "tok_s": 39.92,
+              "stddev": 0.26
+            },
+            "tg128@2048": {
+              "tok_s": 7.39,
+              "stddev": 0.0
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q4_K - Medium"
+        },
+        {
+          "name": "Q5_K_M",
+          "file_gb": 2.889512288,
+          "peak_rss_mb": 3977.6,
+          "results": {
+            "pp512@0": {
+              "tok_s": 50.64,
+              "stddev": 0.3
+            },
+            "tg128@0": {
+              "tok_s": 10.21,
+              "stddev": 0.04
+            },
+            "pp512@2048": {
+              "tok_s": 37.76,
+              "stddev": 0.11
+            },
+            "tg128@2048": {
+              "tok_s": 6.81,
+              "stddev": 0.06
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q5_K - Medium"
+        },
+        {
+          "name": "Q6_K",
+          "file_gb": 3.306259808,
+          "peak_rss_mb": 4375.0,
+          "results": {
+            "pp512@0": {
+              "tok_s": 50.72,
+              "stddev": 0.03
+            },
+            "tg128@0": {
+              "tok_s": 9.14,
+              "stddev": 0.1
+            },
+            "pp512@2048": {
+              "tok_s": 38.47,
+              "stddev": 0.02
+            },
+            "tg128@2048": {
+              "tok_s": 6.38,
+              "stddev": 0.03
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q6_K"
+        },
+        {
+          "name": "Q8_0",
+          "file_gb": 4.280403552,
+          "peak_rss_mb": 5300.8,
+          "results": {
+            "pp512@0": {
+              "tok_s": 39.78,
+              "stddev": 0.23
+            },
+            "tg128@0": {
+              "tok_s": 7.26,
+              "stddev": 0.01
+            },
+            "pp512@2048": {
+              "tok_s": 31.1,
+              "stddev": 0.23
+            },
+            "tg128@2048": {
+              "tok_s": 5.34,
+              "stddev": 0.02
+            }
+          },
+          "build": "46847e615",
+          "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz",
+          "model_type": "qwen3 4B Q8_0"
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "name": "Q3_K_M",
+      "file_gb": 2.075616608,
+      "peak_rss_mb": 3906.1,
+      "peak_rss_mb_mean": 3905.2,
+      "results": {
+        "pp512@0": {
+          "tok_s": 49.42,
+          "std": 4.06,
+          "runs": [
+            50.23,
+            45.02,
+            53.02
+          ]
+        },
+        "tg128@0": {
+          "tok_s": 12.63,
+          "std": 0.89,
+          "runs": [
+            11.96,
+            12.29,
+            13.64
+          ]
+        },
+        "pp512@2048": {
+          "tok_s": 37.32,
+          "std": 2.51,
+          "runs": [
+            36.76,
+            35.13,
+            40.06
+          ]
+        },
+        "tg128@2048": {
+          "tok_s": 7.62,
+          "std": 0.39,
+          "runs": [
+            7.31,
+            7.49,
+            8.06
+          ]
+        }
+      }
+    },
+    {
+      "name": "Q4_K_M",
+      "file_gb": 2.497279328,
+      "peak_rss_mb": 5273.5,
+      "peak_rss_mb_mean": 5273.4,
+      "results": {
+        "pp512@0": {
+          "tok_s": 50.94,
+          "std": 2.49,
+          "runs": [
+            48.53,
+            50.78,
+            53.51
+          ]
+        },
+        "tg128@0": {
+          "tok_s": 11.33,
+          "std": 0.71,
+          "runs": [
+            10.52,
+            11.66,
+            11.82
+          ]
+        },
+        "pp512@2048": {
+          "tok_s": 36.87,
+          "std": 3.36,
+          "runs": [
+            33.26,
+            37.42,
+            39.92
+          ]
+        },
+        "tg128@2048": {
+          "tok_s": 7.16,
+          "std": 0.42,
+          "runs": [
+            6.67,
+            7.41,
+            7.39
+          ]
+        }
+      }
+    },
+    {
+      "name": "Q5_K_M",
+      "file_gb": 2.889512288,
+      "peak_rss_mb": 3977.8,
+      "peak_rss_mb_mean": 3977.7,
+      "results": {
+        "pp512@0": {
+          "tok_s": 47.64,
+          "std": 2.6,
+          "runs": [
+            45.96,
+            46.33,
+            50.64
+          ]
+        },
+        "tg128@0": {
+          "tok_s": 9.63,
+          "std": 0.56,
+          "runs": [
+            9.09,
+            9.58,
+            10.21
+          ]
+        },
+        "pp512@2048": {
+          "tok_s": 35.81,
+          "std": 2.49,
+          "runs": [
+            33.0,
+            36.67,
+            37.76
+          ]
+        },
+        "tg128@2048": {
+          "tok_s": 6.51,
+          "std": 0.47,
+          "runs": [
+            5.96,
+            6.75,
+            6.81
+          ]
+        }
+      }
+    },
+    {
+      "name": "Q6_K",
+      "file_gb": 3.306259808,
+      "peak_rss_mb": 4375.0,
+      "peak_rss_mb_mean": 4374.9,
+      "results": {
+        "pp512@0": {
+          "tok_s": 48.89,
+          "std": 3.68,
+          "runs": [
+            44.65,
+            51.29,
+            50.72
+          ]
+        },
+        "tg128@0": {
+          "tok_s": 8.83,
+          "std": 0.68,
+          "runs": [
+            8.05,
+            9.29,
+            9.14
+          ]
+        },
+        "pp512@2048": {
+          "tok_s": 36.79,
+          "std": 2.53,
+          "runs": [
+            33.88,
+            38.02,
+            38.47
+          ]
+        },
+        "tg128@2048": {
+          "tok_s": 6.09,
+          "std": 0.49,
+          "runs": [
+            5.53,
+            6.36,
+            6.38
+          ]
+        }
+      }
+    },
+    {
+      "name": "Q8_0",
+      "file_gb": 4.280403552,
+      "peak_rss_mb": 5301.0,
+      "peak_rss_mb_mean": 5300.9,
+      "results": {
+        "pp512@0": {
+          "tok_s": 38.4,
+          "std": 1.88,
+          "runs": [
+            36.25,
+            39.16,
+            39.78
+          ]
+        },
+        "tg128@0": {
+          "tok_s": 6.95,
+          "std": 0.47,
+          "runs": [
+            6.41,
+            7.19,
+            7.26
+          ]
+        },
+        "pp512@2048": {
+          "tok_s": 30.06,
+          "std": 2.2,
+          "runs": [
+            27.53,
+            31.54,
+            31.1
+          ]
+        },
+        "tg128@2048": {
+          "tok_s": 5.15,
+          "std": 0.34,
+          "runs": [
+            4.75,
+            5.35,
+            5.34
+          ]
+        }
+      }
+    }
+  ],
+  "build": "46847e615",
+  "cpu": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+}

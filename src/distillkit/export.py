@@ -164,7 +164,11 @@ def run(cfg: Config) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     merged, bf16 = out / "merged", out / "model-bf16.gguf"
 
-    if not (merged / "config.json").exists():
+    if not ecfg.merge:
+        from huggingface_hub import snapshot_download
+
+        merged = Path(snapshot_download(cfg.student.model))  # the untrained base, straight from the HF cache
+    elif not (merged / "config.json").exists():
         merge(cfg, merged)
     if not bf16.exists():
         _run(
