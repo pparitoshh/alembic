@@ -2,7 +2,7 @@
 
 *European AI Hackathon · Oct 6–29, 2026 · Team of 5*
 *Companion to [RESEARCH.md](RESEARCH.md), which covers the state of the art and the design rationale.*
-*Updated Oct 4, 2026: teacher/student finalized, QDoRA + FSDP, tool calling, shared single node, eval-first ordering.*
+*Updated Oct 4, 2026: teacher/student finalized, QDoRA + FSDP, tool calling, shared single node, eval-first ordering. Student set to Qwen3-4B-Instruct-2507.*
 
 ---
 
@@ -33,9 +33,11 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 | Role | Model | Format | Why |
 |---|---|---|---|
 | **Teacher** | Qwen3-32B (official Qwen) | GGUF Q4_K_M (~20 GB) | Fits on one A100 64 GB on a shared node |
-| **Student** | Qwen3-4B | bitsandbytes 4-bit + DoRA (QDoRA) | Capacity for domain + tool calling; Q4_K_M export ~2.7 GB |
+| **Student** | Qwen3-4B-Instruct-2507 | bitsandbytes 4-bit + DoRA (QDoRA) | Capacity for domain + tool calling; non-thinking only; Q4_K_M export ~2.5 GB |
 
+- **Why the 2507 Instruct variant:** the Jul 2025 update of Qwen3-4B's non-thinking mode, with the same architecture and tokenizer. Much better at tool use (BFCL-v3 61.9 vs. 57.6, TAU1-Retail 48.7 vs. 24.3). It never emits `<think>` blocks, so training, inference and the Ollama template all render tool calls the same way.
 - Same Qwen3 family → shared tokenizer → logit-level KD stays open for v2.
+- The baseline for G2 is the untrained **Qwen3-4B-Instruct-2507** itself.
 - Apache 2.0 → clean for MIT release.
 - **DoRA:** LoRA A/B matrices update direction; a separate trainable vector updates magnitude. Closer to full fine-tuning at low rank. One flag in PEFT (`use_dora=True`).
 - **FSDP, not DeepSpeed ZeRO-2** — known QDoRA issues with ZeRO-2.
@@ -47,14 +49,14 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 | Focus | What we will do on the cluster |
 |---|---|
 | **Distributed teacher inference** | Batch generation with Qwen3-32B Q4_K_M on one GPU (more if available). Start with ~10k examples, evaluate, then scale up if time allows. Measure throughput (tokens/s per GPU) and cost per 1k verified examples. |
-| **Parallel student training** | QDoRA on Qwen3-4B with FSDP; several seeds and ablations in parallel. A student family (1.7B / 4B) is a stretch goal. |
+| **Parallel student training** | QDoRA on Qwen3-4B-Instruct-2507 with FSDP; several seeds and ablations in parallel. A student family (1.7B / 4B) is a stretch goal (no 2507 release of 1.7B: use Qwen3-1.7B with thinking off). |
 | **Accuracy vs. size under quantization** | Evaluate every (student size × quant level) pair on the same held-out set. Produce an **accuracy–size–speed Pareto frontier**. |
 
 ### Compute
 
 - **Cluster:** Leonardo (CINECA). **One node (4× A100 64 GB), shared across hackathon teams.** Plan for 1–2 GPUs at a time.
 - **Teacher:** Qwen3-32B Q4_K_M fits on a single 64 GB A100.
-- **Student:** Qwen3-4B QDoRA is small; FSDP gives clean multi-GPU scaling when GPUs are free.
+- **Student:** Qwen3-4B-Instruct-2507 QDoRA is small; FSDP gives clean multi-GPU scaling when GPUs are free.
 - **Storage:** model weights + data + top-20 logprobs (can be several GB — check quota).
 - **Operating rules on a shared node:** generate in chunks, checkpoint generated data frequently, run heavy jobs off-peak where possible.
 - **Still to confirm:** compute-node access date; internet on compute nodes; vLLM availability; max wall time; storage quota.
@@ -154,7 +156,7 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 | When | Milestone |
 |---|---|
 | **Before Oct 6** | Seed corpus + document split; eval set started (~50 questions incl. tool-calling slice); tool schemas + 2 gold examples; toy pipeline running locally. *Status Sep 30: toy generate → evaluate beats base (64.1% ± 4.8); export, real corpus and eval set still open.* |
-| **Week 1 (Oct 6–12)** | Kickoff; Leonardo access; pre-download teacher (Qwen3-32B Q4_K_M) and student (Qwen3-4B); smoke test of teacher generation with logprobs and QDoRA training + GGUF export; baselines measured; 10k pilot generation |
+| **Week 1 (Oct 6–12)** | Kickoff; Leonardo access; pre-download teacher (Qwen3-32B Q4_K_M) and student (Qwen3-4B-Instruct-2507); smoke test of teacher generation with logprobs and QDoRA training + GGUF export; baselines measured; 10k pilot generation |
 | **Week 2 (Oct 13–19)** | Train first student; evaluate; targeted second generation batch on failure areas; verification at scale |
 | **Week 3 (Oct 20–26)** | Ablations (3 seeds each): filtering, data scale; quant levels; second student size if on track |
 | **Final (Oct 27–29)** | Quantization sweep + Pareto frontier; release repo, model and dataset; final presentation |

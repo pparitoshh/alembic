@@ -1,4 +1,4 @@
-# Leonardo template (GOAL.md §3): Qwen3-32B teacher on one A100 64 GB -> Qwen3-4B student, QDoRA.
+# Leonardo template (GOAL.md §3): Qwen3-32B teacher on one A100 64 GB -> Qwen3-4B-Instruct-2507 student, QDoRA.
 # Start the teacher first, e.g. on a compute node:
 #   vllm serve Qwen/Qwen3-32B-AWQ --max-logprobs 20 --tool-call-parser hermes --enable-auto-tool-choice
 # then point base_url at it (ssh tunnel or the node's hostname).
@@ -46,7 +46,7 @@ verify:
   max_answer_chars: 4000
 
 student:
-  model: Qwen/Qwen3-4B   # alternative: Qwen/Qwen3-4B-Instruct-2507 (non-thinking, better tool use; RESEARCH.md §2.1)
+  model: Qwen/Qwen3-4B-Instruct-2507   # non-thinking, better tool use (GOAL.md §3, RESEARCH.md §2.1)
   system_prompt: You are an HPC assistant. Answer questions about Slurm, CUDA, MPI and profiling concisely and correctly. Put scripts in fenced code blocks.
 
 train:

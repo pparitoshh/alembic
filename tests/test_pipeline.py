@@ -66,7 +66,7 @@ def test_legacy_row_and_tool_trace():
     assert final_answer(trace) == "Yes, job 42 is running."
     ex = training_example(trace, "SYS")
     assert ex["messages"][0] == {"role": "system", "content": "SYS"}
-    assert json.loads(ex["tools"])[0]["name"] == "job_status"
+    assert json.loads(ex["tools"])[0] == {"type": "function", "function": trace["tools"][0]}  # what vLLM/Ollama send
     assert training_example(legacy, "SYS")["tools"] is None
 
 

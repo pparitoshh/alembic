@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from .config import EndpointCfg
+from .records import openai_tools
 from .schemas import parse_json
 
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -73,7 +74,7 @@ class Teacher:
         if response_format:
             extra["response_format"] = response_format
         if tools:
-            extra["tools"] = [{"type": "function", "function": t} for t in tools]
+            extra["tools"] = openai_tools(tools)
         if top_logprobs:
             extra |= {"logprobs": True, "top_logprobs": top_logprobs}
         if self.cfg.extra_body:

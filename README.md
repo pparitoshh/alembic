@@ -4,7 +4,7 @@
 
 DistillKit turns a large open-weight **teacher** model into a compact **student** that runs on a laptop. The student learns from teacher-generated question/answer text and tool-calling traces (sequence-level distillation), so any teacher that emits text works with any student. The teacher's top-20 logprobs are saved as well, so logit-level distillation can be added later without re-running the teacher.
 
-The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM.
+The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B-Instruct-2507** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM.
 
 > **Status:** working prototype, built for the [European AI Hackathon](https://www.openhackathons.org/s/siteevent/a0CUP00003yKxcX2AS/se000475) (Oct 6–29, 2026). The four stages `generate → verify → train → evaluate` run end to end on a laptop (RTX 2060 6 GB). Export (GGUF/Ollama) is not built yet.
 
@@ -40,7 +40,7 @@ Outputs go to the config's `run_dir` (e.g. `runs/iter3/`, git-ignored). Each exp
 
 ```bash
 uv run distillkit train -c configs/toy_qdora.yaml                   # local QDoRA smoke test (Qwen3-0.6B, 4-bit + DoRA)
-uv run distillkit all   -c configs/qwen3_4b_qdora.yaml              # Leonardo: Qwen3-32B teacher on vLLM -> Qwen3-4B
+uv run distillkit all   -c configs/qwen3_4b_qdora.yaml              # Leonardo: Qwen3-32B teacher on vLLM -> Qwen3-4B-Instruct-2507
 accelerate launch --config_file configs/accelerate/fsdp.yaml \
     -m distillkit.cli train -c configs/qwen3_4b_qdora.yaml          # multi-GPU QDoRA with FSDP (untested on Leonardo yet)
 ```

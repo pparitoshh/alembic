@@ -38,9 +38,17 @@ def final_answer(row: dict) -> str:
     return ""
 
 
+def openai_tools(schemas: list[dict] | None) -> list[dict] | None:
+    """Wrap bare schemas as OpenAI `{"type": "function", "function": ...}` entries. vLLM, llama-server
+    and Ollama hand tools to the Qwen chat template in this form, so training must render them the same way."""
+    if not schemas:
+        return None
+    return [s if s.get("type") == "function" else {"type": "function", "function": s} for s in schemas]
+
+
 def training_example(row: dict, system_prompt: str) -> dict:
     """Conversational SFT example for TRL (loss on assistant turns only)."""
-    tools = row.get("tools")
+    tools = openai_tools(row.get("tools"))
     return {
         "messages": [{"role": "system", "content": system_prompt}, *messages(row)],
         # JSON string keeps the Arrow schema uniform across rows with different tools; TRL decodes it

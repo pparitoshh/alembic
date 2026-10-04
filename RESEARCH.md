@@ -1,6 +1,6 @@
 # DistillKit — State of the Art Research Notes
 
-*First compiled 2026-09-30; **revised 2026-10-04** for the finalized design in [GOAL.md](GOAL.md) (Qwen3-32B teacher, Qwen3-4B QDoRA student, FSDP, tool calling, saved top-20 logprobs, one shared Leonardo node).*
+*First compiled 2026-09-30; **revised 2026-10-04** for the finalized design in [GOAL.md](GOAL.md) (Qwen3-32B teacher, Qwen3-4B-Instruct-2507 QDoRA student, FSDP, tool calling, saved top-20 logprobs, one shared Leonardo node).*
 *European AI Hackathon, Oct 6–29, 2026.*
 
 **Scope:** distilling a large open-weight **teacher** into a laptop-sized **student**. v1 trains on **generated text only** (sequence-level KD), but the teacher's **top-20 logprobs are saved** so logit-level KD can be added in v2. The demo is an **HPC Assistant** covering Slurm, CUDA, MPI and profiling, **with tool calling**.
@@ -14,7 +14,7 @@
 | Framing | **Sequence-level KD** in v1; top-20 logprobs saved for v2 logit KD | Tokenizer-independent in general; teacher and student here share the Qwen3 tokenizer, so logit KD stays possible later |
 | Teacher | **Qwen3-32B**, 4-bit, non-thinking, on **one A100 64 GB** | Fits one GPU on a shared node; Apache 2.0 |
 | Teacher serving | **Open decision → recommend vLLM + official `Qwen3-32B-AWQ`**; keep llama.cpp + GGUF Q4_K_M as fallback (§2.2) | vLLM's GGUF path is "highly experimental"; vLLM AWQ has continuous batching and native top-k logprobs with token IDs |
-| Student | **Qwen3-4B, non-thinking** (consider `Qwen3-4B-Instruct-2507`, §2.1) | 2507 update: BFCL-v3 57.6 → 61.9, TAU1-Retail 24.3 → 48.7 |
+| Student | **Qwen3-4B-Instruct-2507** (decided Oct 4, §2.1) | 2507 update: BFCL-v3 57.6 → 61.9, TAU1-Retail 24.3 → 48.7 |
 | Training | **QDoRA** (bnb 4-bit + `use_dora=True`), TRL `SFTTrainer`, `assistant_only_loss`, **FSDP** | DoRA is closer to full FT at low rank; PEFT reports issues with QDoRA under DeepSpeed ZeRO-2 |
 | Data | Document-grounded; **~70% prose / ~30% tool-call traces**; persona × task × difficulty grid; gold few-shot anchors | Coverage over volume; consistent format |
 | Verification | Dedup → exec checks (`bash -n`, Slurm linter, `nvcc`, `mpicc`) → **tool-call checks** (schema, args, execution) → judge → decontamination | APIGen-style 3-stage check for tool calls |
@@ -28,7 +28,7 @@
 
 - **Classic (logit) KD** matches the teacher's token distribution. It needs teacher logits on the *same vocabulary* as the student.
 - **Sequence-level KD** (Kim & Rush, 2016) trains on teacher output text with normal cross-entropy. This is what DeepSeek-R1-Distill, OpenThoughts, s1 and most "distilled" small models do. Our framework stays teacher-agnostic: any model that emits text can be a teacher.
-- **Why save top-20 logprobs now:** Qwen3-32B and Qwen3-4B share the Qwen3 tokenizer, so cached teacher logprobs can be used for a KL + CE loss in v2 without re-running the teacher (G13).
+- **Why save top-20 logprobs now:** Qwen3-32B and Qwen3-4B-Instruct-2507 share the Qwen3 tokenizer, so cached teacher logprobs can be used for a KL + CE loss in v2 without re-running the teacher (G13).
 - **Caveat on top-k caching:** *Sparse Logit Sampling* (Anshumann et al., ACL 2025) shows that caching top-K probabilities gives a **biased** estimate of the teacher distribution, which hurts performance and calibration. Their **Random Sampling KD** (importance-sampled tokens) is unbiased and needs even fewer stored logits, at < 10% overhead over CE training (tested at 300M–3B). → For v2, either renormalize the top-20 and accept the bias, or store a random-sampled set alongside the top-20. Decide before the big generation run, since it changes what we store.
 - **Logprobs from a 4-bit teacher** are the quantized model's distribution, not bf16 Qwen3-32B's. Fine for v2 KD, but state it in the dataset card.
 - **Prior art to cite (and a name clash):** Arcee AI already publishes an open-source logit-distillation toolkit called **DistillKit** ([arcee-ai/DistillKit](https://github.com/arcee-ai/DistillKit)), with offline distillation from compressed cached logits. No `distillkit` package showed up on PyPI in our search, but **the name is taken on GitHub**. Consider renaming before the public release (G4), and position against it: ours is sequence-level + verified data + tool calling + laptop export; theirs is logit-level.
@@ -45,7 +45,10 @@
 | **Qwen3-4B** (Apr 2025, hybrid) | Thinking on/off via `enable_thinking`. BFCL-v3 57.6 (non-thinking). |
 | **Qwen3-4B-Instruct-2507** | Non-thinking only (never emits `<think>`), 262k context, Apache 2.0. **BFCL-v3 61.9, TAU1-Retail 48.7, TAU1-Airline 32.0**, far ahead of the original on agentic tasks. Recommended sampling: T 0.7, top-p 0.8, top-k 20. |
 
-**Recommendation:** use **Qwen3-4B-Instruct-2507** as the student. It is the same architecture and tokenizer (so all GOAL.md reasoning holds) and it is trained for tool use without thinking, which is the mode we want. Whichever we pick, **the baseline must be the same checkpoint** (G2 compares the student with its own base).
+**Decision (Oct 4):** the student is **Qwen3-4B-Instruct-2507**. It has the same architecture and tokenizer, so all GOAL.md reasoning holds, and it is trained for tool use without thinking, which is the mode we want. **The baseline is the same checkpoint, untrained** (G2).
+
+- **Tool-call format (checked against the real templates):** Hermes style. Tools go into the system prompt inside `<tools>` as `{"type": "function", "function": {...}}`; the model writes `<tool_call>{"name": …, "arguments": {…}}</tool_call>`; results come back in a **user** turn inside `<tool_response>`. vLLM (`--tool-call-parser hermes`), llama-server (`--jinja`) and Ollama (with the Qwen3 template in the Modelfile) all parse it into OpenAI `tool_calls`. No Claude Code or other external agent is needed at runtime.
+- The hybrid Qwen3-4B adds empty `<think></think>` blocks to some assistant turns, and TRL's training template places them slightly differently from the official template. 2507 has no think blocks, which removes that mismatch.
 
 - **Keep thinking off.** *The Reasoning Trap* (2025) reports that strengthening reasoning **amplifies tool hallucination**; *Small Models Struggle to Learn from Strong Reasoners* (ACL Findings 2025) found ≤3B students degrade on long CoT. Short reasoning before a tool call is fine; long `<think>` blocks are not.
 - **Size check:** Qwen3-4B at Q4_K_M is about **2.4–2.5 GB** (perplexity +0.30 vs. full precision, as reported by quant uploaders). That leaves ~1.5 GB for KV cache, the embedding model and the RAG index under the 4 GB target. Keep the default context small (4–8k) in the Modelfile.

@@ -2,7 +2,7 @@
 
 *Tracks what is done against [GOAL.md](GOAL.md) (order of work §6, timeline §11). Newest entries first.*
 
-> **Note (Oct 4):** iterations 0–4 below are toy runs with **Qwen3-0.6B + plain LoRA** on a laptop. The final setup is **Qwen3-32B teacher → Qwen3-4B student with QDoRA + FSDP, plus tool calling** (see [GOAL.md](GOAL.md) and [RESEARCH.md](RESEARCH.md)). The old PLAN.md was removed; entries that mention it are kept as history.
+> **Note (Oct 4):** iterations 0–4 below are toy runs with **Qwen3-0.6B + plain LoRA** on a laptop. The final setup is **Qwen3-32B teacher → Qwen3-4B-Instruct-2507 student with QDoRA + FSDP, plus tool calling** (see [GOAL.md](GOAL.md) and [RESEARCH.md](RESEARCH.md)). The old PLAN.md was removed; entries that mention it are kept as history.
 
 ## Status at a glance
 
