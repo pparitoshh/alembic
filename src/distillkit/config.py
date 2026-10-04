@@ -91,6 +91,8 @@ class EvalCfg(_Section):
     calibration_file: Path | None = None  # human-labelled answer pairs for the `calibrate` stage
     max_new_tokens: int = 512
     tag: str = ""  # suffix for judge outputs, e.g. "gemma4" for the cross-check judge on the same answers
+    gguf: list[str] = []  # also answer with run_dir/export/model-<Q>.gguf on llama-server (gguf_eval.py)
+    gguf_ngl: int = 0  # GPU layers for those runs: 0 = CPU only, as on the laptop
 
 
 class ExportCfg(_Section):
