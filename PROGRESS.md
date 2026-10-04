@@ -17,9 +17,16 @@
 | `train` (LoRA / QDoRA) | ✅ | ✅ | QDoRA on Qwen3-0.6B (RTX 2060); FSDP config written, untested |
 | `evaluate` | ✅ | — | prose judge + tool-slice scoring; not yet run on a tool-trained student |
 | Teacher top-20 logprob capture | ✅ | ✅ | works against the toy API; needs a vLLM/llama-server test on the cluster |
-| `export` (GGUF/Ollama) | ❌ | ❌ | not started; the Modelfile must carry Qwen3's tool template |
+| `export` (GGUF/Ollama) | ✅ | ✅ | merge → bf16 GGUF → imatrix → Q4_K_M/Q8_0 → Modelfile → `ollama create` + tool-call smoke test |
 
 ## Log
+
+### 2026-10-04: export stage (branch `feature/export`)
+
+- `export.py`: merge the (Q)DoRA adapter into the bf16 base → `convert_hf_to_gguf.py` → `llama-imatrix` on the run's own verified transcripts (tools included) → `llama-quantize` per `export.quants` → Ollama `Modelfile` → optional `ollama create`. Each step is skipped if its output exists.
+- Modelfile template: Ollama's own `qwen3` template (`ollama show qwen3:4b --modelfile`) minus thinking, so Ollama's tool-call parser works unchanged. The text after `<|im_start|>assistant` comes from the student's tokenizer (empty for 2507, an empty think block for hybrid Qwen3), matching training.
+- llama.cpp b11392 from the release tarball (no compiler on this laptop) + the matching source tag for the converter. Converter deps (`sentencepiece`, `protobuf`, …) are in a new `export` extra; llama.cpp's own pins (older torch/transformers) aren't needed.
+- **Pilot:** `tools_pilot` adapter (Qwen3-0.6B) → Q4_K_M 0.40 GB, Q8_0 0.64 GB in ~2 min. Through Ollama's chat API the model emitted a Hermes tool call that Ollama parsed into `job_status(job_id="4718207")`, then answered correctly from the mock result. Prose quality is still toy-level (`--gres=2`), expected at 0.6B × 15 examples.
 
 ### 2026-10-04: tool calling, outdated material removed
 
@@ -55,6 +62,6 @@
 ## Next steps
 
 1. Human review of the eval sets; grow the prose set to ~50 questions from 3+ held-out docs.
-2. `export` stage: merge DoRA into the bf16 base → GGUF (imatrix) → Ollama Modelfile with the Qwen3 tool template.
+2. Laptop benchmarks for G3/G6: `llama-bench` tokens/s and peak RAM per quant level; accuracy per quant via the eval harness on the GGUF models.
 3. Slurm job scripts for vLLM teacher serving and training on Leonardo; day-1 smoke test of logprobs with token IDs.
 4. Baselines: Qwen3-4B-Instruct-2507 untrained on both eval slices.

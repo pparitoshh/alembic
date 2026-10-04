@@ -91,6 +91,16 @@ class EvalCfg(_Section):
     max_new_tokens: int = 512
 
 
+class ExportCfg(_Section):
+    llama_cpp: Path = Path("~/tools/llama.cpp")  # checkout (convert_hf_to_gguf.py) + release binaries in bin/
+    quants: list[str] = ["Q4_K_M", "Q8_0"]  # first one goes into the Modelfile
+    imatrix: bool = True  # importance matrix from the run's own transcripts (domain text)
+    imatrix_ctx: int = 512
+    num_ctx: int = 8192  # Ollama context: keeps KV cache small for the < 4 GB laptop target
+    sampling: dict = {"temperature": 0.7, "top_p": 0.8, "top_k": 20}  # Qwen3-2507 recommendation
+    ollama_name: str | None = None  # set to run `ollama create <name>` after export
+
+
 class Config(_Section):
     run_dir: Path
     seeds: SeedsCfg
@@ -101,6 +111,7 @@ class Config(_Section):
     student: StudentCfg
     train: TrainCfg = TrainCfg()
     eval: EvalCfg
+    export: ExportCfg = ExportCfg()
 
 
 def load_config(path: str | Path) -> Config:

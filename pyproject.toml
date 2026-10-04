@@ -23,6 +23,12 @@ train = [
     "accelerate>=1.0",
     "bitsandbytes>=0.45",
 ]
+export = [
+    "protobuf>=7.36.2",
+    "requests>=2.34.2",
+    "sentencepiece>=0.2.2",
+    "tqdm>=4.70.1",
+]
 
 [project.scripts]
 distillkit = "distillkit.cli:main"

@@ -10,7 +10,7 @@ os.environ.setdefault("TORCH_DISABLE_NATIVE_JIT", "1")
 
 # stage name -> module with `run(cfg)`, in pipeline order; modules import lazily so
 # `generate` and `verify` work without the training extras installed
-STAGES = {"generate": "generate", "verify": "verify", "train": "train", "evaluate": "evaluate"}
+STAGES = {"generate": "generate", "verify": "verify", "train": "train", "evaluate": "evaluate", "export": "export"}
 
 
 def main() -> None:

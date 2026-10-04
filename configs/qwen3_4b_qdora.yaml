@@ -70,3 +70,8 @@ eval:
   file: data/eval/eval_all.jsonl
   tool_file: data/eval/eval_tools.jsonl   # tool-calling slice (draft, needs human review)
   max_new_tokens: 512
+
+export:
+  llama_cpp: ~/tools/llama.cpp       # on Leonardo: a checkout in $WORK with the release binaries
+  quants: [Q4_K_M, Q8_0, Q5_K_M, Q3_K_M]   # >= 3 levels for the Pareto frontier (G6)
+  ollama_name: hpc-assistant

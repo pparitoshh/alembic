@@ -68,3 +68,7 @@ eval:
   file: data/eval/eval_all.jsonl
   tool_file: data/eval/eval_tools.jsonl
   max_new_tokens: 512
+
+export:
+  quants: [Q4_K_M, Q8_0]
+  ollama_name: distillkit-pilot
