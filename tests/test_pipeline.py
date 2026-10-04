@@ -18,9 +18,8 @@ CONFIGS = sorted((ROOT / "configs").glob("*.yaml"))
 
 
 @pytest.mark.parametrize("path", CONFIGS, ids=lambda p: p.name)
-def test_every_config_validates(path, tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)  # load_config creates run_dir; keep it out of the repo
-    assert load_config(path).run_dir.is_dir()
+def test_every_config_validates(path):
+    assert load_config(path).run_dir.is_dir()  # created under the test's temp dir (conftest chdir)
 
 
 def _cfg_dict(tmp_path) -> dict:
@@ -29,7 +28,6 @@ def _cfg_dict(tmp_path) -> dict:
     d = yaml.safe_load((ROOT / "configs/toy_qdora.yaml").read_text())
     d["run_dir"] = str(tmp_path / "run")
     d["seeds"]["dir"] = str(ROOT / "data/seeds")
-    d["verify"]["flag_list"] = str(ROOT / "data/slurm_flags.txt")
     d["eval"]["file"] = str(ROOT / "data/eval/eval_all.jsonl")
     return d
 

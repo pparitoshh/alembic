@@ -21,6 +21,14 @@
 
 ## Log
 
+### 2026-10-04: hermetic tests, portable package
+
+- `tests/conftest.py` (autouse, every test): network blocked, `*_API_KEY`/`*_TOKEN` removed, Hugging Face offline, HOME and the working directory moved to a temp dir, module state reset. `tests/test_hermetic.py` checks these guarantees.
+- `.env` is read from the working directory only. Before, `load_dotenv()` searched upward from `config.py` and loaded the repo's API key even in tests run elsewhere.
+- The Slurm flag list ships inside the package (`src/distillkit/data/slurm_flags.txt`); `verify.flag_list` is optional and, when set, also drives the mock `sbatch`. Before, the mock found the list via a repo-relative path and silently skipped the check in an installed copy.
+- `bash -n` fails with a clear error if bash is missing.
+- **Checked:** 51 tests pass in the repo, and against a wheel installed non-editable in a fresh venv, run from `/tmp` with an empty environment (no torch, no HOME, no credentials), as after `pip install` on Leonardo.
+
 ### 2026-10-04: export stage (branch `feature/export`)
 
 - `export.py`: merge the (Q)DoRA adapter into the bf16 base → `convert_hf_to_gguf.py` → `llama-imatrix` on the run's own verified transcripts (tools included) → `llama-quantize` per `export.quants` → Ollama `Modelfile` → optional `ollama create`. Each step is skipped if its output exists.

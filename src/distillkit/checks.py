@@ -2,7 +2,9 @@
 
 import re
 import shlex
+import shutil
 import subprocess
+from importlib.resources import files
 from pathlib import Path
 
 CODE_BLOCK = re.compile(r"```([\w+-]*)\n(.*?)```", re.DOTALL)
@@ -11,8 +13,11 @@ SLURM_CMDS = {"sbatch", "srun", "salloc"}
 PLACEHOLDER = re.compile(r"<[A-Za-z_][\w.-]*>")
 
 
-def load_flags(path: str | Path) -> set[str]:
-    lines = Path(path).read_text().splitlines()
+def load_flags(path: str | Path | None = None) -> set[str]:
+    """Valid Slurm long options, one per line. None = the list shipped in the package (Slurm man pages),
+    so an installed copy (e.g. on Leonardo) finds it without the repo checkout."""
+    text = (files("distillkit") / "data" / "slurm_flags.txt").read_text() if path is None else Path(path).read_text()
+    lines = text.splitlines()
     return {l.strip() for l in lines if l.strip() and not l.startswith("#")}
 
 
@@ -62,7 +67,10 @@ def slurm_flags_used(text: str) -> list[str]:
 def bash_syntax_ok(script: str) -> bool:
     # doc-style placeholders like `<jobid>` would parse as redirections
     script = PLACEHOLDER.sub("PLACEHOLDER", script)
-    r = subprocess.run(["bash", "-n"], input=script, text=True, capture_output=True)
+    bash = shutil.which("bash")
+    if bash is None:
+        raise RuntimeError("bash not found on PATH: the shell-syntax check needs it")
+    r = subprocess.run([bash, "-n"], input=script, text=True, capture_output=True)
     return r.returncode == 0
 
 

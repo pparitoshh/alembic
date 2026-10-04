@@ -157,19 +157,22 @@ def _list_queue(state: str | None = None, partition: str | None = None) -> dict:
     return {"jobs": jobs}
 
 
-_VALID_FLAGS: set[str] | None = None
+_VALID_FLAGS: set[str] | None = None  # None = the packaged list, loaded on first use
+
+
+def set_valid_flags(flags: set[str]) -> None:
+    """Use the run's flag list (`verify.flag_list`) so the mock sbatch and the answer checks agree."""
+    global _VALID_FLAGS
+    _VALID_FLAGS = flags
 
 
 def _submit_job(script: str, test_only: bool = False) -> dict:
     global _VALID_FLAGS
     if _VALID_FLAGS is None:
-        from pathlib import Path
-
-        flags = Path(__file__).resolve().parents[2] / "data" / "slurm_flags.txt"
-        _VALID_FLAGS = load_flags(flags) if flags.exists() else set()
+        _VALID_FLAGS = load_flags()
     if not script.lstrip().startswith("#!"):
         return {"error": "sbatch: error: This does not look like a batch script. The first line must start with #! followed by the path to an interpreter."}
-    res = check_answer(f"```bash\n{script}\n```", _VALID_FLAGS) if _VALID_FLAGS else {"bad_flags": [], "bash_ok": True}
+    res = check_answer(f"```bash\n{script}\n```", _VALID_FLAGS)
     if res["bad_flags"]:
         return {"error": f"sbatch: unrecognized option '--{res['bad_flags'][0]}'"}
     if not res["bash_ok"]:

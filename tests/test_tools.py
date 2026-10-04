@@ -19,7 +19,6 @@ def _cfg(tmp_path, **generate) -> Config:
     d = yaml.safe_load((ROOT / "configs/toy_qdora.yaml").read_text())
     d["run_dir"] = str(tmp_path / "run")
     d["seeds"]["dir"] = str(ROOT / "data/seeds")
-    d["verify"]["flag_list"] = str(ROOT / "data/slurm_flags.txt")
     d["eval"]["file"] = str(ROOT / "data/eval/eval_all.jsonl")
     d["generate"] |= generate
     return Config.model_validate(d)

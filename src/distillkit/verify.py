@@ -9,6 +9,7 @@ from .config import Config
 from .io import read_jsonl, write_jsonl
 from .records import final_answer
 from .toolcheck import check_trace
+from .tools import set_valid_flags
 
 
 def _shingles(text: str, n: int = 3) -> set[tuple[str, ...]]:
@@ -25,6 +26,7 @@ def run(cfg: Config) -> Path:
     # generate appends rows in completion order; sort so "first copy wins" in dedup is reproducible
     rows = sorted(read_jsonl(run_dir / "generated.jsonl"), key=lambda r: r.get("id", ""))
     valid_flags = load_flags(vcfg.flag_list)
+    set_valid_flags(valid_flags)  # tool checks run submit_job on the mock sbatch
     eval_shingles = [_shingles(r["question"]) for r in read_jsonl(cfg.eval.file)]
 
     kept, rejected = [], []

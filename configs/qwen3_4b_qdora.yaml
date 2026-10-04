@@ -45,7 +45,6 @@ generate:
 
 verify:
   dedup_threshold: 0.8
-  flag_list: data/slurm_flags.txt
   max_answer_chars: 4000
 
 student:

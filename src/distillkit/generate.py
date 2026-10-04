@@ -20,7 +20,8 @@ from .records import prose_row
 from .schemas import GeneratedQuestion
 from .seeds import load_chunks
 from .teacher import Teacher
-from .tools import PARTITIONS, SCHEMAS, ToolError, execute, parse_arguments
+from .checks import load_flags
+from .tools import PARTITIONS, SCHEMAS, ToolError, execute, parse_arguments, set_valid_flags
 
 Q_SYSTEM = 'You write realistic questions that users of an HPC cluster ask. Reply only with JSON: {"question": "<the question>"}.'
 
@@ -189,6 +190,7 @@ def _mode_rule(job: dict) -> str:
 def run(cfg: Config) -> Path:
     gcfg, run_dir = cfg.generate, cfg.run_dir
     teacher = Teacher(cfg.teacher)
+    set_valid_flags(load_flags(cfg.verify.flag_list))
     jobs = question_jobs(cfg)
     gold_prose, gold_trace = _gold(cfg, "prose"), _gold(cfg, "tool_trace")
 

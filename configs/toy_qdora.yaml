@@ -43,7 +43,6 @@ generate:
 
 verify:
   dedup_threshold: 0.8   # Jaccard on question word 3-grams
-  flag_list: data/slurm_flags.txt
   max_answer_chars: 4000
 
 student:

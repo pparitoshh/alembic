@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -48,7 +48,7 @@ class GenerateCfg(_Section):
 
 class VerifyCfg(_Section):
     dedup_threshold: float = 0.8  # Jaccard on question word 3-grams
-    flag_list: Path
+    flag_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_flags.txt)
     max_answer_chars: int = 4000
 
 
@@ -115,7 +115,9 @@ class Config(_Section):
 
 
 def load_config(path: str | Path) -> Config:
-    load_dotenv()  # picks up API keys from ./.env; real env vars take precedence
+    # API keys from ./.env in the working directory only (not searched upward from this file), so a
+    # run or test elsewhere never picks up the repo's secrets; real env vars take precedence
+    load_dotenv(find_dotenv(usecwd=True))
     with open(path) as f:
         cfg = Config.model_validate(yaml.safe_load(f))
     cfg.run_dir.mkdir(parents=True, exist_ok=True)

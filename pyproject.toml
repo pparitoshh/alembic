@@ -42,3 +42,7 @@ packages = ["src/distillkit"]
 
 [dependency-groups]
 dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"  # no .pytest_cache written into the checkout

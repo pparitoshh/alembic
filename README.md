@@ -38,8 +38,9 @@ llama.cpp setup (no compiler needed): a checkout for the converter, plus the rel
 
 ```bash
 git clone --depth 1 --branch b11392 https://github.com/ggml-org/llama.cpp ~/tools/llama.cpp
+mkdir -p ~/tools/llama.cpp/bin
 curl -L https://github.com/ggml-org/llama.cpp/releases/download/b11392/llama-b11392-bin-ubuntu-x64.tar.gz \
-  | tar -xz -C ~/tools/llama.cpp --one-top-level=bin --strip-components=1
+  | tar -xz -C ~/tools/llama.cpp/bin --strip-components=1
 ```
 
 Pilot result (Qwen3-0.6B): Q4_K_M 0.40 GB, Q8_0 0.64 GB, about 2 minutes on a laptop CPU.

@@ -14,7 +14,7 @@ from .io import read_jsonl, write_jsonl
 from .schemas import JudgeVerdict
 from .teacher import Teacher
 from .toolcheck import score_tool_item
-from .tools import SCHEMAS
+from .tools import SCHEMAS, set_valid_flags
 
 JUDGE_SYSTEM = "You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Reply only with JSON: {\"reasoning\": \"<short comparison>\", \"verdict\": \"A\" | \"B\" | \"T\"} (T = tie)."
 
@@ -101,6 +101,7 @@ def run(cfg: Config) -> dict:
     eval_rows = read_jsonl(cfg.eval.file)
     tool_rows = read_jsonl(cfg.eval.tool_file) if cfg.eval.tool_file else []
     valid_flags = load_flags(cfg.verify.flag_list)
+    set_valid_flags(valid_flags)
     # one model load for both slices; tool questions are asked with the tool schemas in the prompt
     all_answers = generate_answers(cfg, [r["question"] for r in eval_rows + tool_rows], [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows))
     answers = {k: v[: len(eval_rows)] for k, v in all_answers.items()}
