@@ -101,6 +101,11 @@ class ExportCfg(_Section):
     num_ctx: int = 8192  # Ollama context: keeps KV cache small for the < 4 GB laptop target
     sampling: dict = {"temperature": 0.7, "top_p": 0.8, "top_k": 20}  # Qwen3-2507 recommendation
     ollama_name: str | None = None  # set to run `ollama create <name>` after export
+    merge: bool = True  # False: export the untrained student.model itself (the baseline for the demo)
+    bench_threads: int | None = None  # None = physical cores
+    bench_depths: list[int] = [0, 2048]  # tokens already in context: empty, and system + tools + RAG chunk
+    bench_reps: int = 2  # llama-bench repetitions inside one pass
+    bench_runs: int = 3  # independent passes over all models: spread from background load on a real laptop
 
 
 class Config(_Section):

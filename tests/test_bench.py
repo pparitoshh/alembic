@@ -1,0 +1,76 @@
+from pathlib import Path
+
+import pytest
+
+from distillkit.bench import markdown, parse_llama_bench, physical_cores, summarize, system_load
+from distillkit.config import ExportCfg
+
+# two physical cores with hyperthreading, keys padded with tabs as in the real /proc/cpuinfo
+CPUINFO = "\n\n".join(
+    f"processor\t: {i}\nmodel name\t: Intel(R) Core(TM) i7-9750H\nphysical id\t: 0\ncore id\t\t: {i % 2}\nsiblings\t: 4"
+    for i in range(4)
+)
+
+
+def test_physical_cores_ignores_hyperthreads():
+    assert physical_cores(CPUINFO) == 2
+    assert physical_cores("") >= 1  # no core ids (e.g. some VMs): falls back to logical CPUs
+
+
+def test_parse_llama_bench():
+    rows = [
+        {"build_commit": "46847e615", "cpu_info": "i7", "model_type": "qwen3 4B Q4_K - Medium", "n_prompt": 512, "n_gen": 0, "n_depth": 0, "avg_ts": 61.234, "stddev_ts": 1.2},
+        {"build_commit": "46847e615", "cpu_info": "i7", "model_type": "qwen3 4B Q4_K - Medium", "n_prompt": 0, "n_gen": 128, "n_depth": 0, "avg_ts": 12.345, "stddev_ts": 0.11},
+        {"build_commit": "46847e615", "cpu_info": "i7", "model_type": "qwen3 4B Q4_K - Medium", "n_prompt": 0, "n_gen": 128, "n_depth": 2048, "avg_ts": 9.87, "stddev_ts": 0.05},
+    ]
+    p = parse_llama_bench(rows)
+    assert p["results"] == {
+        "pp512@0": {"tok_s": 61.23, "stddev": 1.2},
+        "tg128@0": {"tok_s": 12.35, "stddev": 0.11},
+        "tg128@2048": {"tok_s": 9.87, "stddev": 0.05},
+    }
+    assert (p["build"], p["cpu"]) == ("46847e615", "i7")
+
+
+def test_markdown_table():
+    results = {"pp512@0": {"tok_s": 61.2}, "tg128@0": {"tok_s": 12.3}, "tg128@2048": {"tok_s": 9.9}}
+    report = {
+        "cpu": "i7", "threads": 6, "build": "b", "num_ctx": 8192, "depths": [0, 2048],
+        "models": [{"name": "Q4_K_M", "file_gb": 2.5, "peak_rss_mb": 3584.0, "results": results}],
+    }
+    md = markdown(report)
+    assert "| Q4_K_M | 2.50 | 3.50 | 61.2 ± 0.0 | 12.3 ± 0.0 | 9.9 ± 0.0 |" in md
+    assert "6 threads" in md and "context 8192" in md
+
+
+def test_bench_defaults():
+    e = ExportCfg()
+    assert e.merge and e.bench_threads is None and e.bench_depths == [0, 2048] and e.bench_runs >= 3
+
+
+def test_bench_needs_exported_models(tmp_path):
+    from distillkit import bench
+    from distillkit.config import load_config
+
+    cfg = load_config(Path(__file__).parent.parent / "configs/tools_pilot.yaml", [f"run_dir={tmp_path / 'run'}"])
+    with pytest.raises(SystemExit, match="no model-"):
+        bench.run(cfg)
+
+
+def test_summarize_over_passes():
+    def model(name, tg, rss):
+        return {"name": name, "file_gb": 2.5, "peak_rss_mb": rss, "results": {"tg128@0": {"tok_s": tg}}}
+
+    passes = [{"models": [model("Q4_K_M", 10.0, 3000.0), model("Q8_0", 6.0, 4500.0)]},
+              {"models": [model("Q4_K_M", 12.0, 3100.0), model("Q8_0", 6.0, 4400.0)]}]
+    s = {m["name"]: m for m in summarize(passes)}
+    q4 = s["Q4_K_M"]
+    assert q4["results"]["tg128@0"] == {"tok_s": 11.0, "std": 1.41, "runs": [10.0, 12.0]}
+    assert q4["peak_rss_mb"] == 3100.0 and q4["peak_rss_mb_mean"] == 3050.0  # worst case is what must fit
+    assert s["Q8_0"]["results"]["tg128@0"]["std"] == 0.0
+    assert list(s) == ["Q4_K_M", "Q8_0"]
+
+
+def test_system_load_is_recorded():
+    load = system_load()
+    assert load["loadavg_1m"] >= 0 and isinstance(load["busiest"], list)
