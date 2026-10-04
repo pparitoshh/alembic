@@ -4,9 +4,9 @@
 
 DistillKit turns a large open-weight **teacher** model into a compact **student** that runs on a laptop. The student learns from teacher-generated question/answer text and tool-calling traces (sequence-level distillation), so any teacher that emits text works with any student. The teacher's top-20 logprobs are saved as well, so logit-level distillation can be added later without re-running the teacher.
 
-The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B-Instruct-2507** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM.
+The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B-Instruct-2507** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM, as a streaming chat assistant (≥ 8 tok/s with 2,048 tokens of context; ≤ 3 s to the first token on follow-up questions).
 
-> **Status:** working prototype, built for the [European AI Hackathon](https://www.openhackathons.org/s/siteevent/a0CUP00003yKxcX2AS/se000475) (Oct 6–29, 2026). `generate → verify → train → evaluate → export` runs end to end on a laptop (RTX 2060 6 GB), including tool-calling traces against a mock Slurm cluster and an Ollama package whose tool calls Ollama parses.
+> **Status:** working prototype, built for the [European AI Hackathon](https://www.openhackathons.org/s/siteevent/a0CUP00003yKxcX2AS/se000475) (Oct 6–29, 2026). `generate → verify → train → evaluate → export` runs end to end on a laptop (RTX 2060 6 GB), including tool-calling traces against a mock Slurm cluster and an Ollama package whose tool calls Ollama parses. Slurm scripts for Leonardo are ready; laptop speed/RAM benchmarks of the 4B are in [research/](research/README.md).
 
 ## Quick start
 
@@ -18,6 +18,7 @@ uv run distillkit verify   -c configs/tools_pilot.yaml   # dedup, flag/bash chec
 uv run distillkit train    -c configs/tools_pilot.yaml   # LoRA / QDoRA SFT of the student
 uv run distillkit evaluate -c configs/tools_pilot.yaml   # student vs. base: judge + tool-call scoring
 uv run distillkit export   -c configs/tools_pilot.yaml   # merge -> GGUF (imatrix) -> Q4_K_M/Q8_0 -> Ollama
+uv run distillkit bench    -c configs/tools_pilot.yaml   # laptop speed, peak RAM, time to first token per quant
 uv run pytest -q
 ```
 
@@ -45,6 +46,33 @@ curl -L https://github.com/ggml-org/llama.cpp/releases/download/b11392/llama-b11
 
 Pilot result (Qwen3-0.6B): Q4_K_M 0.40 GB, Q8_0 0.64 GB, about 2 minutes on a laptop CPU.
 
+## Laptop benchmark and GGUF eval
+
+`bench` measures every exported quant on the CPU: llama-bench prompt and generation speed with an
+empty context and with 2,048 tokens in it, peak RAM at the deployed context (8,192, KV cache
+included), and time to first token of a streaming chat on llama-server (a cold first question with
+the system prompt and tool schemas, then a follow-up that reuses the processed prompt). It runs
+`export.bench_runs` interleaved passes and reports mean ± std plus the machine's load, because a real
+laptop is never idle. Results go to `run_dir/export/bench.{json,md}`.
+
+Base Qwen3-4B-Instruct-2507 on an i7-9750H laptop (6 threads, 3 passes,
+[full report](research/bench/2026-10-04_qwen3-4b-instruct-2507_base/README.md)):
+
+| Quant | Peak RAM GiB (default / `--load-mode none`) | Gen tok/s, empty context | Gen tok/s, 2,048 in context |
+|---|---|---|---|
+| Q3_K_M | 3.81 / 3.13 | 12.6 | 7.6 |
+| Q4_K_M | 5.15 / **3.52** | 11.3 | 7.2 |
+| Q5_K_M | 3.88 | 9.6 | 6.5 |
+| Q8_0 | 5.18 / 5.17 | 7.0 | 5.2 |
+
+On AVX2 CPUs llama.cpp keeps a repacked copy of Q4_K/Q3_K weights; with the default memory-mapped
+load the file stays resident too, so load Q4_K_M without mmap to stay under 4 GB.
+
+`eval.gguf: [Q4_K_M, ...]` makes `answer`/`evaluate` also answer the eval set with the exported GGUF
+files on llama-server (same rendered prompt, greedy), so the scores describe the file users run. The
+judge compares each quant with the full-precision model it came from (0.5 = no quantization loss) and
+with base.
+
 ## Tool calling
 
 The assistant has 8 Slurm tools (`src/distillkit/tools.py`): `job_status`, `list_queue`, `submit_job`, `cancel_job`, `read_job_log`, `job_accounting`, `gpu_availability`, `partition_info`. Calls use Qwen3's own Hermes format (`<tool_call>{"name": …, "arguments": …}</tool_call>`), which vLLM (`--tool-call-parser hermes`), llama-server (`--jinja`) and Ollama parse into OpenAI `tool_calls`, so no external agent framework is needed at runtime. For data generation and evaluation the tools run against a deterministic mock cluster. Generated traces are kept only if every call is valid and executable, every job id comes from the question or an earlier tool result, and calling (or not) fits the question.
@@ -71,6 +99,7 @@ The assistant has 8 Slurm tools (`src/distillkit/tools.py`): `job_status`, `list
 - **[GOAL.md](GOAL.md):** mission, final model choices, goals, order of work, success metrics, deliverables, team roles and timeline.
 - **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (teacher serving and logprobs, tool-calling data, verification, QDoRA + FSDP, RAG, quantization, evaluation).
 - **[slurm/README.md](slurm/README.md):** running on Leonardo: setup, day-1 smoke tests, the job pipeline.
+- **[research/](research/README.md):** committed results with the machine they ran on: laptop config, judge calibration, laptop benchmarks.
 - **[PROGRESS.md](PROGRESS.md):** running log of what is done.
 
 ## Planned stack
