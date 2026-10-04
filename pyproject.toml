@@ -21,6 +21,7 @@ train = [
     "peft>=0.14",
     "datasets>=3.0",
     "accelerate>=1.0",
+    "bitsandbytes>=0.45",
 ]
 
 [project.scripts]

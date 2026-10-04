@@ -15,11 +15,28 @@
 | `train` (LoRA) | ✅ | ✅ | Qwen3-0.6B, fp16; best setting lr 1e-4, r16/α32, 3 epochs (24 steps, loss ≈ 1.39); `train.seed` option |
 | `evaluate` | ✅ | ✅ | student **beats base on average**: 64.1% ± 4.8 over 3 seeds, 26 questions (range 59.6–69.2%) ([report](docs/report_iterations_0-4.md)) |
 | `export` (GGUF/Ollama) | ❌ | ❌ | not started |
-| Tool calling (schemas, mock tools, traces, checker) | ❌ | ❌ | new in Oct 4 goals |
-| Teacher top-20 logprob capture | ❌ | ❌ | serving stack open: vLLM + Qwen3-32B-AWQ recommended |
-| QDoRA + FSDP training | ❌ | ❌ | toy runs used plain LoRA |
+| Tool calling (schemas, mock tools, traces, checker) | 🟡 | ❌ | data format + training mask ready; schemas, mock tools, generation and checker still to do |
+| Teacher top-20 logprob capture | ✅ | ❌ | `teacher.top_logprobs`; needs a vLLM/llama-server test on the cluster |
+| QDoRA + FSDP training | ✅ | ✅ QDoRA (1 GPU) | `train.method: dora`, `load_in_4bit`; FSDP config written, untested |
 
 ## Log
+
+### 2026-10-04: refactor for the final design (branch `refactor/qdora-tool-ready`)
+
+**Kept as is:** `seeds.py` (doc-level split, chunking), `checks.py` (flag linter, `bash -n`), dedup/decontamination in `verify.py`, the both-orders judge in `evaluate.py`, tenacity retries, `schemas.py`.
+
+**Changed**
+- **Typed config** (`config.py`, pydantic): unknown keys fail fast; new fields have defaults, so every old config still loads (a test covers this).
+- **One record format** (`records.py`): rows are chat `messages` (+ optional `tools`), so prose answers and tool-call traces share one pipeline. Old `question`/`answer` rows still load.
+- **Teacher client** returns text, tool calls and optional top-k logprobs (`teacher.top_logprobs`); `extra_body` passes server options (vLLM `return_tokens_as_token_ids`, `enable_thinking`).
+- **Resumable generation**: questions and answers are appended as they finish (`questions.jsonl`, `generated.jsonl`, `teacher_logprobs.jsonl.gz`) with stable ids; a rerun does only what's missing, and a line cut off by a kill is repaired.
+- **Training**: conversational data with `assistant_only_loss` (TRL's Qwen3 training template). The mask was checked by hand: loss covers assistant turns + `<|im_end|>`, not tool results, and the prefix matches the inference prompt. `train.method: lora|dora`, `load_in_4bit` (NF4, `quant_storage` = model dtype for FSDP), `lora_dropout`.
+- New configs: `qwen3_4b_qdora.yaml` (Leonardo template), `toy_qdora.yaml` (local), `accelerate/fsdp.yaml` (PEFT's FSDP + QLoRA recipe).
+- CLI stages are a registry, so `export` plugs in as one entry.
+
+**Verified:** 26 tests pass. Local QDoRA run on Qwen3-0.6B (RTX 2060, fp16): 120 examples × 3 epochs in 2m15s, DoRA adapter saved, eval generation loads it. One fix was needed: TRL casts QLoRA adapters to bf16, which breaks fp16 AMP, so they're cast back to fp32 on the fp16 path.
+
+**Not done (features, not refactor):** tool schemas + mock tools + trace generation + tool-call checker; `export` stage; judge hosted on the cluster; FSDP run on real multi-GPU hardware.
 
 ### 2026-10-04: goals finalized, docs rewritten
 

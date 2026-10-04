@@ -1,0 +1,70 @@
+# Local QDoRA smoke test (RTX 2060 6 GB): same data and settings as iter4_s42, but
+# 4-bit base + DoRA adapters, to check the cluster recipe end to end before Leonardo.
+run_dir: runs/toy_qdora
+
+seeds:
+  dir: data/seeds
+  eval_docs: [slurm_job_arrays, slurm_requeue_signals]   # held out BEFORE any generation
+  chunk_chars: 1500
+
+# Any OpenAI-compatible /chat/completions endpoint works:
+#   OpenCode Zen: https://opencode.ai/zen/v1        (key in $OPENCODE_API_KEY)
+#   Ollama:       http://localhost:11434/v1         (drop api_key_env)
+#   Cluster:      http://<node>:8000/v1             (vllm serve)
+teacher:
+  base_url: https://opencode.ai/zen/v1
+  api_key_env: OPENCODE_API_KEY
+  model: qwen3.8-flash   # $0.15/$0.47 per 1M; qwen3.6-plus is the stronger alternative (ablation A3)
+  temperature: 0.8
+  max_tokens: 1024
+  concurrency: 12
+
+# Judge from a different model family than the teacher (reduces self-preference bias).
+judge:
+  base_url: https://opencode.ai/zen/v1
+  api_key_env: OPENCODE_API_KEY
+  model: deepseek-v4.1-flash
+  temperature: 0.0
+  max_tokens: 4096  # it reasons before the verdict: ~1000 tokens when comparing two long answers (512 truncated to empty replies)
+  concurrency: 4
+
+generate:
+  questions_per_chunk: 12
+  answers_per_question: 2
+  personas:
+    - a new PhD student who has never used a cluster
+    - a research software engineer porting code to GPUs
+    - an ML engineer running multi-GPU training jobs
+  task_types:
+    - concept   # explain a concept or option
+    - howto     # how do I do X
+    - script    # write a complete sbatch script
+    - debug     # why does my job fail / stay pending
+
+verify:
+  dedup_threshold: 0.8   # Jaccard on question word 3-grams
+  flag_list: data/slurm_flags.txt
+  max_answer_chars: 4000
+
+student:
+  model: Qwen/Qwen3-0.6B
+  system_prompt: You are an HPC assistant. Answer questions about Slurm, CUDA, MPI and profiling concisely and correctly. Put scripts in fenced code blocks.
+
+train:
+  method: dora
+  load_in_4bit: true
+  lora_dropout: 0.0
+  lora_r: 16
+  lora_alpha: 32
+  learning_rate: 1.0e-4
+  epochs: 3
+  seed: 42
+  batch_size: 4
+  grad_accum: 4
+  max_length: 1024
+  fp16: true     # RTX 2060 has no bf16; use bf16 on A100/H100
+  bf16: false
+
+eval:
+  file: data/eval/eval_all.jsonl
+  max_new_tokens: 512

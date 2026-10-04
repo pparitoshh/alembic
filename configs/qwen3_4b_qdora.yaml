@@ -1,0 +1,68 @@
+# Leonardo template (GOAL.md §3): Qwen3-32B teacher on one A100 64 GB -> Qwen3-4B student, QDoRA.
+# Start the teacher first, e.g. on a compute node:
+#   vllm serve Qwen/Qwen3-32B-AWQ --max-logprobs 20 --tool-call-parser hermes --enable-auto-tool-choice
+# then point base_url at it (ssh tunnel or the node's hostname).
+run_dir: runs/qwen3_4b_qdora
+
+seeds:
+  dir: data/seeds
+  eval_docs: [slurm_job_arrays, slurm_requeue_signals]   # held out BEFORE any generation
+  chunk_chars: 1500
+
+teacher:
+  base_url: http://localhost:8000/v1   # vllm serve; no api_key_env for a local server
+  model: Qwen/Qwen3-32B-AWQ            # or the GGUF Q4_K_M via llama-server (RESEARCH.md §2.2)
+  temperature: 0.7
+  max_tokens: 1024
+  concurrency: 32                      # vLLM batches concurrent requests; tune from the day-1 throughput test
+  top_logprobs: 20                     # saved to run_dir/teacher_logprobs.jsonl.gz for v2 logit KD
+  extra_body:
+    return_tokens_as_token_ids: true   # vLLM: tokens come back as "token_id:<n>"
+    chat_template_kwargs: {enable_thinking: false}
+
+# Different model family from the teacher. Compute nodes may have no internet: then serve
+# a judge on the cluster with vLLM and change base_url/model here.
+judge:
+  base_url: https://opencode.ai/zen/v1
+  api_key_env: OPENCODE_API_KEY
+  model: deepseek-v4.1-flash
+  temperature: 0.0
+  max_tokens: 4096
+  concurrency: 4
+
+generate:
+  questions_per_chunk: 12
+  answers_per_question: 1   # one shared GPU: spend extra samples on failure areas instead (GOAL.md §6)
+  personas:
+    - a new PhD student who has never used a cluster
+    - a research software engineer porting code to GPUs
+    - an ML engineer running multi-GPU training jobs
+    - a sysadmin debugging stuck or failing jobs
+  task_types: [concept, howto, script, debug]
+
+verify:
+  dedup_threshold: 0.8
+  flag_list: data/slurm_flags.txt
+  max_answer_chars: 4000
+
+student:
+  model: Qwen/Qwen3-4B   # alternative: Qwen/Qwen3-4B-Instruct-2507 (non-thinking, better tool use; RESEARCH.md §2.1)
+  system_prompt: You are an HPC assistant. Answer questions about Slurm, CUDA, MPI and profiling concisely and correctly. Put scripts in fenced code blocks.
+
+train:
+  method: dora
+  load_in_4bit: true
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.0   # DoRA's fast path
+  learning_rate: 1.0e-4   # toy-run value (0.6B, LoRA): re-tune on day 1
+  epochs: 3
+  seed: 42
+  batch_size: 4
+  grad_accum: 4
+  max_length: 2048   # tool-calling traces are longer than prose answers
+  bf16: true
+
+eval:
+  file: data/eval/eval_all.jsonl
+  max_new_tokens: 512

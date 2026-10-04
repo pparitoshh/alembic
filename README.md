@@ -29,12 +29,23 @@ uv sync --extra train              # plain `uv sync` removes torch/trl/peft
 echo 'OPENCODE_API_KEY=...' > .env # teacher + judge endpoint (any OpenAI-compatible API works)
 uv run distillkit generate -c configs/iter3.yaml   # teacher writes questions and answers
 uv run distillkit verify   -c configs/iter3.yaml   # dedup, flag and bash-syntax checks
-uv run distillkit train    -c configs/iter3.yaml   # LoRA SFT of the student
+uv run distillkit train    -c configs/iter3.yaml   # LoRA / QDoRA SFT of the student
 uv run distillkit evaluate -c configs/iter3.yaml   # student vs. base, judged remotely
 uv run pytest -q
 ```
 
-Outputs go to the config's `run_dir` (e.g. `runs/iter3/`, git-ignored). Each experiment has its own config: `configs/toy.yaml` (iteration 0) and `iter1.yaml` to `iter4_s*.yaml`. API calls retry transient errors with exponential backoff.
+Outputs go to the config's `run_dir` (e.g. `runs/iter3/`, git-ignored). Each experiment has its own config: `configs/toy.yaml` (iteration 0) and `iter1.yaml` to `iter4_s*.yaml`. Configs are validated on load (unknown keys are errors). API calls retry transient errors with exponential backoff. `generate` appends results as they finish, so rerunning it after a crash or a wall-time kill only does the missing work.
+
+**QDoRA and the cluster setup:**
+
+```bash
+uv run distillkit train -c configs/toy_qdora.yaml                   # local QDoRA smoke test (Qwen3-0.6B, 4-bit + DoRA)
+uv run distillkit all   -c configs/qwen3_4b_qdora.yaml              # Leonardo: Qwen3-32B teacher on vLLM -> Qwen3-4B
+accelerate launch --config_file configs/accelerate/fsdp.yaml \
+    -m distillkit.cli train -c configs/qwen3_4b_qdora.yaml          # multi-GPU QDoRA with FSDP (untested on Leonardo yet)
+```
+
+With `teacher.top_logprobs: 20`, the teacher's top-20 logprobs for every answer token go to `run_dir/teacher_logprobs.jsonl.gz`, keyed by row `id`.
 
 ## Pipeline
 

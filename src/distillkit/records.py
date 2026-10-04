@@ -1,0 +1,49 @@
+"""The one data format every stage reads and writes.
+
+A row is a chat transcript plus provenance:
+
+    {"doc_id", "chunk_id", "persona", "task", "question", "sample", "teacher",
+     "messages": [{"role": "user", ...}, {"role": "assistant", ...}, ...],
+     "tools": [<JSON schema>, ...]}            # optional; tool-calling traces only
+
+Prose answers are one user + one assistant turn. Tool-calling traces add assistant `tool_calls`
+and `tool` result turns in between (Hermes format, which the Qwen3 chat template renders).
+The student's system prompt is *not* stored; `training_example` adds it, so it can change
+without regenerating data.
+"""
+
+import json
+
+
+def prose_row(meta: dict, question: str, answer: str) -> dict:
+    return {
+        **meta,
+        "question": question,
+        "messages": [{"role": "user", "content": question}, {"role": "assistant", "content": answer}],
+    }
+
+
+def messages(row: dict) -> list[dict]:
+    """Transcript of a row; rows from before the messages format only have question/answer."""
+    if "messages" in row:
+        return row["messages"]
+    return [{"role": "user", "content": row["question"]}, {"role": "assistant", "content": row["answer"]}]
+
+
+def final_answer(row: dict) -> str:
+    """Content of the last assistant turn: what checks and judges look at."""
+    for m in reversed(messages(row)):
+        if m["role"] == "assistant":
+            return m.get("content") or ""
+    return ""
+
+
+def training_example(row: dict, system_prompt: str) -> dict:
+    """Conversational SFT example for TRL (loss on assistant turns only)."""
+    tools = row.get("tools")
+    return {
+        "messages": [{"role": "system", "content": system_prompt}, *messages(row)],
+        # JSON string keeps the Arrow schema uniform across rows with different tools; TRL decodes it
+        "tools": json.dumps(tools) if tools else None,
+        "chat_template_kwargs": {"enable_thinking": False},  # Qwen3 hybrid; ignored by other templates
+    }

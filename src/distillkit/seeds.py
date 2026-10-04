@@ -1,6 +1,6 @@
 """Load seed documents, chunk them, and split train/eval by document."""
 
-from pathlib import Path
+from .config import Config
 
 
 def chunk_text(text: str, max_chars: int) -> list[str]:
@@ -26,14 +26,14 @@ def chunk_text(text: str, max_chars: int) -> list[str]:
     return chunks
 
 
-def load_chunks(cfg: dict) -> tuple[list[dict], list[dict]]:
+def load_chunks(cfg: Config) -> tuple[list[dict], list[dict]]:
     """Return (train_chunks, eval_chunks). Split is by document, never by chunk."""
-    scfg = cfg["seeds"]
-    eval_docs = set(scfg["eval_docs"])
+    scfg = cfg.seeds
+    eval_docs = set(scfg.eval_docs)
     train, held_out = [], []
-    for path in sorted(Path(scfg["dir"]).glob("*.md")):
+    for path in sorted(scfg.dir.glob("*.md")):
         doc_id = path.stem
-        for i, text in enumerate(chunk_text(path.read_text(), scfg["chunk_chars"])):
+        for i, text in enumerate(chunk_text(path.read_text(), scfg.chunk_chars)):
             chunk = {"doc_id": doc_id, "chunk_id": f"{doc_id}#{i}", "text": text}
             (held_out if doc_id in eval_docs else train).append(chunk)
     return train, held_out

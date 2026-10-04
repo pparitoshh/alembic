@@ -1,0 +1,24 @@
+# accelerate launch --config_file configs/accelerate/fsdp.yaml -m distillkit.cli train -c <config>
+# FSDP for QLoRA/QDoRA (not DeepSpeed ZeRO-2: known QDoRA issues). Needs train.bf16: true so the
+# 4-bit weights (bnb_4bit_quant_storage) and the other params share one dtype.
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+mixed_precision: bf16
+num_machines: 1
+num_processes: 2          # GPUs free on the shared node; up to 4
+machine_rank: 0
+main_training_function: main
+rdzv_backend: static
+same_network: true
+use_cpu: false
+# Follows PEFT's documented FSDP + QLoRA recipe (FSDP v1). Untested on Leonardo yet: smoke test first.
+fsdp_config:
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_forward_prefetch: false
+  fsdp_offload_params: false
+  fsdp_sharding_strategy: FULL_SHARD
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+  fsdp_sync_module_states: true
+  fsdp_use_orig_params: false

@@ -5,9 +5,9 @@ Metrics: flag hallucination + bash syntax (deterministic) and pairwise LLM-judge
 """
 
 import json
-from pathlib import Path
 
 from .checks import check_answer, load_flags
+from .config import Config
 from .io import read_jsonl, write_jsonl
 from .schemas import JudgeVerdict
 from .teacher import Teacher
@@ -27,19 +27,19 @@ Answer B:
 Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Reply with the JSON verdict."""
 
 
-def generate_answers(cfg: dict, questions: list[str]) -> dict[str, list[str]]:
+def generate_answers(cfg: Config, questions: list[str]) -> dict[str, list[str]]:
     import torch
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     from .prompting import render_prompt
 
-    scfg = cfg["student"]
-    adapter = Path(cfg["run_dir"]) / "adapter"
-    tok = AutoTokenizer.from_pretrained(scfg["model"])
+    scfg = cfg.student
+    adapter = cfg.run_dir / "adapter"
+    tok = AutoTokenizer.from_pretrained(scfg.model)
     tok.padding_side = "left"
-    dtype = torch.float16 if cfg["train"]["fp16"] else torch.bfloat16
-    model = AutoModelForCausalLM.from_pretrained(scfg["model"], dtype=dtype, device_map="auto")
+    # (Q)DoRA adapters are applied to the unquantized base, as in the merged model we export
+    model = AutoModelForCausalLM.from_pretrained(scfg.model, dtype=getattr(torch, cfg.train.dtype), device_map="auto")
     has_adapter = adapter.exists()
     if has_adapter:
         model = PeftModel.from_pretrained(model, str(adapter))
@@ -51,12 +51,12 @@ def generate_answers(cfg: dict, questions: list[str]) -> dict[str, list[str]]:
             enc = tok(prompts[i : i + 8], return_tensors="pt", padding=True).to(model.device)
             with torch.no_grad():
                 gen = model.generate(
-                    **enc, max_new_tokens=cfg["eval"]["max_new_tokens"], do_sample=False, pad_token_id=tok.pad_token_id
+                    **enc, max_new_tokens=cfg.eval.max_new_tokens, do_sample=False, pad_token_id=tok.pad_token_id
                 )
             outs += tok.batch_decode(gen[:, enc["input_ids"].shape[1] :], skip_special_tokens=True)
         return [o.strip() for o in outs]
 
-    prompts = [render_prompt(tok, scfg["system_prompt"], q) for q in questions]
+    prompts = [render_prompt(tok, scfg.system_prompt, q) for q in questions]
     results = {}
     if has_adapter:
         with model.disable_adapter():
@@ -74,10 +74,10 @@ def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
     return (v.verdict if v else None), raw
 
 
-def run(cfg: dict) -> dict:
-    run_dir = Path(cfg["run_dir"])
-    eval_rows = read_jsonl(cfg["eval"]["file"])
-    valid_flags = load_flags(cfg["verify"]["flag_list"])
+def run(cfg: Config) -> dict:
+    run_dir = cfg.run_dir
+    eval_rows = read_jsonl(cfg.eval.file)
+    valid_flags = load_flags(cfg.verify.flag_list)
     answers = generate_answers(cfg, [r["question"] for r in eval_rows])
 
     summary = {}
@@ -94,7 +94,7 @@ def run(cfg: dict) -> dict:
     per_q = [{**r, **{f"answer_{k}": v[i] for k, v in answers.items()}} for i, r in enumerate(eval_rows)]
 
     if "student" in answers:
-        teacher = Teacher(cfg, section="judge")
+        teacher = Teacher(cfg.judge, name="judge")
         # every question in both orders, judged in parallel: [q0 student=A, q0 student=B, q1 ...]
         pairs = [(row, a, b) for row in per_q for a, b in ((row["answer_student"], row["answer_base"]), (row["answer_base"], row["answer_student"]))]
         verdicts = teacher.map(lambda p: judge(teacher, *p), pairs)

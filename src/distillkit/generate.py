@@ -1,10 +1,16 @@
-"""Stage 1: document-grounded question generation + multiple grounded answers per question."""
+"""Stage 1: document-grounded question generation + multiple grounded answers per question.
+
+Resumable: questions and answers are appended to the run dir as they finish, and a rerun only
+does the missing ones. On a shared cluster node, a job killed at its wall time loses nothing.
+"""
 
 import itertools
 import random
 from pathlib import Path
 
-from .io import write_jsonl
+from .config import Config
+from .io import JsonlAppender
+from .records import prose_row
 from .schemas import GeneratedQuestion
 from .seeds import load_chunks
 from .teacher import Teacher
@@ -40,47 +46,54 @@ A_PROMPT = """Use this reference material as ground truth:
 Question: {question}"""
 
 
-def run(cfg: dict) -> Path:
-    gcfg = cfg["generate"]
-    teacher = Teacher(cfg)
+def question_jobs(cfg: Config) -> list[dict]:
+    """Deterministic (chunk, persona, task) grid sample; `id` is stable across reruns of the same config."""
+    gcfg = cfg.generate
     train_chunks, _ = load_chunks(cfg)
     rng = random.Random(0)
-    grid = list(itertools.product(gcfg["personas"], gcfg["task_types"]))
-
+    grid = list(itertools.product(range(len(gcfg.personas)), gcfg.task_types))
     jobs = []
     for chunk in train_chunks:
-        for persona, task in rng.sample(grid, min(gcfg["questions_per_chunk"], len(grid))):
-            jobs.append({**chunk, "persona": persona, "task": task})
+        for p, task in rng.sample(grid, min(gcfg.questions_per_chunk, len(grid))):
+            jobs.append({**chunk, "id": f"{chunk['chunk_id']}/{task}/p{p}", "persona": gcfg.personas[p], "task": task})
+    return jobs
 
-    print(f"[generate] {len(train_chunks)} train chunks -> {len(jobs)} questions")
+
+def run(cfg: Config) -> Path:
+    gcfg, run_dir = cfg.generate, cfg.run_dir
+    teacher = Teacher(cfg.teacher)
+    jobs = question_jobs(cfg)
+
+    q_out = JsonlAppender(run_dir / "questions.jsonl")
+    done_q = {q["id"]: q for q in q_out.existing()}
+    todo_q = [j for j in jobs if j["id"] not in done_q]
+    print(f"[generate] {len(jobs)} questions planned, {len(done_q)} already done, {len(todo_q)} to go")
 
     def make_question(j):
         q, _ = teacher.chat_json(Q_SYSTEM, Q_PROMPT.format(chunk=j["text"], persona=j["persona"], task=j["task"]), GeneratedQuestion)
-        return {**j, "question": q.question.strip()} if q else None
+        if q:
+            q_out.append({**j, "question": q.question.strip()})
 
-    questions = [q for q in teacher.map(make_question, jobs) if q]
+    teacher.map(make_question, todo_q)
+    questions = [q for q in q_out.existing() if q["id"] in {j["id"] for j in jobs}]
     if len(questions) < len(jobs):
-        print(f"[generate] dropped {len(jobs) - len(questions)} questions with invalid JSON")
+        print(f"[generate] {len(jobs) - len(questions)} questions had invalid JSON; rerun to retry them")
 
-    answer_jobs = [(q, k) for q in questions for k in range(gcfg["answers_per_question"])]
-    print(f"[generate] {len(answer_jobs)} answers ({gcfg['answers_per_question']} per question)")
+    out = JsonlAppender(run_dir / "generated.jsonl")
+    lp_out = JsonlAppender(run_dir / "teacher_logprobs.jsonl.gz") if cfg.teacher.top_logprobs else None
+    done_a = {r["id"] for r in out.existing()}
+    answer_jobs = [(q, k) for q in questions for k in range(gcfg.answers_per_question) if f"{q['id']}/s{k}" not in done_a]
+    print(f"[generate] {gcfg.answers_per_question} answers per question; {len(answer_jobs)} to go")
 
     def make_answer(item):
         q, k = item
-        a = teacher.chat(A_SYSTEM, A_PROMPT.format(chunk=q["text"], question=q["question"]))
-        return {
-            "doc_id": q["doc_id"],
-            "chunk_id": q["chunk_id"],
-            "persona": q["persona"],
-            "task": q["task"],
-            "question": q["question"],
-            "answer": a,
-            "sample": k,
-            "teacher": teacher.model,
-        }
+        c = teacher.chat(A_SYSTEM, A_PROMPT.format(chunk=q["text"], question=q["question"]), top_logprobs=cfg.teacher.top_logprobs)
+        meta = {k_: q[k_] for k_ in ("doc_id", "chunk_id", "persona", "task")}
+        row = {"id": f"{q['id']}/s{k}", **prose_row(meta, q["question"], c.content), "sample": k, "teacher": teacher.model}
+        if lp_out and c.logprobs:
+            lp_out.append({"id": row["id"], **c.logprobs})  # written first: a row never lacks its logprobs
+        out.append(row)
 
-    rows = teacher.map(make_answer, answer_jobs)
-    out = Path(cfg["run_dir"]) / "generated.jsonl"
-    write_jsonl(out, rows)
-    print(f"[generate] wrote {len(rows)} rows -> {out}")
-    return out
+    teacher.map(make_answer, answer_jobs)
+    print(f"[generate] {len(out.existing())} rows -> {out.path}")
+    return out.path
