@@ -88,7 +88,9 @@ class TrainCfg(_Section):
 class EvalCfg(_Section):
     file: Path
     tool_file: Path | None = None  # tool-calling slice: scored by toolcheck, not the judge
+    calibration_file: Path | None = None  # human-labelled answer pairs for the `calibrate` stage
     max_new_tokens: int = 512
+    tag: str = ""  # suffix for judge outputs, e.g. "gemma4" for the cross-check judge on the same answers
 
 
 class ExportCfg(_Section):
@@ -114,11 +116,28 @@ class Config(_Section):
     export: ExportCfg = ExportCfg()
 
 
-def load_config(path: str | Path) -> Config:
+def apply_overrides(raw: dict, overrides: list[str]) -> dict:
+    """`section.key=value` overrides (value parsed as YAML: 42 -> int, true -> bool, null -> None),
+    so one config file can drive many jobs: per-seed run_dir, per-job server port, another judge."""
+    for item in overrides:
+        key, sep, value = item.partition("=")
+        if not sep or not key:
+            raise ValueError(f"override must look like section.key=value, got {item!r}")
+        *parents, leaf = key.split(".")
+        node = raw
+        for p in parents:
+            node = node.setdefault(p, {})
+            if not isinstance(node, dict):
+                raise ValueError(f"override {item!r}: {p!r} is not a section")
+        node[leaf] = yaml.safe_load(value) if value else ""  # `key=` sets an empty string, not null
+    return raw
+
+
+def load_config(path: str | Path, overrides: list[str] = ()) -> Config:
     # API keys from ./.env in the working directory only (not searched upward from this file), so a
     # run or test elsewhere never picks up the repo's secrets; real env vars take precedence
     load_dotenv(find_dotenv(usecwd=True))
     with open(path) as f:
-        cfg = Config.model_validate(yaml.safe_load(f))
+        cfg = Config.model_validate(apply_overrides(yaml.safe_load(f), list(overrides)))
     cfg.run_dir.mkdir(parents=True, exist_ok=True)
     return cfg

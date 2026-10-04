@@ -21,6 +21,17 @@
 
 ## Log
 
+### 2026-10-04: Leonardo workflow and judges (branch `feature/leonardo`)
+
+- **Judges:** gpt-oss-20b (main) and Gemma 4 26B-A4B (cross-check), both Apache 2.0 and served by vLLM on the cluster; no API at evaluation time. The teacher is also served locally from downloaded weights.
+- **`calibrate` stage** + 24 constructed known-label pairs. Validated via OpenCode: glm-5.3-flash 100%, minimax-m3 97.9%, kimi-k3 95.8%, deepseek-v4.1-flash 93.8% accuracy. Every judge caught every single-defect error; only ties separated them. The set is a sanity floor; ranking strong judges needs human-labelled real pairs. Our two judges aren't on OpenCode: calibrate them on day 1.
+- **`answer` stage**: base/student answers cached per run (invalidated by a retrained adapter), so the judge runs after the GPU is freed and the cross-check judge scores the same answers (`eval.tag`).
+- **CLI `--set key=value`** overrides (validated like the YAML), so one config drives every job: per-seed `run_dir`, per-job server port, the judge.
+- **`slurm/`:** `env.sh` (account, paths, models, seeds), `common.sh` (vLLM start/health/stop, per-job ports), `setup_login.sh`, `smoke_teacher.sbatch` (+ `smoke_teacher.py`: logprob token ids decode with the student tokenizer, tool calls, tokens/s at concurrency 1/16/64), `generate`, `train` (seed array), `train_fsdp`, `evaluate` (seed array), `calibrate`, `export`, `submit.sh` (dependencies: afterok, aftercorr per seed).
+- `python -m distillkit.aggregate <run_dir>`: mean ± std over seeds.
+- Tests: 80, hermetic; Slurm scripts checked with `bash -n`, their `--set` keys against the config schema, models in `env.sh` against the Leonardo config, array sizes against `SEEDS`.
+- **Not run yet:** nothing in `slurm/` has run on Leonardo (no access before Oct 6).
+
 ### 2026-10-04: hermetic tests, portable package
 
 - `tests/conftest.py` (autouse, every test): network blocked, `*_API_KEY`/`*_TOKEN` removed, Hugging Face offline, HOME and the working directory moved to a temp dir, module state reset. `tests/test_hermetic.py` checks these guarantees.
@@ -69,7 +80,7 @@
 
 ## Next steps
 
-1. Human review of the eval sets; grow the prose set to ~50 questions from 3+ held-out docs.
+1. Human review of the eval sets; grow the prose set to ~50 questions from 3+ held-out docs; label ~30 real student-vs-base answer pairs for judge calibration (the constructed set is too easy to rank strong judges).
 2. Laptop benchmarks for G3/G6: `llama-bench` tokens/s and peak RAM per quant level; accuracy per quant via the eval harness on the GGUF models.
-3. Slurm job scripts for vLLM teacher serving and training on Leonardo; day-1 smoke test of logprobs with token IDs.
+3. Day 1 on Leonardo: `setup_login.sh`, `smoke_teacher.sbatch`, `calibrate.sbatch` for both judges; fill in the account/reservation in `slurm/env.sh`.
 4. Baselines: Qwen3-4B-Instruct-2507 untrained on both eval slices.

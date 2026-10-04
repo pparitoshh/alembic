@@ -96,14 +96,39 @@ def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
     return (v.verdict if v else None), raw
 
 
+def _eval_rows(cfg: Config) -> tuple[list[dict], list[dict]]:
+    return read_jsonl(cfg.eval.file), read_jsonl(cfg.eval.tool_file) if cfg.eval.tool_file else []
+
+
+def run_answers(cfg: Config) -> dict[str, list[str]]:
+    """Stage `answer`: base/student answers for both eval slices, cached in run_dir/eval_answers.json.
+
+    Separate from judging so a cluster job can free the GPU before it starts the judge server, and so
+    a second judge (`eval.tag`) scores exactly the same answers. Reused while the questions and the
+    adapter are unchanged."""
+    eval_rows, tool_rows = _eval_rows(cfg)
+    questions = [r["question"] for r in eval_rows + tool_rows]
+    cache = cfg.run_dir / "eval_answers.json"
+    adapter = cfg.run_dir / "adapter" / "adapter_model.safetensors"
+    stamp = adapter.stat().st_mtime if adapter.exists() else None
+    if cache.exists():
+        c = json.loads(cache.read_text())
+        if c["questions"] == questions and c["adapter_mtime"] == stamp:
+            print(f"[answer] reusing {cache}")
+            return c["answers"]
+    # one model load for both slices; tool questions are asked with the tool schemas in the prompt
+    answers = generate_answers(cfg, questions, [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows))
+    cache.write_text(json.dumps({"questions": questions, "adapter_mtime": stamp, "answers": answers}, ensure_ascii=False))
+    print(f"[answer] {len(questions)} questions x {len(answers)} models -> {cache}")
+    return answers
+
+
 def run(cfg: Config) -> dict:
     run_dir = cfg.run_dir
-    eval_rows = read_jsonl(cfg.eval.file)
-    tool_rows = read_jsonl(cfg.eval.tool_file) if cfg.eval.tool_file else []
+    eval_rows, tool_rows = _eval_rows(cfg)
     valid_flags = load_flags(cfg.verify.flag_list)
     set_valid_flags(valid_flags)
-    # one model load for both slices; tool questions are asked with the tool schemas in the prompt
-    all_answers = generate_answers(cfg, [r["question"] for r in eval_rows + tool_rows], [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows))
+    all_answers = run_answers(cfg)
     answers = {k: v[: len(eval_rows)] for k, v in all_answers.items()}
     tool_answers = {k: v[len(eval_rows) :] for k, v in all_answers.items()}
 
@@ -145,8 +170,10 @@ def run(cfg: Config) -> dict:
             score += pts / 2
         summary["student_vs_base_win_rate"] = score / len(per_q)
         summary["judge_unparsed"] = unparsed  # counted as ties; should be 0
+        summary["judge"] = cfg.judge.model
 
-    write_jsonl(run_dir / "eval_outputs.jsonl", per_q)
-    (run_dir / "eval_summary.json").write_text(json.dumps(summary, indent=2))
+    suffix = f"_{cfg.eval.tag}" if cfg.eval.tag else ""
+    write_jsonl(run_dir / f"eval_outputs{suffix}.jsonl", per_q)
+    (run_dir / f"eval_summary{suffix}.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
     return summary

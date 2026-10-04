@@ -70,6 +70,7 @@ The assistant has 8 Slurm tools (`src/distillkit/tools.py`): `job_status`, `list
 
 - **[GOAL.md](GOAL.md):** mission, final model choices, goals, order of work, success metrics, deliverables, team roles and timeline.
 - **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (teacher serving and logprobs, tool-calling data, verification, QDoRA + FSDP, RAG, quantization, evaluation).
+- **[slurm/README.md](slurm/README.md):** running on Leonardo: setup, day-1 smoke tests, the job pipeline.
 - **[PROGRESS.md](PROGRESS.md):** running log of what is done.
 
 ## Planned stack

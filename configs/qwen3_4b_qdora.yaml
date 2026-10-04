@@ -20,15 +20,18 @@ teacher:
     return_tokens_as_token_ids: true   # vLLM: tokens come back as "token_id:<n>"
     chat_template_kwargs: {enable_thinking: false}
 
-# Different model family from the teacher. Compute nodes may have no internet: then serve
-# a judge on the cluster with vLLM and change base_url/model here.
+# Judge: gpt-oss-20b (OpenAI, Apache 2.0, ~16 GB MXFP4), served on the cluster by slurm/evaluate.sbatch;
+# base_url is set per job with --set. Cross-check judge: Gemma 4 26B-A4B IT (Google, Apache 2.0), same
+# answers, run with `--set eval.tag=gemma4 --set judge.model=google/gemma-4-26B-A4B-it` (see slurm/README.md).
+# Validate either judge first with the `calibrate` stage.
 judge:
-  base_url: https://opencode.ai/zen/v1
-  api_key_env: OPENCODE_API_KEY
-  model: deepseek-v4.1-flash
+  base_url: http://127.0.0.1:8001/v1
+  model: openai/gpt-oss-20b
   temperature: 0.0
-  max_tokens: 4096
-  concurrency: 4
+  max_tokens: 4096          # reasons before the verdict; reasoning is returned separately by vLLM
+  concurrency: 16
+  extra_body:
+    reasoning_effort: medium
 
 generate:
   questions_per_chunk: 12
@@ -68,6 +71,7 @@ train:
 eval:
   file: data/eval/eval_all.jsonl
   tool_file: data/eval/eval_tools.jsonl   # tool-calling slice (draft, needs human review)
+  calibration_file: data/eval/judge_calibration.jsonl   # known-label pairs for `calibrate`
   max_new_tokens: 512
 
 export:

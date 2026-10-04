@@ -66,6 +66,7 @@ train:
 eval:
   file: data/eval/eval_all.jsonl
   tool_file: data/eval/eval_tools.jsonl
+  calibration_file: data/eval/judge_calibration.jsonl
   max_new_tokens: 512
 
 export:
