@@ -11,7 +11,6 @@ Writes run_dir/export/bench.json and bench.md. Machine-dependent by design: run 
 
 import json
 import os
-import platform
 import statistics
 import subprocess
 import sys
@@ -19,6 +18,7 @@ from pathlib import Path
 
 from .config import Config
 from .export import _bin
+from .machine import collect
 
 PROMPT = "Write an sbatch script that runs 100 array tasks, at most 10 at a time, each with 1 CPU and 2 GB."
 
@@ -136,7 +136,7 @@ def run(cfg: Config) -> dict:
         raise SystemExit(f"[bench] no model-<quant>.gguf for {ecfg.quants} in {out}; run export first")
     models.sort(key=lambda p: p.stat().st_size)
     threads = ecfg.bench_threads or physical_cores()
-    report = {"machine": platform.node(), "threads": threads, "num_ctx": ecfg.num_ctx, "depths": ecfg.bench_depths, "passes": [], "models": []}
+    report = {"machine": collect(llama_cpp), "threads": threads, "num_ctx": ecfg.num_ctx, "depths": ecfg.bench_depths, "passes": [], "models": []}
     # interleaved passes: a burst of background load lands on every model, not on one
     for i in range(ecfg.bench_runs):
         p = {"pass": i + 1, "load": system_load(), "models": []}
