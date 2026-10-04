@@ -16,3 +16,5 @@ bench report embeds its machine record.
 
 Not recorded: RAM type and speed (need `sudo dmidecode -t memory`), which matter for CPU generation
 speed since it is memory-bandwidth bound.
+
+- [bench/2026-10-04_qwen3-4b-instruct-2507_base](bench/2026-10-04_qwen3-4b-instruct-2507_base/README.md) — laptop speed and RAM per quant of the base 4B; Q4_K_M fits in 3.5 GiB without mmap

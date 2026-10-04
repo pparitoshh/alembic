@@ -151,7 +151,7 @@ def summarize(passes: list[dict]) -> list[dict]:
 
 def markdown(report: dict) -> str:
     depths = report["depths"]
-    head = ["model", "file GB", "peak RAM GB (max)", "pp512 tok/s", *[f"tg128 tok/s @{d}" for d in depths]]
+    head = ["model", "file GB", "peak RAM GiB (max)", "pp512 tok/s", *[f"tg128 tok/s @{d}" for d in depths]]
     loads = ", ".join(str(p["load"]["loadavg_1m"]) for p in report.get("passes", []))
     lines = [
         f"CPU: {report['cpu']} · {report['threads']} threads · llama.cpp {report['build']} · context {report['num_ctx']}",
