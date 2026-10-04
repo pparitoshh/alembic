@@ -1,6 +1,8 @@
 # DistillKit — Progress Log
 
-*Tracks what is done against [PLAN.md](PLAN.md). Newest entries first.*
+*Tracks what is done against [GOAL.md](GOAL.md) (order of work §6, timeline §11). Newest entries first.*
+
+> **Note (Oct 4):** iterations 0–4 below are toy runs with **Qwen3-0.6B + plain LoRA** on a laptop. The final setup is **Qwen3-32B teacher → Qwen3-4B student with QDoRA + FSDP, plus tool calling** (see [GOAL.md](GOAL.md) and [RESEARCH.md](RESEARCH.md)). The old PLAN.md was removed; entries that mention it are kept as history.
 
 ## Status at a glance
 
@@ -12,9 +14,21 @@
 | `verify` | ✅ | ✅ | 120/120 kept (40/40 earlier, after fixing checker false positives) |
 | `train` (LoRA) | ✅ | ✅ | Qwen3-0.6B, fp16; best setting lr 1e-4, r16/α32, 3 epochs (24 steps, loss ≈ 1.39); `train.seed` option |
 | `evaluate` | ✅ | ✅ | student **beats base on average**: 64.1% ± 4.8 over 3 seeds, 26 questions (range 59.6–69.2%) ([report](docs/report_iterations_0-4.md)) |
-| `export` (GGUF/Ollama) | ❌ | ❌ | planned Oct 4 |
+| `export` (GGUF/Ollama) | ❌ | ❌ | not started |
+| Tool calling (schemas, mock tools, traces, checker) | ❌ | ❌ | new in Oct 4 goals |
+| Teacher top-20 logprob capture | ❌ | ❌ | serving stack open: vLLM + Qwen3-32B-AWQ recommended |
+| QDoRA + FSDP training | ❌ | ❌ | toy runs used plain LoRA |
 
 ## Log
+
+### 2026-10-04: goals finalized, docs rewritten
+
+- **GOAL.md** replaced with the Oct 4 version: Qwen3-32B (4-bit) teacher on one A100 64 GB, Qwen3-4B student with QDoRA + FSDP, tool calling (~30% of data), top-20 teacher logprobs saved for v2 logit KD, one shared Leonardo node, eval-first order of work.
+- **RESEARCH.md** revised for this design. Key findings: vLLM GGUF is "highly experimental" → recommend vLLM + official `Qwen3-32B-AWQ` (native top-20 logprobs with token IDs); consider `Qwen3-4B-Instruct-2507` as the student (BFCL-v3 61.9 vs 57.6); top-k logprob caching is biased (Sparse Logit Sampling, ACL 2025); QDoRA has known issues under DeepSpeed ZeRO-2 and is ~1.5–1.8× slower than LoRA; **Arcee AI already ships a "DistillKit"**, so the name needs a decision before release; ≥ 20 tok/s on a laptop CPU for 4B Q4_K_M is a risk.
+- Removed the outdated `PLAN.md` (1.7B LoRA, 2 nodes) and `GOAL_v2.md` draft.
+
+**Next:** eval set (~50 Qs incl. tool slice), 5–10 tool schemas + mock tools, 2 gold examples, export stage, Slurm scripts, day-1 teacher logprob smoke test.
+
 
 ### 2026-09-30 (night): iterations 1-4, goal met on average
 

@@ -2,15 +2,15 @@
 
 **Modular teacher–student distillation for local, domain-specific assistants.**
 
-DistillKit turns a large open-weight **teacher** model into a compact **student** that runs on a laptop. The student learns from teacher-generated question/answer pairs (sequence-level distillation). No logits are needed and the teacher and student don't have to share a tokenizer, so any teacher that emits text works with any student.
+DistillKit turns a large open-weight **teacher** model into a compact **student** that runs on a laptop. The student learns from teacher-generated question/answer text and tool-calling traces (sequence-level distillation), so any teacher that emits text works with any student. The teacher's top-20 logprobs are saved as well, so logit-level distillation can be added later without re-running the teacher.
 
-The demo use case is an **HPC Assistant**: a ≤2B-parameter student specialised in Slurm, CUDA, MPI and profiling. It runs offline on a laptop CPU in under 4 GB of RAM.
+The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM.
 
 > **Status:** working prototype, built for the [European AI Hackathon](https://www.openhackathons.org/s/siteevent/a0CUP00003yKxcX2AS/se000475) (Oct 6–29, 2026). The four stages `generate → verify → train → evaluate` run end to end on a laptop (RTX 2060 6 GB). Export (GGUF/Ollama) is not built yet.
 
 ## Results so far (toy run)
 
-Qwen3-0.6B + LoRA, trained on 120 teacher answers about Slurm, judged against the untrained base model on held-out questions by a different model family (both answer orders):
+Toy setup, not the final models: Qwen3-0.6B + LoRA, trained on 120 teacher answers about Slurm, judged against the untrained base model on held-out questions by a different model family (both answer orders):
 
 | Iteration | Change | Judge win rate vs. base |
 |---|---|---|
@@ -40,31 +40,31 @@ Outputs go to the config's `run_dir` (e.g. `runs/iter3/`, git-ignored). Each exp
 
 ```
  seed docs ──► teacher inference ──► verification ──► student training ──► quantize/export ──► evaluate
- (Slurm,       (vLLM, multi-GPU,      (dedup, sbatch/    (TRL SFT, FSDP/      (GGUF Q8_0 /        (held-out docs,
-  CUDA, MPI)    N answers/question)    nvcc checks,       DeepSpeed,           Q4_K_M + imatrix,   exec checks,
-                                       LLM judge)         optional RAFT/DPO)   Ollama)             LLM judge)
+ (Slurm,       (vLLM, Qwen3-32B,     (dedup, sbatch/    (TRL SFT, QDoRA,     (GGUF Q8_0 /        (held-out docs,
+  CUDA, MPI)    top-20 logprobs)       nvcc, tool-call    FSDP,                Q4_K_M + imatrix,   exec checks,
+                                       checks, judge)     optional RAFT/DPO)   Ollama)             LLM judge)
 ```
 
 | Module | Responsibility |
 |---|---|
-| **Teacher** | Load any Hugging Face model via vLLM, or call an OpenAI-compatible endpoint |
-| **Data generation** | Document-grounded, diversified Q&A generation (persona × task type × difficulty) |
-| **Verification** | Deduplication, executable checks, LLM-as-judge, eval decontamination |
-| **Student training** | Full fine-tuning or LoRA with TRL; multi-node FSDP/DeepSpeed |
+| **Teacher** | Any model that emits text: Hugging Face model, GGUF, or an OpenAI-compatible endpoint; top-20 logprobs saved |
+| **Data generation** | Document-grounded, diversified prose Q&A and tool-calling traces (persona × task type × difficulty) |
+| **Verification** | Deduplication, executable checks, tool-call validation, LLM-as-judge, eval decontamination |
+| **Student training** | TRL SFT with QDoRA (4-bit base + DoRA adapters), FSDP for multi-GPU |
 | **Export & eval** | GGUF quantization, Ollama packaging, accuracy/size/speed evaluation |
 
 ## Documentation
 
-- **[GOAL.md](GOAL.md):** mission, goals, success metrics, deliverables, team roles and timeline.
-- **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (data generation, filtering, the RAG/RAFT knowledge problem, training, quantization, evaluation).
+- **[GOAL.md](GOAL.md):** mission, final model choices, goals, order of work, success metrics, deliverables, team roles and timeline.
+- **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (teacher serving and logprobs, tool-calling data, verification, QDoRA + FSDP, RAG, quantization, evaluation).
 - **[docs/training.md](docs/training.md):** plain-language guide to how training works: one sample, what the student predicts, micro-batches and optimizer steps, and which weights are frozen or trained.
 - **[docs/report_iterations_0-4.md](docs/report_iterations_0-4.md):** comparison of all iterations, seed-level testing, and which parameters moved the win rate.
 - **[docs/iter_0_learning.md](docs/iter_0_learning.md)** to **[iter_3_learning.md](docs/iter_3_learning.md):** per-iteration write-ups: what changed, results, lessons.
-- **[PROGRESS.md](PROGRESS.md):** running log against [PLAN.md](PLAN.md).
+- **[PROGRESS.md](PROGRESS.md):** running log of what is done.
 
 ## Planned stack
 
-Python · PyTorch · Hugging Face Transformers / TRL · vLLM · FSDP / DeepSpeed · llama.cpp (GGUF) · Ollama
+Python · PyTorch · Hugging Face Transformers / TRL / PEFT (DoRA) · bitsandbytes · vLLM · FSDP · llama.cpp (GGUF) · Ollama
 
 ## Contributing
 
