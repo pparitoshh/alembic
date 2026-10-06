@@ -21,7 +21,7 @@ from .teacher import Teacher
 from .toolcheck import score_tool_item
 from .tools import SCHEMAS, set_valid_flags
 
-JUDGE_SYSTEM = "You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Reply only with JSON: {\"reasoning\": \"<short comparison>\", \"verdict\": \"A\" | \"B\" | \"T\"} (T = tie)."
+JUDGE_SYSTEM = 'You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Return exactly one JSON object: {"verdict":"A"}, {"verdict":"B"}, or {"verdict":"T"}. A means Answer A is better, B means Answer B is better, and T means a tie. Do not include an explanation or Markdown.'
 
 JUDGE_PROMPT = """Question: {question}
 
@@ -33,7 +33,7 @@ Answer A:
 Answer B:
 {b}
 
-Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Reply with the JSON verdict."""
+Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Return only the JSON verdict, with no explanation."""
 
 
 def generate_answers(cfg: Config, questions: list[str], tools: list[list[dict] | None] | None = None) -> dict[str, list[str]]:

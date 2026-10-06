@@ -14,7 +14,6 @@ class GeneratedQuestion(BaseModel):
 
 
 class JudgeVerdict(BaseModel):
-    reasoning: str = Field(description="Short comparison of both answers against the reference")
     verdict: Literal["A", "B", "T"] = Field(description="A or B for the better answer, T for a tie")
 
 
