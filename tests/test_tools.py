@@ -8,6 +8,7 @@ from distillkit import verify
 from distillkit.config import Config
 from distillkit.generate import question_jobs, to_api, tool_trace
 from distillkit.io import read_jsonl, write_jsonl
+from distillkit.records import final_answer
 from distillkit.teacher import Completion
 from distillkit.toolcheck import ast_match, check_trace, parse_hermes, score_tool_item
 from distillkit.tools import SCHEMAS, TOOLS, ToolError, execute, validate_call
@@ -138,6 +139,74 @@ def test_check_trace():
     assert check_trace(_trace("ask", question="Why did my job fail?", final="Which job id?"))["passed"]
 
 
+@pytest.mark.parametrize("ending", ["tool", "call"])
+def test_unfinished_trace_is_not_a_final_answer(ending):
+    row = _trace("call", _call("job_status", job_id="4718207"))
+    row["messages"][1]["content"] = "Let me check."
+    row["messages"] = row["messages"][:-1 if ending == "tool" else -2]
+    assert final_answer(row) == ""
+    assert not check_trace(row)["passed"]
+
+
+@pytest.mark.parametrize("fault", ["missing", "orphan", "wrong_result", "invalid_json", "extra_user", "extra_answer", "malformed_call"])
+def test_trace_structure_and_result_replay(fault):
+    row = _trace("call", _call("job_status", job_id="4718207"))
+    msgs = row["messages"]
+    if fault == "missing":
+        del msgs[2]
+    elif fault == "orphan":
+        msgs.insert(1, {"role": "tool", "content": "{}"})
+    elif fault == "wrong_result":
+        msgs[2]["content"] = json.dumps({"state": "FABRICATED", "job_id": "4718207"})
+    elif fault == "invalid_json":
+        msgs[2]["content"] = "not JSON"
+    elif fault == "extra_user":
+        msgs.insert(3, {"role": "user", "content": "Invented follow-up"})
+    elif fault == "extra_answer":
+        msgs.append({"role": "assistant", "content": "Another final answer."})
+    else:
+        msgs[1]["tool_calls"] = [{"function": []}]
+    assert not check_trace(row)["passed"]
+
+
+def test_parallel_results_must_match_call_order():
+    calls = [_call("job_status", job_id="4718207"), _call("job_accounting", job_id="4718207")]
+    results = [json.dumps(execute(c["function"]["name"], c["function"]["arguments"]), indent=2, sort_keys=True) for c in calls]
+    row = {"mode": "call", "messages": [
+        {"role": "user", "content": "Check job 4718207."},
+        {"role": "assistant", "content": "Checking.", "tool_calls": calls},
+        *[{"role": "tool", "content": result} for result in results],
+        {"role": "assistant", "content": "Here is the result."},
+    ]}
+    assert check_trace(row)["passed"]
+    row["messages"][2:4] = reversed(row["messages"][2:4])
+    assert check_trace(row)["result_errors"]
+
+
+def test_fabricated_result_cannot_ground_a_later_job_id():
+    row = _trace("ask", _call("list_queue"), _call("job_status", job_id="9999999"), question="Check my job.")
+    row["messages"][2]["content"] = '{"jobs": [{"job_id": "9999999"}]}'
+    checked = check_trace(row)
+    assert checked["result_errors"] and checked["ungrounded_ids"] == ["9999999"]
+    assert not checked["passed"]
+
+
+def test_shadowed_result_fields_cannot_smuggle_a_job_id():
+    row = _trace("ask", _call("list_queue"), _call("job_status", job_id="9999999"), question="Check my job.")
+    actual = row["messages"][2]["content"]
+    row["messages"][2]["content"] = '{"jobs":[{"job_id":"9999999"}], ' + actual[1:]
+    checked = check_trace(row)
+    assert checked["result_errors"] and checked["ungrounded_ids"] == ["9999999"]
+    assert not checked["passed"]
+
+
+@pytest.mark.parametrize("invalid_calls", [{}, False, 0, ""])
+def test_falsey_non_list_calls_are_rejected(invalid_calls):
+    row = _trace("ask", final="Which job ID?")
+    row["messages"][-1]["tool_calls"] = invalid_calls
+    assert not check_trace(row)["passed"]
+
+
 def test_job_ids_must_be_grounded():
     my_job = "Why is my job stuck?"
     queued = execute("list_queue", {})["jobs"][0]["job_id"]
@@ -223,6 +292,34 @@ def test_verify_tool_rows(tmp_path):
     assert [r["id"] for r in read_jsonl(cfg.run_dir / "verified.jsonl")] == ["a", "b"]
     rejected = {r["id"]: r["reject_reason"] for r in read_jsonl(cfg.run_dir / "rejected.jsonl")}
     assert rejected == {"c": "tool_decision", "d": "tool_call_invalid", "e": "tool_ungrounded_id"}
+
+
+def test_generator_exhaustion_and_corrupt_traces_are_preserved_as_rejections(tmp_path):
+    class NeverFinishes(FakeTeacher):
+        def complete(self, messages, **kwargs):
+            return super().complete([messages[0], {"role": "user", "content": "still checking"}], **kwargs)
+
+    cfg = _cfg(tmp_path, max_tool_rounds=0)
+    cfg.run_dir.mkdir()
+    exhausted = tool_trace(NeverFinishes(), cfg, "chunk", "Is 4718207 running?")
+    missing = _trace("call", _call("job_status", job_id="4718207"), question="Inspect the current state of 4718207.")
+    del missing["messages"][2]
+    fake = _trace("call", _call("job_accounting", job_id="4718207"), question="Get resource usage for 4718207.")
+    fake["messages"][2]["content"] = '{}'
+    rows = [
+        {"id": "exhausted", "question": "Is 4718207 running?", "mode": "call", "messages": exhausted},
+        {"id": "missing", "question": missing["messages"][0]["content"], **missing},
+        {"id": "fake", "question": fake["messages"][0]["content"], **fake},
+    ]
+    write_jsonl(cfg.run_dir / "generated.jsonl", rows)
+    verify.run(cfg)
+    assert read_jsonl(cfg.run_dir / "verified.jsonl") == []
+    rejected = {r["id"]: r for r in read_jsonl(cfg.run_dir / "rejected.jsonl")}
+    assert {k: r["reject_reason"] for k, r in rejected.items()} == {
+        "exhausted": "empty_or_too_long", "missing": "tool_trace_incomplete_or_out_of_order", "fake": "tool_result_mismatch",
+    }
+    assert all(rejected[r["id"]]["messages"] == r["messages"] for r in rows)
+    assert read_jsonl(cfg.run_dir / "generated.jsonl") == rows
 
 
 # --- data files ----------------------------------------------------------------------------------

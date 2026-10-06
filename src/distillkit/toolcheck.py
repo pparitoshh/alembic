@@ -10,7 +10,7 @@
 import json
 import re
 
-from .records import messages
+from .records import final_answer, messages
 from .tools import ToolError, execute, parse_arguments, validate_call
 
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
@@ -65,26 +65,88 @@ def ungrounded_ids(call: dict, context: str) -> list[str]:
     return [] if found(job_id) or found(str(job_id).split("_")[0]) else [str(job_id)]
 
 
+def _unique_fields(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate result field: {key}")
+        result[key] = value
+    return result
+
+
 def check_trace(row: dict) -> dict:
-    """Verify a transcript. `row["mode"]` (call/ask/none) says whether a call was required."""
+    """Check complete ordered traces against this version of the deterministic mocks.
+
+    Stored results are evidence only after matching replay. This does not judge whether the
+    final answer interprets those results correctly, or validate results from a real cluster.
+    """
     context, calls, ungrounded = "", [], []
-    for m in messages(row):
-        if m["role"] in ("user", "tool"):
-            context += "\n" + (m.get("content") or "")
-        elif m["role"] == "assistant":
-            for c in message_calls(m):
+    errors, trace_errors, result_errors, pending = [], [], [], []
+    transcript = messages(row)
+    if not isinstance(transcript, list):
+        trace_errors.append("messages must be a list")
+        transcript = []
+    expected_role = "user"
+    for i, m in enumerate(transcript):
+        if not isinstance(m, dict) or m.get("role") != expected_role:
+            trace_errors.append(f"turn {i}: expected {expected_role}")
+            continue
+        role = m["role"]
+        if role == "user":
+            if not isinstance(m.get("content"), str) or not m["content"].strip():
+                trace_errors.append(f"turn {i}: empty or invalid question")
+            context = m.get("content") if isinstance(m.get("content"), str) else ""
+            expected_role = "assistant"
+        elif role == "assistant":
+            raw_calls = m.get("tool_calls")
+            if raw_calls is None:
+                raw_calls = []
+            if not isinstance(raw_calls, list):
+                trace_errors.append(f"turn {i}: tool_calls must be a list")
+                continue
+            for raw in raw_calls:
+                f = raw.get("function") if isinstance(raw, dict) else None
+                if not isinstance(f, dict) or not isinstance(f.get("name"), str):
+                    errors.append(f"turn {i}: malformed tool call")
+                    pending.append(None)
+                    continue
+                c = {"name": f["name"], "arguments": f.get("arguments", {})}
                 calls.append(c)
                 ungrounded += ungrounded_ids(c, context)
-    errors = [e for c in calls if (e := call_error(c))]
+                if error := call_error(c):
+                    errors.append(error)
+                    pending.append(None)
+                else:
+                    pending.append(execute(c["name"], c["arguments"]))
+            expected_role = "tool" if raw_calls else "end of transcript"
+        else:  # results follow calls in order in the record schema (no call IDs)
+            expected = pending.pop(0)
+            try:
+                actual = json.loads(m["content"], object_pairs_hook=_unique_fields)
+                # JSON comparison retains boolean/number distinctions; formatting/order do not matter.
+                matches = json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True)
+            except (KeyError, TypeError, ValueError):
+                matches = False
+            if expected is not None and not matches:
+                result_errors.append(f"turn {i}: stored result differs from deterministic mock replay")
+            elif expected is not None:
+                context += "\n" + json.dumps(expected)
+            expected_role = "tool" if pending else "assistant"
+    if pending:
+        trace_errors.append(f"missing {len(pending)} tool result(s)")
+    if not final_answer(row).strip():
+        trace_errors.append("missing terminal assistant answer")
     decision = "call" if calls else "no_call"
     ok = decision == EXPECTED_DECISION.get(row.get("mode", ""), decision)
     return {
         "n_calls": len(calls),
         "call_errors": errors,
+        "trace_errors": trace_errors,
+        "result_errors": result_errors,
         "ungrounded_ids": ungrounded,
         "decision": decision,
         "decision_ok": ok,
-        "passed": not errors and not ungrounded and ok,
+        "passed": not errors and not trace_errors and not result_errors and not ungrounded and ok,
     }
 
 

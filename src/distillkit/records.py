@@ -31,10 +31,13 @@ def messages(row: dict) -> list[dict]:
 
 
 def final_answer(row: dict) -> str:
-    """Content of the last assistant turn: what checks and judges look at."""
-    for m in reversed(messages(row)):
-        if m["role"] == "assistant":
-            return m.get("content") or ""
+    """Terminal assistant answer, never a pre-call plan from an unfinished trace."""
+    transcript = messages(row)
+    if isinstance(transcript, list) and transcript and isinstance(transcript[-1], dict):
+        m = transcript[-1]
+        if m.get("role") == "assistant" and m.get("tool_calls") in (None, []):
+            content = m.get("content")
+            return content if isinstance(content, str) else ""
     return ""
 
 
