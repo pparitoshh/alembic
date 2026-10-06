@@ -11,7 +11,7 @@ from distillkit.io import read_jsonl, write_jsonl
 from distillkit.records import final_answer
 from distillkit.teacher import Completion
 from distillkit.toolcheck import ast_match, check_trace, parse_hermes, score_tool_item
-from distillkit.tools import SCHEMAS, TOOLS, ToolError, execute, validate_call
+from distillkit.tools import PARTITIONS, SCHEMAS, TOOLS, ToolError, execute, validate_call
 
 ROOT = Path(__file__).parent.parent
 
@@ -82,6 +82,29 @@ def test_submit_job_lints_the_script():
     assert "unrecognized option '--gpu-count'" in bad["error"]
     part = execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --partition=gpu\nsrun hostname"})
     assert part["error"] == "sbatch: error: invalid partition specified: gpu"
+
+
+def test_gpu_snapshot_capacity_and_idle_nodes_are_consistent():
+    snapshot = execute("gpu_availability", {})
+    assert snapshot == execute("gpu_availability", {})
+    for row in snapshot["partitions"]:
+        part = PARTITIONS[row["partition"]]
+        assert 0 <= row["idle_nodes"] <= part["nodes"]
+        assert row["idle_nodes"] * part["gpus_per_node"] <= row["gpus_free"] <= row["gpus_total"]
+        assert execute("gpu_availability", {"partition": row["partition"]})["partitions"] == [row]
+
+
+@pytest.mark.parametrize("directive,partition", [
+    ("--partition=boost_qos_dbg", "boost_qos_dbg"), ("--partition dcgp_usr_prod", "dcgp_usr_prod"),
+    ("-p boost_qos_lprod", "boost_qos_lprod"), ("", "boost_usr_prod"),
+])
+def test_test_only_result_respects_requested_partition_without_inventing_cpus(directive, partition):
+    script = "#!/bin/bash\n" + (f"#SBATCH {directive}\n" if directive else "") + "#SBATCH --cpus-per-task=2\nhostname\n"
+    result = execute("submit_job", {"script": script, "test_only": True})
+    assert result["valid"] and "submitted" not in result
+    assert result["message"].endswith(f"in partition {partition}")
+    assert "32 processors" not in result["message"]
+    assert result["validation_scope"] == ["flag_names", "bash_syntax", "partition_name"]
 
 
 # --- toolcheck ---------------------------------------------------------------------------------
