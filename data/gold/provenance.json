@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "review_method": "Local model review plus automated validation; exact reviewer version unknown; no human review claimed.",
+  "scope": "This binds reviewed local example bytes to source bytes and the declared train split. Upstream URLs, versions and licenses remain unknown. The runtime re-resolves splits from the effective seeds configuration.",
+  "examples": {
+    "prose.json": {
+      "sha256": "dea5dbcdbeee53ff11d093131a4914e12ea01c75063028eb98e15e8ea973f78b",
+      "sources": [
+        {
+          "doc_id": "slurm_sbatch_basics",
+          "split": "train",
+          "sha256": "cfd461fe6a5ee88b40da5c3ace910a0d49a7a9da460f971eee17e025c43ec7a4",
+          "evidence": [
+            "The --cpus-per-task bullet identifies threaded OpenMP programs and OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK.",
+            "The complete hello example supplies every directive and command in this anchor."
+          ]
+        }
+      ],
+      "derivation": "Replacement authored solely from the currently training-assigned sbatch source, with no evaluation questions or references."
+    },
+    "tool_trace.json": {
+      "sha256": "7d8f4fcbf6a0f306143c3fa1da7ffa882bc6868a32142455f9b292aecb50c989",
+      "sources": [
+        {
+          "doc_id": "slurm_monitoring",
+          "split": "train",
+          "sha256": "85503b296e28b7855b1e7eea00381d19bfd0773d1b6855574f53c451c336c978",
+          "evidence": [
+            "The sacct bullet covers finished-job accounting, State, Elapsed and MaxRSS.",
+            "The final paragraph associates OUT_OF_MEMORY with memory exhaustion. The anchor only reports the supplied state and values."
+          ]
+        }
+      ],
+      "local_fixture_evidence": {
+        "path": "src/distillkit/tools.py",
+        "sha256": "7528a9d8995f8c2855910ce6166491ed80fde6fd24f3bbe6fa76a7667f7db259",
+        "symbols": [
+          "SCHEMAS/job_accounting",
+          "_job_accounting"
+        ],
+        "origin": "User-supplied deterministic mock contract and pre-existing tool_trace.json call/result; not real cluster observations."
+      },
+      "derivation": "Retains the supplied question, plan, call and synthetic result. Narrows the final answer to record fields supported by the training source and supplied fixture; removes ungrounded diagnosis and remedies."
+    }
+  }
+}
