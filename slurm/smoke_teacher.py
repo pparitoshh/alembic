@@ -37,14 +37,32 @@ def main() -> None:
     )
     toks = r.choices[0].logprobs.content
     ids = [int(t.token.removeprefix("token_id:")) for t in toks]
-    decoded = tok.decode(ids)
+    raw_decoded = tok.decode(ids)
+    decoded = tok.decode(ids, skip_special_tokens=True)
+    content = r.choices[0].message.content or ""
+
+    special_ids = set(tok.all_special_ids)
+    special_positions = [i for i, token_id in enumerate(ids) if token_id in special_ids]
+    terminal_specials_only = (
+        not special_positions
+        or special_positions == list(range(special_positions[0], len(ids)))
+    )
+
     results["logprobs"] = {
         "tokens": len(toks),
         "top_k": min(len(t.top_logprobs) for t in toks),
-        "ids_decode_to_content": decoded.strip() == (r.choices[0].message.content or "").strip(),
+        "ids_decode_to_content": (
+            terminal_specials_only
+            and decoded.strip() == content.strip()
+        ),
+        "terminal_special_tokens": [
+            tok.convert_ids_to_tokens(ids[i]) for i in special_positions
+        ],
     }
     if not results["logprobs"]["ids_decode_to_content"]:
-        results["logprobs"]["decoded"], results["logprobs"]["content"] = decoded, r.choices[0].message.content
+        results["logprobs"]["raw_decoded"] = raw_decoded
+        results["logprobs"]["decoded"] = decoded
+        results["logprobs"]["content"] = content
 
     r = client.chat.completions.create(
         model=a.model, messages=[{"role": "user", "content": "Is my job 4718207 still running?"}],

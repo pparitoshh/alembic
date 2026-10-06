@@ -4,6 +4,11 @@ set -euo pipefail
 
 # compute nodes: no internet assumed; everything comes from $HF_HOME and the venvs
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1
+
+# vLLM/FlashInfer runtime tools on Leonardo.
+export PATH="$VLLM_VENV/bin:$PATH"
+export VLLM_USE_FLASHINFER_SAMPLER="${VLLM_USE_FLASHINFER_SAMPLER:-0}"
+
 cd "$REPO"
 mkdir -p slurm/logs
 
