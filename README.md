@@ -26,10 +26,21 @@ uv run pytest -q
 |---|---|
 | `configs/tools_pilot.yaml` | small live pilot: prose + tool traces from the toy teacher API, Qwen3-0.6B student |
 | `configs/toy_qdora.yaml` | local QDoRA smoke test (Qwen3-0.6B, 4-bit + DoRA) |
-| `configs/qwen3_4b_qdora.yaml` | Leonardo: Qwen3-32B teacher on vLLM → Qwen3-4B-Instruct-2507, ~30% tool traces |
+| `configs/qwen3_4b_qdora.yaml` | Leonardo: Qwen3-32B-AWQ teacher on vLLM → Qwen3-4B-Instruct-2507, ~30% tool traces, gpt-oss-20b judge |
 | `configs/accelerate/fsdp.yaml` | multi-GPU QDoRA: `accelerate launch --config_file configs/accelerate/fsdp.yaml -m distillkit.cli train -c <config>` (untested on Leonardo yet) |
 
 Outputs go to the config's `run_dir` (git-ignored). Configs are validated on load (unknown keys are errors). API calls retry transient errors with exponential backoff. `generate` appends results as they finish, so rerunning it after a crash or a wall-time kill only does the missing work. With `teacher.top_logprobs: 20`, the teacher's top-20 logprobs for every prose answer token go to `run_dir/teacher_logprobs.jsonl.gz`, keyed by row `id`.
+
+## Models (Leonardo)
+
+| Role | Model | Disk | GPU memory | Served by |
+|---|---|---|---|---|
+| Teacher | `Qwen/Qwen3-32B-AWQ` | ~19 GB | ~19 GB + KV cache, 1× A100 64 GB | vLLM (fallback: llama.cpp + GGUF Q4_K_M) |
+| Student | `Qwen/Qwen3-4B-Instruct-2507` | ~8 GB | 4-bit QDoRA, 1–2× A100 (FSDP) | TRL; vLLM for eval answers |
+| Judge | `openai/gpt-oss-20b` | ~14 GB | ~16 GB (MXFP4), 1× A100 | vLLM |
+| Cross-check judge | `google/gemma-4-26B-A4B-it` | ~52 GB | ~52 GB (bf16), 1× A100, little room for KV cache | vLLM |
+
+Both judges come from different model families than the Qwen teacher and student, so they don't favour their answers, and they run on the cluster, so evaluation needs no external API. The judge compares two answers pairwise, in both orders, against the reference chunk. The cross-check judge re-scores the same cached answers (`--set eval.tag=gemma4 --set judge.model=google/gemma-4-26B-A4B-it`), and agreement between the two makes "beats base" credible. Each judge is first validated with `distillkit calibrate` on known-label pairs (`data/eval/judge_calibration.jsonl`; results in [research/judge_calibration/](research/judge_calibration/2026-10-04_opencode/README.md)). Model sizes and the `$WORK` storage plan are in [GOAL.md](GOAL.md) §4.
 
 ## Export (GGUF + Ollama)
 
