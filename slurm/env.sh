@@ -8,7 +8,7 @@ export SBATCH_PARTITION="${SBATCH_PARTITION:-boost_usr_prod}"   # Booster: 4x A1
 
 # --- paths ($WORK is set by CINECA per project) ---
 export REPO="${REPO:-$WORK/alembic}"                 # this repository
-export VENV="$REPO/.venv"                            # distillkit (uv sync --extra train --extra export)
+export VENV="${VENV:-$REPO/.venv}"                   # distillkit (uv sync --extra train --extra export)
 export VLLM_VENV="${VLLM_VENV:-$WORK/venvs/vllm}"    # vLLM in its own venv: it pins its own torch
 export LLAMA_CPP="${LLAMA_CPP:-$WORK/tools/llama.cpp}"
 export LLAMA_CPP_TAG="b11392"
