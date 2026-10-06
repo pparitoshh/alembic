@@ -180,9 +180,11 @@ def _submit_job(script: str, test_only: bool = False) -> dict:
     part = re.search(r"^\s*#SBATCH\s+(?:--partition[= ]|-p\s*)(\S+)", script, re.MULTILINE)
     if part and part.group(1) not in PARTITIONS:
         return {"error": "sbatch: error: invalid partition specified: " + part.group(1)}
+    partition = part.group(1) if part else "boost_usr_prod"  # this mock's default
     jid = str(4000000 + int(hashlib.sha256(script.encode()).hexdigest(), 16) % 1000000)
     if test_only:
-        return {"valid": True, "message": f"sbatch: Job {jid} to start at 2026-10-12T14:30:00 using 32 processors on nodes lrdn0412 in partition boost_usr_prod"}
+        return {"valid": True, "message": f"sbatch: Job {jid} to start at 2026-10-12T14:30:00 in partition {partition}",
+                "validation_scope": ["flag_names", "bash_syntax", "partition_name"]}
     return {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}"}
 
 
@@ -232,7 +234,10 @@ def _gpu_availability(partition: str | None = None) -> dict:
     for p, v in parts.items():
         r = _rng("gpus", p)
         total = v["nodes"] * v["gpus_per_node"]
-        out.append({"partition": p, "gpu_type": v["gpu_type"], "gpus_total": total, "gpus_free": r.randint(0, max(1, total // 50)), "idle_nodes": r.randint(0, 5)})
+        free = r.randint(0, max(1, total // 50))
+        # A fully idle node contributes all of its GPUs to this synthetic free count.
+        idle = r.randint(0, min(5, v["nodes"], free // v["gpus_per_node"]))
+        out.append({"partition": p, "gpu_type": v["gpu_type"], "gpus_total": total, "gpus_free": free, "idle_nodes": idle})
     return {"partitions": out}
 
 
