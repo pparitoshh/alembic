@@ -3,6 +3,7 @@
 *European AI Hackathon · Oct 6–29, 2026 · Team of 5*
 *Companion to [RESEARCH.md](RESEARCH.md), which covers the state of the art and the design rationale.*
 *Updated Oct 4, 2026: teacher/student finalized, QDoRA + FSDP, tool calling, shared single node, eval-first ordering. Student set to Qwen3-4B-Instruct-2507.*
+*Updated Oct 6, 2026: judge models (gpt-oss-20b + Gemma 4 cross-check) added; GPU memory and disk sizes per model; teacher switched to Qwen3-32B-AWQ on vLLM (GGUF as fallback).*
 
 ---
 
@@ -32,8 +33,10 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 
 | Role | Model | Format | Why |
 |---|---|---|---|
-| **Teacher** | Qwen3-32B (official Qwen) | GGUF Q4_K_M (~20 GB) | Fits on one A100 64 GB on a shared node |
+| **Teacher** | Qwen3-32B-AWQ (official Qwen) | AWQ 4-bit (~19 GB), vLLM | Fits on one A100 64 GB on a shared node; vLLM returns token IDs + top-20 logprobs in one call |
 | **Student** | Qwen3-4B-Instruct-2507 | bitsandbytes 4-bit + DoRA (QDoRA) | Capacity for domain + tool calling; non-thinking only; Q4_K_M export ~2.5 GB |
+| **Judge** | gpt-oss-20b (OpenAI) | MXFP4 (~16 GB), vLLM | Non-Qwen family (no self-preference bias toward teacher/student); Apache 2.0; one A100 |
+| **Cross-check judge** | Gemma 4 26B-A4B IT (Google) | bf16, vLLM | Second family; re-scores the same cached answers, so agreement makes "beats base" credible |
 
 - **Why the 2507 Instruct variant:** the Jul 2025 update of Qwen3-4B's non-thinking mode, with the same architecture and tokenizer. Much better at tool use (BFCL-v3 61.9 vs. 57.6, TAU1-Retail 48.7 vs. 24.3). It never emits `<think>` blocks, so training, inference and the Ollama template all render tool calls the same way.
 - Same Qwen3 family → shared tokenizer → logit-level KD stays open for v2.
@@ -41,24 +44,44 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 - Apache 2.0 → clean for MIT release.
 - **DoRA:** LoRA A/B matrices update direction; a separate trainable vector updates magnitude. Closer to full fine-tuning at low rank. One flag in PEFT (`use_dora=True`).
 - **FSDP, not DeepSpeed ZeRO-2** — known QDoRA issues with ZeRO-2.
+- **Judges run on the cluster**, so evaluation needs no external API. The judge sees the reference chunk and scores pairwise in both answer orders. Each judge must pass the `calibrate` stage (known-label pairs) before its scores are used; both are calibrated on day 1 on Leonardo.
 
-> **Open decision:** logprob capture is easier under vLLM than llama.cpp. Confirm the serving stack can return top-20 logprobs for the GGUF teacher, or serve the teacher via vLLM.
+> **Decided (Oct 6):** the teacher is served by **vLLM + Qwen3-32B-AWQ** (AWQ runs via the Marlin kernel on Ampere; A100 has no FP8). vLLM gives top-20 logprobs and token IDs natively. llama.cpp + GGUF Q4_K_M (~20 GB, same footprint) stays as the fallback if vLLM can't be installed on Leonardo; both expose an OpenAI-compatible API, so the teacher client doesn't change.
 
 ## 4. Hackathon focus areas
 
 | Focus | What we will do on the cluster |
 |---|---|
-| **Distributed teacher inference** | Batch generation with Qwen3-32B Q4_K_M on one GPU (more if available). Start with ~10k examples, evaluate, then scale up if time allows. Measure throughput (tokens/s per GPU) and cost per 1k verified examples. |
+| **Distributed teacher inference** | Batch generation with Qwen3-32B-AWQ under vLLM on one GPU (more if available). Start with ~10k examples, evaluate, then scale up if time allows. Measure throughput (tokens/s per GPU) and cost per 1k verified examples. |
 | **Parallel student training** | QDoRA on Qwen3-4B-Instruct-2507 with FSDP; several seeds and ablations in parallel. A student family (1.7B / 4B) is a stretch goal (no 2507 release of 1.7B: use Qwen3-1.7B with thinking off). |
 | **Accuracy vs. size under quantization** | Evaluate every (student size × quant level) pair on the same held-out set. Produce an **accuracy–size–speed Pareto frontier**. |
 
 ### Compute
 
 - **Cluster:** Leonardo (CINECA). **One node (4× A100 64 GB), shared across hackathon teams.** Plan for 1–2 GPUs at a time.
-- **Teacher:** Qwen3-32B Q4_K_M fits on a single 64 GB A100.
+- **Teacher:** Qwen3-32B-AWQ fits on a single 64 GB A100.
 - **Student:** Qwen3-4B-Instruct-2507 QDoRA is small; FSDP gives clean multi-GPU scaling when GPUs are free.
-- **Storage:** model weights + data + top-20 logprobs (can be several GB — check quota).
+- **Judges:** one A100 each. Student/base answers are cached first, so the judge runs after the training GPU is freed.
+- **Storage:** ~95 GB of model weights plus venvs, data, logprobs and exports. Plan for **~150 GB on `$WORK`** (see the table below; check with `cindata`).
 - **Operating rules on a shared node:** generate in chunks, checkpoint generated data frequently, run heavy jobs off-peak where possible.
+
+#### GPU memory and disk per model
+
+*Weight sizes are from `slurm/setup_login.sh`. The GPU memory figures for KV cache and training are estimates: we measure them in the week-1 smoke tests.*
+
+| Model / artefact | Disk | GPU memory | GPUs | Notes |
+|---|---|---|---|---|
+| Teacher: Qwen3-32B-AWQ (vLLM) | ~19 GB | ~19 GB weights + KV cache; vLLM fills the rest of the 64 GB | 1 | GGUF Q4_K_M fallback is ~20 GB, same footprint |
+| Student: Qwen3-4B-Instruct-2507 (bf16 download) | ~8 GB | ~2.5 GB as 4-bit NF4; training with activations is roughly 15–30 GB per GPU | 1–2 (FSDP) | Also served bf16 (~8 GB) by vLLM for answer generation |
+| Judge: gpt-oss-20b (MXFP4) | ~14 GB | ~16 GB weights + KV cache | 1 | Leaves plenty of room for batching |
+| Cross-check judge: Gemma 4 26B-A4B IT (bf16) | ~52 GB | ~52 GB weights, only ~10 GB left for KV cache | 1 | Tight on 64 GB: keep context short and concurrency low |
+| Adapters + checkpoints (per run) | < 1 GB | — | — | × seeds × ablations: a few GB in total |
+| GGUF exports (per student) | ~8 GB f16 intermediate + ~4.3 GB Q8_0 + ~2.5 GB Q4_K_M | — | CPU | Delete the f16 intermediate after quantizing |
+| Teacher top-20 logprobs (10k examples) | hundreds of MB (binary) | — | — | Several GB if stored as JSON: store binary |
+| Python venvs (distillkit + vLLM) | ~15–20 GB | — | — | Two venvs: vLLM pins its own torch |
+
+**Concurrency on the shared node:** the teacher, each judge and each training run need one GPU each, so they can run side by side on the 4 GPUs. The exception is FSDP training, which needs 2. Never put two of them on the same GPU. The laptop student budget is < 4 GB RAM (Q4_K_M ~2.5 GB + KV cache + RAG).
+
 - **Still to confirm:** compute-node access date; internet on compute nodes; vLLM availability; max wall time; storage quota.
 - **If compute nodes have no internet:** pre-download weights to shared storage from login nodes; host the judge on the cluster.
 
@@ -162,7 +185,7 @@ of reach for a 4B model on a CPU-only laptop at any quant level (12 tokens/s at 
 | When | Milestone |
 |---|---|
 | **Before Oct 6** | Seed corpus + document split; eval set started (~50 questions incl. tool-calling slice); tool schemas + 2 gold examples; toy pipeline running locally. |
-| **Week 1 (Oct 6–12)** | Kickoff; Leonardo access; pre-download teacher (Qwen3-32B Q4_K_M) and student (Qwen3-4B-Instruct-2507); smoke test of teacher generation with logprobs and QDoRA training + GGUF export; baselines measured; 10k pilot generation |
+| **Week 1 (Oct 6–12)** | Kickoff; Leonardo access; pre-download teacher (Qwen3-32B-AWQ) and student (Qwen3-4B-Instruct-2507); smoke test of teacher generation with logprobs and QDoRA training + GGUF export; calibrate both judges; baselines measured; 10k pilot generation |
 | **Week 2 (Oct 13–19)** | Train first student; evaluate; targeted second generation batch on failure areas; verification at scale |
 | **Week 3 (Oct 20–26)** | Ablations (3 seeds each): filtering, data scale; quant levels; second student size if on track |
 | **Final (Oct 27–29)** | Quantization sweep + Pareto frontier; release repo, model and dataset; final presentation |
