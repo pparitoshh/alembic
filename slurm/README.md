@@ -4,12 +4,16 @@ Everything runs **on the cluster, offline**: weights are downloaded once on a lo
 serves its own models with vLLM on its own GPU (on `127.0.0.1`, on a port derived from the job id, so
 teams sharing the node don't collide). No external API is used.
 
-| Role | Model | GPUs | License |
-|---|---|---|---|
-| Teacher | `Qwen/Qwen3-32B-AWQ` (vLLM) | 1 | Apache 2.0 |
-| Student | `Qwen/Qwen3-4B-Instruct-2507`, QDoRA | 1 per seed (2 with FSDP) | Apache 2.0 |
-| Judge | `openai/gpt-oss-20b` (vLLM) | 1 (shared with the student's answers) | Apache 2.0 |
-| Cross-check judge | `google/gemma-4-26B-A4B-it` (vLLM) | 1 | Apache 2.0 |
+| Role | Model | Disk | GPUs | License |
+|---|---|---|---|---|
+| Teacher | `Qwen/Qwen3-32B-AWQ` (vLLM) | ~19 GB | 1 | Apache 2.0 |
+| Student | `Qwen/Qwen3-4B-Instruct-2507`, QDoRA | ~8 GB | 1 per seed (2 with FSDP) | Apache 2.0 |
+| Judge | `openai/gpt-oss-20b` (vLLM) | ~14 GB | 1 (shared with the student's answers) | Apache 2.0 |
+| Cross-check judge | `google/gemma-4-26B-A4B-it` (vLLM) | ~52 GB | 1 (bf16 fills most of the 64 GB: short context, low concurrency) | Apache 2.0 |
+
+Teacher serving was decided on Oct 6 (GOAL.md §3): vLLM + AWQ returns top-20 logprobs and token ids in
+one call. If vLLM can't be installed, the fallback is llama.cpp `llama-server` with the official
+Qwen3-32B GGUF Q4_K_M (~20 GB, same OpenAI-compatible API); the scripts don't automate that path yet.
 
 ## 1. One-time setup (login node)
 
