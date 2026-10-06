@@ -23,6 +23,8 @@ from .tools import SCHEMAS, set_valid_flags
 
 JUDGE_SYSTEM = 'You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Return exactly one JSON object: {"verdict":"A"}, {"verdict":"B"}, or {"verdict":"T"}. A means Answer A is better, B means Answer B is better, and T means a tie. Do not include an explanation or Markdown.'
 
+JUDGE_PROTOCOL = "paired-orders-v2-invalid-incomplete"
+
 JUDGE_PROMPT = """Question: {question}
 
 Reference answer (ground truth): {reference}
@@ -145,20 +147,24 @@ def comparisons(models: list[str]) -> list[tuple[str, str]]:
     return pairs
 
 
-def win_rate(teacher: Teacher, per_q: list[dict], x: str, y: str) -> tuple[float, int]:
-    """Judge x vs y on every question in both orders; (x's win rate, unparsed verdicts).
-    Verdicts go to row["judge"]["<x>_vs_<y>"] as [x shown as A, x shown as B]."""
+def win_rate(teacher: Teacher, per_q: list[dict], x: str, y: str) -> tuple[float | None, int]:
+    """Both orders, equal question weights; any invalid verdict makes the aggregate incomplete.
+
+    Preserve invalids as None, distinct from genuine ties. No partial-subset headline score is
+    reported. Valid pairs retain the previous scoring: win=1, tie=0.5, loss=0 in each order.
+    Verdicts go to row["judge"]["<x>_vs_<y>"] as [x shown as A, x shown as B].
+    """
     pairs = [(row, a, b) for row in per_q for a, b in ((row[f"answer_{x}"], row[f"answer_{y}"]), (row[f"answer_{y}"], row[f"answer_{x}"]))]
     verdicts = teacher.map(lambda p: judge(teacher, *p), pairs)  # in parallel: [q0 x=A, q0 x=B, q1 ...]
     score, unparsed = 0.0, 0
     for i, row in enumerate(per_q):
         (v1, raw1), (v2, raw2) = verdicts[2 * i], verdicts[2 * i + 1]
         unparsed += (v1 is None) + (v2 is None)
-        v1, v2 = v1 or "T", v2 or "T"
-        score += ({"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]) / 2
+        if v1 is not None and v2 is not None:
+            score += ({"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]) / 2
         row.setdefault("judge", {})[f"{x}_vs_{y}"] = [v1, v2]
         row.setdefault("judge_raw", {})[f"{x}_vs_{y}"] = [raw1, raw2]
-    return score / len(per_q), unparsed
+    return score / len(per_q) if per_q and not unparsed else None, unparsed
 
 
 def run(cfg: Config) -> dict:
@@ -196,11 +202,19 @@ def run(cfg: Config) -> dict:
     if pairs:
         teacher = Teacher(cfg.judge, name="judge")
         unparsed = 0
+        summary["judge_protocol"] = JUDGE_PROTOCOL
+        summary["judge_comparisons"] = {}
         for x, y in pairs:
             rate, bad = win_rate(teacher, per_q, x, y)
-            summary[f"{x}_vs_{y}_win_rate"] = rate
+            key = f"{x}_vs_{y}"
+            summary[f"{key}_win_rate"] = rate
+            summary["judge_comparisons"][key] = {
+                "status": "complete" if rate is not None else "incomplete",
+                "questions": len(per_q), "expected_verdicts": 2 * len(per_q), "invalid_verdicts": bad,
+                "complete_pairs": sum(all(v is not None for v in row["judge"][key]) for row in per_q),
+            }
             unparsed += bad
-        summary["judge_unparsed"] = unparsed  # counted as ties; should be 0
+        summary["judge_unparsed"] = unparsed
         summary["judge"] = cfg.judge.model
 
     suffix = f"_{cfg.eval.tag}" if cfg.eval.tag else ""
