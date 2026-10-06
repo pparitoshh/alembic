@@ -1,5 +1,5 @@
 {
-  "note": "Hand-written few-shot anchor for tool-calling traces: question -> one-line plan -> tool call -> tool result -> answer. Results come from the deterministic mock cluster (tools.py).",
+  "note": "Few-shot tool format anchored in slurm_monitoring and the existing local synthetic accounting fixture; split provenance is in provenance.json. Not evidence from a live cluster.",
   "messages": [
     {
       "role": "user",
@@ -26,7 +26,7 @@
     },
     {
       "role": "assistant",
-      "content": "Job 4718209 ended with **OUT_OF_MEMORY** after 00:27:53: GPU memory peaked at 63.4 GiB, the full capacity of the A100 64 GB, so CUDA ran out of memory. Host RAM (85G) was not the problem. To fix it:\n\n- lower the per-GPU batch size, or enable gradient checkpointing;\n- or spread the model over more GPUs, e.g. `#SBATCH --gpus-per-node=4` with FSDP.\n\nNote that it ran in `boost_qos_dbg`, which has a 30-minute limit, so move longer runs to `boost_usr_prod`."
+      "content": "The accounting record reports that job 4718209 ended with OUT_OF_MEMORY after 00:27:53. Its MaxRSS is 85G."
     }
   ]
 }

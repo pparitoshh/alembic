@@ -9,6 +9,7 @@ Resumable: questions and answers are appended to the run dir as they finish, and
 does the missing ones. On a shared cluster node, a job killed at its wall time loses nothing.
 """
 
+import hashlib
 import itertools
 import json
 import random
@@ -86,14 +87,58 @@ Reference material (ground truth for general Slurm facts; never mention it):
 
 def _gold(cfg: Config, name: str) -> str:
     """Gold transcript rendered as a labelled example for the system prompt. As earlier chat turns it
-    leaked: the teacher took the example's job id for the user's own job."""
+    leaked: the teacher took the example's job id for the user's own job.
+
+    Split provenance is separate from the transcript schema. Bind the example and each declared
+    seed source to reviewed bytes, and resolve train/eval using this run's config, not the sidecar
+    alone. This gate does not establish upstream licensing or prove semantic derivation.
+    """
     if not cfg.generate.gold_dir:
         return ""
     path = Path(cfg.generate.gold_dir) / f"{name}.json"
-    if not path.exists():
-        return ""
+    provenance_path = path.parent / "provenance.json"
+
+    def fail(reason):
+        raise ValueError(f"Gold example {path}: {reason}")
+
+    try:
+        raw = path.read_bytes()
+        data = json.loads(raw)
+        provenance = json.loads(provenance_path.read_bytes())
+    except (OSError, ValueError) as exc:
+        fail(f"cannot read example/provenance ({provenance_path}): {exc}")
+    if not isinstance(provenance, dict) or provenance.get("schema_version") != 1:
+        fail("unknown provenance schema; expected schema_version=1")
+    examples = provenance.get("examples")
+    entry = examples.get(path.name) if isinstance(examples, dict) else None
+    if not isinstance(entry, dict):
+        fail("unknown source split provenance; missing example entry")
+    if entry.get("sha256") != hashlib.sha256(raw).hexdigest():
+        fail("example hash differs from reviewed provenance; review and rebind the example")
+    sources = entry.get("sources")
+    if not isinstance(sources, list) or not sources:
+        fail("unknown source split provenance; expected a nonempty sources list")
+    source_paths = {p.stem: p for p in cfg.seeds.dir.glob("*.md")}
+    for source in sources:
+        if not isinstance(source, dict) or not isinstance(source.get("doc_id"), str):
+            fail("unknown source split provenance; each source needs a doc_id")
+        doc_id = source["doc_id"]
+        if doc_id in cfg.seeds.eval_docs:
+            fail(f"source {doc_id!r} resolves to eval under seeds.eval_docs; training gold requires train")
+        if source.get("split") != "train":
+            fail(f"source {doc_id!r} has forbidden or unresolved declared split {source.get('split')!r}")
+        if doc_id not in source_paths:
+            fail(f"source {doc_id!r} has unresolved split; no document in configured seeds.dir")
+        try:
+            source_bytes = source_paths[doc_id].read_bytes()
+        except OSError as exc:
+            fail(f"source {doc_id!r} cannot be read: {exc}")
+        if not source_bytes.strip() or source.get("sha256") != hashlib.sha256(source_bytes).hexdigest():
+            fail(f"source {doc_id!r} is empty or differs from reviewed source hash")
+    if not isinstance(data, dict) or not isinstance(data.get("messages"), list) or not data["messages"]:
+        fail("expected a nonempty messages transcript")
     lines = []
-    for m in json.loads(path.read_text())["messages"]:
+    for m in data["messages"]:
         if m["role"] == "tool":
             lines.append(f"[tool result] {m['content']}")
             continue
@@ -138,8 +183,12 @@ def _record_call(c: dict) -> dict:
     return {"type": "function", "function": {"name": f["name"], "arguments": args}}
 
 
-def tool_trace(teacher: Teacher, cfg: Config, chunk: str, question: str, gold: str = "") -> list[dict]:
+def tool_trace(teacher: Teacher, cfg: Config, chunk: str, question: str, gold: str | None = None) -> list[dict]:
     """Run the teacher as an agent against the mock cluster; returns the transcript after the system prompt."""
+    checked_gold = _gold(cfg, "tool_trace")
+    if gold is not None and gold != checked_gold:
+        raise ValueError("tool_trace gold must match the configured, provenance-checked tool_trace example")
+    gold = checked_gold
     system = {"role": "system", "content": A_SYSTEM + "\n" + TOOL_RULES.format(chunk=chunk) + gold}
     convo = [{"role": "user", "content": question}]
     for _ in range(cfg.generate.max_tool_rounds + 1):
@@ -189,10 +238,12 @@ def _mode_rule(job: dict) -> str:
 
 def run(cfg: Config) -> Path:
     gcfg, run_dir = cfg.generate, cfg.run_dir
+    # Fail before constructing a client, creating output appenders or sending question requests.
+    # Check both configured examples even if this question plan happens to use only one mode.
+    gold_prose, gold_trace = _gold(cfg, "prose"), _gold(cfg, "tool_trace")
     teacher = Teacher(cfg.teacher)
     set_valid_flags(load_flags(cfg.verify.flag_list))
     jobs = question_jobs(cfg)
-    gold_prose, gold_trace = _gold(cfg, "prose"), _gold(cfg, "tool_trace")
 
     q_out = JsonlAppender(run_dir / "questions.jsonl")
     done_q = {q["id"]: q for q in q_out.existing()}
