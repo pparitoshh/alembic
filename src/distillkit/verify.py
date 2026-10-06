@@ -57,6 +57,10 @@ def run(cfg: Config) -> Path:
             r = {**r, "tool_checks": tool}
             if tool["call_errors"]:
                 reason = "tool_call_invalid"  # unknown tool, bad arguments, or the mock rejected it
+            elif tool["trace_errors"]:
+                reason = "tool_trace_incomplete_or_out_of_order"
+            elif tool["result_errors"]:
+                reason = "tool_result_mismatch"
             elif tool["ungrounded_ids"]:
                 reason = "tool_ungrounded_id"  # a job id not taken from the question or a tool result
             elif not tool["decision_ok"]:
