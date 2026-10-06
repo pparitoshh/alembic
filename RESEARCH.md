@@ -1,6 +1,6 @@
 # DistillKit — State of the Art Research Notes
 
-*First compiled 2026-09-30; **revised 2026-10-04** for the finalized design in [GOAL.md](GOAL.md) (Qwen3-32B teacher, Qwen3-4B-Instruct-2507 QDoRA student, FSDP, tool calling, saved top-20 logprobs, one shared Leonardo node).*
+*First compiled 2026-09-30; **revised 2026-10-04** for the finalized design in [GOAL.md](GOAL.md) (Qwen3-32B teacher, Qwen3-4B-Instruct-2507 QDoRA student, FSDP, tool calling, saved top-20 logprobs, one shared Leonardo node); **2026-10-06:** teacher serving decided (vLLM + Qwen3-32B-AWQ).*
 *European AI Hackathon, Oct 6–29, 2026.*
 
 **Scope:** distilling a large open-weight **teacher** into a laptop-sized **student**. v1 trains on **generated text only** (sequence-level KD), but the teacher's **top-20 logprobs are saved** so logit-level KD can be added in v2. The demo is an **HPC Assistant** covering Slurm, CUDA, MPI and profiling, **with tool calling**.
@@ -13,7 +13,7 @@
 |---|---|---|
 | Framing | **Sequence-level KD** in v1; top-20 logprobs saved for v2 logit KD | Tokenizer-independent in general; teacher and student here share the Qwen3 tokenizer, so logit KD stays possible later |
 | Teacher | **Qwen3-32B**, 4-bit, non-thinking, on **one A100 64 GB** | Fits one GPU on a shared node; Apache 2.0 |
-| Teacher serving | **Open decision → recommend vLLM + official `Qwen3-32B-AWQ`**; keep llama.cpp + GGUF Q4_K_M as fallback (§2.2) | vLLM's GGUF path is "highly experimental"; vLLM AWQ has continuous batching and native top-k logprobs with token IDs |
+| Teacher serving | **vLLM + official `Qwen3-32B-AWQ`** (decided Oct 6, §2.2); llama.cpp + GGUF Q4_K_M as fallback | vLLM's GGUF path is "highly experimental"; vLLM AWQ has continuous batching and native top-k logprobs with token IDs |
 | Student | **Qwen3-4B-Instruct-2507** (decided Oct 4, §2.1) | 2507 update: BFCL-v3 57.6 → 61.9, TAU1-Retail 24.3 → 48.7 |
 | Training | **QDoRA** (bnb 4-bit + `use_dora=True`), TRL `SFTTrainer`, `assistant_only_loss`, **FSDP** | DoRA is closer to full FT at low rank; PEFT reports issues with QDoRA under DeepSpeed ZeRO-2 |
 | Data | Document-grounded; **~70% prose / ~30% tool-call traces**; persona × task × difficulty grid; gold few-shot anchors | Coverage over volume; consistent format |
@@ -64,7 +64,7 @@ Qwen3-32B has no 2507 refresh; use it in **non-thinking mode** (`enable_thinking
 | **vLLM + GGUF** | Native | Unknown | vLLM docs: GGUF support is **"highly experimental and under-optimized"**, may conflict with other features; now needs a plugin. **Avoid.** |
 | **vLLM + `Qwen/Qwen3-32B-AWQ`** (~19 GB) | Native; `--max-logprobs` defaults to **20**; `return_tokens_as_token_ids` gives IDs directly | PagedAttention + continuous batching; AWQ runs via the Marlin kernel on Ampere | Needs vLLM on Leonardo (container or uv wheel); A100 has **no FP8**, so FP8 builds are out |
 
-**Recommendation:** close the open decision with **vLLM + Qwen3-32B-AWQ** on one A100 64 GB. It has the same 4-bit footprint, the best throughput, and IDs + top-20 logprobs in one call. Keep the llama.cpp/GGUF path as the fallback if vLLM can't be installed. Both expose an OpenAI-compatible API, so our `teacher.py` client doesn't change.
+**Decision (Oct 6):** **vLLM + Qwen3-32B-AWQ** on one A100 64 GB. It has the same 4-bit footprint, the best throughput, and IDs + top-20 logprobs in one call. The llama.cpp/GGUF path is the fallback if vLLM can't be installed. Both expose an OpenAI-compatible API, so our `teacher.py` client doesn't change. `slurm/env.sh` sets `TEACHER_MODEL=Qwen/Qwen3-32B-AWQ`; `slurm/smoke_teacher.sbatch` checks the logprob token IDs, tool calls and throughput on day 1.
 
 - **Day-1 smoke test:** request 1 completion with `logprobs=True, top_logprobs=20`, check that the IDs decode back to the text with the **student's** tokenizer, and log tokens/s at concurrency 1, 16 and 64.
 - **Storage estimate:** 20 × (token ID + float) per generated token. At ~10k examples × ~400 answer tokens × 20 entries, that is ~80M entries: **hundreds of MB as fp16 + int32 in Parquet/NPZ**, several GB as JSON. Store binary, not JSON.
