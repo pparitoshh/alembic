@@ -16,10 +16,16 @@
 | `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination |
 | `train` (LoRA / QDoRA) | ✅ | ✅ | QDoRA on Qwen3-0.6B (RTX 2060); FSDP config written, untested |
 | `evaluate` | ✅ | — | prose judge + tool-slice scoring; not yet run on a tool-trained student |
-| Teacher top-20 logprob capture | ✅ | ✅ | works against the toy API; needs a vLLM/llama-server test on the cluster |
+| Teacher top-20 logprob capture | ✅ | ✅ | works against the toy API; needs a vLLM test on the cluster with Qwen3-32B-AWQ (`smoke_teacher.sbatch`) |
 | `export` (GGUF/Ollama) | ✅ | ✅ | merge → bf16 GGUF → imatrix → Q4_K_M/Q8_0 → Modelfile → `ollama create` + tool-call smoke test |
 
 ## Log
+
+### 2026-10-06: teacher serving decided, judges and sizes in GOAL.md
+
+- **Teacher: vLLM + `Qwen/Qwen3-32B-AWQ`** (~19 GB, one A100 64 GB). Closes GOAL.md's open decision on logprob capture: vLLM returns top-20 logprobs and token IDs (`return_tokens_as_token_ids`) in one call; AWQ runs via the Marlin kernel on Ampere (A100 has no FP8). `slurm/env.sh` already downloads this model. Fallback if vLLM can't be installed on Leonardo: llama.cpp + GGUF Q4_K_M (~20 GB), same OpenAI-compatible API, so `teacher.py` doesn't change.
+- **GOAL.md:** judge models (gpt-oss-20b + Gemma 4 26B-A4B cross-check) added to the model choices; per-model disk / GPU memory / GPU count table; plan ~150 GB on `$WORK`; judge calibration added to week 1.
+- **Watch:** Gemma 4 26B-A4B in bf16 is ~52 GB of weights, leaving ~10 GB of KV cache on a 64 GB A100: keep its context short and concurrency low.
 
 ### 2026-10-04: laptop benchmarks, GGUF eval mode (branch `feature/bench`)
 
