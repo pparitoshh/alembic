@@ -115,7 +115,7 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "797fe42f677f6a28952a4244e6bc56df9e26f12f9dd45e01b8dbbc1bc5a983ac"
+      "sha256": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
     },
     {
       "path": "src/distillkit/toolcheck.py",
@@ -278,6 +278,19 @@
       "dataset_content_changed": false,
       "reason": "Integrate tested opt-in source-family/scenario planning and prior support workflow code with current151release; references/scoringinputs unchanged",
       "validation_status": "CPU combined integration pending; frozen previous revisions remain reproducible"
+    },
+    {
+      "integration": "source-support-v3-opt-in",
+      "revision": "b44f33a0b36607c0337be0e743bba31cfb2ed14a",
+      "changes": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "797fe42f677f6a28952a4244e6bc56df9e26f12f9dd45e01b8dbbc1bc5a983ac",
+          "after": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
+        }
+      ],
+      "dataset_content_changed": false,
+      "validation_status": "Combined production source passed 515 CPU tests plus 28 subtests on Leonardo with real dependencies (production-integration-cpu-001); no inference is implied. This validation note was added afterward; source bytes are identical."
     }
   ]
 }
