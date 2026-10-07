@@ -1,0 +1,8 @@
+{
+  "eval.file": "data/eval/dev_v3/normal.jsonl",
+  "eval.tool_file": "data/eval/dev_v3/tools.jsonl",
+  "eval.tool_protocol": "tool-first-response-v2",
+  "eval.tag": "dev_v3",
+  "run_dir": "runs/eval_dev_v3_unused",
+  "eval.tool_application_policy": "hpc-tools-clarify-first-v1"
+}

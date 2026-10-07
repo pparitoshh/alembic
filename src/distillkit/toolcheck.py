@@ -208,6 +208,9 @@ def score_tool_item(output: str, item: dict) -> dict:
     """Score one eval item {"expect": "call"|"no_call", "expected_call"?: {...}} against raw output.
 
     Only the first call is scored: eval items ask for one call."""
+    if item.get("scoring_protocol") == "tool-first-response-v2":
+        from .eval_tools_v2 import score
+        return score(output, item)
     _, calls = parse_hermes(output)
     decision = "call" if calls else "no_call"
     grounded = not any(ungrounded_ids(c, item["question"]) for c in calls if c.get("name"))

@@ -1,0 +1,155 @@
+{
+  "version": "dev-eval-rc-v3",
+  "created_utc": "2026-10-07T12:49:46.411860+00:00",
+  "base_revision": "5e04e2a2c2ffd1e3c8d030ff3863c729a322b237",
+  "code_identity": "Exact file hashes below; final commit recorded in campaign checkpoint-07 and PR.",
+  "purpose": "Internal development RC, exposed; not final-test or externally published material.",
+  "owners": [
+    "Vaibhav Mangroliya",
+    "Shraddha Jadhav"
+  ],
+  "ready": {
+    "normal": 66,
+    "tools_first_response_scope": 16
+  },
+  "draft_pending": 0,
+  "separate": {
+    "judge_calibration_pairs": 24,
+    "diagnostic_cases": 10,
+    "fresh_final_test_items": 0
+  },
+  "protocols": {
+    "normal": "development-normal-v3",
+    "tool": "tool-first-response-v2",
+    "visible_tool_policy": "hpc-tools-clarify-first-v1",
+    "judge": "unchanged verdict-only"
+  },
+  "inputs": [
+    {
+      "path": "data/eval/eval_all_v2.jsonl",
+      "sha256": "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4"
+    },
+    {
+      "path": "data/eval/eval_core.jsonl",
+      "sha256": "ed01ac6e63b3774273cdf4c48defe6ee6d8c012421e959658072167f9dda2511"
+    },
+    {
+      "path": "data/eval/eval_req.jsonl",
+      "sha256": "f627bf1c736a2a3040aa3fcc6ea765ce6e51b113f5dbb4e21b3e3ec37f911b27"
+    },
+    {
+      "path": "data/eval/eval_tools.jsonl",
+      "sha256": "c5ec3515625067355d6232bc27b063f05d55c0def056132cb1a8575454493441"
+    },
+    {
+      "path": "data/eval/judge_calibration.jsonl",
+      "sha256": "307282a2282ec94249320fd4d021a83b0e8e209cd738d1e1a71460c71f2954de"
+    },
+    {
+      "path": "data/eval/eval_all_v2.manifest.json",
+      "sha256": "d9d49288640f73bca1d1260fc6e9bf90f23b6a187ca6b980bde04b34012cbbef"
+    },
+    {
+      "path": "data/seeds/slurm_job_arrays.md",
+      "sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b"
+    },
+    {
+      "path": "data/seeds/slurm_requeue_signals.md",
+      "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "data/eval/dev_v3/README.md",
+      "sha256": "10450e20ffb0509c0262722258732386e12dc30471d7fd2cf653447bacb961f3"
+    },
+    {
+      "path": "data/eval/dev_v3/cached_answer_compatibility.json",
+      "sha256": "a210e6ab928be0a5c24e444964567b354dd32e611de62ca1712481f4440c3d3e"
+    },
+    {
+      "path": "data/eval/dev_v3/config_overrides.json",
+      "sha256": "c34552c3f4a7483fd2c95ac1d0e177f5fada7360729b27d8832b597db00dae33"
+    },
+    {
+      "path": "data/eval/dev_v3/corrections.json",
+      "sha256": "8f811d5bd5972bd76060b6e1969d2bf4b4a22ac878728662ada858233fa7da36"
+    },
+    {
+      "path": "data/eval/dev_v3/normal.jsonl",
+      "sha256": "41ae36ffdbf30972152670db4eaea29f248a558f6ae3dffe02e1e91bb83e7f3e"
+    },
+    {
+      "path": "data/eval/dev_v3/source_support.json",
+      "sha256": "8807bb1687964b1345f5dd394f43856162f81c21a5fe454489dd70ec1085ed0b"
+    },
+    {
+      "path": "data/eval/dev_v3/tool_review.json",
+      "sha256": "2e66f18594be67460ace0d71d5e6d314e6ff4fa4cf284fb2cce9d806e8f1012b"
+    },
+    {
+      "path": "data/eval/dev_v3/tools.jsonl",
+      "sha256": "055c85bf9d622448427019334092420166873761ba2f389f7f6fd334b9ea1c96"
+    },
+    {
+      "path": "data/eval/dev_v3/validate_release.py",
+      "sha256": "93d49f8062bfa2f48cc32749c91ca68113b7c10b2d6d0729ace758ac9eeb10c0"
+    },
+    {
+      "path": "data/eval/dev_v3/validation.json",
+      "sha256": "458280d101f029ebdd200f2064cca669c121600e20416f42e705af08833544d0"
+    }
+  ],
+  "code_bindings": [
+    {
+      "path": "src/distillkit/eval_tools_v2.py",
+      "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+    },
+    {
+      "path": "src/distillkit/evaluate.py",
+      "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+    },
+    {
+      "path": "src/distillkit/gguf_eval.py",
+      "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+    },
+    {
+      "path": "src/distillkit/config.py",
+      "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+    },
+    {
+      "path": "src/distillkit/toolcheck.py",
+      "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+    },
+    {
+      "path": "src/distillkit/tools.py",
+      "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+    },
+    {
+      "path": "tests/test_eval_dev_v3.py",
+      "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+    }
+  ],
+  "composition": {
+    "original_core": 10,
+    "original_req": 16,
+    "reviewed_supplement": 40,
+    "eval_all_added_again": false
+  },
+  "review": {
+    "method": "Coordinator model content review plus independent read-only model review and automated validation. Inherited normal overlap/supplement reviews preserved.",
+    "human_review_claimed": false,
+    "human_gate_required": false,
+    "exact_reviewer_model_version": "unknown",
+    "infallible": false,
+    "inherited_overlap_sha256": "a069d268e771e84f7d88f70a08170de1d477c9636fe85f9148acb99b46924b57",
+    "independent_capabilities_claimed": false
+  },
+  "provenance": {
+    "unknown_original_six_source_fields": 18,
+    "publication_permission_not_established": true
+  },
+  "no_new_training_records": true,
+  "all_evaluation_material_excluded_from_training": true,
+  "validation": "validation.json records actual exact checks; tests exercise production scorer and prompt/cache paths with CPU mocks, not model inference."
+}
