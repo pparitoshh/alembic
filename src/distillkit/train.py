@@ -10,26 +10,39 @@ from pathlib import Path
 from .config import Config
 
 
+def admitted_training_rows(cfg: Config) -> list[dict]:
+    from .io import read_jsonl
+    from .source_registry import admitted_sources
+    from .support import source_for_record
+    rows = read_jsonl(cfg.run_dir / 'verified.jsonl')
+    if getattr(cfg.seeds, 'registry', None) is not None:
+        admitted_sources(cfg)
+        for row in rows:
+            source_for_record(cfg, row)
+    return rows
+
+
 def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
     """Train through the production path, optionally inspecting it before optimization.
 
     The hooks support bounded runtime checks without maintaining a second trainer.
     They do not change configuration, labels, losses or model selection.
     """
+    # Admission is checked before tokenizer/model loading, including direct train
+    # invocations that reuse an older verified file without rerunning verification.
+    rows = admitted_training_rows(cfg)
     import torch
     from datasets import Dataset
     from peft import LoraConfig
     from transformers import AutoTokenizer, BitsAndBytesConfig
     from trl import SFTConfig, SFTTrainer
 
-    from .io import read_jsonl
     from .records import training_example
 
     scfg, tcfg, run_dir = cfg.student, cfg.train, cfg.run_dir
     out_dir = run_dir / "adapter"
 
     tok = AutoTokenizer.from_pretrained(scfg.model)
-    rows = read_jsonl(run_dir / "verified.jsonl")
     ds = Dataset.from_list([training_example(r, scfg.system_prompt) for r in rows])
     print(f"[train] {len(ds)} examples, student={scfg.model}, method={tcfg.method}, 4bit={tcfg.load_in_4bit}")
 

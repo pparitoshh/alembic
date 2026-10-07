@@ -1,6 +1,7 @@
 """Load seed documents, chunk them, and split train/eval by document."""
 
 from .config import Config
+from .source_registry import admitted_sources
 
 
 def chunk_text(text: str, max_chars: int) -> list[str]:
@@ -29,11 +30,14 @@ def chunk_text(text: str, max_chars: int) -> list[str]:
 def load_chunks(cfg: Config) -> tuple[list[dict], list[dict]]:
     """Return (train_chunks, eval_chunks). Split is by document, never by chunk."""
     scfg = cfg.seeds
+    admitted = admitted_sources(cfg)
     eval_docs = set(scfg.eval_docs)
     train, held_out = [], []
     for path in sorted(scfg.dir.glob("*.md")):
         doc_id = path.stem
         for i, text in enumerate(chunk_text(path.read_text(), scfg.chunk_chars)):
             chunk = {"doc_id": doc_id, "chunk_id": f"{doc_id}#{i}", "text": text}
+            if admitted is not None and doc_id not in eval_docs:
+                chunk.update(admitted[doc_id])
             (held_out if doc_id in eval_docs else train).append(chunk)
     return train, held_out
