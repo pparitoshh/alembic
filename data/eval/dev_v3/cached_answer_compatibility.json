@@ -1,0 +1,36 @@
+{
+  "version": "dev-eval-rc-v3",
+  "cached_answers_sha256": "dbf1eb9c2a800e2cb0ee23947d21792fc3140867e35db425bdb178f052231c61",
+  "cached_answer_count": 82,
+  "questions_aligned": 82,
+  "normal_answering_inputs_unchanged": 66,
+  "normal_reference_only_corrections": [
+    "arr-003",
+    "req-002",
+    "req-011"
+  ],
+  "normal_rescoring": "Compatible answering inputs; no judge requests or new scores in this checkpoint. Use v3 references consistently for all compared systems.",
+  "tool_cached_answers_incompatible": 16,
+  "incompatible_ids": [
+    "tool-001",
+    "tool-002",
+    "tool-003",
+    "tool-004",
+    "tool-005",
+    "tool-006",
+    "tool-007",
+    "tool-008",
+    "tool-009",
+    "tool-010",
+    "tool-011",
+    "tool-012",
+    "tool-013",
+    "tool-014",
+    "tool-015",
+    "tool-016"
+  ],
+  "tool_reason": "Visible global policy and one-call limit change tool system prompts. Every old tool answer remains archived under its original version; no regeneration.",
+  "new_answers_generated": 0,
+  "baseline_bytes_preserved": true,
+  "judge_protocol_changed": false
+}

@@ -88,6 +88,8 @@ class TrainCfg(_Section):
 
 
 class EvalCfg(_Section):
+    tool_protocol: Literal["tool-first-call-v1", "tool-first-response-v2"] = "tool-first-call-v1"
+    tool_application_policy: Literal['hpc-tools-clarify-first-v1', 'hpc-tools-readonly-discovery-v1'] = 'hpc-tools-clarify-first-v1'
     file: Path
     tool_file: Path | None = None  # tool-calling slice: scored by toolcheck, not the judge
     calibration_file: Path | None = None  # human-labelled answer pairs for the `calibrate` stage

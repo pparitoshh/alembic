@@ -1,0 +1,874 @@
+{
+  "version": "development-tool-v2",
+  "method": "Coordinator model review plus independent read-only model review, followed by automated production tests; no human review claimed or required.",
+  "exact_reviewer_model_version": "unknown",
+  "infallibility_claimed": false,
+  "rows": [
+    {
+      "id": "tool-001",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-001",
+        "task": "tool",
+        "expect": "call",
+        "question": "Is job 4718207 still running?",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "job_status",
+          "arguments": {
+            "job_id": [
+              "4718207"
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-001",
+        "task": "tool",
+        "expect": "call",
+        "question": "Is job 4718207 still running?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "job_status",
+          "arguments": {
+            "job_id": [
+              "4718207"
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Explicit job ID and current-state request support job_status.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "job_status",
+        "arguments": {
+          "job_id": [
+            "4718207"
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-002",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-002",
+        "task": "tool",
+        "expect": "call",
+        "question": "Show me the last 50 lines of the error log of job 4718206.",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "read_job_log",
+          "arguments": {
+            "job_id": [
+              "4718206"
+            ],
+            "stream": [
+              "stderr",
+              ""
+            ],
+            "tail_lines": [
+              50
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-002",
+        "task": "tool",
+        "expect": "call",
+        "question": "Show me the last 50 lines of the error log of job 4718206.",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "read_job_log",
+          "arguments": {
+            "job_id": [
+              "4718206"
+            ],
+            "stream": [
+              "stderr",
+              ""
+            ],
+            "tail_lines": [
+              50
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Explicit job ID, stderr and 50 lines; omitted stream is documented stderr default.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "read_job_log",
+        "arguments": {
+          "job_id": [
+            "4718206"
+          ],
+          "stream": [
+            "stderr",
+            ""
+          ],
+          "tail_lines": [
+            50
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-003",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-003",
+        "task": "tool",
+        "expect": "call",
+        "question": "How many GPUs are free right now in boost_usr_prod?",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "gpu_availability",
+          "arguments": {
+            "partition": [
+              "boost_usr_prod"
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-003",
+        "task": "tool",
+        "expect": "call",
+        "question": "How many GPUs are free right now in boost_usr_prod?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "gpu_availability",
+          "arguments": {
+            "partition": [
+              "boost_usr_prod"
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Explicit partition GPU availability request; use the named partition only.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "gpu_availability",
+        "arguments": {
+          "partition": [
+            "boost_usr_prod"
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-004",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-004",
+        "task": "tool",
+        "expect": "call",
+        "question": "Please cancel job 4718210, I started it with the wrong input file.",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "cancel_job",
+          "arguments": {
+            "job_id": [
+              "4718210"
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-004",
+        "task": "tool",
+        "expect": "call",
+        "question": "Please cancel job 4718210, I started it with the wrong input file.",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "cancel_job",
+          "arguments": {
+            "job_id": [
+              "4718210"
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Explicit authorized cancellation of the specified job; evaluation executes only a mock.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "cancel_job",
+        "arguments": {
+          "job_id": [
+            "4718210"
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-005",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-005",
+        "task": "tool",
+        "expect": "call",
+        "question": "What's the maximum wall time I can request on boost_qos_lprod?",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "partition_info",
+          "arguments": {
+            "partition": [
+              "boost_qos_lprod"
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-005",
+        "task": "tool",
+        "expect": "call",
+        "question": "What's the maximum wall time I can request on boost_qos_lprod?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "partition_info",
+          "arguments": {
+            "partition": [
+              "boost_qos_lprod"
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Partition maximum wall-time capability is supplied by partition_info, not a job own limit.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "partition_info",
+        "arguments": {
+          "partition": [
+            "boost_qos_lprod"
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-006",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-006",
+        "task": "tool",
+        "expect": "call",
+        "question": "Which of my jobs are still waiting in the queue?",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "list_queue",
+          "arguments": {
+            "state": [
+              "PENDING"
+            ],
+            "partition": [
+              ""
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-006",
+        "task": "tool",
+        "expect": "call",
+        "question": "Which of my jobs are still waiting in the queue?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "list_queue",
+          "arguments": {
+            "state": [
+              "PENDING"
+            ],
+            "partition": [
+              ""
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Waiting queue request supports state=PENDING; no partition was selected.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "list_queue",
+        "arguments": {
+          "state": [
+            "PENDING"
+          ],
+          "partition": [
+            ""
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-007",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-007",
+        "task": "tool",
+        "expect": "call",
+        "question": "How much memory did job 4718209 actually use?",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "job_accounting",
+          "arguments": {
+            "job_id": [
+              "4718209"
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-007",
+        "task": "tool",
+        "expect": "call",
+        "question": "How much memory did job 4718209 actually use?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "job_accounting",
+          "arguments": {
+            "job_id": [
+              "4718209"
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Observed memory-usage request belongs to job_accounting.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "job_accounting",
+        "arguments": {
+          "job_id": [
+            "4718209"
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-008",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-008",
+        "task": "tool",
+        "expect": "call",
+        "question": "Did job 4718203 finish normally or was it killed?",
+        "review": "draft: needs human review",
+        "expected_call": [
+          {
+            "name": "job_status",
+            "arguments": {
+              "job_id": [
+                "4718203"
+              ]
+            }
+          },
+          {
+            "name": "job_accounting",
+            "arguments": {
+              "job_id": [
+                "4718203"
+              ]
+            }
+          }
+        ]
+      },
+      "after": {
+        "id": "tool-008",
+        "task": "tool",
+        "expect": "call",
+        "question": "Did job 4718203 finish normally or was it killed?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": [
+          {
+            "name": "job_status",
+            "arguments": {
+              "job_id": [
+                "4718203"
+              ]
+            }
+          },
+          {
+            "name": "job_accounting",
+            "arguments": {
+              "job_id": [
+                "4718203"
+              ]
+            }
+          }
+        ],
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Either job_status or job_accounting supplies relevant state; first response does not establish final causal explanation.",
+      "allowed_workflow": "call",
+      "expected_calls": [
+        {
+          "name": "job_status",
+          "arguments": {
+            "job_id": [
+              "4718203"
+            ]
+          }
+        },
+        {
+          "name": "job_accounting",
+          "arguments": {
+            "job_id": [
+              "4718203"
+            ]
+          }
+        }
+      ],
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-009",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-009",
+        "task": "tool",
+        "expect": "call",
+        "question": "Can you check whether this script would be accepted, without actually submitting it?\n\n#!/bin/bash\n#SBATCH --partition=boost_usr_prod\n#SBATCH --gpus-per-node=2\n#SBATCH --time=02:00:00\nsrun python train.py",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "submit_job",
+          "arguments": {
+            "script": [
+              "*"
+            ],
+            "test_only": [
+              true
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-009",
+        "task": "tool",
+        "expect": "call",
+        "question": "Can you check whether this script would be accepted, without actually submitting it?\n\n#!/bin/bash\n#SBATCH --partition=boost_usr_prod\n#SBATCH --gpus-per-node=2\n#SBATCH --time=02:00:00\nsrun python train.py",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "submit_job",
+          "arguments": {
+            "script": [
+              "#!/bin/bash\n#SBATCH --partition=boost_usr_prod\n#SBATCH --gpus-per-node=2\n#SBATCH --time=02:00:00\nsrun python train.py"
+            ],
+            "test_only": [
+              true
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Validate the exact supplied script with test_only=true; no submission or changes to case-sensitive program names.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "submit_job",
+        "arguments": {
+          "script": [
+            "#!/bin/bash\n#SBATCH --partition=boost_usr_prod\n#SBATCH --gpus-per-node=2\n#SBATCH --time=02:00:00\nsrun python train.py"
+          ],
+          "test_only": [
+            true
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-010",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-010",
+        "task": "tool",
+        "expect": "call",
+        "question": "Are there any free GPUs on the cluster at the moment?",
+        "review": "draft: needs human review",
+        "expected_call": {
+          "name": "gpu_availability",
+          "arguments": {
+            "partition": [
+              ""
+            ]
+          }
+        }
+      },
+      "after": {
+        "id": "tool-010",
+        "task": "tool",
+        "expect": "call",
+        "question": "Are there any free GPUs on the cluster at the moment?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "expected_call": {
+          "name": "gpu_availability",
+          "arguments": {
+            "partition": [
+              ""
+            ]
+          }
+        },
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Cluster-wide GPU availability; omit partition filter.",
+      "allowed_workflow": "call",
+      "expected_calls": {
+        "name": "gpu_availability",
+        "arguments": {
+          "partition": [
+            ""
+          ]
+        }
+      },
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-011",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-011",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Why did my job fail?",
+        "review": "draft: needs human review",
+        "allow_lookup": true
+      },
+      "after": {
+        "id": "tool-011",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Why did my job fail?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Missing job identity: under visible clarify_first, ask for ID before any tool use.",
+      "allowed_workflow": "no_call",
+      "expected_calls": null,
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-012",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-012",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Cancel my job please, it's stuck.",
+        "review": "draft: needs human review",
+        "allow_lookup": true
+      },
+      "after": {
+        "id": "tool-012",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Cancel my job please, it's stuck.",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Cancellation requested but target missing: clarify before action or discovery.",
+      "allowed_workflow": "no_call",
+      "expected_calls": null,
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-013",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-013",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Show me the log of my last training run.",
+        "review": "draft: needs human review",
+        "allow_lookup": true
+      },
+      "after": {
+        "id": "tool-013",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Show me the log of my last training run.",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Last training run is not an identified job: clarify; do not infer a target from its name.",
+      "allowed_workflow": "no_call",
+      "expected_calls": null,
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-014",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-014",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "What does #SBATCH --ntasks-per-node mean?",
+        "review": "draft: needs human review"
+      },
+      "after": {
+        "id": "tool-014",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "What does #SBATCH --ntasks-per-node mean?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "General directive question: no live lookup; decision score does not assess explanatory correctness.",
+      "allowed_workflow": "no_call",
+      "expected_calls": null,
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-015",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-015",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "What is the difference between srun and sbatch?",
+        "review": "draft: needs human review"
+      },
+      "after": {
+        "id": "tool-015",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "What is the difference between srun and sbatch?",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "General srun/sbatch comparison: no live lookup; decision score does not assess explanatory correctness.",
+      "allowed_workflow": "no_call",
+      "expected_calls": null,
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    },
+    {
+      "id": "tool-016",
+      "disposition": "ready_for_first_response_scope",
+      "before": {
+        "id": "tool-016",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Write an sbatch script that requests 4 GPUs on one node for 2 hours and runs train.py.",
+        "review": "draft: needs human review"
+      },
+      "after": {
+        "id": "tool-016",
+        "task": "tool",
+        "expect": "no_call",
+        "question": "Write an sbatch script that requests 4 GPUs on one node for 2 hours and runs train.py.",
+        "review": "model-reviewed: first-response decision and arguments; automated validation required",
+        "scoring_protocol": "tool-first-response-v2",
+        "application_policy": "hpc-tools-clarify-first-v1"
+      },
+      "justification": "Script-writing request is not authorization to submit or validate it via a tool; no-call score does not judge script content.",
+      "allowed_workflow": "no_call",
+      "expected_calls": null,
+      "source_support": [
+        "user question for intent, target, parameters and supplied script",
+        "src/distillkit/tools.py SCHEMAS and deterministic mock implementation",
+        "src/distillkit/eval_tools_v2.py POLICY_TEXT"
+      ],
+      "scope_exclusions": [
+        "final prose quality",
+        "multi-turn result grounding",
+        "delivered task completion"
+      ],
+      "cached_baseline_compatible": false,
+      "incompatibility_reason": "New visible global tool application policy changes answering system prompt; old response is preserved, never silently reused."
+    }
+  ],
+  "reviewed": 16,
+  "draft": 0,
+  "pending": 0,
+  "scope": "First-response call/no-call decision, exact arguments and isolated mock executability only."
+}
