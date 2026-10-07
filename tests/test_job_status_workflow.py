@@ -171,11 +171,11 @@ def test_bounded_workflow_prompt_reaches_every_actual_teacher_turn(cfg):
 def test_observed_unsupported_stderr_command_is_rejected_by_production_verifier(cfg):
     from distillkit import verify
     from distillkit.io import write_jsonl,read_jsonl
-    from distillkit.job_status_guard import WORKFLOW_VERSION
+    from distillkit.job_status_guard import LEGACY_WORKFLOW_VERSION
     jid=fixture('FAILED')
     bad=f'Read the last 20 stderr lines with:\n```bash\nsacct -j {jid} --format=JobID,State,ExitCode,Reason\n```'
     teacher=FakeTeacher([Completion('',[call(job_id=jid)]),Completion(bad)])
-    row=trace(cfg,teacher,f'Check job {jid}.',[jid]);row.update(id='unsupported',question=f'Check job {jid}.',workflow_version=WORKFLOW_VERSION)
+    row=trace(cfg,teacher,f'Check job {jid}.',[jid]);row.update(id='unsupported',question=f'Check job {jid}.',workflow_version=LEGACY_WORKFLOW_VERSION)
     assert not toolcheck.check_trace(row)['passed']
     assert toolcheck.check_trace(row)['workflow_errors']
     write_jsonl(cfg.run_dir/'generated.jsonl',[row])
@@ -185,10 +185,10 @@ def test_observed_unsupported_stderr_command_is_rejected_by_production_verifier(
 
 
 def test_bounded_workflow_does_not_reject_supported_field_wording(cfg):
-    from distillkit.job_status_guard import WORKFLOW_VERSION
+    from distillkit.job_status_guard import LEGACY_WORKFLOW_VERSION
     jid=fixture('FAILED')
     for answer in ['FAILED; exit code 1:0. The cause is not established by this status.',
                    'The result does not identify the failure cause. The read_job_log tool can retrieve stderr.']:
         row=trace(cfg,FakeTeacher([Completion('',[call(job_id=jid)]),Completion(answer)]),f'Check job {jid}.',[jid])
-        row['workflow_version']=WORKFLOW_VERSION
+        row['workflow_version']=LEGACY_WORKFLOW_VERSION
         assert toolcheck.check_trace(row)['passed']
