@@ -16,6 +16,7 @@ class SeedsCfg(_Section):
     dir: Path
     eval_docs: list[str]  # held out BEFORE any generation
     chunk_chars: int = 1500
+    registry: Path | None = None  # reviewed source-family registry; legacy configs remain compatible
 
 
 class EndpointCfg(_Section):

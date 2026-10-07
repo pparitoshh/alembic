@@ -13,6 +13,7 @@ from .toolcheck import check_trace
 from .tools import SCHEMAS, set_valid_flags
 from .job_status_guard import WORKFLOW_VERSION, JobStatusPolicy
 from .support import check_support, source_for_record
+from .source_registry import admitted_sources, record_source_binding
 
 
 def _shingles(text: str, n: int = 3) -> set[tuple[str, ...]]:
@@ -26,6 +27,7 @@ def _jaccard(a: set, b: set) -> float:
 
 def run(cfg: Config) -> Path:
     vcfg, run_dir = cfg.verify, cfg.run_dir
+    admitted_sources(cfg)  # fail before writing outputs if the configured source basis is invalid
     # generate appends rows in completion order; sort so "first copy wins" in dedup is reproducible
     rows = sorted(read_jsonl(run_dir / "generated.jsonl"), key=lambda r: r.get("id", ""))
     valid_flags = load_flags(vcfg.flag_list)
@@ -53,6 +55,12 @@ def run(cfg: Config) -> Path:
     for r in rows:
         reason = None
         q, a = r["question"], final_answer(r)
+        try:
+            record_source_binding(cfg, r)
+        except (OSError, ValueError) as exc:
+            pending_review.append({**r, "pending_reason":"source_admission_unresolved",
+                                   "source_admission_error":str(exc)})
+            continue
         if not q or not a or len(a) > vcfg.max_answer_chars:
             reason = "empty_or_too_long"
         if reason is None and q not in kept_questions:

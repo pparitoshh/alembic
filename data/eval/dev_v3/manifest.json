@@ -115,7 +115,7 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "c052fe397a44fd09a06cd7c047ebcaabd228e24b354f9f6f36845a9df078a551"
+      "sha256": "2acf3889f797217efd6cb43ada99510dc60a278490ea35e9ae8ee861da7e4640"
     },
     {
       "path": "src/distillkit/toolcheck.py",
@@ -172,15 +172,15 @@
         },
         {
           "path": "src/distillkit/config.py",
-          "sha256": "c052fe397a44fd09a06cd7c047ebcaabd228e24b354f9f6f36845a9df078a551"
+          "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
         },
         {
           "path": "src/distillkit/toolcheck.py",
-          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+          "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
         },
         {
           "path": "src/distillkit/tools.py",
-          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+          "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
         },
         {
           "path": "tests/test_eval_dev_v3.py",
@@ -220,6 +220,50 @@
       "compatibility": "Independent model inspection: SCHEMAS, EvalCfg, normal/tool evaluation prompts, scorers and caches unchanged. New closed catalog/trace guards opt-in and confined to training trace paths. Dataset/source/reference bytes unchanged.",
       "historical_tool_source_evidence": "source_support.json retains tools.py evidence at prior reviewed 3e9fe06 revision; it is historical, not a claim to hash this changed implementation. Current schemas and default mock behavior remain compatible.",
       "review_method": "Independent read-only model review plus coordinator integration tests; no human review or infallibility claimed."
+    },
+    {
+      "previous_revision": "3725622a5cf9e3533257ee9169c22c802b07af53",
+      "previous_manifest_sha256": "aff82955ff713b804fe2c68b653b3fc5414b441741c4a631999fa62994d75fa8",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "c052fe397a44fd09a06cd7c047ebcaabd228e24b354f9f6f36845a9df078a551"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "scope": "Opt-in training-source family admission; no evaluation schema/scorer/prompt changes",
+      "cpu_validation": {
+        "passed": 374,
+        "subtests_passed": 28,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "evidence": "campaign dataset_delivery_v1/family-guard-cpu-003/tests.xml"
+      },
+      "metadata_correction": "First integration history previous_code_bindings restored from actual3e9fe06manifest; changed_code_bindings already retained correct before/after values."
     }
   ]
 }

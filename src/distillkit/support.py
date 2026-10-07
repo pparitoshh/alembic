@@ -97,6 +97,8 @@ def evidence_packet(row, source):
 
 def source_for_record(cfg, row):
     """Resolve reviewed bytes from this run's training sources, not an answer's own citations."""
+    from .source_registry import record_source_binding
+    record_source_binding(cfg, row)
     if row.get('doc_id') in cfg.seeds.eval_docs:
         raise ValueError('evaluation-only source cannot support a training record')
     if row.get('source_kind') == 'chunk':

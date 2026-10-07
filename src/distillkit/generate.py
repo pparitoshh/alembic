@@ -16,7 +16,7 @@ import random
 from pathlib import Path
 
 from .config import Config
-from .io import JsonlAppender
+from .io import JsonlAppender, read_jsonl
 from .records import prose_row
 from .schemas import GeneratedQuestion
 from .seeds import load_chunks
@@ -118,6 +118,8 @@ def _gold(cfg: Config, name: str) -> str:
     seed source to reviewed bytes, and resolve train/eval using this run's config, not the sidecar
     alone. This gate does not establish upstream licensing or prove semantic derivation.
     """
+    from .source_registry import admitted_sources
+    admitted_sources(cfg)  # same family gate as ordinary question/source selection
     if not cfg.generate.gold_dir:
         return ""
     path = Path(cfg.generate.gold_dir) / f"{name}.json"
@@ -321,6 +323,11 @@ def run(cfg: Config) -> Path:
     # Check both configured examples even if this question plan happens to use only one mode.
     gold_prose, gold_trace = _gold(cfg, "prose"), _gold(cfg, "tool_trace")
     jobs = question_jobs(cfg)
+    # Registry-enabled campaigns cannot reuse legacy/stale source text solely
+    # because a deterministic question ID matches. Check before any client exists.
+    if getattr(cfg.seeds, 'registry', None) is not None:
+        cached = read_jsonl(run_dir / "questions.jsonl") if (run_dir / "questions.jsonl").exists() else []
+        _check_cached_questions(cfg, jobs, cached)
     teacher = Teacher(cfg.teacher)
     set_valid_flags(load_flags(cfg.verify.flag_list))
 
@@ -341,6 +348,8 @@ def run(cfg: Config) -> Path:
     teacher.map(make_question, todo_q)
     planned = {j["id"] for j in jobs}
     questions = [{"mode": "prose", **q} for q in q_out.existing() if q["id"] in planned]  # old runs have no mode
+    if getattr(cfg.seeds, 'registry', None) is not None:
+        _check_cached_questions(cfg, jobs, questions)
     if len(questions) < len(jobs):
         print(f"[generate] {len(jobs) - len(questions)} questions had invalid JSON; rerun to retry them")
 
@@ -355,6 +364,9 @@ def run(cfg: Config) -> Path:
         meta = {k_: q[k_] for k_ in ("doc_id", "chunk_id", "persona", "task", "mode")}
         head = {"id": f"{q['id']}/s{k}"}
         tail = {"sample": k, "teacher": teacher.model, "prompt_version": PROMPT_VERSION, "mock_version": MOCK_VERSION}
+        for field in ('source_family', 'source_families', 'document_sha256', 'source_registry_sha256'):
+            if field in q:
+                tail[field] = q[field]
         tail.update(source_kind='chunk', source_sha256=hashlib.sha256(q['text'].encode()).hexdigest())
         if q["mode"] == "prose":
             msgs = [{"role": "system", "content": A_SYSTEM + gold_prose}, {"role": "user", "content": A_PROMPT.format(chunk=q["text"], question=q["question"])}]
@@ -377,3 +389,23 @@ def run(cfg: Config) -> Path:
     teacher.map(make_answer, answer_jobs)
     print(f"[generate] {len(out.existing())} rows -> {out.path}")
     return out.path
+
+
+def _check_cached_questions(cfg: Config, jobs: list[dict], questions: list[dict]) -> None:
+    """Opt-in resume integrity; malformed/stale inputs are preserved and rejected."""
+    from .source_registry import record_source_binding
+    planned = {j['id']: j for j in jobs}
+    seen = set()
+    for question in questions:
+        qid = question.get('id')
+        if qid in seen or qid not in planned:
+            raise ValueError(f'cached question {qid!r} is duplicate or outside the current plan; use a fresh run directory')
+        seen.add(qid)
+        record_source_binding(cfg, question)
+        for field, value in planned[qid].items():
+            if question.get(field) != value:
+                raise ValueError(f'cached question {qid!r} has stale {field}; use a fresh run directory')
+        if question.get('prompt_version') != PROMPT_VERSION or question.get('mock_version') != MOCK_VERSION:
+            raise ValueError(f'cached question {qid!r} has stale prompt/mock version; use a fresh run directory')
+        if question.get('scenario') != _scenario(planned[qid]):
+            raise ValueError(f'cached question {qid!r} has stale simulated scenario; use a fresh run directory')
