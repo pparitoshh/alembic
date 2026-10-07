@@ -11,11 +11,13 @@ import json
 import re
 
 from .records import final_answer, messages
-from .tools import MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
+from .job_status_guard import target_error
+from .tools import CATALOG_VERSION, MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
 
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
 # looking the job up (list_queue, then calls on the ids it returned) are both fine; grounding
 # rejects the bad case, a call on an id the user never gave.
+TRAINING_TRACE_POLICY_VERSION = "explicit-job-targets-v2"
 EXPECTED_DECISION = {"call": "call", "none": "no_call"}
 
 _HERMES = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
@@ -91,8 +93,18 @@ def _unique_fields(pairs):
 
 
 def check_trace(row: dict, valid_flags=None) -> dict:
-    with mock_session(valid_flags):
-        return _check_trace(row)
+    catalog = row.get("mock_job_ids")
+    try:
+        if ("mock_job_ids" in row or "mock_catalog_version" in row) and (
+                catalog is None or row.get("mock_catalog_version") != CATALOG_VERSION):
+            raise ValueError("closed mock catalog requires its explicit supported version and job_ids")
+        with mock_session(valid_flags, job_ids=catalog):
+            return _check_trace(row)
+    except ValueError as exc:
+        # Malformed experiment metadata is a per-record hard failure, not an aborted run.
+        return {"n_calls":0,"call_errors":[],"trace_errors":[str(exc)],"result_errors":[],
+                "ungrounded_ids":[],"ungrounded_partitions":[],"decision":"invalid",
+                "decision_ok":False,"passed":False}
 
 
 def _check_trace(row: dict) -> dict:
@@ -102,6 +114,7 @@ def _check_trace(row: dict) -> dict:
     final answer interprets those results correctly, or validate results from a real cluster.
     """
     context, calls, ungrounded, partitions = "", [], [], []
+    question, observed_results = "", []
     errors, trace_errors, result_errors, pending = [], [], [], []
     if row.get("mock_version", MOCK_VERSION) != MOCK_VERSION:
         trace_errors.append(f"mock version {row['mock_version']!r} requires its archived implementation; current: {MOCK_VERSION}")
@@ -119,6 +132,7 @@ def _check_trace(row: dict) -> dict:
             if not isinstance(m.get("content"), str) or not m["content"].strip():
                 trace_errors.append(f"turn {i}: empty or invalid question")
             context = m.get("content") if isinstance(m.get("content"), str) else ""
+            question = context
             expected_role = "assistant"
         elif role == "assistant":
             raw_calls = m.get("tool_calls")
@@ -137,6 +151,13 @@ def _check_trace(row: dict) -> dict:
                 calls.append(c)
                 ungrounded += ungrounded_ids(c, context)
                 partitions += ungrounded_partition(c, context)
+                target_issue = target_error(c, question, observed_results)
+                if target_issue:
+                    job_id = str(parse_arguments(c["arguments"])["job_id"])
+                    if job_id not in ungrounded:
+                        ungrounded.append(job_id)
+                    pending.append(None)
+                    continue
                 result, error = _run_call(c)
                 if error:
                     errors.append(error)
@@ -156,6 +177,7 @@ def _check_trace(row: dict) -> dict:
                 result_errors.append(f"turn {i}: stored result differs from deterministic mock replay")
             elif expected is not None:
                 context += "\n" + json.dumps(expected)
+                observed_results.append(expected)
             expected_role = "tool" if pending else "assistant"
     if pending:
         trace_errors.append(f"missing {len(pending)} tool result(s)")
@@ -164,6 +186,7 @@ def _check_trace(row: dict) -> dict:
     decision = "call" if calls else "no_call"
     ok = decision == EXPECTED_DECISION.get(row.get("mode", ""), decision)
     return {
+        "policy_version": TRAINING_TRACE_POLICY_VERSION,
         "n_calls": len(calls),
         "call_errors": errors,
         "trace_errors": trace_errors,
