@@ -22,6 +22,7 @@ from .schemas import GeneratedQuestion
 from .seeds import load_chunks
 from .teacher import Teacher
 from .checks import load_flags
+from . import scenario_plan
 from .job_status_guard import (WORKFLOW_RULES, WORKFLOW_VERSION, JobStatusPolicy, blocked_batch,
                                clarification_response, guard_result, target_error)
 from .tools import MOCK_VERSION, PARTITIONS, SCHEMAS, ToolError, execute, mock_session, parse_arguments, set_valid_flags
@@ -282,6 +283,8 @@ def question_jobs(cfg: Config) -> list[dict]:
         unknown = set(tool_docs) - {c["doc_id"] for c in train_chunks}
         if unknown:
             raise ValueError(f"generate.tool_doc_ids must resolve to training sources; forbidden or unknown: {sorted(unknown)}")
+    if getattr(gcfg, 'scenario_plan', None) is not None:
+        return scenario_plan.question_jobs(cfg, train_chunks)
     rng = random.Random(0)
     grid = list(itertools.product(range(len(gcfg.personas)), gcfg.task_types))
     modes, weights = zip(*gcfg.tool_mix.items())
@@ -323,11 +326,24 @@ def run(cfg: Config) -> Path:
     # Check both configured examples even if this question plan happens to use only one mode.
     gold_prose, gold_trace = _gold(cfg, "prose"), _gold(cfg, "tool_trace")
     jobs = question_jobs(cfg)
+    planned_scenarios = getattr(gcfg, 'scenario_plan', None) is not None
+    if planned_scenarios:
+        binding = scenario_plan.freeze_run(cfg, jobs, {'prose': gold_prose, 'tool_trace': gold_trace}, {
+            'version': PROMPT_VERSION, 'question_system': Q_SYSTEM, 'question': Q_PROMPT,
+            'answer_system': A_SYSTEM, 'answer': A_PROMPT, 'modes': MODE_RULES,
+            'tool_rules': TOOL_RULES, 'workflow_rules': WORKFLOW_RULES,
+            'scenario': scenario_plan.SCENARIO_PROMPT, 'mock_version': MOCK_VERSION,
+            'schemas': SCHEMAS, 'partitions': PARTITIONS,
+        })
+        jobs = [{**j, 'generation_manifest_sha256': binding} for j in jobs]
     # Registry-enabled campaigns cannot reuse legacy/stale source text solely
     # because a deterministic question ID matches. Check before any client exists.
     if getattr(cfg.seeds, 'registry', None) is not None:
         cached = read_jsonl(run_dir / "questions.jsonl") if (run_dir / "questions.jsonl").exists() else []
         _check_cached_questions(cfg, jobs, cached)
+        if planned_scenarios:
+            answers = read_jsonl(run_dir / "generated.jsonl") if (run_dir / "generated.jsonl").exists() else []
+            scenario_plan.check_cached_answers(cfg, jobs, cached, answers)
     teacher = Teacher(cfg.teacher)
     set_valid_flags(load_flags(cfg.verify.flag_list))
 
@@ -340,6 +356,7 @@ def run(cfg: Config) -> Path:
     def make_question(j):
         scenario = _scenario(j)
         prompt = Q_PROMPT.format(chunk=j["text"], persona=j["persona"], task=j["task"], mode_rule=_mode_rule(j, scenario))
+        prompt += scenario_plan.question_instruction(j)
         q, _ = teacher.chat_json(Q_SYSTEM, prompt, GeneratedQuestion)
         if q:
             q_out.append({**j, "question": q.question.strip(), "scenario": scenario, "prompt_version": PROMPT_VERSION,
@@ -364,7 +381,7 @@ def run(cfg: Config) -> Path:
         meta = {k_: q[k_] for k_ in ("doc_id", "chunk_id", "persona", "task", "mode")}
         head = {"id": f"{q['id']}/s{k}"}
         tail = {"sample": k, "teacher": teacher.model, "prompt_version": PROMPT_VERSION, "mock_version": MOCK_VERSION}
-        for field in ('source_family', 'source_families', 'document_sha256', 'source_registry_sha256'):
+        for field in (*scenario_plan.SOURCE_FIELDS, *scenario_plan.SCENARIO_FIELDS):
             if field in q:
                 tail[field] = q[field]
         tail.update(source_kind='chunk', source_sha256=hashlib.sha256(q['text'].encode()).hexdigest())
