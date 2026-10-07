@@ -1,0 +1,1448 @@
+{
+  "schema_version": "independent-evaluation-content-review-v1",
+  "created_utc": "2026-10-07T22:34:58.997043+00:00",
+  "reviewer": "Codex delegated eval_review agent; independent of the Aalto and tool draft authors",
+  "exact_model_identity": "unknown",
+  "method": "Read complete 11 assigned Aalto content documents and applicable LICENSE, all 47 candidate questions/targets, exact cited spans, production tool schemas/mocks/scorer/policy, and comparison questions. Model content review plus standard-library exact checks. No external sources or inference requests.",
+  "review_exposure": "Not blind: author sidecars and historical comparison datasets were available. No human review claimed. Reviewer previously authored the 22 final drafts used only for overlap comparison.",
+  "summary": {
+    "aalto_reviewed": 40,
+    "aalto_recommended_acceptance": 40,
+    "tool_reviewed": 7,
+    "tool_recommended_acceptance": 7,
+    "blocking_content_issues": 0,
+    "unresolved_content_items": 0,
+    "coordinator_release_acceptance": "pending"
+  },
+  "checks_run": {
+    "JSON_schema_ID_question_checks": "pass",
+    "within_draft_and_comparison_exact_normalized_duplicates": 0,
+    "normalization": "Unicode NFKC, casefold, Unicode word tokens",
+    "normal_evidence_spans_verified": 58,
+    "tool_evidence_spans_verified": 22,
+    "tool_bound_input_hashes_verified": 12,
+    "input_files_unchanged_during_review_write": true,
+    "comparison_question_count": 147,
+    "comparison_breakdown": {
+      "existing_normal_dev": 66,
+      "existing_tool_dev": 16,
+      "calibration": 24,
+      "frozen_diagnostics": 10,
+      "eligible_records": 9,
+      "new_final_drafts": 22
+    },
+    "semantic_dedup": "Model inspection found no duplicate objectives. Lexical scores used only as triage, not a semantic guarantee.",
+    "highest_lexical_pairs": [
+      {
+        "score": 0.25,
+        "left": "dev-aalto-010",
+        "right": "mem"
+      },
+      {
+        "score": 0.2353,
+        "left": "dev-aalto-015",
+        "right": "dev-aalto-019"
+      },
+      {
+        "score": 0.234,
+        "left": "dev-aalto-014",
+        "right": "dev-aalto-015"
+      },
+      {
+        "score": 0.2295,
+        "left": "dev-aalto-022",
+        "right": "dev-aalto-038"
+      },
+      {
+        "score": 0.2273,
+        "left": "tool-018",
+        "right": "tool-002"
+      },
+      {
+        "score": 0.2273,
+        "left": "tool-017",
+        "right": "js4-pending-list"
+      },
+      {
+        "score": 0.2241,
+        "left": "dev-aalto-005",
+        "right": "dev-aalto-040"
+      },
+      {
+        "score": 0.2203,
+        "left": "dev-aalto-037",
+        "right": "dev-aalto-038"
+      },
+      {
+        "score": 0.2105,
+        "left": "tool-017",
+        "right": "tie-mine"
+      },
+      {
+        "score": 0.2097,
+        "left": "dev-aalto-022",
+        "right": "dev-aalto-037"
+      }
+    ]
+  },
+  "checks_not_run": [
+    "No new production scorer execution; the author-reported 44 synthetic scorer tests are inherited evidence, not rerun here.",
+    "No compilation, shell or Slurm execution, profiling, model inference, student evaluation, real cluster actions or runtime policy verification."
+  ],
+  "release_caveats": [
+    "All Aalto items are development-exposed and must retain the exact source revision and Triton site scope; module names, PMIx suggestion, GPU policies and approximate sampling interval are not claims about Leonardo or every Slurm cluster.",
+    "References with external example filenames explicitly assume those programs exist and use commands documented inline. Full program behavior and runtime success have not been verified.",
+    "dev-aalto-002 cites both the GPU reference and the GPU tutorial within the same reserved family. Preserve both support entries instead of flattening provenance to one path.",
+    "dev-aalto-035 cited loop/output spans are supported; the same source also shows equals-form #SBATCH --output at lines 74-77. Its changed output filename is incidental to the new progress/buffering objective.",
+    "Tool scoring assesses only first-response decision, arguments and deterministic mock executability. No-call nonempty text can pass without asking a useful question or truthfully explaining a limitation; tool-023 is not a complete hallucination test.",
+    "tool-020 is an explicitly authorized isolated mock action. Its CPU-only script on a GPU-like mock partition is accepted by that fixture and must not be promoted as proof of real cluster policy/resource validity.",
+    "The normal scripts use source-compatible compositions. No exact-reference wording should be required from models when a supported equivalent answer satisfies the task.",
+    "No new source or review resolves the original six seeds’ 18 unknown provenance fields.",
+    "Keep all new development and final material, references and paraphrases outside training, gold prompts, feedback and preferences. Final drafts retain construction exposure and are not claimed blind."
+  ],
+  "input_hashes": {
+    "campaigns/distillkit-20261006T231002Z/checkpoint-06/job-status-005/outputs/conversations.jsonl": "ad82a7022bfe0c012e4ec1448cdedec6bf6a93ffae99fd433670168b781c47b3",
+    "campaigns/distillkit-20261006T231002Z/checkpoint-08/support-v2-001/inputs/generated.jsonl": "ad82a7022bfe0c012e4ec1448cdedec6bf6a93ffae99fd433670168b781c47b3",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/eval_drafts/aalto/normal_drafts.jsonl": "57b0378b130bda6dc86e5f2c23695115bac79262045367ea5d8c8d4610420d3b",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/eval_drafts/aalto/source_support.json": "9962d04d7e1a421983e8897bf9b84725f3ec5690ea8821b23a739b535acf81af",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/eval_drafts/final/final_candidates.jsonl": "d761c4b612e0e6485d195f20d219216af901af65f25448788781e4bab96b6261",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/eval_drafts/tools/tools_candidates.jsonl": "f606e125c8bc3c6e71df16371454fc4ceb6ab290bca3374ec0f233b00fccaace",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/eval_drafts/tools/tools_candidates.review.json": "1fa0a12dfbef3b696838022728e808e03363db68e51a8105863057daf1132a84",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/LICENSE": "a900d25e653f4b1f2c5b7d16b97be6cfe55b31ebb61aed6e306ec003a9d64cee",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/examples/monitoring/gpu.rst": "3ebb6e3862b17ec288b63409c48d4a2409fad01c5f372ce7c2e8d4a8d219d03d",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/commandline.rst": "18ef318cc1f165554925b127025ede31055739e87f3b1ae8f6c866e35495584f",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/gpu.rst": "a79a8c9f864b70e9a22d4023e46c96535ab681e42254ae8bf676d5b345d4870a",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/modules.rst": "63da57e45bf0fe230d5b1822789c0675d8bc55fd4cbc22c4f26befbe0f26c8cc",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+    "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+    "campaigns/distillkit-20261006T231002Z/repair-v2/eligible_records_v1.jsonl": "3fd618878ec68ac6ed6d4226e05bd97898d342203621237e79aeae3047d77bd0",
+    "worktrees/support-v2-integration/data/eval/dev_v3/normal.jsonl": "41ae36ffdbf30972152670db4eaea29f248a558f6ae3dffe02e1e91bb83e7f3e",
+    "worktrees/support-v2-integration/data/eval/dev_v3/tools.jsonl": "055c85bf9d622448427019334092420166873761ba2f389f7f6fd334b9ea1c96",
+    "worktrees/support-v2-integration/data/eval/judge_calibration.jsonl": "307282a2282ec94249320fd4d021a83b0e8e209cd738d1e1a71460c71f2954de",
+    "worktrees/support-v2-integration/docs/MOCK_TOOL_LIMITS.md": "fe9bf27bd479d314c2b554565489d80131c1e68f78fc05bb9c065539f9cbcbba",
+    "worktrees/support-v2-integration/src/distillkit/checks.py": "30e3fcd0b089c550d9c7d67d01c0d87b1e3d8d2a0430415b1441d6f10213b132",
+    "worktrees/support-v2-integration/src/distillkit/data/slurm_flags.txt": "08380b55ec0d3bbd841d52b642254cb8c181ae127161771efcdfc77b3845bff1",
+    "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+    "worktrees/support-v2-integration/src/distillkit/job_status_guard.py": "1c7e5da60a434cc86a070a93e26521a5d48b63d0a3060822e493319099ae9faa",
+    "worktrees/support-v2-integration/src/distillkit/records.py": "e2ef43d8ce60ca8c1c08498647bca03f27aa445bf70e8667d93751ad8c23b76a",
+    "worktrees/support-v2-integration/src/distillkit/toolcheck.py": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989",
+    "worktrees/support-v2-integration/src/distillkit/tools.py": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+    "worktrees/support-v2-integration/tests/test_tools.py": "a3cbe4217e5caafd7eeefa6bd754b793b4550556974934e6a3aba4f612dc2f0d"
+  },
+  "comparison_inputs": [
+    {
+      "path": "worktrees/support-v2-integration/data/eval/dev_v3/normal.jsonl",
+      "rows": 66,
+      "sha256": "41ae36ffdbf30972152670db4eaea29f248a558f6ae3dffe02e1e91bb83e7f3e"
+    },
+    {
+      "path": "worktrees/support-v2-integration/data/eval/dev_v3/tools.jsonl",
+      "rows": 16,
+      "sha256": "055c85bf9d622448427019334092420166873761ba2f389f7f6fd334b9ea1c96"
+    },
+    {
+      "path": "worktrees/support-v2-integration/data/eval/judge_calibration.jsonl",
+      "rows": 24,
+      "sha256": "307282a2282ec94249320fd4d021a83b0e8e209cd738d1e1a71460c71f2954de"
+    },
+    {
+      "path": "campaigns/distillkit-20261006T231002Z/checkpoint-08/support-v2-001/inputs/generated.jsonl",
+      "rows": 10,
+      "sha256": "ad82a7022bfe0c012e4ec1448cdedec6bf6a93ffae99fd433670168b781c47b3"
+    },
+    {
+      "path": "campaigns/distillkit-20261006T231002Z/repair-v2/eligible_records_v1.jsonl",
+      "rows": 9,
+      "sha256": "3fd618878ec68ac6ed6d4226e05bd97898d342203621237e79aeae3047d77bd0"
+    },
+    {
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/eval_drafts/final/final_candidates.jsonl",
+      "rows": 22,
+      "sha256": "d761c4b612e0e6485d195f20d219216af901af65f25448788781e4bab96b6261"
+    }
+  ],
+  "normal_items": [
+    {
+      "id": "dev-aalto-001",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source describes the explicit kernel/data-transfer path and requires checking multi-GPU support. The reference correctly limits itself to that documented path, without promising automatic offload or speedup.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 45,
+          "end_line": 53,
+          "quote_sha256": "1b3844f821215146c2819a2e24efe8b780950f369cd96321de5ab1828a835a2a"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 92,
+          "end_line": 100,
+          "quote_sha256": "7e1605867e590eea78ac1702cf4be078d7a5387fd555ba37a031da7959473dc7"
+        }
+      ],
+      "row_sha256": "32a47b1393a388d73ea6e2cb2c320cda47adaee1137e177617456961137913ae",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-002",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The GPU reference explicitly lists a missing GPU request as one possible cause of the QOS/accounting message; the answer preserves that uncertainty and the Triton prohibition on CPU-only GPU-partition work.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/gpu.rst",
+          "sha256": "a79a8c9f864b70e9a22d4023e46c96535ab681e42254ae8bf676d5b345d4870a",
+          "start_line": 25,
+          "end_line": 29,
+          "quote_sha256": "ff4ab68ebbdbebe4c5d6f38e0b0742c1bd74bb6b3e47a9b7c7bb098fa6e82e8c"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 98,
+          "end_line": 100,
+          "quote_sha256": "92bafcbb77ef073095d982bd52b5a672745f5f4ce6527325401ef78d8317566e"
+        }
+      ],
+      "row_sha256": "a98d79242f13053e52b9d021c6036fe9d5c5de5e26e30e7643da0bebb3253da0",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-003",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The scenario explicitly places the test on a no-GPU login node, matching the documented missing-libcuda explanation. Requesting a GPU before testing follows the same document.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 244,
+          "end_line": 250,
+          "quote_sha256": "d99256c3df0746fb71c8146a476502d7851dfb91cb6b38e55579e97a7b3398d7"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 87,
+          "end_line": 90,
+          "quote_sha256": "9e5894d6ced6e4ea9d6ecb80d5a6cf60840abc4e1dbdc6aff4a7ee4314143862"
+        }
+      ],
+      "row_sha256": "bb0516df6b889a95d0e8fe24b30b0ee932d0fb3ac76d6aef1da10b07132f2f24",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-004",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The stated compile/run CUDA module mismatch is directly documented. The answer asks the user to check the environment rather than claiming an unobserved fix succeeded.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 252,
+          "end_line": 257,
+          "quote_sha256": "c7a8f266b8789c690b6f7bba336c6174b06a7b740ef483d88fbe18ed8791c5be"
+        }
+      ],
+      "row_sha256": "f5e1c101671deb22b5529310909c85b00c3dc627bc74a4110cb363c9993daf6c",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-005",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The pinned source names scicomp-pytorch-env/2026.1, B300 optimization and V100 incompatibility. The snapshot qualifier prevents an unsupported claim about other module versions or sites.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 287,
+          "end_line": 296,
+          "quote_sha256": "61d38a6852f61a3bafc4122510e5e59ba96ee256a723943753b1f2ce39011dd3"
+        }
+      ],
+      "row_sha256": "c07c78f297be16533fa5e6d65bc47f6e64d1e371a9432356d226b386f288f133",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-006",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The full nvcc invocation and the four architecture-number mappings occur inline. The external program is explicitly assumed to exist, so its unacquired implementation is not needed to answer.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 188,
+          "end_line": 205,
+          "quote_sha256": "71d348bbe554ae04c57ebb3e04f2ede59dd9929b544e42bbbe647c852bcff1f2"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 300,
+          "end_line": 315,
+          "quote_sha256": "c27c51bf0958f0eafd0417b6d876e14c25bf2df9aed47f08ba9fa37cbec5f720"
+        }
+      ],
+      "row_sha256": "bbc7ae2a30f39a4b48ab5d32bbf9dc9f7ac270f54dbb568f31b648362e0d77eb",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-007",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The monitoring note explicitly links high CPU/low GPU utilization to a possible feeding bottleneck and conditions more CPUs on program support. The answer preserves possibility and shared-resource limits.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/examples/monitoring/gpu.rst",
+          "sha256": "3ebb6e3862b17ec288b63409c48d4a2409fad01c5f372ce7c2e8d4a8d219d03d",
+          "start_line": 35,
+          "end_line": 49,
+          "quote_sha256": "990349e5a8fca58a22b7520f293c919563a558cc9d3561fe2744fea7ad89734a"
+        }
+      ],
+      "row_sha256": "a062a74c7f664d0148ec12658579fd5566936eb823485a9fc3be1884582995c0",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-008",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The input-file packing, data-loading/preprocessing/batching steps and /dev/shm or /tmp suggestion are all documented; no file-format invention or guaranteed speedup appears.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "start_line": 326,
+          "end_line": 351,
+          "quote_sha256": "496a2df9d1b7eb6c27f873f61be0ebef0b71b4b5eb48a24feebb1404302a4a76"
+        }
+      ],
+      "row_sha256": "474b37b9a70eec5e321b143ea1ee180e61bfe8d90931414aa125b273a653aed4",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-009",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source states ordinary non-MPI applications need major changes and explains tasks, communication and ranks. The answer distinguishes software capability from allocation size.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "start_line": 45,
+          "end_line": 66,
+          "quote_sha256": "18bf16491e64b597c99b88e5fbf5376b3989cdde42777fadefb2516a2d963aa2"
+        }
+      ],
+      "row_sha256": "83dd89b6d03794f38e77c2e94ce7be58d64d19087150b8563e862ca2889bff8a",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-010",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source states tasks-per-node times CPUs-per-task must not exceed node CPU capacity. The arithmetic 8*4=32 and corrected 6*4=24 follow the explicit scenario and preserve the measurement caveat.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Related to calibration mem and mpi64 only at the resource-topic level: this tests hybrid CPU capacity and preserves CPUs per task, not memory-per-core or even rank placement.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "start_line": 218,
+          "end_line": 230,
+          "quote_sha256": "847fe21613a69daa503a3b4865207c87f3e29972ba9413a5cafed4d49149eef5"
+        }
+      ],
+      "row_sha256": "ceac41bc3d5ced3e9672535a0864d26d4213e48ec2f06e353e5c2017d3173a98",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-011",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The exact module pair, mpicc build and srun launch appear inline. Matching build/run modules is explicit; the unacquired program and already-provided resource directives are scenario prerequisites.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Related to final-ompi-001/002 only by MPI build topic. This site module/build/run sequence does not test wrapper semantics, compiler flag extraction or GNU Make integration.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "start_line": 120,
+          "end_line": 148,
+          "quote_sha256": "1494ef7f577705cb4ddfc62aa4b2cc7ffa083f6dd01d7ade64428a534435c9d6"
+        }
+      ],
+      "row_sha256": "4878cd38552aeedd0ecd9a3bec1f2a805d78e237e1236f68c6a576e44b2d9995",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-012",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "slurm features and --constraint=hsw are the documented site workflow. The answer selects a feature rather than inventing a node identity.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "start_line": 174,
+          "end_line": 205,
+          "quote_sha256": "99f315d294428178a92c2cc6e8b6aea3060d1eecf74cc446c9731c2f3681b5a6"
+        }
+      ],
+      "row_sha256": "0267d2fb50d4e5773342e16cdd982d2d8db23dadcf790736f4cb036dc041d987",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-013",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source offers SLURM_MPI_TYPE=pmix_v2 as a possible remedy for a non-site MPI installation. The answer correctly keeps it a suggestion, not a guaranteed or site-independent repair.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "start_line": 159,
+          "end_line": 169,
+          "quote_sha256": "04c4b71177fde97eb3fb93b5bb4e79193e5931f36e782584becb2e76579f08e6"
+        }
+      ],
+      "row_sha256": "dce6fd1530bca1777c7c5f3225d8dbe481b52dc9029c2bd956d4bf409eff2bd9",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-014",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The psmp versus popt distinction, measurement requirement and hybrid CPU-capacity condition are explicit in the source.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Shares hybrid source context with dev-aalto-010 but tests build capability and empirical layout selection instead of correcting an over-capacity request.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "start_line": 218,
+          "end_line": 230,
+          "quote_sha256": "847fe21613a69daa503a3b4865207c87f3e29972ba9413a5cafed4d49149eef5"
+        }
+      ],
+      "row_sha256": "7a92df0985c486c24a5caa3ea27e4f6195f2d5ce6e51c4afc542db48279a41f9",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-015",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The guide distinguishes gprof instrumentation/function-call counts from perf sampling/statistical profiles and relative overhead. The answer does not claim a measured overhead for this user.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 50,
+          "end_line": 66,
+          "quote_sha256": "b3ae7e463736f76b95ade46b091e427700766ebb1f3871d8834e417c921e8400"
+        }
+      ],
+      "row_sha256": "3981ec08b1853631718139b72a0c6df7997d4631b86e6871316afd9910a52ae4",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-016",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The complete compile, record, report and annotate command sequence appears inline; the source explains the role of -g. Execution is explicitly hypothetical in an allocated environment.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Related to dev-aalto-017 through perf, but requests constructing the measurement workflow rather than interpreting the distribution of measured costs.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 69,
+          "end_line": 80,
+          "quote_sha256": "2053a169222c71dae5a44a75f7f2b5dc51a98c6e45a8f59fc0866b14b1dc084d"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 90,
+          "end_line": 96,
+          "quote_sha256": "cea7ee1d13bbe8eabcc826f286cca0d2d8ed3ff7a2334350b88c4e7698acb926"
+        }
+      ],
+      "row_sha256": "a768ca87e77dbf4ff99237e6b48269927e227cba1e529e2f49ad7ea09e1c805f",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-017",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The provided profile puts most work in MAIN__; the guide next uses perf annotate MAIN__ and identifies its inner loop. The answer gives that evidence-based next inspection without diagnosing another program.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Requires hotspot prioritization from a provided profile; dev-aalto-016 tests command sequencing.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 42,
+          "end_line": 45,
+          "quote_sha256": "20968b9c62f2c0873d3832f585ac16019756728d9eb7eb8de36f395e0984e206"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 80,
+          "end_line": 96,
+          "quote_sha256": "3c5b1e9f3d25ab99bdb0a65f3936d638fc16a4b685f137a00f4995c7bf7cdab8"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 109,
+          "end_line": 121,
+          "quote_sha256": "465e16de8566c7cbb857b12b1e0bcb8deeddc7bdedaaf8881fc043c1acb9f973"
+        }
+      ],
+      "row_sha256": "3b9a401750550f338884d20b6602a26a88662cf6b4f9a492f2bd1f2e20d68001",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-018",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source names read/write duration and access patterns, and /usr/bin/time -v for initial I/O statistics. Applying it to the user-supplied executable is a supported procedure.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 128,
+          "end_line": 137,
+          "quote_sha256": "9056e68c8add1fafc58b68c367122309dc3aef13732f67693bb0364d8d63e2cc"
+        }
+      ],
+      "row_sha256": "98adb1ec9feda024481ccd052684f5f1de078846de4b789ebfd2faf129229b8e",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-019",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The documented system-wide CPU/GPU/I/O scope versus CUDA-kernel metric scope directly supports the tool-selection distinction.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 260,
+          "end_line": 269,
+          "quote_sha256": "278c1237d90ca9a723ffb93590d455e2289cbf2e2c8df8640f6c60a16cded0ac"
+        }
+      ],
+      "row_sha256": "5831e9d8ce37749f7032771a6f30be6e0c17544a8e7d52784557f77c8e818b7f",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-020",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "Both module load cuda and ncu --target-processes all --set full occur inline. The answer avoids the nearby unsupported output-file assumption and does not claim profiling ran.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 372,
+          "end_line": 379,
+          "quote_sha256": "d8a929ec88c76464a3d9a4e8e18c99612a97d583f85b3201c067f8a9521f05fa"
+        }
+      ],
+      "row_sha256": "4b7ad4e0a1a3e60834f3f65c6eabdf93f5c2156a97884caf659db1506b3239a0",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-021",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The Open OnDemand sequence, localhost TensorBoard URL, PyTorch Profiler tab and torch-tb-profiler package appear together in the source. Environment existence is supplied by the question.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 214,
+          "end_line": 239,
+          "quote_sha256": "8f585a2e7ddd8eda1ea0476c7bc1164206eddfe8d727a379d31eb341ede291b5"
+        }
+      ],
+      "row_sha256": "ed218d4f8e70bc19568913a832cd7446060e2f99e48797d65aba8daef65da222",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-022",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source explicitly says -g helps decode counters to filenames/lines and mpiP can work without it with variable results. The answer does not require total failure.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "start_line": 164,
+          "end_line": 173,
+          "quote_sha256": "27fd1a538846b7374faa8fcedad0c2d8799b0b33396fd84397fca8d984788eb8"
+        }
+      ],
+      "row_sha256": "d8f4d1886475154ac6997d0a7140a6e8913da0145167b657f7705cb4f61668f8",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-023",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The complete CMake prerequisite error, spider result and two-module load command are present. This tests dependency hierarchy rather than a missing install or renamed module version.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Distinct from eligible module version/debug examples: the module exists but prerequisite hierarchy must be satisfied.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "start_line": 172,
+          "end_line": 213,
+          "quote_sha256": "57671e2e5be379bb404f38c9e018145980263350a1303b44ba699fae97eac2ce"
+        }
+      ],
+      "row_sha256": "368c58e6fef47048d09118667205bb5c6cc67f5c4b5eef18feadbbebda2226f7",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-024",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "savelist, describe and restore have distinct documented collection roles; the answer separates inspection from loading.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Collection discovery/inspection differs from dev-aalto-025 saving/restoring a known state.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/modules.rst",
+          "sha256": "63da57e45bf0fe230d5b1822789c0675d8bc55fd4cbc22c4f26befbe0f26c8cc",
+          "start_line": 17,
+          "end_line": 20,
+          "quote_sha256": "43deef541d98da481444a18c27e46737be23f5115006dd5ab728e9ad3123d0bf"
+        }
+      ],
+      "row_sha256": "cefc1e57c3d99b76d250b45d87401fd576ee575628c3fec6bbe40340334576d1",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-025",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The save, purge, restore, list sequence is shown in the tutorial. This tests collection-state restoration, not merely listing loaded modules.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Saving and restoring a collection differs from collection inspection and from the eligible simple module-list example.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "start_line": 251,
+          "end_line": 290,
+          "quote_sha256": "79d68300444f22237e4370d443bb320f60240597460cf92d55a9d22800952d17"
+        }
+      ],
+      "row_sha256": "1248ea0e0ddc5fe3c7b70394108d79242dd161d55079768633dbc6db74d0151b",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-026",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "Current-shell environment changes, inheritance by children and loss when the environment is cleared are explicit. No software deletion is inferred.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Distinct from eligible PATH/module-purpose questions: traces child-process inheritance and an environment-clearing launcher.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "start_line": 243,
+          "end_line": 245,
+          "quote_sha256": "f4469407de0de7ff388d4a4696c6fc527d74897e100cfc00b316400bb747d2ba"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "start_line": 317,
+          "end_line": 321,
+          "quote_sha256": "e51aea45b40449a91fb4ad8a86d3badefe41b6cb54d0e5abf83e07d834615420"
+        }
+      ],
+      "row_sha256": "b4f0a521d36db5d2fa4dced6a8cab87afd3ece087a8b868348c8a2946a772aba",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-027",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The guide directly warns about startup-file module loads affecting unrelated software and recommends removing the customization while debugging. The reference targets the added customization, not deleting all startup files.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Tests unintended startup-file effects, not default-version selection or PATH installation.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "start_line": 142,
+          "end_line": 152,
+          "quote_sha256": "5e48fffb1687a338d1775804afbf8677b072f2bbb565a616d550869a6a9b6bb9"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "start_line": 237,
+          "end_line": 245,
+          "quote_sha256": "d51a0f6b77111c436b13fe59d83a747919b35e4bb677f0f6caf8714e29159627"
+        }
+      ],
+      "row_sha256": "1527fde359afc96900347f7c5a607bde7fe4ad7920285ee39bfba6a8fc179766",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-028",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The minimal YAML, -n creation override, mamba module and site-specific source activate method are documented. The name change is part of a meaningful YAML-versus-CLI override task.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 6,
+          "end_line": 9,
+          "quote_sha256": "57d70a2bce1c7a110292001223b9c3b86d91949a888009063138ad2370b441a7"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 13,
+          "end_line": 34,
+          "quote_sha256": "0639c079e11bd8db452ec05e72c7217569338010386e9971bb14ccea8231dfa5"
+        }
+      ],
+      "row_sha256": "37be8103b52d2984996b9ec97548cf849422b5a0d77781424aa959d9fa240855",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-029",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "Both export flags and their separate purposes are documented; the answer appropriately says portability improves without guaranteeing identical solves.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 52,
+          "end_line": 56,
+          "quote_sha256": "3770b18ee4611a1e0e0ce2834063b87d607e15c63d93338ba502a6409ac9d5fc"
+        }
+      ],
+      "row_sha256": "0cd3a389d29901c3a04a549f288ad762f58f545ef061e7698fc461403b5cacd0",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-030",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The reference combines the documented CUDA-override prefix with the documented env-create invocation and user-supplied runtime version. It does not claim the login node has a GPU.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 6,
+          "end_line": 9,
+          "quote_sha256": "57d70a2bce1c7a110292001223b9c3b86d91949a888009063138ad2370b441a7"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 27,
+          "end_line": 30,
+          "quote_sha256": "79c7c4f0e1185350e3ef7d322327807164388e7aa2eea288e7f386829b4e531f"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 70,
+          "end_line": 74,
+          "quote_sha256": "3f41db0e21ebabf605720fabb412742d08d79ce2af3e6575714635be3711083f"
+        }
+      ],
+      "row_sha256": "68e0955678e08d7a344c59fd7dbc0c5252a8aa8c7e5db57a7366c907662d2523",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-031",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The acquired reference explicitly distinguishes cached-file cleanup from removing an environment. Scope must remain this documented behavior; no actual cleanup was performed.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 39,
+          "end_line": 40,
+          "quote_sha256": "1e95ffd1a9b72a7fc4d630bab908a3f43bd5cb3d9f183f8ab06afd20b23da740"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "start_line": 67,
+          "end_line": 69,
+          "quote_sha256": "8fd4538b206f593d4a0b1c190a1a7af4d2017e3d1c72f554a06373a1e9d08769"
+        }
+      ],
+      "row_sha256": "383f659909dc7165938d31185be4c4f802771b29d9c6b47fd7efa24e773900dc",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-032",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source supplies du -h DIR | sort -h, pipe semantics and destructive output redirection. The small composition follows those exact supported operations.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No duplicate objective found among the existing comparison questions, 22 final drafts, or the other new drafts.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/commandline.rst",
+          "sha256": "18ef318cc1f165554925b127025ede31055739e87f3b1ae8f6c866e35495584f",
+          "start_line": 59,
+          "end_line": 65,
+          "quote_sha256": "dd2f6f884a389e863796be443a2db0e1e50df12e09886d59a03623eb36ecf2b6"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/commandline.rst",
+          "sha256": "18ef318cc1f165554925b127025ede31055739e87f3b1ae8f6c866e35495584f",
+          "start_line": 78,
+          "end_line": 86,
+          "quote_sha256": "353ed7ec75039b13780a3b447ee2f3d96d94a6154565a7688cb868c145b88220"
+        }
+      ],
+      "row_sha256": "9fe3ea854c0737e71002d54e364b172e049708222aec7d62f0e74862ab52e348",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-033",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The tutorial separately demonstrates submitted-script snapshotting and runtime reading of the external Python file. The answer combines these facts into the supplied sleep-before-launch scenario.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "No existing array/dependency/requeue task tests snapshotting the batch file versus late-reading external code.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "start_line": 274,
+          "end_line": 283,
+          "quote_sha256": "c82e8d7410787ced3b01c3a6c9faf7eb5c02fccaa9bb499401bd863e248ccccb"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "start_line": 308,
+          "end_line": 319,
+          "quote_sha256": "9d1e196d185108d088cca1416eb650c3024f0294c17d5dcbc407e1813be7ee3b"
+        }
+      ],
+      "row_sha256": "76edc80ea7c803d792707dce97883e9cc2053d08133c7c78f18b336718f953e5",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-034",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "Each srun being a separate history job-step row is explicitly stated. The monitoring implication directly follows and does not invent any accounting column.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Distinct from tool-015 general sbatch/srun definitions: tests per-stage history visibility within one batch job.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "start_line": 93,
+          "end_line": 96,
+          "quote_sha256": "accf1530481ef6f837f5e075e47020c811e8551b88619dd0874fa3fcf848724c"
+        }
+      ],
+      "row_sha256": "5876d461cee9e37453dd1ffc6beb16a1693f54ff7100f32bbd079283aaecb145",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-035",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The loop, date/sleep behavior, output directive and tail -f observation are shown; buffering is the given explanation for delayed lines. No command was executed.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Distinct from the eligible hostname/name script: tests a progress loop, live-following output and buffering.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "start_line": 324,
+          "end_line": 342,
+          "quote_sha256": "fab1d577849d503aedcfb223648b98b3067107a683eb18df70dafd1bdab59d3a"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "start_line": 347,
+          "end_line": 364,
+          "quote_sha256": "a8c6111085dcc8492d2089b2818f5b57d7f6edadda851609f1e9c9d17d440c48"
+        }
+      ],
+      "row_sha256": "c03edb221ebf75a2b69cd6871d4ca74f3c30a6ed8060adf0f6b59f860622bf92",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-036",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The source explicitly describes the blocked shell while awaiting allocation and inspecting the queue from a second connection. The answer does not infer failure from normal waiting.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Blocked waiting shell and inspecting from another connection differs from job-state tool lookup or connection-loss behavior.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 64,
+          "end_line": 85,
+          "quote_sha256": "abf3293bbcccbd11d4aae8166106814895491df0ea1676b1ba84c86801bfdb8b"
+        }
+      ],
+      "row_sha256": "39fea11e24885f32614cdd8a0ccebbf3313071594af95ba0eebd7828026db9d1",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-037",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The ordinary interactive connection-lifetime warning and recommendation of batch work for unattended runs are stated. The answer keeps this distinct from the site persistent-screen wrapper.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Connection interruption for normal interactive srun differs from dev-aalto-038 screen-backed session cleanup.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 110,
+          "end_line": 122,
+          "quote_sha256": "749068ed68ef8747ba73d9b03a0de84a046b4e4a2a8c991fed02b56d35be0943"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 527,
+          "end_line": 532,
+          "quote_sha256": "76d1a46089361ae97103fcc714299f462450416f4d1138b4c3751218c27ef55a"
+        }
+      ],
+      "row_sha256": "c11f3c9b06590e393a36de230ea24d6c722e671da9d6909d1bb908a46511200c",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-038",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "sinteractive starts a separate screen session; the source says to exit all its shells or cancel rather than merely close the terminal. The answer preserves that lifecycle distinction.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Persistent screen cleanup differs from normal srun connection lifetime.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 156,
+          "end_line": 171,
+          "quote_sha256": "d90dcfe5758b6fdf4cd25ebe3fb4a76ce983e110bb005b5c1d9265a8a4086f24"
+        }
+      ],
+      "row_sha256": "5a3dd6e05938217f7029a6933069fdfb7b7c338037cc24669b7eb90a1928cc46",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-039",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The approximate 60-second memory sampling and the existing test program sleep option are documented. The combined memory request/test command is supported, and the answer does not guarantee an exact peak.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Distinct from calibration maxrss/tool-007 peak-memory lookup: tests a sampling blind spot and a controlled longer observation interval.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 214,
+          "end_line": 237,
+          "quote_sha256": "047464b62d60cddd6cdf9e8bf4464afc25e2154a337b93606ef95280e710ecce"
+        },
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 243,
+          "end_line": 253,
+          "quote_sha256": "787fffb18eca5d725c90a2e6c4f64eec449c5b4df58227566df65f2603da545d"
+        }
+      ],
+      "row_sha256": "4671e8bed957c0b04b6cb4e5d748b81d52da52870db483b04b4b779bc610bdf9",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "dev-aalto-040",
+      "recommendation": "accept_content_with_stated_scope",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "reference_review": "The pinned site policy advises gpu-debug, limits other interactive GPU use to one GPU/four hours, and warns of cancellation. The answer does not recast advice as a guaranteed scheduler enforcement mechanism.",
+      "question_realism": "reasonable source-qualified HPC scenario",
+      "task_classification": "appropriate",
+      "duplicate_review": "Distinct from calibration pty: tests snapshot-specific resource-sharing limits and interruption risk, not constructing an interactive shell command.",
+      "evidence": [
+        {
+          "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "start_line": 181,
+          "end_line": 186,
+          "quote_sha256": "d3e75e673b656ead114704a99fa463d5b415bc60d9155c0342e8e31467740b3c"
+        }
+      ],
+      "row_sha256": "6e5aba81a64450b8f1af0a8b9059efb0130cc35fc4489d233bb0690e4f419587",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    }
+  ],
+  "tool_items": [
+    {
+      "id": "tool-017",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "Both filters are explicit and supported. The mock intersects state and partition; the visible policy allows this queue query without a job ID. This adds a conjunctive argument requirement beyond the existing PENDING-only query.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "A correct first call is assessed. Reporting the filtered result is outside this protocol.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 29,
+          "end_line": 40,
+          "quote_sha256": "85534a43cb13eb18a5895a5e1d710a8a0b51a9f66729ecf7ef1d86b915346629"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 189,
+          "end_line": 202,
+          "quote_sha256": "a0f6a4185634c086f7a191f4b9d12b345731a135dc8643204fb8a2be7cd7b066"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "075c26863c4e157f5d6d8540145261c48ced9c5d56c35ebbfb8e3ac7f411ff07",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "tool-018",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "stdout must be explicitly selected because stderr is the default. Omitted tail_lines or integer 20 both preserve the requested default; string 20 is not allowed. This is not a tail-number or ID-only variation of tool-002.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "The selected default fixture has a readable stdout log. No diagnosis, log summarization, or claims about a real job are scored.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 58,
+          "end_line": 69,
+          "quote_sha256": "b913c755e4d52b6b0856f55f818701d01b1b38363e6036079ce6cdd7fbdf75fa"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 262,
+          "end_line": 275,
+          "quote_sha256": "b571c490e949a2564c6601a628275cff399e03d0cbcb3feb089c6f73491a3018"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "d17eccf5a6e2dd78dd7344eefbfd56980b26abb39f870de1711599b0cf4b9ac2",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "tool-019",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "partition_info with no filter supplies all configured partitions and requested CPU/memory/time fields, including the CPU-only fixture. gpu_availability has different scope and fields; this differs from one-partition tool-005.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "Only requesting the correct full configuration result is scored; the answer need not infer live capacity or scheduling guarantees.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 76,
+          "end_line": 93,
+          "quote_sha256": "13fcc3ab0f5e653554913ecdf7216818fc62da8006431d099dd28dbefc1ddddf"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 98,
+          "end_line": 103,
+          "quote_sha256": "7e2bf1e236a85a24a48aaff842ec8238b028d64b21b120deef70a19ee6966328"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 294,
+          "end_line": 320,
+          "quote_sha256": "1790a4f49e70d0bf88eac6220a1fe63d44007a1d487d261b151240fcc585c6e3"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "80db867a43265afb26aa76449d5c22f09c0dcd6a8722972c7e7b8466fa61844a",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "tool-020",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "The complete supplied script and explicit mock-submission permission justify submit_job with test_only=false or omitted. This is meaningfully different from tool-009 validation-only permission. Script case/content must remain exact under the current scorer transport rules.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "Mock submission only. No script execution, allocation, job completion, resource validation, real Slurm submission, or student quality has occurred. Accepted script transport differences follow the existing v2 scorer, not a new scorer.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 41,
+          "end_line": 51,
+          "quote_sha256": "6105a4ea5ff8d46ccddefb8a530e52afcb71b5ad6a9058c4af4076106b8843a0"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 214,
+          "end_line": 245,
+          "quote_sha256": "f319ff85d657199f5674a762f06be152275c2c8b14a819f5571d00cb1b10fc07"
+        },
+        {
+          "path": "worktrees/support-v2-integration/tests/test_tools.py",
+          "sha256": "a3cbe4217e5caafd7eeefa6bd754b793b4550556974934e6a3aba4f612dc2f0d",
+          "start_line": 97,
+          "end_line": 107,
+          "quote_sha256": "786140c1c925323d86c97a093ea09b64ff39a1acfb40d542830657415edb4cae"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "68c8e0e0f8ccaf286c72eb6c7070b7d4bbf59cbbf8cf19dd20900fcc499054cf",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "tool-021",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "The API requires full script text and the inventory has no arbitrary file reader. A filename cannot satisfy that argument. No-call clarification is appropriate; inventing a new wrapper script would not submit the supplied but unread content.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "The no-call label only checks that the first response contains no tool call and is nonempty. It does not validate whether the assistant actually requests the right missing information.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 23,
+          "end_line": 94,
+          "quote_sha256": "a5774a46a59d28589ce9290c84378d2232a491b6e24a435a40615cfb11f1c617"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 214,
+          "end_line": 226,
+          "quote_sha256": "68c429d815c2a822d93e1dff30ffa063b4815ba2bdbde9ad8561fe48d31bddc0"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "4e32e8f7a7e8ae3a52b5dcd17c09fa0a2dec12f199162f95c159109b1a3d7a5d",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "tool-022",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "Two explicit IDs do not resolve which is obsolete. The visible clarify-first policy forbids guessing or discovery before clarification for the unresolved action target. This differs from simply missing an ID.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "Only no-call behavior is scored. The semantic quality of a clarification is unscored, and the fixture states cannot establish the user meaning of obsolete.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 53,
+          "end_line": 57,
+          "quote_sha256": "84db3f33ddadf64a180b63ca7c364d794b0cd01c6e6e9eef585d05c0f0e39d33"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "4ba19e8cde1a050bffab0e0b769c74da25b7ab9e84c2e4faea98d747921c311c",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    },
+    {
+      "id": "tool-023",
+      "recommendation": "accept_first_response_decision_item",
+      "blocking_issues": [],
+      "source_support": "supported",
+      "content_and_novelty_review": "None of the eight available tools runs an arbitrary command in the current login shell. Submitting a batch job would change the requested operation. No-call is correct for this inventory.",
+      "expected_call_compatible_with_schema_and_scorer": true,
+      "policy": "hpc-tools-clarify-first-v1",
+      "protocol": "tool-first-response-v2",
+      "scope_limit": "The scorer cannot distinguish a truthful limitation from fabricated command output if both are nonempty no-call text. This limitation must remain visible; the draft does not claim hallucination detection.",
+      "evidence": [
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 23,
+          "end_line": 94,
+          "quote_sha256": "a5774a46a59d28589ce9290c84378d2232a491b6e24a435a40615cfb11f1c617"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "start_line": 214,
+          "end_line": 245,
+          "quote_sha256": "f319ff85d657199f5674a762f06be152275c2c8b14a819f5571d00cb1b10fc07"
+        },
+        {
+          "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+          "start_line": 10,
+          "end_line": 23,
+          "quote_sha256": "723649d8186be21f90f6d4a7e17b2ced4d4f2ed4e2b5e31f7cc3b3749bc57bfb"
+        }
+      ],
+      "row_sha256": "33f237829db2f323aaa0618166d9de43eb0d5664011cf390d6438bdc076fdfe8",
+      "release_acceptance": "coordinator decision pending",
+      "training_eligible": false
+    }
+  ],
+  "originals_modified": false,
+  "external_requests": 0,
+  "new_training_records": 0
+}

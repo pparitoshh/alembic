@@ -1,0 +1,269 @@
+{
+  "purpose": "Synthetic production-scorer regression fixtures; not evaluation questions or teacher/training records",
+  "cases": [
+    {
+      "id": "tool-017",
+      "test": "supported argument variant 1",
+      "synthetic_response": "<tool_call>{\"name\": \"list_queue\", \"arguments\": {\"state\": \"RUNNING\", \"partition\": \"boost_usr_prod\"}}</tool_call>",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-017",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-017",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-018",
+      "test": "supported argument variant 1",
+      "synthetic_response": "<tool_call>{\"name\": \"read_job_log\", \"arguments\": {\"job_id\": \"8410003\", \"stream\": \"stdout\", \"tail_lines\": 20}}</tool_call>",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-018",
+      "test": "supported argument variant 2",
+      "synthetic_response": "<tool_call>{\"name\": \"read_job_log\", \"arguments\": {\"job_id\": \"8410003\", \"stream\": \"stdout\"}}</tool_call>",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-018",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-018",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-019",
+      "test": "supported argument variant 1",
+      "synthetic_response": "<tool_call>{\"name\": \"partition_info\", \"arguments\": {}}</tool_call>",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-019",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-019",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-020",
+      "test": "supported argument variant 1",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\n#SBATCH --partition=boost_qos_dbg\\n#SBATCH --cpus-per-task=2\\nhostname\\n\", \"test_only\": false}}</tool_call>",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-020",
+      "test": "supported argument variant 2",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\n#SBATCH --partition=boost_qos_dbg\\n#SBATCH --cpus-per-task=2\\nhostname\\n\"}}</tool_call>",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-020",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-020",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-021",
+      "test": "supported nonempty no-call fixture",
+      "synthetic_response": "Please paste the full contents of batch.sh so I can submit that script.",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-021",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-021",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-022",
+      "test": "supported nonempty no-call fixture",
+      "synthetic_response": "Which job is obsolete and should be cancelled: 4718210 or 4718207?",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-022",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-022",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-023",
+      "test": "supported nonempty no-call fixture",
+      "synthetic_response": "The available tools cannot execute commands in your current login shell, so I cannot report observed output from that command.",
+      "expected_first_response_pass": true
+    },
+    {
+      "id": "tool-023",
+      "test": "empty response is not successful",
+      "synthetic_response": " ",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-023",
+      "test": "dangling tool delimiter is invalid",
+      "synthetic_response": "<tool_call>{\"name\":\"list_queue\"}",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-017",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"list_queue\", \"arguments\": {\"state\": \"RUNNING\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-017",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"list_queue\", \"arguments\": {\"partition\": \"boost_usr_prod\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-017",
+      "test": "meaningfully incorrect decision/arguments 3",
+      "synthetic_response": "<tool_call>{\"name\": \"list_queue\", \"arguments\": {\"state\": \"PENDING\", \"partition\": \"boost_usr_prod\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-018",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"read_job_log\", \"arguments\": {\"job_id\": \"8410003\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-018",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"read_job_log\", \"arguments\": {\"job_id\": \"8410003\", \"stream\": \"stderr\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-018",
+      "test": "meaningfully incorrect decision/arguments 3",
+      "synthetic_response": "<tool_call>{\"name\": \"read_job_log\", \"arguments\": {\"job_id\": \"8410003\", \"stream\": \"stdout\", \"tail_lines\": 50}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-018",
+      "test": "meaningfully incorrect decision/arguments 4",
+      "synthetic_response": "<tool_call>{\"name\": \"job_status\", \"arguments\": {\"job_id\": \"8410003\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-019",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"partition_info\", \"arguments\": {\"partition\": \"boost_usr_prod\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-019",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"gpu_availability\", \"arguments\": {}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-020",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\n#SBATCH --partition=boost_qos_dbg\\n#SBATCH --cpus-per-task=2\\nhostname\\n\", \"test_only\": true}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-020",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\n#SBATCH --partition=boost_qos_dbg\\n#SBATCH --cpus-per-task=3\\nhostname\\n\", \"test_only\": false}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-020",
+      "test": "meaningfully incorrect decision/arguments 3",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"batch.sh\", \"test_only\": false}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-021",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"batch.sh\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-021",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\n#SBATCH --partition=boost_qos_dbg\\n#SBATCH --cpus-per-task=2\\nhostname\\n\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-021",
+      "test": "meaningfully incorrect decision/arguments 3",
+      "synthetic_response": "<tool_call>{\"name\": \"list_queue\", \"arguments\": {}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-022",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"cancel_job\", \"arguments\": {\"job_id\": \"4718210\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-022",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"cancel_job\", \"arguments\": {\"job_id\": \"4718207\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-022",
+      "test": "meaningfully incorrect decision/arguments 3",
+      "synthetic_response": "<tool_call>{\"name\": \"list_queue\", \"arguments\": {}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-023",
+      "test": "meaningfully incorrect decision/arguments 1",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\n#SBATCH --partition=boost_qos_dbg\\n#SBATCH --cpus-per-task=2\\nhostname\\n\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-023",
+      "test": "meaningfully incorrect decision/arguments 2",
+      "synthetic_response": "<tool_call>{\"name\": \"job_status\", \"arguments\": {\"job_id\": \"4718207\"}}</tool_call>",
+      "expected_first_response_pass": false
+    },
+    {
+      "id": "tool-020",
+      "test": "allowed CRLF transport plus terminal newline",
+      "synthetic_response": "<tool_call>{\"name\": \"submit_job\", \"arguments\": {\"script\": \"#!/bin/bash\\r\\n#SBATCH --partition=boost_qos_dbg\\r\\n#SBATCH --cpus-per-task=2\\r\\nhostname\\r\\n\"}}</tool_call>",
+      "expected_first_response_pass": true
+    }
+  ]
+}

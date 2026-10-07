@@ -1,0 +1,1199 @@
+{
+  "schema_version": "aalto-development-draft-support-v1",
+  "source_revision": "b83fad3e06326459a17390f107ca04b2e8e0752a",
+  "purpose": "DEVELOPMENT ONLY; model-authored drafts, never training data",
+  "review_method": "Model drafting and self-review plus exact automated checks; coordinator and independent review pending; no human review claimed",
+  "attribution": "Adapted from Aalto Scientific Computing documentation, Copyright 2009-present Aalto University and/or all contributors. Question scenarios and concise reference answers are model-authored adaptations; evidence quotes preserve the acquired text.",
+  "license": "Aalto documentation CC-BY-4.0; software/script examples CC0; retain raw LICENSE and upstream attribution",
+  "license_evidence": {
+    "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/LICENSE",
+    "sha256": "a900d25e653f4b1f2c5b7d16b97be6cfe55b31ebb61aed6e306ec003a9d64cee",
+    "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/LICENSE"
+  },
+  "items": [
+    {
+      "id": "dev-aalto-001",
+      "doc_id": "aalto_triton_gpu",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.program_support_and_data_path",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 45,
+          "end_line": 53,
+          "quote": "The programs we normally write in common programming languages, e.g. C++ are\nexecuted by the CPU. To run a part of that program in a GPU the program must\ndo the following:\n\n1. Specify a piece of code called a **kernel**, which contains the GPU part\n   of the program and is compiled for the specific GPU architecture in use.\n2. Transfer the data needed by the program from the RAM to GPU VRAM.\n3. Execute the kernel on the GPU.\n4. Transfer the results from GPU VRAM to RAM."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 92,
+          "end_line": 100,
+          "quote": ".. note::\n\n   Most GPU programs cannot utilize more than one GPU at a time. Before\n   trying to reserve multiple GPUs you should verify that your code\n   can utilize them.\n\n   Moreover, running CPU-only jobs on GPU nodes is not permitted in our\n   current setup. Thus, if you request a GPU partition in your job script,\n   you must also request at least one GPU."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the code/data path and multi-GPU support check. No particular CUDA API, automatic speedup, or installation procedure is required.",
+      "review_notes": "Distinct from existing GPU-count request/calibration tasks: tests software prerequisites and data movement, not numeric resource syntax.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-002",
+      "doc_id": "aalto_triton_gpu_reference",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.partition_policy_and_diagnostic_uncertainty",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/gpu.rst",
+          "source_sha256": "a79a8c9f864b70e9a22d4023e46c96535ab681e42254ae8bf676d5b345d4870a",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/gpu.rst",
+          "start_line": 25,
+          "end_line": 29,
+          "quote": "Running CPU-only workloads on GPU partitions is not permitted.\nIf you encounter an error along the lines of\n``srun: error: Unable to allocate resources: Job violates accounting/QOS policy \n(job submit limit, user's size and/or time limits)``, one possible\ncause is that you request a GPU partition but script is missing ``--gpus=n``."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 98,
+          "end_line": 100,
+          "quote": "   Moreover, running CPU-only jobs on GPU nodes is not permitted in our\n   current setup. Thus, if you request a GPU partition in your job script,\n   you must also request at least one GPU."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require a possible-cause diagnosis and explicit GPU request. Do not infer quota balances, scheduling priority, or other unprovided causes.",
+      "review_notes": "Uses the policy/error paragraph only; excludes contradictory min-vram/gpu-vram syntax elsewhere in the GPU reference.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-003",
+      "doc_id": "aalto_triton_gpu",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.login_node_runtime_diagnosis",
+      "difficulty": "easy",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 244,
+          "end_line": 250,
+          "quote": "CUDA libraries not found\n~~~~~~~~~~~~~~~~~~~~~~~~\n\nIf you ever get ``libcuda.so.1: cannot open shared object file: No such\nfile or directory``, this means you are attempting to use a CUDA\nprogram on a node without a GPU. This especially happens if you try\nto test a GPU code on the login node."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 87,
+          "end_line": 90,
+          "quote": "To request GPUs on Slurm, you should use the ``--gpus=N``, where ``N``\nis the number of GPUs you wish to request.\n\nFor example, ``--gpus=1`` will give you a single GPU."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "The question explicitly supplies the no-GPU login-node condition. Do not treat this message as a universal diagnosis on every system or prescribe driver installation.",
+      "review_notes": "New runtime-venue failure scenario; no existing evaluation or eligible training question tests this error.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-004",
+      "doc_id": "aalto_triton_gpu",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.compile_runtime_toolkit_consistency",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 252,
+          "end_line": 257,
+          "quote": "Another problem that might occur is when a program will try to use\npre-compiled kernels, but the corresponding CUDA toolkit is not\navailable.\n\nThis might happen in you have used a ``cuda``-module to compile\nthe code and it is not loaded when you try to run the code."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the compile/run toolkit-module check. Do not diagnose the GPU driver, invent a module version, or guarantee this fixes every CUDA error.",
+      "review_notes": "Distinct from preceding item: GPU presence is given; the tested issue is a missing toolkit environment after compilation.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-005",
+      "doc_id": "aalto_triton_gpu",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.framework_architecture_compatibility",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 287,
+          "end_line": 296,
+          "quote": "Please note that pre-installed software either has CUDA already\npresent or it loads the needed modules. Thus you\n**do not need to explicitly load CUDA** from the module system when\nloading these.\n\nThere is also a Pytorch module ``scicomp-pytorch-env/2026.1`` that \ncontains the latest version of Pytorch and the corresponding CUDA toolkit. \nThis module is optimized for newer GPUs (B300s) but does not work on \nolder GPUs (V100s) due to differences in CUDA compute capability \nrequirements and supported GPU architectures."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Score the specific documented module/V100 incompatibility and architecture reason. No replacement package version or installation command is supported here.",
+      "review_notes": "Explicit snapshot/module assumption avoids presenting 'latest' as a current universal fact.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-006",
+      "doc_id": "aalto_triton_gpu",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.multiarchitecture_compiler_arguments",
+      "difficulty": "hard",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 188,
+          "end_line": 205,
+          "quote": "To compile CUDA-based code for GPUs, lets load a ``cuda``-module and\na newer compiler:\n\n.. code-block:: bash\n\n   module load triton/2024.1-gcc gcc/12.3.0 cuda/12.2.1\n\nNow we should have a compiler and a CUDA toolkit loaded. After this\nwe can compile the code with:\n\n.. code-block:: bash\n\n   nvcc -arch=sm_60 -gencode=arch=compute_60,code=sm_60 -gencode=arch=compute_70,code=sm_70 -gencode=arch=compute_80,code=sm_80 -gencode=arch=compute_90,code=sm_90 -o pi-gpu slurm/pi-gpu.cu\n\nThis monstrosity of a command is written like this because we want our code\nto be able run on multiple different GPU architectures. For more information,\nsee section on\n:ref:`setting compilation flags for GPU architectures <cuda-arch-flags>`."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 300,
+          "end_line": 315,
+          "quote": "Setting CUDA architecture flags when compiling GPU codes\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nMany GPU codes come with precompiled kernels, but in some\ncases you might need to compile your own kernels. When this is\nthe case you'll want to give the compiler flags that make it\npossible to run the code on multiple different GPU architectures.\n\nFor GPUs in Triton these flags are:\n\n.. code-block:: make\n\n   -arch=sm_60 -gencode=arch=compute_60,code=sm_60 -gencode=arch=compute_70,code=sm_70 -gencode=arch=compute_80,code=sm_80 -gencode=arch=compute_90,code=sm_90\n\nHere architectures (``compute_XX``/``sm_XX``) number 60, 70, 80 and 90\ncorrespond to GPU cards P100, V100, A100 and H100/H200 respectively."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the nvcc invocation, documented argument set, input/output, and mappings; ordering of independent -gencode arguments may vary. Do not require external program contents or unsupported newer architectures.",
+      "review_notes": "A complete inline compiler invocation with supplied source-file/environment prerequisites; compilation is not claimed or performed. Unlike resource-count scripts, tests build architecture targeting.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-007",
+      "doc_id": "aalto_triton_gpu_monitoring",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.cpu_feeding_bottleneck_and_resource_restraint",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/examples/monitoring/gpu.rst",
+          "source_sha256": "3ebb6e3862b17ec288b63409c48d4a2409fad01c5f372ce7c2e8d4a8d219d03d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/examples/monitoring/gpu.rst",
+          "start_line": 35,
+          "end_line": 49,
+          "quote": "In the example, you can see that the GPU utilization is low.\n\nIf this is the case you should check whether job's CPU utilization is close\nto 100% with ``seff JOBID``. Having a high CPU utilization and a low GPU\nutilization can indicate that the CPUs are trying to keep the GPU occupied\nwith calculations, but the workload is too much for the CPUs and thus GPUs\nare not constantly working.\n\nIncreasing the number of CPUs you request can help, especially in tasks\nthat involve data loading or preprocessing, but your program must know how\nto utilize the CPUs.\n\nHowever, you shouldn't request too many CPUs: There wouldn't be enough CPUs\nfor everyone to use the GPUs and they would go to waste (all of our nodes\nhave 4-12 CPUs for each GPU)."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require tentative diagnosis, program parallelism condition, and restraint. No exact CPU count or guaranteed speedup is derivable.",
+      "review_notes": "Existing tools query free GPUs/accounting; this item reasons from supplied utilization evidence without a live lookup.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-008",
+      "doc_id": "aalto_triton_gpu",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "gpu.input_pipeline_and_small_file_layout",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/gpu.rst",
+          "source_sha256": "750a086170f16bce626b0c7504fcbe2790286a7e596fd0f3b5aae055284be01c",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/gpu.rst",
+          "start_line": 326,
+          "end_line": 351,
+          "quote": "Many problems such as deep learning training are data-hungry.\nIf you are loading large amounts of data you should make certain\nthat the data loading is done in an efficient manner or the GPU\nwill not be fully utilized.\n\nAll deep learning frameworks have their own guides on how to optimize\nthe data loading, but they all are some variation of:\n\n1. Store your data in multiple big files.\n2. Create code that loads data from these big files.\n3. Run optional pre-processing functions on the data.\n4. Create a batch of data out of individual data samples.\n\nTasks 2 and 3 are usually parallelized across multiple CPUs. Using\npipelines such as these can dramatically speed up the training procedure.\n\nIf your data consists of individual files that are not too big,\nit is a good idea to have the data stored in one file, which is then\ncopied to nodes ramdisk ``/dev/shm`` or temporary disk ``/tmp``.\n\nAvoiding small files is in general a good rule to follow. Please refer\nto the :doc:`small files <../usage/smallfiles>` page for more detailed\ninformation.\n\nIf your data is too big to fit in the disk, we recommend that you\ncontact us for efficient data handling models."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the documented storage/loading/preprocessing/batching plan. No archive format, copy command, framework API, storage capacity, or retention guarantee is required.",
+      "review_notes": "Distinct from CPU-count tuning: tests data organization and staging rather than allocation sizing.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-009",
+      "doc_id": "aalto_triton_mpi",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "mpi.application_parallelism_prerequisite",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "source_sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/parallel-mpi.rst",
+          "start_line": 45,
+          "end_line": 66,
+          "quote": "`MPI or message passing interface <https://en.wikipedia.org/wiki/Message_Passing_Interface>`_\nis a standard for creating communication between many tasks that collectively\nrun a program in parallel. Programs using MPI can scale up to thousands of\nnodes.\n\nPrograms using MPI need to be written so that they utilize the MPI communication.\n**Thus typical programs that are not written around MPI cannot use MPI without\nmajor modifications.**\n\n.. figure:: /images/parallel-mpi.svg\n    :width: 80%\n    :align: center\n\nMPI programs typically work in the following way:\n\n1. Same program is started in multiple separate **tasks**.\n2. All tasks join a communication layer with MPI.\n3. Each tasks gets their own **rank** (basically and ID number).\n4. Based on their ranks tasks execute their part of the code and communicate to\n   other tasks. Rank 0 is usually the \"main program\" that prints output for\n   monitoring.\n5. After the program finishes communication layer is stopped."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the distinction between launching tasks and implementing MPI work/communication. No new MPI API calls or rewrite of the application is required.",
+      "review_notes": "Distinct from calibration's rank-count construction and tool-014: tests application suitability, not allocation arithmetic.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-010",
+      "doc_id": "aalto_triton_mpi",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "mpi.hybrid_per_node_capacity_check",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "source_sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/parallel-mpi.rst",
+          "start_line": 218,
+          "end_line": 230,
+          "quote": "When MPI and shared memory parallelism are done by the same application\nit is usually called hybrid parallelization.\n**Programs that utilize this model can require both multiple tasks\nand multiple CPUs per task.**\n\nFor example, CP2K compiled to ``psmp``-target has hybrid parallelization enabled\nwhile ``popt``-target has only MPI parallelization enabled. The best ratio between\nMPI tasks and CPUs per tasks depends on the program and needs to be measured.\n\nRemember that the number of CPUs in a machine is hardware dependent.\nThe total number of CPUs per node when you request ``--ntasks-per-node=n`` and\n``--cpus-per-task=C`` is :math:`n \\cdot C`. This number needs to be equal or less than\nthe total number of CPUs in the machine."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require multiplication, capacity violation, and corrected 6-by-4 request. Do not claim this fitting layout is optimal or available on every Triton node.",
+      "review_notes": "Meaningfully different from mpi64 calibration: hybrid CPU-per-task feasibility with a fixed per-task requirement.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-011",
+      "doc_id": "aalto_triton_mpi",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "mpi.site_build_runtime_module_and_launcher_consistency",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "source_sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/parallel-mpi.rst",
+          "start_line": 120,
+          "end_line": 148,
+          "quote": "First off, we need to compile the program with a suitable OpenMPI version. Let's use the\nrecommended version ``openmpi/4.1.6``::\n\n   $ module load triton/2024.1-gcc openmpi/4.1.6\n\n   $ mpicc -o pi-mpi slurm/pi-mpi.c\n\nThe program can now be run with ``srun ./pi-mpi N``, where ``N`` is the number of\niterations to be done by the algorithm.\n\nLet's ask for resources and run the program with two processes using ``srun``::\n\n $ srun --nodes=1 --ntasks=2 --time=00:10:00 --mem=500M ./pi-mpi 1000000\n\nThis worked because we had the correct modules already loaded.\nUsing a slurm script setting the requirements and loading the correct modules becomes easier:\n\n.. code-block:: slurm\n\n   #!/bin/bash\n   #SBATCH --time=00:10:00\n   #SBATCH --mem=500M\n   #SBATCH --output=pi-mpi.out\n   #SBATCH --nodes=1\n   #SBATCH --ntasks=2\n\n   module load triton/2024.1-gcc openmpi/4.1.6\n\n   srun ./pi-mpi 1000000"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Score matching modules, mpicc build, and srun launch. Do not require contents of the externally linked pi program or introduce flags from the Open MPI final-test documents.",
+      "review_notes": "Uses only inline Aalto build/launch material; no unexpanded example include is needed. Site-specific example, not a universal launcher rule.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-012",
+      "doc_id": "aalto_triton_mpi",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "mpi.cpu_feature_discovery_and_constraint",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "source_sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/parallel-mpi.rst",
+          "start_line": 174,
+          "end_line": 205,
+          "quote": "The number of CPUs/tasks one can specify for a single parallel job depends\nusually on the underlying algorithm. In many codes, such as many\nfinite-difference codes, the workers are set in a grid-like structure. The user\nof said codes has then a choice of choosing the dimensions of the simulation\ngrid aka. how many workers are in x-, y-, and z-dimensions.\n\nFor best perfomance one should reserve half or full nodes when possible. In\nheterogeneous clusters this can be a bit more complicated as different CPUs\ncan have different numbers of cores.\n\nIn Triton CPU partitions there are machines with 24, 28 and 40 CPUs. See the\nlist of :ref:`available nodes<hardware-list>` for more information.\n\nHowever, one can make the reservations easier by specifying a CPU architecture\nwith ``--constraint=ARCHITECTURE``. This tells Slurm to look for nodes that\nsatisfy a specific feature. To list available features, one can use\n``slurm features``.\n\nFor example, one could limit the code to the Haswell-architecture with the\nfollowing script:\n\n.. code-block:: slurm\n\n  #!/bin/bash\n  #SBATCH --time=00:10:00      # takes 5 minutes all together\n  #SBATCH --mem-per-cpu=200M   # 200MB per process\n  #SBATCH --nodes=1            # 1 node\n  #SBATCH --ntasks-per-node=24 # 24 processes as that is the number in the machine\n  #SBATCH --constraint=hsw     # set constraint for processor architecture\n\n  module load triton/2024.1-gcc openmpi/4.1.6  # NOTE: should be the same as you used to compile the code\n  srun ./pi-mpi 1000000"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require discovery and the explicit supplied hsw feature constraint. Do not infer present node counts, available capacity, or arbitrary architecture aliases.",
+      "review_notes": "Tests source-supported feature discovery/placement rather than task-count variation.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-013",
+      "doc_id": "aalto_triton_mpi",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "mpi.custom_installation_pmix_integration",
+      "difficulty": "hard",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "source_sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/parallel-mpi.rst",
+          "start_line": 159,
+          "end_line": 169,
+          "quote": "MPI workers do not see each other\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\nWhen using our installations of MPI the MPI ranks will automatically\nget information on their ranks from Slurm via library called\n`PMIx <https://pmix.github.io/>`_. If the MPI used is some other version,\nthey might not connect with the Slurm correctly.\n\nIf you have your own installation of MPI you might try setting\n``export SLURM_MPI_TYPE=pmix_v2`` in your job before calling ``srun``.\nThis will tell Slurm to use PMIx for connecting with the MPI installation."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Preserve the tentative wording and exact documented setting. Do not assert compatibility for every MPI/PMIx version or recommend a cluster-wide change.",
+      "review_notes": "The question explicitly examines the guide's own-installation/srun troubleshooting branch; it does not override the abstract's usual launcher guidance.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-014",
+      "doc_id": "aalto_triton_mpi",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "mpi.hybrid_build_variant_and_measured_layout",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/parallel-mpi.rst",
+          "source_sha256": "1273e1ccf7006fc683944c80c7fdfed78556886a2ac81f6920dbf85997eb88cd",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/parallel-mpi.rst",
+          "start_line": 218,
+          "end_line": 230,
+          "quote": "When MPI and shared memory parallelism are done by the same application\nit is usually called hybrid parallelization.\n**Programs that utilize this model can require both multiple tasks\nand multiple CPUs per task.**\n\nFor example, CP2K compiled to ``psmp``-target has hybrid parallelization enabled\nwhile ``popt``-target has only MPI parallelization enabled. The best ratio between\nMPI tasks and CPUs per tasks depends on the program and needs to be measured.\n\nRemember that the number of CPUs in a machine is hardware dependent.\nThe total number of CPUs per node when you request ``--ntasks-per-node=n`` and\n``--cpus-per-task=C`` is :math:`n \\cdot C`. This number needs to be equal or less than\nthe total number of CPUs in the machine."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require build-mode distinction and measurement, not an asserted universal best ratio. No CP2K inputs, launch flags or thread environment variables are supported here.",
+      "review_notes": "Distinct from the capacity-debug item: examines application build capability and experimental layout choice, not an arithmetic correction.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-015",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.instrumentation_vs_sampling",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 50,
+          "end_line": 66,
+          "quote": "GNU gprof\n^^^^^^^^^\n\n`gprof <http://sourceware.org/binutils/docs/gprof/>`__ is a profiler\nbased on instrumenting your code (build with -pg). It has relatively\nhigh overhead, but gives exact information e.g. for the number of times\na function is called.\n\nPerf\n^^^^\n\n`perf <https://perf.wiki.kernel.org/index.php/Tutorial>`__ is a\n*sampling profiler*, which periodically samples *events* originating\ne.g. from the CPU performance monitoring unit (PMU). This generates a\nstatistical profile, but the advantage is that the overhead is very low\n(single digit %), and one can get timings at the level of individual asm\ninstructions. For a simple example, consider a (naive) matrix"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Score the documented tradeoff and tool choice. Do not require universal overhead numbers or guarantee exactness for every program configuration.",
+      "review_notes": "New measurement-method comparison; no existing evaluation/calibration question covers profiling methodology.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-016",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.perf_build_collect_report_annotate",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 69,
+          "end_line": 80,
+          "quote": "Compile the program (-g provides debug symbols which will be useful\nlater on, at no performance cost)::\n\n  $ gfortran -Wall -g -O3 mymatmul.f90\n\nRun the program via the profiler to generate profile data::\n\n  $ perf record ./a.out\n\nNow we can look at the profile::\n\n $ perf report"
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 90,
+          "end_line": 96,
+          "quote": "So 85% of the runtime is spent in the main program (symbol MAIN\\_\\_),\nand most of the rest is in the random number generator, which the\nprogram calls in order to generate the input matrices.\n\nNow, lets take a closer look at the main program::\n\n  $ perf annotate MAIN__"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the compile/record/report/annotate stages and source-supported flags. No generated performance result or claim of execution is allowed.",
+      "review_notes": "A concrete production-analysis workflow; the source program itself is an explicit scenario prerequisite.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-017",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.hotspot_prioritization_from_report",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 42,
+          "end_line": 45,
+          "quote": "This can give you a list of where all your processor time is going,\neither per-function or per-line. Generally, most of your time is in a\nvery small region of your code, and you need to know what this is in\norder to improve *just* that part."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 80,
+          "end_line": 96,
+          "quote": " $ perf report\n # Samples: 1251\n #\n # Overhead Command Shared Object Symbol\n # ........ .............. ............................. ......\n #\n 85.45% a.out ./a.out [.] MAIN\\_\\_\n 4.24% a.out /usr/lib/libgfortran.so.3.0.0 [.] \\_gfortran\\_arandom\\_r4\n 3.12% a.out /usr/lib/libgfortran.so.3.0.0 [.] kiss\\_random\\_kernel\n\nSo 85% of the runtime is spent in the main program (symbol MAIN\\_\\_),\nand most of the rest is in the random number generator, which the\nprogram calls in order to generate the input matrices.\n\nNow, lets take a closer look at the main program::\n\n  $ perf annotate MAIN__"
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 109,
+          "end_line": 121,
+          "quote": "  : c = 0.\n  :\n  : do j = 1, n\n  : do k = 1, n\n  : do i = 1, n\n  : c(i,j) = c(i,j) + a(i,k) \\* b(k,j)\n  30.12 : 400a40: 0f 28 04 01 movaps (%rcx,%rax,1),%xmm0\n  4.92 : 400a44: 0f 59 c1 mulps %xmm1,%xmm0\n  12.36 : 400a47: 0f 58 04 02 addps (%rdx,%rax,1),%xmm0\n  40.73 : 400a4b: 0f 29 04 02 movaps %xmm0,(%rdx,%rax,1)\n  9.65 : 400a4f: 48 83 c0 10 add $0x10,%rax\n\nUnsurprisingly, the inner loop kernel takes up practically all the time."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require prioritization of the measured hotspot and finer inspection. Do not promise a speedup or prescribe an unsupported code transformation.",
+      "review_notes": "Different reasoning from collecting a profile: interprets supplied relative costs to choose where to investigate.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-018",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.io_measurement_before_optimization",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 128,
+          "end_line": 137,
+          "quote": "Input/output profiling\n----------------------\n\nThis will tell you how much time is spent reading and writing data,\nwhere, and what type of patterns it has (big reads, random access, etc).\nNote that you can see the time information when CPU profiling: if\ninput/output functions take a lot of time, you need to improve IO.\n\n``/usr/bin/time -v`` prints some useful info about IO operations and\nstatistics."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require I/O-focused measurement and the documented time -v prefix. Do not claim this one command supplies every detailed access pattern or a diagnosis.",
+      "review_notes": "Excludes the questionable strace/awk byte-summing examples and any unacquired external profiler guide.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-019",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.system_vs_kernel_scope",
+      "difficulty": "easy",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 260,
+          "end_line": 269,
+          "quote": "NVIDIA provides a suite of profiling tools designed to help users optimize and analyze the performance of applications running on NVIDIA GPUs. These tools are essential for understanding how applications utilize GPU resources and for identifying bottlenecks in the code.\n\nOverview of NVIDIA Profilers:\n\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\n\nNsight Systems is a system-wide performance analysis tool that provides detailed insights into GPU workloads, CPU workloads, and their interactions. It helps identify issues related to CPU-GPU interaction, GPU utilization, memory bandwidth, and other system-level bottlenecks, such as I/O operations.\n\nNsight Compute is a GPU kernel profiling tool specifically designed for deep-dive analysis of CUDA kernels. It provides a wide range of performance metrics.\n\nThe old profiler nvprof is being deprecated and is no longer recommended for profiling GPU applications. It has been replaced by Nsight Compute and Nsight Systems, which provide a more comprehensive and user-friendly profiling experience. "
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the two scopes and matching tools. No concrete cause, performance score, or API instrumentation requirement is implied.",
+      "review_notes": "New choice-of-measurement-scope question; independent of the command-construction item below.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-020",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.nsight_compute_full_process_collection",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 372,
+          "end_line": 379,
+          "quote": "**To use Nsight Compute**, you need to run:\n\n.. code-block:: console\n\n   $ module load cuda\n   $ ncu --target-processes all --set full ./my_application\n\nThis command profiles all CUDA kernels in your application, providing a comprehensive set of performance metrics including instruction throughput, memory access efficiency, and occupancy. Nsight Compute generates a report file called ``my_application.ncu-rep``."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the CUDA module and full-set/all-target-process command. No output-file creation claim, kernel-filter regex, or measured result is required.",
+      "review_notes": "Avoids unsupported automatic report-filename assertions and questionable regex examples in the source.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-021",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.pytorch_tensorboard_log_visualization",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 214,
+          "end_line": 239,
+          "quote": "On Triton, there are at least two approaches to visualizing profiler results:\n\n.. tabs::\n\n   .. tab:: OpenOnDemand/Desktop\n\n      To visualize the report on Triton, you can launch a desktop from :doc:`Open Ondemand <../usage/ood>`. In the desktop's terminal, run:\n\n      .. code-block:: console\n\n        $ module load mamba\n        $ source activate yourenv\n        $ tensorboard --logdir ./log\n\n      to launch the tensorboard and point it to the log directory where the profiling results were saved. Now you can view results in TensorBoard: open a browser and go to http://localhost:6006. Navigate to the PyTorch Profiler tab to view detailed profiling information, such as:\n\n        - CPU and GPU utilization\n        - Memory usage\n        - Kernel execution times\n        - Operation breakdowns\n        \n      **NOTE:** you need to have PyTorch Profiler TensorBoard Plugin installed in your environment via:\n\n        .. code-block:: bash\n\n           pip install torch-tb-profiler"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Assume logs already exist. Do not claim importing torch.profiler alone records them, set up SSH forwarding, or install anything during evaluation.",
+      "review_notes": "Uses the explicit OpenOnDemand branch only; no unexpanded image, external recipe, or speculative VS Code prompt behavior.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-022",
+      "doc_id": "aalto_triton_profiling",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "profiling.mpip_debug_information_limits",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/usage/profiling.rst",
+          "source_sha256": "ab42f730c4a42badee82c4800d16fb5e8e69c2e2279101d5c071876f328b558b",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/usage/profiling.rst",
+          "start_line": 164,
+          "end_line": 173,
+          "quote": "mpiP\n^^^^\n\nmpiP: Lightweight, Scalable MPI Profiling http://mpip.sourceforge.net/.\nCollects statistical information about MPI functions. mpiP is a\nlink-time library, that means that it can be linked to the object file,\nthough it is recommended that you have recompiled the code with -g.\nDebugging information is used to decode the program counters to a source\ncode filename and line number automatically. mpiP will work without -g,\nbut mileage may vary."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require line-attribution purpose and the distinction between poorer attribution and inability to profile. No malformed soft-hyphen linker command is needed.",
+      "review_notes": "Avoids the source's old site-specific mpip installation and command typography; tests the stated measurement limitation.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-023",
+      "doc_id": "aalto_triton_modules",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.hierarchical_module_prerequisite",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "source_sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/modules.rst",
+          "start_line": 172,
+          "end_line": 213,
+          "quote": "Hierarchical modules\n--------------------\n\nHierarchical modules means that you have to load one module before you\ncan load another. In the case of Triton, most compiled software will \nrequire loading a relevant software stack module. Another common \nhierarchy is for MPI software.\n\nFor example, let's load a newer version of CMake:\n\n.. code-block:: console\n  :emphasize-lines: 3-4\n\n  $ module load cmake/3.27.7\n  Lmod has detected the following error:  These module(s) or\n  extension(s) exist but cannot be loaded as requested: \"cmake/3.27.7\"\n     Try: \"module spider cmake/3.27.7\" to see how to load the module(s).\n\nLmod says that the modules exist but can't be loaded, but gives a hint\nfor what to do next.  Let's do that:\n\n.. code-block:: console\n   :emphasize-lines: 7-9\n\n   $ module spider cmake/3.27.7\n\n   ----------------------------------------------------------------------------\n     cmake: cmake/3.27.7\n   ----------------------------------------------------------------------------\n\n       You will need to load all module(s) on any one of the lines below before the \"cmake/3.27.7\" module is available to load.\n\n        triton/2024.1-gcc\n\n       Help:\n       ...\n\nSo now we can load it (we can do it in one line)::\n\n  $ module load triton/2024.1-gcc cmake/3.27.7\n  $ cmake --version\n  cmake version 3.27.7"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the prerequisite interpretation and ordered load. No module installation, arbitrary compiler substitution, or current availability claim.",
+      "review_notes": "Distinct from eligible basic module listing/default-version records. Excludes the contradictory Python-version and FFTW/OpenFOAM examples.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-024",
+      "doc_id": "aalto_triton_module_reference",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.inspect_saved_collections",
+      "difficulty": "easy",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/modules.rst",
+          "source_sha256": "63da57e45bf0fe230d5b1822789c0675d8bc55fd4cbc22c4f26befbe0f26c8cc",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/modules.rst",
+          "start_line": 17,
+          "end_line": 20,
+          "quote": "   ``module save ALIAS``        | Save module collection to this alias (saved in ``~/.lmod.d/``)\n   ``module savelist``          | List all saved collections\n   ``module describe ALIAS``    | Details on a collection\n   ``module restore ALIAS``     | Load saved module collection (faster than loading individually)"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require savelist and describe; restore is optional explanatory context, not a command to execute during inspection.",
+      "review_notes": "Inspection of saved environments is distinct from listing currently loaded modules, which is already represented in training.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-025",
+      "doc_id": "aalto_triton_modules",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.capture_and_restore_module_collection",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "source_sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/modules.rst",
+          "start_line": 251,
+          "end_line": 290,
+          "quote": "Making a module collection\n--------------------------\n\nThere is a basic dependency/conflict system to handle module\ndependency. Each time you load a module, it resolves all the\ndependencies. This can result in long loading times or be annoying to\ndo each time you log in to the system. However, there is a solution:\n``module save COLLECTION_NAME`` and ``module restore COLLECTION_NAME``\n\nLet's see how to do this in an example.\n\nLet's say that for compiling / running your program you need:\n\n  - a compiler\n  - CMake\n  - MPI libraries\n  - FFTW libraries\n  - BLAS libraries\n\nYou could run this each time you want to compile/run your code::\n\n  $ module load triton/2024.1-gcc gcc/12.3.0 cmake/3.27.7 openmpi/4.1.6 fftw/3.3.10 openblas/0.3.24\n  $ module list           # 32 modules\n\nLet's say this environment works for you. Now you can save it with\n``module save MY-ENV-NAME``.  Then ``module purge`` to unload\neverything.  Now, do ``module restore MY-ENV-NAME``::\n\n  $ module save my-env\n  $ module purge\n  $ module restore my-env\n  $ module list           # same 32 modules\n\nGenerally, it is a good idea to save your modules as a collection to\nhave your desired modules all set up each time you want to\nre-compile/re-build.\n\nSo the subsequent times that you want to compile/build, you simply\n``module restore my-env`` and this way you can be sure you have the\nsame previous environment."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require saving before purging, then restoring and listing. The current environment is supplied as working; do not invent a dependency list or promise permanence across site reorganizations.",
+      "review_notes": "Stateful save/clear/restore workflow rather than a renamed basic module-load example.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-026",
+      "doc_id": "aalto_triton_modules",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.child_process_inheritance_and_clearing",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "source_sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/modules.rst",
+          "start_line": 243,
+          "end_line": 245,
+          "quote": "When you load a module in a shell, the module command changes the\ncurrent shell's environment variables, and the environment variables\nare passed on to all the child processes."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "source_sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/modules.rst",
+          "start_line": 317,
+          "end_line": 321,
+          "quote": "We use the Lmod system and Lmod works by changing environment variables.\nThus, they must be *sourced* by a shell and are only transferred to child processes.\nAnything that clears the environment clears the loaded modules too. Module\nloading is done by special functions (not scripts) that are\nshell-specific and set environment variables."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require environment inheritance and clearing. No particular launcher flag or shell startup implementation is specified.",
+      "review_notes": "Tests process scope and environment clearing, beyond the existing PATH-edit and module-dependency concepts.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-027",
+      "doc_id": "aalto_triton_modules",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.startup_autoload_interference",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "source_sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/modules.rst",
+          "start_line": 142,
+          "end_line": 152,
+          "quote": "You can load any number of modules in your open shell, your scripts,\netc.  You could load modules in your ``~/.bash_profile``, but then it\nwill always automatically load it - this causes unexplainable bugs\nregularly!\n\n.. warning::\n\n  We regularly see problems caused by something in ``~/.bash_profile`` /\n  ``~/.bash_rc`` affecting other unrelated software in\n  hard-to-understand ways.  Be very cautious about anything in your\n  shell startup files, and always remove it as a first debugging step."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/modules.rst",
+          "source_sha256": "b8fe234e518c3fa3e7fb34e3c463fe4fe6d9302fd1e8010a28de4c3317c81311",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/modules.rst",
+          "start_line": 237,
+          "end_line": 245,
+          "quote": "In Linux systems, different environment variables like ``$PATH`` and\n``$LD_LIBRARY_PATH`` help figure out how to run programs.  Modules\njust cleverly manipulate these so that you can find the software you\nneed, even if there are multiple versions available.  You can see\nthese variables with the **echo** command, e.g. ``echo $PATH``.\n\nWhen you load a module in a shell, the module command changes the\ncurrent shell's environment variables, and the environment variables\nare passed on to all the child processes."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Limit the recommendation to the user's added customization; do not delete all startup files or diagnose a particular package conflict without evidence.",
+      "review_notes": "New failure context involving implicit startup state; no actual user startup files are accessed or changed.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-028",
+      "doc_id": "aalto_triton_conda",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.declarative_conda_recipe_and_name_override",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 6,
+          "end_line": 9,
+          "quote": "   * * ``module load mamba``\n     * Load module that provides conda/mamba Triton, for use making\n       your own environments.  ``mamba`` is a faster drop-in\n       replacement for ``conda``."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 13,
+          "end_line": 34,
+          "quote": "   * * .. code-block:: yaml\n\n         name: conda-example\n         channels:\n           - conda-forge\n         dependencies:\n           - numpy\n           - pandas\n     * Minimal ``environment.yml`` example.  By defining our requirements\n       in one place, our environment becomes reproducible and we can\n       solve problems by re-creating it.  \"Dependencies\" lists\n       packages that will be installed.\n   * * **Environment management:**\n     * **Creating, activating, removing:**\n   * * ``mamba env create --file environment.yml``\n     * Create environment from yaml file.  Use ``-n NAME`` to set or\n       override the name from the .yml file.  Environments with ``-n``\n       are stored in ``conda config --show envs_dirs``.\n   * * ``source activate NAME``\n     * Activate environment of name NAME.  Note we use this and *not*\n       ``conda init``/``conda activate`` to avoid changing Python for your whole\n       account.   **HPC Cluster specific.**"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the recipe, creation-name override, and Triton-specific activation. No version pins or solved package versions are supplied, so do not require bit-for-bit reproducibility.",
+      "review_notes": "A new environment creation/activation workflow, distinct from eligible shell PATH and module basics.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-029",
+      "doc_id": "aalto_triton_conda",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.portable_history_based_export",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 52,
+          "end_line": 56,
+          "quote": "   * * ``mamba env export``\n     * Export an environment.yml that describes the current\n       environment.  Add ``--no-builds`` to make it more portable\n       across operating systems.  Add ``--from-history`` to list only\n       what you have explicitly requested in the past."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require both documented options and their separate meanings. Do not invent a guarantee of identical dependency resolution across systems.",
+      "review_notes": "Tests export policy rather than repeating the environment-creation command with another name.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-030",
+      "doc_id": "aalto_triton_conda",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.cuda_solver_override_on_login_node",
+      "difficulty": "hard",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 6,
+          "end_line": 9,
+          "quote": "   * * ``module load mamba``\n     * Load module that provides conda/mamba Triton, for use making\n       your own environments.  ``mamba`` is a faster drop-in\n       replacement for ``conda``."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 27,
+          "end_line": 30,
+          "quote": "   * * ``mamba env create --file environment.yml``\n     * Create environment from yaml file.  Use ``-n NAME`` to set or\n       override the name from the .yml file.  Environments with ``-n``\n       are stored in ``conda config --show envs_dirs``."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 70,
+          "end_line": 74,
+          "quote": "   * * ``CONDA_OVERRIDE_CUDA=\"11.2\" mamba ..``\n     * Used when making CUDA environment on login node (choose right\n       CUDA version for you). Used with ``... env create`` or\n       ``... install`` to indicate that CUDA will be available when\n       the program runs."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the override on the environment-creation command. Do not claim that it installs a driver, detects a GPU, or proves runtime compatibility.",
+      "review_notes": "Distinct from CUDA login-node execution diagnosis: this concerns dependency selection for an explicitly different future runtime.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-031",
+      "doc_id": "aalto_triton_conda",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "environment.cache_cleanup_vs_environment_removal",
+      "difficulty": "easy",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 39,
+          "end_line": 40,
+          "quote": "   * * ``mamba env remove -n NAME``\n     * Remove the environment of that name."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/conda.rst",
+          "source_sha256": "05e0d08828cc3530a2a270eddb3d386d849ddf1f228f624abd8ee0f63c00175d",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/conda.rst",
+          "start_line": 67,
+          "end_line": 69,
+          "quote": "   * * ``mamba clean -a``\n     * Clean up cached files to free up space (not environments or\n       packages in them)."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the cache/environment distinction. No command is actually executed and no recovered disk-space amount is predicted.",
+      "review_notes": "A separate retention decision, not superficial variation of create/export/activate tasks.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-032",
+      "doc_id": "aalto_triton_commandline",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "linux.disk_usage_pipeline_and_output_replacement",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/commandline.rst",
+          "source_sha256": "18ef318cc1f165554925b127025ede31055739e87f3b1ae8f6c866e35495584f",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/commandline.rst",
+          "start_line": 59,
+          "end_line": 65,
+          "quote": "``du [-ash] [DIR]``\n   Print disk usage of a directory. Default is KiB, rounded up to\n   block sizes (1 or 4 KiB), ``-h`` means \"human readable\" (MB,\n   GB, etc), ``-s`` means \"only of DIR, not all subdirectories also\".\n   ``-a`` means \"all files, not only directories\".\n   A common pattern is ``du -h DIR | sort -h`` to print all\n   directories and their sizes, sorted by size."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/ref/commandline.rst",
+          "source_sha256": "18ef318cc1f165554925b127025ede31055739e87f3b1ae8f6c866e35495584f",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/ref/commandline.rst",
+          "start_line": 78,
+          "end_line": 86,
+          "quote": "``|`` (pipe): ``COMMAND1 | COMMAND2``\n   The output of ``COMMAND1`` is sent to the input of ``COMMAND2``.\n   Useful for combining simple commands together into complex\n   operations - a core part of the `unix philosophy\n   <https://en.wikipedia.org/wiki/Unix_philosophy>`__.\n\n``>`` (output redirection): ``COMMAND > FILE``\n   Write standard output of ``COMMAND`` to ``FILE``.  Any existing\n   content is lost."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require human-readable usage/sorting and replacement redirection. No deletion, largest-file diagnosis, or interpretation of an unseen filesystem.",
+      "review_notes": "New multi-command disk inspection task. Existing eligible shell items concern PATH/script discovery, not usage sorting.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-033",
+      "doc_id": "aalto_triton_serial",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "batch.submitted_script_vs_runtime_program_snapshot",
+      "difficulty": "hard",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "source_sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/serial.rst",
+          "start_line": 274,
+          "end_line": 283,
+          "quote": "      In this case we modified a script after we had submitted it. These\n      modifications do not affect the script that is in the queue as that\n      script has already been given to Slurm.\n\n      **The Slurm script is locked in place when you submit a script.\n      Modifications to the script do not affect the script that is being\n      run.**\n\n      You should always make certain that you do not modify the\n      Slurm script being run or you cannot replicate your run."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "source_sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/serial.rst",
+          "start_line": 308,
+          "end_line": 319,
+          "quote": "      In this case we modified the Python code before it had begun executing\n      (we added a line that raised an error while the ``sleep 180`` was being\n      executed).\n\n      **The code that the Slurm script executes will be determined when\n      the script is running. It is not locked in place when you submit a\n      script.**\n\n      You should always make certain that you do not modify the code that the\n      Slurm script will execute while it is queued or while its being run.\n\n      Otherwise you can get errors and you cannot replicate your run."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "The question fixes the edit before Python starts; do not generalize about modifying already-running program internals or claim all input files are snapshotted.",
+      "review_notes": "New reproducibility reasoning combining two documented edit scenarios; no held-out requeue/dependency semantics.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-034",
+      "doc_id": "aalto_triton_serial",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "batch.srun_stage_history_granularity",
+      "difficulty": "easy",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "source_sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/serial.rst",
+          "start_line": 93,
+          "end_line": 96,
+          "quote": "Resource requests are followed by job steps, which are the actual\ntasks to be done. Each ``srun`` within the a slurm script is a job\nstep, and appears as a separate row in your history - which is useful\nfor monitoring."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the per-srun step/history relationship. Do not invent step identifiers, timing, states, or returned accounting values.",
+      "review_notes": "Distinct from existing sbatch-versus-srun explanations and current-state tool lookups: tests monitoring granularity inside one batch script.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-035",
+      "doc_id": "aalto_triton_serial",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "batch.progress_log_following_and_buffering",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "source_sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/serial.rst",
+          "start_line": 324,
+          "end_line": 342,
+          "quote": "   You can look at the output of files as your program is running.\n   Let's demonstrate.\n\n   Create a slurm script that runs the following program.  This is a\n   shell script which, every 10 seconds (for 30 iterations), prints\n   the date::\n\n     for i in $(seq 30); do\n       date\n       sleep 10\n     done\n\n   a. Submit the job to the queue.\n   b. Log out from Triton. Log back in and use\n      ``slurm queue``/``squeue -u $USER`` to check the job status.\n   c. Use ``cat NAME_OF_OUTPUTFILE`` to check at the output\n      periodically.  You can use ``tail -f NAME_OF_OUTPUTFILE`` to\n      view the progress in real time as new lines are added (Control-C\n      to cancel)"
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/serial.rst",
+          "source_sha256": "e657d1c552d5811e9282dd32bdcc49c61d0391346ee5fbb9e48385d5e9779855",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/serial.rst",
+          "start_line": 347,
+          "end_line": 364,
+          "quote": "      .. code-block:: slurm\n\n\t #!/bin/bash\n\t #SBATCH --output test-check-output.out\n\n         for i in $(seq 30); do\n           date\n           sleep 10\n         done\n\n      We note that a new line appears about every 10 seconds.  Note\n      that the delays might happen because of buffering, as the system\n      tries to avoid doing too many small i/o operations::\n\n\t $ tail -f test-check-output.out\n\t Wed  7 Jun 10:49:58 EEST 2023\n\t Wed  7 Jun 10:50:08 EEST 2023\n\t (more every 10 seconds)"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the loop/output directive, tail -f, and buffering caveat. No guaranteed exact delivery cadence or real submission/execution claim.",
+      "review_notes": "More than a filename variation of the trained hostname script: introduces periodic progress, live following and observation delays.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-036",
+      "doc_id": "aalto_triton_interactive",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "interactive.blocked_shell_during_allocation_wait",
+      "difficulty": "easy",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 64,
+          "end_line": 85,
+          "quote": "You can submit this program to Triton using ``srun``. All input/output still goes to your terminal\n(but note that graphical applications don't work this way - see\nbelow)::\n\n    srun --mem=100M --time=00:10:00 python3 slurm/pi.py 10000\n    srun: slurm_job_submit: Automatically setting partition to: batch-hsw,batch-bdw,batch-csl,batch-skl,batch-milan\n    srun: job 462418 queued and waiting for resources\n\nHere, we are asking for 100 megabytes of memory (``--mem=100M``) for a\nduration of ten minutes (``--time=00:10:00``) (See the :doc:`quick\nreference <../ref/index>` or below for more options).\nWhile your job - with **jobid** 462418 - is waiting to be allocated resources, your shell\nblocks.\n\nIn other HPC systems you might need to specify account via ``--account=ACCOUNT_NAME`` or\npartition ``--partition=PARTITION_NAME`` when submitting a job. In Triton a parser\nscript will give sensible defaults for these based on your job's requirements, so in most\ncases you do not need to use them.\n\nYou can open a new shell (ssh again) on the cluster and run the command\n``squeue -u $USER`` or ``slurm q`` to see all the jobs\nyou currently have waiting in queue::"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require expected blocking and a second-shell inspection procedure. Do not diagnose why resources are unavailable or claim any real queue was queried.",
+      "review_notes": "Different from pending-job lookup tasks: explains the blocked client terminal and how to observe without interrupting it.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-037",
+      "doc_id": "aalto_triton_interactive",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "interactive.connection_lifetime_vs_unattended_batch",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 110,
+          "end_line": 122,
+          "quote": ".. admonition:: Disadvantages\n\n   Interactive jobs are useful for debugging purposes, to test your setup\n   and configurations before you put your tasks in a batch script for later execution.\n\n   The major disadvantages include:\n\n   - It blocks your shell until it finishes\n   - If your connection to the cluster gets interrupted, you lose the job\n     and its output.\n\n   Keep in mind that you shouldn't open 20 shells to run 20 ``srun`` jobs at once.\n   Please have a look at the :doc:`next tutorial about serial jobs <serial>`."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 527,
+          "end_line": 532,
+          "quote": "What's next?\n------------\n\nIn the next tutorial on `serial batch jobs <serial>`, you will learn how to put the above-mentioned\ncommands in a script, namely a batch script (a.k.a submission script)\nthat allows for a multitude of jobs to run unattended."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Score the documented normal-interactive connection limitation and unattended batch choice. Do not transfer this behavior to sinteractive's separate screen session or claim all disconnect cases are identical.",
+      "review_notes": "Scenario tests connection lifetime/reliability rather than repeating the generic sbatch/srun definition.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-038",
+      "doc_id": "aalto_triton_interactive",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "interactive.screen_session_allocation_cleanup",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 156,
+          "end_line": 171,
+          "quote": "Interactive shell with graphics\n-------------------------------\n\n``sinteractive`` is very similar to ``srun``, but more clever and thus\nallows you to do X forwarding. It starts a `screen session\n<https://en.wikipedia.org/wiki/GNU_Screen>`__ on the node,\nthen sshes to there and connects to the shell::\n\n     $ sinteractive --time=1:00:00 --mem=1000M\n\n.. warning::\n\n  Just like with ``srun --pty bash``, remember to exit the shell.\n  Since there is a separate screen session running, just closing the terminal isn't enough.\n  Exit all shells in the screen session on the node (C-d or ``exit``) or cancel\n  the job."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require separate screen lifetime and explicit shell/job termination. No guessed job ID or cluster action is to be executed.",
+      "review_notes": "Distinct from ordinary srun disconnect behavior: tests the site's persistent graphical-session wrapper.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-039",
+      "doc_id": "aalto_triton_interactive",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "interactive.accounting_sampling_limit_for_short_tests",
+      "difficulty": "hard",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 214,
+          "end_line": 237,
+          "quote": "   The program ``hpc-examples/slurm/memory-use.py``\n   uses up a lot of memory to do nothing.  Let's play with it.\n   It's run as follows:\n   ``python3 hpc-examples/slurm/memory-use.py 50M``, where the\n   last argument is however much memory you want to eat.  You can use\n   ``--help`` to see the options of the program.\n\n   a) Try running the program with a memory use of ``50M`` and with no\n      memory request specified.\n\n   b) Run the program with a memory use of ``50M`` and a memory request\n      of 500 megabytes (``srun --mem=500M``).\n\n   c) Increase the amount of memory the Python process tries to use (not the\n      amount of memory Slurm allocates).  How much memory can\n      you use before the job fails?\n\n   d) Look at the job history using ``slurm history`` - can you see\n      how much memory it actually used? - Note that Slurm only measures memory\n      every 60 seconds or so.\n      To make the program last longer, so that the memory used can be measured,\n      give the ``--sleep`` option to the Python process, like this:\n      ``python3 hpc-examples/slurm/memory-use.py 50M --sleep=60`` -\n      keep it available."
+        },
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 243,
+          "end_line": 253,
+          "quote": "      $ srun python3 slurm/memory-use.py --sleep=60 50M\n      srun: slurm_job_submit: Automatically setting partition to: batch-hsw,batch-bdw,batch-csl,batch-skl,batch-milan\n      srun: job 463444 queued and waiting for resources\n      srun: job 463444 has been allocated resources\n      Trying to use 50000000 bytes of memeory\n      Using 10293248 bytes so far (allocated: 2)\n      Using 10293248 bytes so far (allocated: 4)\n      ...\n      $ srun --mem=500M python slurm/memory-use.py --sleep=60 50M\n      (this works as well)\n      $ srun --mem=500M python3 slurm/memory-use.py --sleep=60 1000M"
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Require the sampling limitation and separate scheduler memory request/program allocation and sleep arguments. The external example program is explicitly assumed present; no source implementation or unseen run result is required.",
+      "review_notes": "Distinct from existing peak-memory commands or OOM diagnosis: tests why short-lived usage may escape accounting.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    },
+    {
+      "id": "dev-aalto-040",
+      "doc_id": "aalto_triton_interactive",
+      "split": "development",
+      "source_family": "Aalto/Triton",
+      "capability": "interactive.gpu_policy_and_interruption_planning",
+      "difficulty": "medium",
+      "evidence": [
+        {
+          "source_path": "dataset_delivery_v1/sources/raw/Aalto-Triton/triton/tut/interactive.rst",
+          "source_sha256": "95da18224c54b365ebaa12096d146b67866bea023ee97bc9965c2aa8d92f8ca9",
+          "url": "https://raw.githubusercontent.com/AaltoSciComp/scicomp-docs/b83fad3e06326459a17390f107ca04b2e8e0752a/triton/tut/interactive.rst",
+          "start_line": 181,
+          "end_line": 186,
+          "quote": "Interactive shell with GPU nodes\n--------------------------------\n\nFor interactive jobs with GPU resources, it is advised to use ``gpu-debug`` partition. ``gpu-debug`` has a higher priority and your job will be scheduled faster.  Batch GPUs are designed mainly for efficient batch computation and jobs which appear to be interactive and have low GPU usage may be cancelled with or without notice.\n\nIf you need a specific GPU type, you can submit your interactive job to other partitions too, but keep the time limit of the job to 4 hours. Also the number of GPUs requested in an interactive job should be kept to 1 GPUs. Limited use of batch GPUs may be accepted if the reservation is kept to when you are actively at the computer using it, but frequently save because we can't guarantee your job won't be killed."
+        }
+      ],
+      "assumptions": [
+        "Triton documentation snapshot b83fad3e06326459a17390f107ca04b2e8e0752a; site commands, modules, policies and examples are version-bound.",
+        "No claim that these settings describe Leonardo or live cluster state.",
+        "Workload names and conditions supplied by the question are scenario assumptions, not observed actions."
+      ],
+      "scoring_limits": "Score the snapshot's one-GPU/four-hour/active-use bounds and cancellation caveat. Do not claim current priority, guaranteed start time, or authorization to ignore site policy.",
+      "review_notes": "Policy planning is distinct from calibration's interactive-GPU command construction and from software multi-GPU capability.",
+      "review_status": "model-authored draft; coordinator and independent review pending"
+    }
+  ]
+}
