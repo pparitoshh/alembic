@@ -1,0 +1,7 @@
+{
+  "preserved_answers": 82,
+  "normal66": "Answering questions/inputs unchanged; references match dev_v3. Any later rescore must use the same version for compared systems. No rescore here.",
+  "old_tool16": "Incompatible with revised visible prompts inherited from dev_v3. Preserve; never silently reuse as this version.",
+  "new_items69": "No cached answering outputs exist; no inference here.",
+  "baseline_source_sha256": "dbf1eb9c2a800e2cb0ee23947d21792fc3140867e35db425bdb178f052231c61"
+}

@@ -1,0 +1,92 @@
+{
+  "version": "dataset-family-reservations-v1",
+  "utc": "2026-10-07T22:13:30.763880+00:00",
+  "status": "Frozen family reservations BEFORE new training generation. Raw sources require content review before item readiness.",
+  "families": [
+    {
+      "family": "Aalto-Triton",
+      "split": "development",
+      "repo": "AaltoSciComp/scicomp-docs",
+      "revision": "b83fad3e06326459a17390f107ca04b2e8e0752a",
+      "permission_status": "CC-BY4 docs / CC0 software examples; retain LICENSE; per-file exceptions still checked",
+      "files": [
+        "LICENSE",
+        "README.rst",
+        "triton/tut/gpu.rst",
+        "triton/ref/gpu.rst",
+        "triton/examples/monitoring/gpu.rst",
+        "triton/tut/parallel-mpi.rst",
+        "triton/ref/mpi-warning.rst",
+        "triton/examples/monitoring/seff.rst",
+        "triton/usage/profiling.rst",
+        "triton/usage/debugging.rst",
+        "triton/tut/modules.rst",
+        "triton/ref/modules.rst",
+        "triton/ref/conda.rst",
+        "triton/ref/commandline.rst",
+        "triton/tut/serial.rst",
+        "triton/tut/interactive.rst"
+      ]
+    },
+    {
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "repo": "open-mpi/ompi",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "version": "5.0.8",
+      "permission_status": "BSD notices; retain root and docs licenses, review per-file notices",
+      "files": [
+        "LICENSE",
+        "VERSION",
+        "docs/license/index.rst",
+        "docs/license/ompi.txt",
+        "docs/license/mpich.txt",
+        "docs/building-apps/quickstart.rst",
+        "docs/building-apps/extracting-wrapper-flags.rst",
+        "docs/building-apps/customizing-wrappers.rst",
+        "docs/launching-apps/quickstart.rst",
+        "docs/launching-apps/localhost.rst",
+        "docs/launching-apps/scheduling.rst",
+        "docs/app-debug/lost-output.rst",
+        "docs/app-debug/serial-debug.rst",
+        "docs/app-debug/valgrind.rst",
+        "docs/tuning-apps/affinity.rst",
+        "docs/tuning-apps/multithreaded.rst"
+      ]
+    },
+    {
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final",
+      "repo": "NVIDIA/cuda-samples",
+      "revision": "cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997",
+      "version": "12.9",
+      "permission_status": "BSD3 plus root CUDA EULA cross-reference; retain root and .cu notices, no imported binaries",
+      "files": [
+        "LICENSE",
+        "README.md",
+        "Samples/0_Introduction/asyncAPI/README.md",
+        "Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+        "Samples/0_Introduction/asyncAPI/CMakeLists.txt",
+        "Samples/0_Introduction/simpleStreams/README.md",
+        "Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+        "Samples/0_Introduction/simpleStreams/CMakeLists.txt",
+        "Samples/0_Introduction/simpleZeroCopy/README.md",
+        "Samples/0_Introduction/simpleZeroCopy/simpleZeroCopy.cu",
+        "Samples/0_Introduction/simpleZeroCopy/CMakeLists.txt",
+        "Samples/0_Introduction/simpleAssert/README.md",
+        "Samples/0_Introduction/simpleAssert/simpleAssert.cu",
+        "Samples/0_Introduction/simpleAssert/CMakeLists.txt",
+        "Samples/0_Introduction/simplePitchLinearTexture/README.md",
+        "Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+        "Samples/0_Introduction/simplePitchLinearTexture/CMakeLists.txt"
+      ]
+    }
+  ],
+  "training_access_to_final": false,
+  "existing_protected_families": [
+    "slurm_job_arrays",
+    "slurm_requeue_signals"
+  ],
+  "original_unknown_provenance_fields": 18,
+  "new_training_records": 0
+}

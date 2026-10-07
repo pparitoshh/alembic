@@ -1,0 +1,19 @@
+{
+  "development": {
+    "eval.file": "data/eval/dataset_v1/development_normal.jsonl",
+    "eval.tool_file": "data/eval/dataset_v1/development_tools.jsonl",
+    "eval.tool_protocol": "tool-first-response-v2",
+    "eval.tool_application_policy": "hpc-tools-clarify-first-v1"
+  },
+  "final_normal_only": {
+    "eval.file": "data/eval/dataset_v1/final_normal.jsonl",
+    "eval.tool_file": null,
+    "eval.tool_protocol": "tool-first-response-v2",
+    "eval.tool_application_policy": "hpc-tools-clarify-first-v1"
+  },
+  "notes": [
+    "Select stage/slice deliberately; final_normal_only disables tool input with actual nullable eval.tool_file.",
+    "Explicit existing tool protocol/policy keys avoid the legacy first-call default. Original defaults remain unchanged.",
+    "Do not use final failures for iterative data/prompt tuning."
+  ]
+}

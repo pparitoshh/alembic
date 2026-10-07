@@ -1,0 +1,17 @@
+{
+  "version": "source-metadata-corrections-v1",
+  "utc": "2026-10-07T22:18:05.916210+00:00",
+  "corrections": [
+    {
+      "family": "Open-MPI-all-versions",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "field": "version",
+      "prior": "5.0.8",
+      "effective": "5.0.8rc3 source snapshot (tarball_version=gitclone)",
+      "evidence_path": "raw/Open-MPI-all-versions/VERSION",
+      "evidence_sha256": "147fd6af0f0d90a22749dba2d52c7bfe8e98f16042a5c3155898f1a9b49f08aa",
+      "reason": "Pinned VERSION explicitly sets release8 and greekrc3; earlier reservation shorthand must not imply a final release. Source bytes/pin/split unchanged.",
+      "raw_bytes_changed": false
+    }
+  ]
+}
