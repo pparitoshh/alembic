@@ -115,15 +115,15 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+      "sha256": "c052fe397a44fd09a06cd7c047ebcaabd228e24b354f9f6f36845a9df078a551"
     },
     {
       "path": "src/distillkit/toolcheck.py",
-      "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+      "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
     },
     {
       "path": "src/distillkit/tools.py",
-      "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
     },
     {
       "path": "tests/test_eval_dev_v3.py",
@@ -151,5 +151,75 @@
   },
   "no_new_training_records": true,
   "all_evaluation_material_excluded_from_training": true,
-  "validation": "validation.json records actual exact checks; tests exercise production scorer and prompt/cache paths with CPU mocks, not model inference."
+  "validation": "validation.json records actual exact checks; tests exercise production scorer and prompt/cache paths with CPU mocks, not model inference.",
+  "code_integration_history": [
+    {
+      "previous_release_revision": "3e9fe0623dcad7f16cf1eff06e737c82a9cf497a",
+      "previous_integrated_revision": "a6ef067f62f9db2dc87754f4ecfa5fdf27bb67ed",
+      "previous_manifest_sha256": "3a7072afb8fc22427404197a4f1ee0f80a3950a3b446a753ec3b0c17a52a0f1a",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "c052fe397a44fd09a06cd7c047ebcaabd228e24b354f9f6f36845a9df078a551"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "added_support_revision": "c91690094ada9bbeeeada4ad4455f6f8b51157c3",
+      "tested_combined_tree_before_metadata_update": "6499f0974cc8ab78ceeacefa526b95956adee2bb",
+      "cpu_validation": {
+        "passed": 346,
+        "subtests_passed": 28,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "evidence": "campaign checkpoint-08 combined-integration-cpu/tests.xml"
+      },
+      "changed_code_bindings": [
+        {
+          "group": "code_bindings",
+          "path": "src/distillkit/config.py",
+          "before": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1",
+          "current": "c052fe397a44fd09a06cd7c047ebcaabd228e24b354f9f6f36845a9df078a551"
+        },
+        {
+          "group": "code_bindings",
+          "path": "src/distillkit/toolcheck.py",
+          "before": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b",
+          "current": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "group": "code_bindings",
+          "path": "src/distillkit/tools.py",
+          "before": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193",
+          "current": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        }
+      ],
+      "compatibility": "Independent model inspection: SCHEMAS, EvalCfg, normal/tool evaluation prompts, scorers and caches unchanged. New closed catalog/trace guards opt-in and confined to training trace paths. Dataset/source/reference bytes unchanged.",
+      "historical_tool_source_evidence": "source_support.json retains tools.py evidence at prior reviewed 3e9fe06 revision; it is historical, not a claim to hash this changed implementation. Current schemas and default mock behavior remain compatible.",
+      "review_method": "Independent read-only model review plus coordinator integration tests; no human review or infallibility claimed."
+    }
+  ]
 }

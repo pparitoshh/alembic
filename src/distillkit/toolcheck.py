@@ -11,11 +11,14 @@ import json
 import re
 
 from .records import final_answer, messages
-from .tools import MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
+from .job_status_guard import (WORKFLOW_VERSION, JobStatusPolicy, blocked_batch,
+                               clarification_response, guard_result, response_issues, target_error)
+from .tools import CATALOG_VERSION, MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
 
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
 # looking the job up (list_queue, then calls on the ids it returned) are both fine; grounding
 # rejects the bad case, a call on an id the user never gave.
+TRAINING_TRACE_POLICY_VERSION = "explicit-job-targets-v3"
 EXPECTED_DECISION = {"call": "call", "none": "no_call"}
 
 _HERMES = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
@@ -91,8 +94,18 @@ def _unique_fields(pairs):
 
 
 def check_trace(row: dict, valid_flags=None) -> dict:
-    with mock_session(valid_flags):
-        return _check_trace(row)
+    catalog = row.get("mock_job_ids")
+    try:
+        if ("mock_job_ids" in row or "mock_catalog_version" in row) and (
+                catalog is None or row.get("mock_catalog_version") != CATALOG_VERSION):
+            raise ValueError("closed mock catalog requires its explicit supported version and job_ids")
+        with mock_session(valid_flags, job_ids=catalog):
+            return _check_trace(row)
+    except (ValueError, TypeError) as exc:
+        # Malformed experiment metadata is a per-record hard failure, not an aborted run.
+        return {"n_calls":0,"call_errors":[],"trace_errors":[str(exc)],"result_errors":[],
+                "ungrounded_ids":[],"ungrounded_partitions":[],"decision":"invalid",
+                "decision_ok":False,"passed":False}
 
 
 def _check_trace(row: dict) -> dict:
@@ -102,7 +115,13 @@ def _check_trace(row: dict) -> dict:
     final answer interprets those results correctly, or validate results from a real cluster.
     """
     context, calls, ungrounded, partitions = "", [], [], []
+    question, observed_results = "", []
     errors, trace_errors, result_errors, pending = [], [], [], []
+    policy_errors, expected_events = [], []
+    guard_triggered = False
+    policy = JobStatusPolicy(**row['tool_policy']) if row.get('tool_policy') is not None else None
+    if row.get('workflow_version') == WORKFLOW_VERSION and policy is None:
+        trace_errors.append('current job-status workflow requires its deployment-visible tool_policy')
     if row.get("mock_version", MOCK_VERSION) != MOCK_VERSION:
         trace_errors.append(f"mock version {row['mock_version']!r} requires its archived implementation; current: {MOCK_VERSION}")
     transcript = messages(row)
@@ -119,15 +138,26 @@ def _check_trace(row: dict) -> dict:
             if not isinstance(m.get("content"), str) or not m["content"].strip():
                 trace_errors.append(f"turn {i}: empty or invalid question")
             context = m.get("content") if isinstance(m.get("content"), str) else ""
+            question = context
             expected_role = "assistant"
         elif role == "assistant":
+            if guard_triggered:
+                if (m.get('content') != clarification_response(question) or
+                        m.get('origin') != 'runtime_guard' or m.get('tool_calls') or
+                        i != len(transcript) - 1):
+                    trace_errors.append('guard intervention must terminate with the exact application clarification and origin')
+                expected_role = 'end of transcript'
+                continue  # never replay additional calls after the application terminated the conversation
             raw_calls = m.get("tool_calls")
             if raw_calls is None:
                 raw_calls = []
             if not isinstance(raw_calls, list):
                 trace_errors.append(f"turn {i}: tool_calls must be a list")
                 continue
-            for raw in raw_calls:
+            clean_calls = [raw.get('function', {}) if isinstance(raw, dict) else {} for raw in raw_calls]
+            denied = blocked_batch(clean_calls, question, observed_results, policy) if policy and raw_calls else []
+            guard_triggered = bool(denied)
+            for call_index, raw in enumerate(raw_calls):
                 f = raw.get("function") if isinstance(raw, dict) else None
                 if not isinstance(f, dict) or not isinstance(f.get("name"), str):
                     errors.append(f"turn {i}: malformed tool call")
@@ -135,14 +165,32 @@ def _check_trace(row: dict) -> dict:
                     continue
                 c = {"name": f["name"], "arguments": f.get("arguments", {})}
                 calls.append(c)
+                if denied:
+                    reason = denied[call_index]
+                    policy_errors.append(reason)
+                    pending.append(guard_result(reason, policy))
+                    expected_events.append({'turn':i,'attempted_call':c,'executed':False,'blocked':True,'reason':reason})
+                    continue
                 ungrounded += ungrounded_ids(c, context)
                 partitions += ungrounded_partition(c, context)
+                target_issue = target_error(c, question, observed_results)
+                if target_issue:
+                    job_id = str(parse_arguments(c["arguments"])["job_id"])
+                    if job_id not in ungrounded:
+                        ungrounded.append(job_id)
+                    pending.append(None)
+                    continue
                 result, error = _run_call(c)
                 if error:
                     errors.append(error)
                     pending.append(None)
                 else:
                     pending.append(result)
+                if policy:
+                    event = {'turn':i,'attempted_call':c,'executed':not bool(error),'blocked':False}
+                    if error:
+                        event['error'] = error
+                    expected_events.append(event)
             expected_role = "tool" if raw_calls else "end of transcript"
         else:  # results follow calls in order in the record schema (no call IDs)
             expected = pending.pop(0)
@@ -156,14 +204,34 @@ def _check_trace(row: dict) -> dict:
                 result_errors.append(f"turn {i}: stored result differs from deterministic mock replay")
             elif expected is not None:
                 context += "\n" + json.dumps(expected)
+                observed_results.append(expected)
             expected_role = "tool" if pending else "assistant"
     if pending:
         trace_errors.append(f"missing {len(pending)} tool result(s)")
     if not final_answer(row).strip():
         trace_errors.append("missing terminal assistant answer")
+    workflow_errors = response_issues(row, final_answer(row))
+    if any(m.get('origin') == 'runtime_guard' for m in transcript if isinstance(m, dict)) and not policy_errors:
+        trace_errors.append('runtime guard response without a replayed guard intervention')
+    if policy:
+        audit = row.get('runtime_audit', {})
+        origin = 'runtime_guard' if guard_triggered else 'teacher'
+        delivered = clarification_response(question) if guard_triggered else final_answer(row)
+        expected_audit = {'version':'tool-runtime-audit-v1','policy':policy.as_dict(),'events':expected_events,
+                          'response_origin':origin,'user_response':delivered,
+                          'model_final_answer':None if guard_triggered else final_answer(row)}
+        if audit != expected_audit:
+            trace_errors.append('runtime audit does not match replayed attempts, execution and delivered response')
     decision = "call" if calls else "no_call"
     ok = decision == EXPECTED_DECISION.get(row.get("mode", ""), decision)
     return {
+        "workflow_errors": workflow_errors,
+        "application_policy_errors": policy_errors,
+        "model_policy_compliant": not policy_errors,
+        "guard_blocked_calls": sum(e['blocked'] for e in expected_events),
+        "executed_calls": sum(e['executed'] for e in expected_events) if policy else None,
+        "runtime_enforcement_consistent": not errors and not trace_errors and not result_errors,
+        "policy_version": TRAINING_TRACE_POLICY_VERSION,
         "n_calls": len(calls),
         "call_errors": errors,
         "trace_errors": trace_errors,
@@ -172,7 +240,7 @@ def _check_trace(row: dict) -> dict:
         "ungrounded_partitions": partitions,
         "decision": decision,
         "decision_ok": ok,
-        "passed": not errors and not trace_errors and not result_errors and not ungrounded and not partitions and ok,
+        "passed": not errors and not trace_errors and not result_errors and not ungrounded and not partitions and not workflow_errors and not policy_errors and ok,
     }
 
 

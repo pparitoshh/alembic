@@ -240,8 +240,9 @@ def test_job_ids_must_be_grounded():
     invented = check_trace(_trace("ask", _call("job_status", job_id="4718209"), question=my_job))
     assert invented["ungrounded_ids"] == ["4718209"] and not invented["passed"]
     assert check_trace(_trace("call", _call("job_status", job_id="4718208")))["ungrounded_ids"] == ["4718208"]
-    # array tasks: grounded through their job id; digits must match whole numbers
-    assert check_trace(_trace("call", _call("job_status", job_id="4718207_3")))["passed"]
+    # Exact target policy: a parent identifier does not authorize an invented task suffix.
+    assert not check_trace(_trace("call", _call("job_status", job_id="4718207_3")))["passed"]
+    assert check_trace(_trace("call", _call("job_status", job_id="4718207_3"), question="Check job 4718207_3."))["passed"]
     assert check_trace(_trace("call", _call("job_status", job_id="471820"), question="job 4718207"))["ungrounded_ids"] == ["471820"]
     assert not check_trace(_trace("call"))["decision_ok"]  # should have called
     assert not check_trace(_trace("none", _call("job_status", job_id="4718207")))["decision_ok"]  # needless call

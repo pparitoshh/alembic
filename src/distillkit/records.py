@@ -51,6 +51,10 @@ def openai_tools(schemas: list[dict] | None) -> list[dict] | None:
 
 def training_example(row: dict, system_prompt: str) -> dict:
     """Conversational SFT example for TRL (loss on assistant turns only)."""
+    if any(m.get('origin') == 'runtime_guard' for m in messages(row)):
+        raise ValueError('runtime guard responses are application output, not teacher training targets')
+    if row.get('purpose') == 'diagnostic_only' or row.get('training_eligible') is False:
+        raise ValueError('diagnostic or explicitly ineligible records are not training examples')
     tools = openai_tools(row.get("tools"))
     return {
         "messages": [{"role": "system", "content": system_prompt}, *messages(row)],
