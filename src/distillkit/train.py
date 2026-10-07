@@ -10,7 +10,12 @@ from pathlib import Path
 from .config import Config
 
 
-def run(cfg: Config) -> Path:
+def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
+    """Train through the production path, optionally inspecting it before optimization.
+
+    The hooks support bounded runtime checks without maintaining a second trainer.
+    They do not change configuration, labels, losses or model selection.
+    """
     import torch
     from datasets import Dataset
     from peft import LoraConfig
@@ -81,6 +86,10 @@ def run(cfg: Config) -> Path:
         for p in trainer.model.parameters():
             if p.requires_grad:
                 p.data = p.data.float()
+    for callback in callbacks:
+        trainer.add_callback(callback)
+    if before_train is not None:
+        before_train(trainer)
     trainer.train()
     trainer.save_model(str(out_dir))
     tok.save_pretrained(str(out_dir))
