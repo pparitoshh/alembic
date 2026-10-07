@@ -119,6 +119,9 @@ def source_for_record(cfg, row):
 
 def request_review(reviewer, row, source, *, protocol=PROTOCOL):
     """One explicit review request; raw response retained, no silent semantic retries."""
+    if protocol == 'source-support-v3':
+        from .support_v3 import request_review as request_v3
+        return request_v3(reviewer, row, source)
     if protocol == 'source-support-v2':
         from .support_v2 import request_review as request_v2
         return request_v2(reviewer, row, source)
@@ -142,6 +145,9 @@ def request_review(reviewer, row, source, *, protocol=PROTOCOL):
 
 def check_support(row, source, report, *, protocol=PROTOCOL):
     """Hard binding/coverage checks plus the reviewer's explicitly fallible support labels."""
+    if protocol == 'source-support-v3':
+        from .support_v3 import check_support as check_v3
+        return check_v3(row, source, report)
     if protocol == 'source-support-v2':
         from .support_v2 import check_support as check_v2
         return check_v2(row, source, report)
