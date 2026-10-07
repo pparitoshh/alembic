@@ -15,6 +15,7 @@ import time
 from distillkit.config import Config
 from distillkit.generate import PROMPT_VERSION, _gold, tool_trace
 from distillkit.io import JsonlAppender, read_jsonl
+from distillkit.job_status_guard import WORKFLOW_VERSION
 from distillkit.records import final_answer
 from distillkit.teacher import Teacher
 from distillkit.toolcheck import TRAINING_TRACE_POLICY_VERSION, check_trace, message_calls
@@ -58,6 +59,8 @@ def run(root,port):
     cfg,plan,source,expected = preflight(root)
     assert os.environ.get('SLURM_JOB_ID') and port
     cfg.teacher.base_url=f'http://127.0.0.1:{port}/v1'
+    experiment_attempt=json.loads((root/'manifest.json').read_text()).get('experiment_attempt',1) if (root/'manifest.json').exists() else 1
+    assert experiment_attempt in (1,2)
     out=root/'outputs';out.mkdir()
     (root/'effective_runtime_config.json').write_text(cfg.model_dump_json(indent=2)+'\n')
     (root/'expected_tool_results.json').write_text(json.dumps(expected,indent=2)+'\n')
@@ -88,9 +91,9 @@ def run(root,port):
         row={**case,'teacher':cfg.teacher.model,'prompt_version':PROMPT_VERSION,'mock_version':MOCK_VERSION,
              'mock_catalog_version':CATALOG_VERSION,'mock_job_ids':plan['mock_job_ids'],'tools':SCHEMAS,
              'source_sha256':hashlib.sha256(source.encode()).hexdigest(),'purpose':'diagnostic_only',
-             'training_eligible':False,'case_attempt':1}
+             'training_eligible':False,'case_attempt':experiment_attempt,'workflow_version':WORKFLOW_VERSION}
         try:
-            row['messages']=tool_trace(teacher,cfg,source,case['question'],mock_job_ids=plan['mock_job_ids'])
+            row['messages']=tool_trace(teacher,cfg,source,case['question'],mock_job_ids=plan['mock_job_ids'],job_status_workflow=True)
             row['verification']=check_trace(row)
             calls=[c for m in row['messages'] if m['role']=='assistant' for c in message_calls(m)]
             decision='call' if calls else 'no_call'
@@ -106,6 +109,7 @@ def run(root,port):
     with ThreadPoolExecutor(max_workers=cfg.teacher.concurrency) as pool:
         rows=list(pool.map(one,plan['cases']))
     result={'job_id':os.environ['SLURM_JOB_ID'],'planned':12,'attempted':len(rows),'case_retries':0,
+            'experiment_attempt':experiment_attempt,'replayed_cases':len(rows) if experiment_attempt>1 else 0,
             'completed':sum(r['status']=='complete' for r in rows),'errors':sum(r['status']=='error' for r in rows),
             'pipeline_pass':sum(r.get('verification',{}).get('passed',False) for r in rows),
             'planned_modes':dict(Counter(r['mode'] for r in rows)),

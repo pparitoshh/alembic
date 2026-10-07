@@ -156,3 +156,39 @@ def test_job_id_mentioned_only_in_log_text_is_not_target_evidence():
     assert target_error(c,'Check my job.',[{'lines':['example job 777']}])
     assert target_error(c,'Check my job.',[{'job_id':'777','error':'not found'}])
     assert target_error(c,'Check my job.',[{'jobs':[{'job_id':'777'}]}]) is None
+
+
+def test_bounded_workflow_prompt_reaches_every_actual_teacher_turn(cfg):
+    from distillkit.job_status_guard import WORKFLOW_RULES
+    jid=fixture('FAILED')
+    teacher=FakeTeacher([Completion('',[call(job_id=jid)]),Completion('The state is FAILED. Status alone does not identify the cause.')])
+    generate.tool_trace(teacher,cfg,'The source provides status fields only.',f'Check job {jid}.',mock_job_ids=[jid],job_status_workflow=True)
+    assert len(teacher.requests)==2
+    assert all(WORKFLOW_RULES in r['messages'][0]['content'] for r in teacher.requests)
+    assert all(r['tools']==tools.SCHEMAS for r in teacher.requests)
+
+
+def test_observed_unsupported_stderr_command_is_rejected_by_production_verifier(cfg):
+    from distillkit import verify
+    from distillkit.io import write_jsonl,read_jsonl
+    from distillkit.job_status_guard import WORKFLOW_VERSION
+    jid=fixture('FAILED')
+    bad=f'Read the last 20 stderr lines with:\n```bash\nsacct -j {jid} --format=JobID,State,ExitCode,Reason\n```'
+    teacher=FakeTeacher([Completion('',[call(job_id=jid)]),Completion(bad)])
+    row=trace(cfg,teacher,f'Check job {jid}.',[jid]);row.update(id='unsupported',question=f'Check job {jid}.',workflow_version=WORKFLOW_VERSION)
+    assert not toolcheck.check_trace(row)['passed']
+    assert toolcheck.check_trace(row)['workflow_errors']
+    write_jsonl(cfg.run_dir/'generated.jsonl',[row])
+    verify.run(cfg)
+    assert read_jsonl(cfg.run_dir/'verified.jsonl')==[]
+    assert read_jsonl(cfg.run_dir/'rejected.jsonl')[0]['reject_reason']=='workflow_unsupported_response'
+
+
+def test_bounded_workflow_does_not_reject_supported_field_wording(cfg):
+    from distillkit.job_status_guard import WORKFLOW_VERSION
+    jid=fixture('FAILED')
+    for answer in ['FAILED; exit code 1:0. The cause is not established by this status.',
+                   'The result does not identify the failure cause. The read_job_log tool can retrieve stderr.']:
+        row=trace(cfg,FakeTeacher([Completion('',[call(job_id=jid)]),Completion(answer)]),f'Check job {jid}.',[jid])
+        row['workflow_version']=WORKFLOW_VERSION
+        assert toolcheck.check_trace(row)['passed']

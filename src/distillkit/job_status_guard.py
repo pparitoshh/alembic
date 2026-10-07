@@ -34,3 +34,34 @@ def target_error(call, question, results=()):
     if job_id not in known:
         return f"{call['name']} target {job_id!r} is not an explicitly identified job in the user request or preceding tool results; ask for the job ID"
     return None
+
+
+WORKFLOW_VERSION = "job-status-evidence-v1"
+WORKFLOW_RULES = """
+Bounded job-status workflow:
+- This workflow answers one identified job-status request or a general question about status fields.
+- If the target job ID is missing or ambiguous, ask for the missing identifier before any lookup.
+  Do not list the queue merely to work around a missing ID; queue discovery needs an explicit user request.
+- After a status result, summarize only relevant returned fields and limitations explicitly established by
+  the supplied source. Do not enumerate possible application, launcher, runtime or resource failure causes.
+  A state and exit code do not establish those causes. It is enough to state what cannot be determined.
+- This workflow's source supplies tool contracts, not shell-command syntax. Do not offer a shell command,
+  command example, or script. If an appropriate next diagnostic tool is mentioned, use only its documented
+  name/capability and do not claim to have run it. Accounting fields are not stderr log lines.
+- A not-found result means only absence from this simulated catalog. Do not infer prior existence,
+  removal, completion or cancellation from that result.
+"""
+# Hard check for the observed unsupported-command defect. This does not prove semantic grounding.
+_SHELL_BLOCK = re.compile(r"```(?:bash|sh|shell|console)\b", re.I)
+_CLUSTER_COMMAND = re.compile(r"(?:^|[\n`])\s*(?:sacct|squeue|scontrol|scancel|sbatch|srun)\s+[-\w]", re.I)
+
+
+def response_issues(row, answer):
+    workflow = row.get('workflow_version')
+    if workflow is None:
+        return []
+    if workflow != WORKFLOW_VERSION:
+        return [f'unsupported workflow version {workflow!r}']
+    if _SHELL_BLOCK.search(answer) or _CLUSTER_COMMAND.search(answer):
+        return ['job-status workflow supplied an unsupported shell command; its source provides tool contracts only']
+    return []

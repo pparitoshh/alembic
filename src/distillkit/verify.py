@@ -65,6 +65,8 @@ def run(cfg: Config) -> Path:
                 reason = "tool_ungrounded_id"  # a job id not taken from the question or a tool result
             elif tool["ungrounded_partitions"]:
                 reason = "tool_ungrounded_partition"
+            elif tool.get("workflow_errors"):
+                reason = "workflow_unsupported_response"
             elif not tool["decision_ok"]:
                 reason = "tool_decision"  # called when it should have answered/asked, or the reverse
         if reason:

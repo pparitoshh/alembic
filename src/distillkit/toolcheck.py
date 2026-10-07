@@ -11,7 +11,7 @@ import json
 import re
 
 from .records import final_answer, messages
-from .job_status_guard import target_error
+from .job_status_guard import response_issues, target_error
 from .tools import CATALOG_VERSION, MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
 
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
@@ -183,9 +183,11 @@ def _check_trace(row: dict) -> dict:
         trace_errors.append(f"missing {len(pending)} tool result(s)")
     if not final_answer(row).strip():
         trace_errors.append("missing terminal assistant answer")
+    workflow_errors = response_issues(row, final_answer(row))
     decision = "call" if calls else "no_call"
     ok = decision == EXPECTED_DECISION.get(row.get("mode", ""), decision)
     return {
+        "workflow_errors": workflow_errors,
         "policy_version": TRAINING_TRACE_POLICY_VERSION,
         "n_calls": len(calls),
         "call_errors": errors,
@@ -195,7 +197,7 @@ def _check_trace(row: dict) -> dict:
         "ungrounded_partitions": partitions,
         "decision": decision,
         "decision_ok": ok,
-        "passed": not errors and not trace_errors and not result_errors and not ungrounded and not partitions and ok,
+        "passed": not errors and not trace_errors and not result_errors and not ungrounded and not partitions and not workflow_errors and ok,
     }
 
 
