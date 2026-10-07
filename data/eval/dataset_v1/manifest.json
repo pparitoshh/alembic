@@ -427,17 +427,17 @@
     {
       "root": "repository",
       "path": "src/distillkit/toolcheck.py",
-      "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+      "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
     },
     {
       "root": "repository",
       "path": "src/distillkit/tools.py",
-      "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
     },
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+      "sha256": "797fe42f677f6a28952a4244e6bc56df9e26f12f9dd45e01b8dbbc1bc5a983ac"
     },
     {
       "root": "repository",
@@ -478,6 +478,32 @@
       "root": "repository",
       "path": "data/seeds/slurm_requeue_signals.md",
       "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4"
+    }
+  ],
+  "code_integration_history": [
+    {
+      "integration": "dataset-production-candidate",
+      "base_integration_revision": "0b0921b2ee09f891ab4da053feacc978106e8017",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b",
+          "after": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "before": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193",
+          "after": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "before": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1",
+          "after": "797fe42f677f6a28952a4244e6bc56df9e26f12f9dd45e01b8dbbc1bc5a983ac"
+        }
+      ],
+      "dataset_content_changed": false,
+      "reason": "Integrate tested opt-in source-family/scenario planning and prior support workflow code with current151release; references/scoringinputs unchanged",
+      "validation_status": "CPU combined integration pending; frozen previous revisions remain reproducible"
     }
   ]
 }

@@ -115,7 +115,7 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "2acf3889f797217efd6cb43ada99510dc60a278490ea35e9ae8ee861da7e4640"
+      "sha256": "797fe42f677f6a28952a4244e6bc56df9e26f12f9dd45e01b8dbbc1bc5a983ac"
     },
     {
       "path": "src/distillkit/toolcheck.py",
@@ -264,6 +264,20 @@
         "evidence": "campaign dataset_delivery_v1/family-guard-cpu-003/tests.xml"
       },
       "metadata_correction": "First integration history previous_code_bindings restored from actual3e9fe06manifest; changed_code_bindings already retained correct before/after values."
+    },
+    {
+      "integration": "dataset-production-candidate",
+      "base_integration_revision": "0b0921b2ee09f891ab4da053feacc978106e8017",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "2acf3889f797217efd6cb43ada99510dc60a278490ea35e9ae8ee861da7e4640",
+          "after": "797fe42f677f6a28952a4244e6bc56df9e26f12f9dd45e01b8dbbc1bc5a983ac"
+        }
+      ],
+      "dataset_content_changed": false,
+      "reason": "Integrate tested opt-in source-family/scenario planning and prior support workflow code with current151release; references/scoringinputs unchanged",
+      "validation_status": "CPU combined integration pending; frozen previous revisions remain reproducible"
     }
   ]
 }
