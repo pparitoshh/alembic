@@ -33,12 +33,13 @@
       ],
       "local_fixture_evidence": {
         "path": "src/distillkit/tools.py",
-        "sha256": "e72340d772a1d29e4f5729c76f42bda928b328311d38d56a4b1a9c9aa4731acb",
+        "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193",
         "symbols": [
           "SCHEMAS/job_accounting",
           "_job_accounting"
         ],
-        "origin": "User-supplied deterministic mock contract and pre-existing tool_trace.json call/result; not real cluster observations."
+        "origin": "User-supplied deterministic mock contract and pre-existing tool_trace.json call/result; not real cluster observations.",
+        "review_note": "Fixture reviewed after isolated-actions-v1 change; unchanged gold call/result verified by production check_trace test. Original source provenance remains unresolved."
       },
       "derivation": "Retains the supplied question, plan, call and synthetic result. Narrows the final answer to record fields supported by the training source and supplied fixture; removes ungrounded diagnosis and remedies."
     }

@@ -53,7 +53,7 @@ def run(cfg: Config) -> Path:
             elif not checks["bash_ok"]:
                 reason = "bash_syntax"
         if reason is None and r.get("mode") in ("call", "ask", "none"):
-            tool = check_trace(r)
+            tool = check_trace(r, valid_flags)
             r = {**r, "tool_checks": tool}
             if tool["call_errors"]:
                 reason = "tool_call_invalid"  # unknown tool, bad arguments, or the mock rejected it
@@ -63,6 +63,8 @@ def run(cfg: Config) -> Path:
                 reason = "tool_result_mismatch"
             elif tool["ungrounded_ids"]:
                 reason = "tool_ungrounded_id"  # a job id not taken from the question or a tool result
+            elif tool["ungrounded_partitions"]:
+                reason = "tool_ungrounded_partition"
             elif not tool["decision_ok"]:
                 reason = "tool_decision"  # called when it should have answered/asked, or the reverse
         if reason:
