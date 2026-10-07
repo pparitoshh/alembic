@@ -1,8 +1,10 @@
 """HPC tools the assistant can call: JSON schemas + deterministic mock implementations.
 
 The mocks stand in for a real Slurm cluster (Leonardo-like partitions) during data generation,
-verification and evaluation. Every result is a pure function of the call, so traces are
-reproducible and checkable: the same job id always has the same state, logs and accounting.
+verification and evaluation. Initial observations are deterministic. Generation and verification
+use an isolated session so submit/cancel actions affect later observations in that conversation.
+No time advances or scheduling/allocation decisions are simulated. Outside a session, one-shot
+evaluation calls retain their deterministic initial fixtures.
 The real tools for the demo wrap squeue/sacct/sbatch/etc. behind the same schemas.
 """
 
@@ -10,6 +12,9 @@ import hashlib
 import json
 import random
 import re
+from contextlib import contextmanager
+from contextvars import ContextVar
+from copy import deepcopy
 
 from .checks import check_answer, load_flags
 
@@ -105,7 +110,21 @@ _STDERR = {
     "TIMEOUT": ["epoch 37/100 step 11200 loss 0.412", "slurmstepd: error: *** JOB {job} ON lrdn0412 CANCELLED AT 2026-10-12T09:14:02 DUE TO TIME LIMIT ***"],
     "CANCELLED": ["slurmstepd: error: *** JOB {job} ON lrdn0412 CANCELLED AT 2026-10-12T09:14:02 ***"],
 }
-_STDOUT = ["Using 4 GPUs: A100-SXM-64GB", "epoch 1/10 loss 2.31", "epoch 2/10 loss 1.87", "epoch 3/10 loss 1.52", "checkpoint saved to $SCRATCH/run/ckpt_3.pt"]
+_STDOUT = ["epoch 1/10 loss 2.31", "epoch 2/10 loss 1.87", "epoch 3/10 loss 1.52", "checkpoint saved to $SCRATCH/run/ckpt_3.pt"]
+
+MOCK_VERSION = "isolated-actions-v1"
+_SESSION: ContextVar[dict | None] = ContextVar("distillkit_mock_session", default=None)
+
+
+@contextmanager
+def mock_session(valid_flags=None):
+    """Fresh deterministic state, isolated across threads and reset even when a request fails."""
+    flags = valid_flags if valid_flags is not None else _VALID_FLAGS
+    token = _SESSION.set({"jobs": {}, "observed_ids": set(), "flags": frozenset(flags if flags is not None else load_flags())})
+    try:
+        yield
+    finally:
+        _SESSION.reset(token)
 
 
 class ToolError(ValueError):
@@ -117,9 +136,14 @@ def _rng(*key) -> random.Random:
 
 
 def _job(job_id: str) -> dict:
-    """The mock cluster's view of a job id: same id -> same job, always."""
+    """Canonical initial fixture, overlaid with this conversation's explicit actions."""
     if not str(job_id).replace("_", "").isdigit():
         raise ToolError(f"invalid job id {job_id!r}")
+    session = _SESSION.get()
+    if session is not None:
+        session["observed_ids"].add(job_id)
+    if session is not None and job_id in session["jobs"]:
+        return deepcopy(session["jobs"][job_id])
     r = _rng("job", job_id)
     state = r.choice(STATES)
     part = r.choice(["boost_usr_prod"] * 4 + ["boost_qos_dbg", "dcgp_usr_prod"])
@@ -149,7 +173,10 @@ def _job_status(job_id: str) -> dict:
 def _list_queue(state: str | None = None, partition: str | None = None) -> dict:
     r = _rng("queue")
     jobs = []
-    for jid in sorted({str(r.randint(4000000, 4999999)) for _ in range(8)}):
+    ids = {str(r.randint(4000000, 4999999)) for _ in range(8)}
+    if (session := _SESSION.get()) is not None:
+        ids.update(session["jobs"])
+    for jid in sorted(ids):
         j = _job(jid)
         if j["state"] in ("PENDING", "RUNNING"):
             jobs.append({k: j[k] for k in ("job_id", "name", "state", "partition", "elapsed", "time_limit")} | ({"reason": j["reason"]} if "reason" in j else {}))
@@ -172,7 +199,9 @@ def _submit_job(script: str, test_only: bool = False) -> dict:
         _VALID_FLAGS = load_flags()
     if not script.lstrip().startswith("#!"):
         return {"error": "sbatch: error: This does not look like a batch script. The first line must start with #! followed by the path to an interpreter."}
-    res = check_answer(f"```bash\n{script}\n```", _VALID_FLAGS)
+    session = _SESSION.get()
+    flags = session["flags"] if session is not None else _VALID_FLAGS
+    res = check_answer(f"```bash\n{script}\n```", flags)
     if res["bad_flags"]:
         return {"error": f"sbatch: unrecognized option '--{res['bad_flags'][0]}'"}
     if not res["bash_ok"]:
@@ -185,6 +214,16 @@ def _submit_job(script: str, test_only: bool = False) -> dict:
     if test_only:
         return {"valid": True, "message": f"sbatch: Job {jid} to start at 2026-10-12T14:30:00 in partition {partition}",
                 "validation_scope": ["flag_names", "bash_syntax", "partition_name"]}
+    if session is not None:
+        # Do not infer execution, allocation or usage from a successful synthetic submission.
+        _list_queue()  # reserve every initial queue fixture, including terminal observations
+        existing_ids = session["observed_ids"] | session["jobs"].keys()
+        while jid in existing_ids:
+            jid = str(int(jid) + 1)
+        session["jobs"][jid] = {"job_id": jid, "name": "submitted_mock_job", "state": "PENDING",
+                                "partition": partition, "elapsed": "00:00:00", "time_limit": None,
+                                "reason": "mock submission: scheduling not simulated", "usage_recorded": False,
+                                "submitted_script": script}
     return {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}"}
 
 
@@ -192,6 +231,13 @@ def _cancel_job(job_id: str) -> dict:
     j = _job(job_id)
     if j["state"] not in ("PENDING", "RUNNING"):
         return {"cancelled": False, "message": f"scancel: error: Kill job error on job id {job_id}: Job/step already completing or completed"}
+    if (session := _SESSION.get()) is not None:
+        cancelled = {**j, "state": "CANCELLED", "exit_code": "0:15"}
+        if j["state"] == "PENDING":
+            cancelled["usage_recorded"] = False
+        for key in ("reason", "est_start"):
+            cancelled.pop(key, None)
+        session["jobs"][job_id] = cancelled
     return {"cancelled": True, "message": f"Job {job_id} cancelled (was {j['state']})"}
 
 
@@ -199,21 +245,22 @@ def _read_job_log(job_id: str, stream: str = "stderr", tail_lines: int = 20) -> 
     if not 1 <= tail_lines <= 200:
         raise ToolError("tail_lines must be between 1 and 200")
     j = _job(job_id)
-    if j["state"] == "PENDING":
+    if j["state"] == "PENDING" or j.get("usage_recorded") is False:
         return {"error": f"slurm-{job_id}.out does not exist yet: the job has not started"}
     if stream == "stdout":
-        lines = _STDOUT
+        devices = f"Using {j['gpus']} GPUs: {PARTITIONS[j['partition']]['gpu_type']}" if j["gpus"] else "CPU-only job; no GPUs allocated"
+        lines = [devices, *_STDOUT]
     elif j["state"] == "OUT_OF_MEMORY" and not j["gpus"]:
         lines = _STDERR["OUT_OF_MEMORY"][1:]  # host OOM kill only, no CUDA error
     else:
         lines = _STDERR.get(j["state"], [])
-    return {"file": f"slurm-{job_id}.{'out' if stream == 'stdout' else 'err'}", "lines": [l.format(job=job_id) for l in lines][-tail_lines:]}
+    return {"file": f"slurm-{job_id}.{'out' if stream == 'stdout' else 'err'}", "lines": [l.replace("lrdn0412", j["node_list"]).format(job=job_id) for l in lines][-tail_lines:]}
 
 
 def _job_accounting(job_id: str) -> dict:
     j = _job(job_id)
-    if j["state"] == "PENDING":
-        return {"job_id": job_id, "state": "PENDING", "message": "no usage yet: the job has not started"}
+    if j["state"] == "PENDING" or j.get("usage_recorded") is False:
+        return {"job_id": job_id, "state": j["state"], "message": "no usage recorded: the mock job has not started"}
     r = _rng("acct", job_id)
     acct = {k: j[k] for k in ("job_id", "state", "elapsed", "time_limit", "partition")} | {"exit_code": j.get("exit_code", "")}
     oom = j["state"] == "OUT_OF_MEMORY"
@@ -221,6 +268,8 @@ def _job_accounting(job_id: str) -> dict:
     acct |= {"max_rss": "494G" if oom and not j["gpus"] else f"{r.randint(4, 300)}G", "cpu_efficiency": f"{r.randint(5, 95)}%"}
     if j["gpus"]:
         acct |= {"gpus": j["gpus"], "gpu_util_mean": f"{r.randint(3, 98)}%", "gpu_mem_peak": "63.4GiB" if oom else f"{r.randint(5, 60)}GiB"}
+    else:
+        acct["gpus"] = 0
     return acct
 
 

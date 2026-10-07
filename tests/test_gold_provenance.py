@@ -65,6 +65,8 @@ class FakeTeacher:
 
 
 def fake_execute(name, args):
+    if name == "partition_info":
+        return {"partition": args["partition"], "max_time": "01:00:00"}
     if name != "job_status":
         raise AssertionError(f"Unexpected tool request in test: {name}")
     return {"job_id": args["job_id"], "state": "RUNNING", "partition": "fixture_partition"}

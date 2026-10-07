@@ -41,6 +41,8 @@ class GenerateCfg(_Section):
     # share of questions that become tool-calling traces, split by mode:
     # call = needs a tool, ask = needs a tool but a required detail is missing, none = tools offered but not needed
     tool_fraction: float = Field(0.0, ge=0, le=1)
+    # None preserves the original planner; a list limits tool modes to compatible training sources.
+    tool_doc_ids: list[str] | None = None
     tool_mix: dict[Literal["call", "ask", "none"], float] = {"call": 0.6, "ask": 0.2, "none": 0.2}
     max_tool_rounds: int = 3
     gold_dir: Path | None = None  # prose.json / tool_trace.json few-shot anchors (data/gold)

@@ -11,7 +11,7 @@ import json
 import re
 
 from .records import final_answer, messages
-from .tools import ToolError, execute, parse_arguments, validate_call
+from .tools import MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
 
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
 # looking the job up (list_queue, then calls on the ids it returned) are both fine; grounding
@@ -41,15 +41,20 @@ def message_calls(msg: dict) -> list[dict]:
 
 def call_error(call: dict) -> str | None:
     """None if the call is well-formed, valid against its schema and runs on the mock cluster."""
+    return _run_call(call)[1]
+
+
+def _run_call(call):
+    """Execute exactly once; action results are also the evidence used for replay."""
     if call.get("name") is None:
-        return "unparseable tool call"
+        return None, "unparseable tool call"
     try:
         result = execute(call["name"], call["arguments"])
     except ToolError as e:
-        return str(e)
+        return None, str(e)
     if call["name"] == "submit_job" and "error" in result:
-        return f"submit_job: {result['error']}"  # the assistant wrote a script sbatch would reject
-    return None
+        return None, f"submit_job: {result['error']}"
+    return result, None
 
 
 def ungrounded_ids(call: dict, context: str) -> list[str]:
@@ -65,6 +70,17 @@ def ungrounded_ids(call: dict, context: str) -> list[str]:
     return [] if found(job_id) or found(str(job_id).split("_")[0]) else [str(job_id)]
 
 
+def ungrounded_partition(call: dict, context: str) -> list[str]:
+    """A supplied partition filter needs user/result evidence; an omitted optional filter is safe."""
+    try:
+        partition = parse_arguments(call.get("arguments", {})).get("partition")
+    except ToolError:
+        return []
+    if not isinstance(partition, str):
+        return []
+    return [] if re.search(rf"(?<![\w-]){re.escape(partition)}(?![\w-])", context) else [partition]
+
+
 def _unique_fields(pairs):
     result = {}
     for key, value in pairs:
@@ -74,14 +90,21 @@ def _unique_fields(pairs):
     return result
 
 
-def check_trace(row: dict) -> dict:
+def check_trace(row: dict, valid_flags=None) -> dict:
+    with mock_session(valid_flags):
+        return _check_trace(row)
+
+
+def _check_trace(row: dict) -> dict:
     """Check complete ordered traces against this version of the deterministic mocks.
 
     Stored results are evidence only after matching replay. This does not judge whether the
     final answer interprets those results correctly, or validate results from a real cluster.
     """
-    context, calls, ungrounded = "", [], []
+    context, calls, ungrounded, partitions = "", [], [], []
     errors, trace_errors, result_errors, pending = [], [], [], []
+    if row.get("mock_version", MOCK_VERSION) != MOCK_VERSION:
+        trace_errors.append(f"mock version {row['mock_version']!r} requires its archived implementation; current: {MOCK_VERSION}")
     transcript = messages(row)
     if not isinstance(transcript, list):
         trace_errors.append("messages must be a list")
@@ -113,11 +136,13 @@ def check_trace(row: dict) -> dict:
                 c = {"name": f["name"], "arguments": f.get("arguments", {})}
                 calls.append(c)
                 ungrounded += ungrounded_ids(c, context)
-                if error := call_error(c):
+                partitions += ungrounded_partition(c, context)
+                result, error = _run_call(c)
+                if error:
                     errors.append(error)
                     pending.append(None)
                 else:
-                    pending.append(execute(c["name"], c["arguments"]))
+                    pending.append(result)
             expected_role = "tool" if raw_calls else "end of transcript"
         else:  # results follow calls in order in the record schema (no call IDs)
             expected = pending.pop(0)
@@ -144,9 +169,10 @@ def check_trace(row: dict) -> dict:
         "trace_errors": trace_errors,
         "result_errors": result_errors,
         "ungrounded_ids": ungrounded,
+        "ungrounded_partitions": partitions,
         "decision": decision,
         "decision_ok": ok,
-        "passed": not errors and not trace_errors and not result_errors and not ungrounded and ok,
+        "passed": not errors and not trace_errors and not result_errors and not ungrounded and not partitions and ok,
     }
 
 
