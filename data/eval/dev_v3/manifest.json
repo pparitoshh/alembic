@@ -115,7 +115,7 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
+      "sha256": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
     },
     {
       "path": "src/distillkit/toolcheck.py",
@@ -212,6 +212,59 @@
       "reason": "Integrate the opt-in job-status/support-review paths with current dev and its training audit. Only the three explicitly listed code bindings change; original source, question, reference and scoring-fixture bindings stay exact.",
       "compatibility": "EvalCfg, tool SCHEMAS, score_tool_item, evaluate.py, gguf_eval.py and eval_tools_v2.py remain identical to the integration base. New trace guards are separate from first-response evaluation. Support-review defaults remain v1/off; v3 runtime limits are documented.",
       "validation_scope": "Exact release validators and the full real-dependency CPU suite are run on the isolated integration snapshot and recorded in the handoff evidence. This entry does not assert a model-inference or training result."
+    },
+    {
+      "version": "source-scenario-integration-binding-v1",
+      "created_utc": "2026-10-07T23:49:29.013722+00:00",
+      "base_revision": "c2ea7aa082aa07c5106d54df99df2a35b12ff420",
+      "integrated_source_revision": "540b3bf6d673bebfe4942b485f116c73e97237e6",
+      "source_commits": [
+        "87903f445547babe80d74a2e2c606cdc6fa12fff",
+        "35b633b50f789f8672cdcb3a538c3da6179878bc"
+      ],
+      "previous_manifest_sha256": "29d1d1bc941e51aa9f2b3af0b21ce6230aed0026ff01079d9101ae336cf2fb22",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269",
+          "after": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Integrate the existing opt-in source-family admission and explicit scenario planner. Only config.py binding changes to cover optional seeds.registry and generate.scenario_plan. Training audit hooks and existing support-review defaults are preserved.",
+      "compatibility": "Evaluation schemas, prompts, first-response scorer, tool schemas and default mocks are unchanged. No evaluation rows, references, source spans or scoring fixtures are changed. Active pilot runtime snapshots remain separate and immutable.",
+      "validation_scope": "Fresh full real-dependency CPU suite and both exact release validators are recorded under the campaign production_code_handoff evidence for the final snapshot; no model or training result is asserted by this metadata entry."
     }
   ]
 }

@@ -16,6 +16,7 @@ class SeedsCfg(_Section):
     dir: Path
     eval_docs: list[str]  # held out BEFORE any generation
     chunk_chars: int = 1500
+    registry: Path | None = None  # reviewed source-family registry; legacy configs remain compatible
 
 
 class EndpointCfg(_Section):
@@ -38,6 +39,7 @@ class GenerateCfg(_Section):
     answers_per_question: int
     personas: list[str]
     task_types: list[str]
+    scenario_plan: Path | None = None  # opt-in explicit, source-bound scenarios instead of grid sampling
     # share of questions that become tool-calling traces, split by mode:
     # call = needs a tool, ask = needs a tool but a required detail is missing, none = tools offered but not needed
     tool_fraction: float = Field(0.0, ge=0, le=1)
