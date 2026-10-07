@@ -113,14 +113,21 @@ _STDERR = {
 _STDOUT = ["epoch 1/10 loss 2.31", "epoch 2/10 loss 1.87", "epoch 3/10 loss 1.52", "checkpoint saved to $SCRATCH/run/ckpt_3.pt"]
 
 MOCK_VERSION = "isolated-actions-v1"
+CATALOG_VERSION = "closed-job-catalog-v1"
 _SESSION: ContextVar[dict | None] = ContextVar("distillkit_mock_session", default=None)
 
 
 @contextmanager
-def mock_session(valid_flags=None):
+def mock_session(valid_flags=None, *, job_ids=None):
     """Fresh deterministic state, isolated across threads and reset even when a request fails."""
+    # Optional closed catalog is explicit experiment state. Default fixtures stay unchanged.
+    if job_ids is not None and (not isinstance(job_ids, list) or
+            any(not isinstance(j, str) or not re.fullmatch(r"[0-9]+(?:_[0-9]+)?", j) for j in job_ids) or
+            len(set(job_ids)) != len(job_ids)):
+        raise ValueError("mock job_ids must be a list of unique numeric job IDs")
     flags = valid_flags if valid_flags is not None else _VALID_FLAGS
-    token = _SESSION.set({"jobs": {}, "observed_ids": set(), "flags": frozenset(flags if flags is not None else load_flags())})
+    token = _SESSION.set({"jobs": {}, "observed_ids": set(), "catalog": None if job_ids is None else frozenset(job_ids),
+                          "flags": frozenset(flags if flags is not None else load_flags())})
     try:
         yield
     finally:
@@ -129,6 +136,10 @@ def mock_session(valid_flags=None):
 
 class ToolError(ValueError):
     """Invalid call: unknown tool, missing/unknown/mistyped argument."""
+
+
+class JobNotFound(ToolError):
+    """A syntactically valid ID is absent from this explicitly closed mock catalog."""
 
 
 def _rng(*key) -> random.Random:
@@ -144,6 +155,8 @@ def _job(job_id: str) -> dict:
         session["observed_ids"].add(job_id)
     if session is not None and job_id in session["jobs"]:
         return deepcopy(session["jobs"][job_id])
+    if session is not None and session["catalog"] is not None and job_id not in session["catalog"]:
+        raise JobNotFound(f"job {job_id} not found in this simulated job catalog")
     r = _rng("job", job_id)
     state = r.choice(STATES)
     part = r.choice(["boost_usr_prod"] * 4 + ["boost_qos_dbg", "dcgp_usr_prod"])
@@ -167,7 +180,10 @@ def _fraction_of(limit: str, r: random.Random) -> str:
 
 
 def _job_status(job_id: str) -> dict:
-    return _job(job_id)
+    try:
+        return _job(job_id)
+    except JobNotFound as exc:
+        return {"job_id": job_id, "found": False, "error": str(exc)}
 
 
 def _list_queue(state: str | None = None, partition: str | None = None) -> dict:
@@ -175,6 +191,8 @@ def _list_queue(state: str | None = None, partition: str | None = None) -> dict:
     jobs = []
     ids = {str(r.randint(4000000, 4999999)) for _ in range(8)}
     if (session := _SESSION.get()) is not None:
+        if session["catalog"] is not None:
+            ids = set(session["catalog"])
         ids.update(session["jobs"])
     for jid in sorted(ids):
         j = _job(jid)
