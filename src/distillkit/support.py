@@ -117,8 +117,13 @@ def source_for_record(cfg, row):
     return source
 
 
-def request_review(reviewer, row, source):
+def request_review(reviewer, row, source, *, protocol=PROTOCOL):
     """One explicit review request; raw response retained, no silent semantic retries."""
+    if protocol == 'source-support-v2':
+        from .support_v2 import request_review as request_v2
+        return request_v2(reviewer, row, source)
+    if protocol != PROTOCOL:
+        raise ValueError(f'unknown support protocol: {protocol}')
     packet = evidence_packet(row, source)
     fmt = {'type':'json_schema', 'json_schema':{'name':'SupportReview','schema':SupportReview.model_json_schema()}}
     response = reviewer.complete([{'role':'system','content':REVIEW_SYSTEM},
@@ -135,8 +140,13 @@ def request_review(reviewer, row, source):
             'review':review}
 
 
-def check_support(row, source, report):
+def check_support(row, source, report, *, protocol=PROTOCOL):
     """Hard binding/coverage checks plus the reviewer's explicitly fallible support labels."""
+    if protocol == 'source-support-v2':
+        from .support_v2 import check_support as check_v2
+        return check_v2(row, source, report)
+    if protocol != PROTOCOL:
+        return {'status':'uncertain', 'reason':'unknown support protocol', 'protocol':protocol}
     def pending(reason):
         return {'status':'uncertain', 'reason':reason, 'protocol':PROTOCOL}
     try:

@@ -108,7 +108,8 @@ def run(cfg: Config) -> Path:
                     source = source_for_record(cfg, r)
                     issue = review_errors.get('*') or review_errors.get(r.get('id'))
                     support = ({'status':'uncertain','reason':issue} if issue else
-                               check_support(r, source, reviews.get(r.get('id'))))
+                               check_support(r, source, reviews.get(r.get('id')),
+                                             protocol=vcfg.grounding_review_protocol))
                     r = {**r, 'grounding_checks':support}
                     if support['status'] == 'unsupported':
                         reason = 'unsupported_claim'

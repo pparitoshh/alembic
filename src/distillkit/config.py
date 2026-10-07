@@ -55,6 +55,7 @@ class VerifyCfg(_Section):
     max_answer_chars: int = 4000
     require_grounding_review: bool = False
     grounding_reviews: Path | None = None  # separate, hash-bound model support reports; never generated answers
+    grounding_review_protocol: Literal['source-support-v1', 'source-support-v2'] = 'source-support-v1'
 
 
 class StudentCfg(_Section):
