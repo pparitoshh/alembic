@@ -96,8 +96,8 @@ and retain the old report file.
 Captured Gemma v2 reviews exhibited duplicated copied segments and contradictory
 labels for future intent. Some direct source applications were also rejected for
 not matching the source's wording. V3 removes copied-target coverage and the
-`kind` × `support` combination, while clarifying semantic instructions. This is
-a proposed contract repair, not measured evidence of better model judgment.
+`kind` × `support` combination, while clarifying semantic instructions. These
+contract changes alone do not establish better model judgment.
 
 `tests/fixtures/support_gemma_v2` preserves ten original diagnostic report lines
 byte for byte, selected from the eighteen captured Gemma reviews. The fixture
@@ -115,8 +115,44 @@ unchanged v1/v2 outcomes. Deliberately wrong supported and nonfactual labels sho
 that valid unit IDs/citations do not prove entailment or factuality. Passing
 these tests is not a real inference run or evidence of semantic improvement.
 
-Before adoption, use a separately authorized bounded review-only comparison
-with preserved inputs and newly constructed controls, including supported
-paraphrases, future intent, factual question premises and unsupported additions.
-Report hard-invalid reviews, semantic disagreements and all denominators
-separately. Do not relabel historical results or tune labels to improve counts.
+## Bounded v3 runtime result
+
+The 2026-10-07 review-only run `support-units-002` (job `59659426`) used
+`google/gemma-4-26B-A4B-it` against frozen code `e9eec23`. It reviewed the same ten
+historical answers plus eight new synthetic diagnostic controls, once each, at
+temperature 0, a 4,096-token response limit and concurrency 1. It generated no
+new assistant answers and contributes **zero training-eligible records**.
+
+| Runtime outcome | Records |
+| --- | ---: |
+| Responses received | 18 |
+| Schema-valid reviews | 13 |
+| Complete valid unit coverage and citations | 12 |
+| Kept by the configured verifier | 10 |
+| Rejected | 2 |
+| Pending | 6 |
+
+Independent model-assisted source review found two false accepts among the
+twelve valid contracts. Both were historical answers: one added unsupported
+configuration/scheduling history from a zero GPU count; the other added a cause
+taxonomy and a memory-diagnosis rule absent from its source evidence. Valid
+citations and complete unit coverage did not make those additions supported.
+
+Five responses exhausted the token limit while emitting trailing whitespace
+after their units array, omitting the uncertainty field and final object. Their
+visible prefixes did not repeat unit IDs. The sixth pending review dropped one
+digit from a target-unit ID. The strict verifier preserved all six as pending;
+no truncated response or altered ID was repaired. The historical ten yielded
+five semantic agreements, two false accepts and three contract failures. The
+fresh eight yielded five agreements and three contract failures. These small,
+exposed diagnostic sets are not blind final tests or evidence of student-model
+improvement; the independent review is also fallible and was not human review.
+
+V3 remains experimental and explicitly opt-in; the default remains v1.
+**Gemma v3 must not be the sole basis for training eligibility.** Any pilot using
+these reviews also needs separate per-record source/evidence review and the
+existing hard validation checks. Keep contract failures, semantic disagreements
+and their denominators separate. Preserve all v1/v2/v3 raw reports and historical
+outcomes; do not relabel them or tune labels to improve counts. This limitation
+does not require removing the experimental protocol or a mandatory human-review
+stage.
