@@ -1,0 +1,1365 @@
+{
+  "version": "final-draft-evidence-v1",
+  "created_utc": "2026-10-07T22:24:12.061436+00:00",
+  "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+  "frozen": false,
+  "construction": {
+    "method": "Model-constructed evaluation questions/references from complete acquired local primary sources; author source/evidence check and exact validation.",
+    "author_role": "Codex delegated evaluation construction agent",
+    "exact_model_version": "unknown",
+    "human_review_claimed": false,
+    "independent_review": "pending",
+    "construction_exposure": true,
+    "pretraining_exposure": "unknown",
+    "blind_final_test_claimed": false
+  },
+  "reservations_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/evaluation_family_assignments.json",
+  "reservations_sha256": "7bd95bcc0f8c5d6fb11b0575952d57997051c60eaa32d2d55c97cbb8e6fd83b2",
+  "acquisition_sha256": "0705badc0515d5cc60d03fe42854b70b78f036fd3bda4198f165d3957793f6c4",
+  "sources": [
+    {
+      "doc_id": "cuda_samples_async_api",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+      "url": "https://raw.githubusercontent.com/NVIDIA/cuda-samples/cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997/Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+      "revision": "cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997",
+      "retrieved_utc": "2026-10-07T22:13:32.735224+00:00",
+      "sha256": "ac361cc7268ee8df6affd68331541a5b46f2236334112c55b03c3fd5d059db50",
+      "complete_source_read": true,
+      "version": "CUDA Samples supporting Toolkit 12.9",
+      "version_caveat": "Source-version label is not the installed runtime version.",
+      "license_notice_paths": [
+        "notices/NVIDIA-CUDA-Samples-LICENSE.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": {
+        "start_line": 1,
+        "end_line": 26,
+        "sha256": "18962bd2a6e8499b16f0f2ae55cb0ed49f93c976f43cfe71dfb5db8d46ff76e2"
+      }
+    },
+    {
+      "doc_id": "cuda_samples_streams",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+      "url": "https://raw.githubusercontent.com/NVIDIA/cuda-samples/cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997/Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+      "revision": "cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997",
+      "retrieved_utc": "2026-10-07T22:13:32.966441+00:00",
+      "sha256": "914e44cc640af097aa0581bf9ae6dac24bb37c2ff2a6c774e6ae1e77c6ccd3de",
+      "complete_source_read": true,
+      "version": "CUDA Samples supporting Toolkit 12.9",
+      "version_caveat": "Source-version label is not the installed runtime version.",
+      "license_notice_paths": [
+        "notices/NVIDIA-CUDA-Samples-LICENSE.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": {
+        "start_line": 1,
+        "end_line": 26,
+        "sha256": "18962bd2a6e8499b16f0f2ae55cb0ed49f93c976f43cfe71dfb5db8d46ff76e2"
+      }
+    },
+    {
+      "doc_id": "cuda_samples_zero_copy",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleZeroCopy/simpleZeroCopy.cu",
+      "url": "https://raw.githubusercontent.com/NVIDIA/cuda-samples/cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997/Samples/0_Introduction/simpleZeroCopy/simpleZeroCopy.cu",
+      "revision": "cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997",
+      "retrieved_utc": "2026-10-07T22:13:33.051924+00:00",
+      "sha256": "ae8fbbadf88c44f6761cd23753579aec79b2b2df7ead3dde009af04211bc8018",
+      "complete_source_read": true,
+      "version": "CUDA Samples supporting Toolkit 12.9",
+      "version_caveat": "Source-version label is not the installed runtime version.",
+      "license_notice_paths": [
+        "notices/NVIDIA-CUDA-Samples-LICENSE.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": {
+        "start_line": 1,
+        "end_line": 26,
+        "sha256": "18962bd2a6e8499b16f0f2ae55cb0ed49f93c976f43cfe71dfb5db8d46ff76e2"
+      }
+    },
+    {
+      "doc_id": "cuda_samples_assert",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleAssert/simpleAssert.cu",
+      "url": "https://raw.githubusercontent.com/NVIDIA/cuda-samples/cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997/Samples/0_Introduction/simpleAssert/simpleAssert.cu",
+      "revision": "cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997",
+      "retrieved_utc": "2026-10-07T22:13:33.271527+00:00",
+      "sha256": "31804e3c6b50bd59c9d6e7081977b7696001fdb7718549b5f789a1367c4e9542",
+      "complete_source_read": true,
+      "version": "CUDA Samples supporting Toolkit 12.9",
+      "version_caveat": "Source-version label is not the installed runtime version.",
+      "license_notice_paths": [
+        "notices/NVIDIA-CUDA-Samples-LICENSE.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": {
+        "start_line": 1,
+        "end_line": 26,
+        "sha256": "18962bd2a6e8499b16f0f2ae55cb0ed49f93c976f43cfe71dfb5db8d46ff76e2"
+      }
+    },
+    {
+      "doc_id": "cuda_samples_pitch_texture",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+      "url": "https://raw.githubusercontent.com/NVIDIA/cuda-samples/cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997/Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+      "revision": "cab7c66b4fcf35b09ea8fbc4c3c1a9272e92d997",
+      "retrieved_utc": "2026-10-07T22:13:33.507539+00:00",
+      "sha256": "3198457e1fa97db64cbb0d67de690e75efbe59a8a70db8aebd15aa006b0b742b",
+      "complete_source_read": true,
+      "version": "CUDA Samples supporting Toolkit 12.9",
+      "version_caveat": "Source-version label is not the installed runtime version.",
+      "license_notice_paths": [
+        "notices/NVIDIA-CUDA-Samples-LICENSE.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": {
+        "start_line": 1,
+        "end_line": 26,
+        "sha256": "18962bd2a6e8499b16f0f2ae55cb0ed49f93c976f43cfe71dfb5db8d46ff76e2"
+      }
+    },
+    {
+      "doc_id": "ompi_build_quickstart",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/building-apps/quickstart.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/building-apps/quickstart.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:31.688165+00:00",
+      "sha256": "21042c16333e23a3c13612314e16eeb90a5a134e92b4550d95badbd343713977",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_wrapper_flags",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/building-apps/extracting-wrapper-flags.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/building-apps/extracting-wrapper-flags.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:31.869108+00:00",
+      "sha256": "b380039a973da6e2bfd738d0c14afbaf26e4371de58b6a9772f4d3790fad1c1c",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_wrapper_customization",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/building-apps/customizing-wrappers.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/building-apps/customizing-wrappers.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:31.938018+00:00",
+      "sha256": "3bb037fac77a8674b530cdc1d5e892dd2569fd665c8941ccc98c061a71af54cc",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_launch_quickstart",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/launching-apps/quickstart.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/launching-apps/quickstart.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:31.928485+00:00",
+      "sha256": "90f6484fe148d9aa3fa1659372e84dc64bd5b6ad40b0af90c38c5d24d909a1ba",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_scheduling",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/launching-apps/scheduling.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/launching-apps/scheduling.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:32.120192+00:00",
+      "sha256": "d1b67524bb1234b1034fa4b14421a8edad4042012799e0ace6848c45370af679",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_lost_output",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/app-debug/lost-output.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/app-debug/lost-output.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:32.174885+00:00",
+      "sha256": "58601680c8f65c79d97cfa07c748581e2141ebd198d49d06b352c54f6da39455",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_serial_debug",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/app-debug/serial-debug.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/app-debug/serial-debug.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:32.202422+00:00",
+      "sha256": "eb026e7f01ed02aa095cd3c7a057967a62fa5411edfb5c3f5ec9cb827791dd84",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_valgrind",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/app-debug/valgrind.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/app-debug/valgrind.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:32.202736+00:00",
+      "sha256": "9c03dfe1ce14e3a5d59d8c5586f0648f1db57bd4ca349df2448f28323828e4ec",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    },
+    {
+      "doc_id": "ompi_affinity",
+      "family": "Open-MPI-all-versions",
+      "split": "final",
+      "path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/tuning-apps/affinity.rst",
+      "url": "https://raw.githubusercontent.com/open-mpi/ompi/84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33/docs/tuning-apps/affinity.rst",
+      "revision": "84891baf79dc2ff1b66270d2c53f6eb3a6ba3a33",
+      "retrieved_utc": "2026-10-07T22:13:32.392229+00:00",
+      "sha256": "d24f645bfd33fdb5ab2d4baecd3381e3aab10f64564cea97f5024e5975eabb97",
+      "complete_source_read": true,
+      "version": "Open MPI 5.0.8rc3 source snapshot (VERSION: greek=rc3; tarball_version=gitclone)",
+      "version_caveat": "Reservation shorthand 5.0.8 omits rc3; exact commit and acquired VERSION take precedence.",
+      "license_notice_paths": [
+        "notices/Open-MPI-LICENSE.txt",
+        "notices/Open-MPI-docs-ompi.txt",
+        "notices/Open-MPI-docs-mpich.txt"
+      ],
+      "license_scope": "Retained source notices; no external publication or binary redistribution approval claimed.",
+      "per_file_notice": "No separate notice in this RST file; root and docs license retained."
+    }
+  ],
+  "items": [
+    {
+      "id": "final-cuda-001",
+      "doc_id": "cuda_samples_async_api",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "asynchronous_host_device_timing",
+        "event_completion_polling"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+      "primary_source_sha256": "ac361cc7268ee8df6affd68331541a5b46f2236334112c55b03c3fd5d059db50",
+      "support_spans": [
+        {
+          "start_line": 28,
+          "end_line": 35,
+          "quote": "/*\n * This sample illustrates the usage of CUDA events for both GPU timing and\n * overlapping CPU and GPU execution.  Events are inserted into a stream\n * of CUDA calls.  Since CUDA stream calls are asynchronous, the CPU can\n * perform computations while GPU is executing (including DMA memcopies\n * between the host and device).  CPU can query CUDA events to determine\n * whether GPU has completed tasks.\n */",
+          "quote_sha256": "d337770e3061c3073d961d0a3f18e166e3a6999adbf9fc09ae52263a8ca76880"
+        },
+        {
+          "start_line": 106,
+          "end_line": 132,
+          "quote": "    checkCudaErrors(cudaDeviceSynchronize());\n    float gpu_time = 0.0f;\n\n    // asynchronously issue work to the GPU (all to stream 0)\n    checkCudaErrors(cudaProfilerStart());\n    sdkStartTimer(&timer);\n    cudaEventRecord(start, 0);\n    cudaMemcpyAsync(d_a, a, nbytes, cudaMemcpyHostToDevice, 0);\n    increment_kernel<<<blocks, threads, 0, 0>>>(d_a, value);\n    cudaMemcpyAsync(a, d_a, nbytes, cudaMemcpyDeviceToHost, 0);\n    cudaEventRecord(stop, 0);\n    sdkStopTimer(&timer);\n    checkCudaErrors(cudaProfilerStop());\n\n    // have CPU do some work while waiting for stage 1 to finish\n    unsigned long int counter = 0;\n\n    while (cudaEventQuery(stop) == cudaErrorNotReady) {\n        counter++;\n    }\n\n    checkCudaErrors(cudaEventElapsedTime(&gpu_time, start, stop));\n\n    // print the cpu and gpu times\n    printf(\"time spent executing by the GPU: %.2f\\n\", gpu_time);\n    printf(\"time spent by CPU in CUDA calls: %.2f\\n\", sdkGetTimerValue(&timer));\n    printf(\"CPU executed %lu iterations while waiting for GPU to finish\\n\", counter);",
+          "quote_sha256": "6b71e97306133459577fa86ca35def01e59c7e7fa5a0addcd76be77b00c3b62b"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Distinguish host call time from the event-delimited GPU pipeline.",
+        "Include both copies as well as the kernel in the event interval.",
+        "Identify stop-event polling as the documented CPU-work opportunity."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "Timing interpretation, not a speedup claim. Do not infer that any two operations necessarily overlap or that this sample is a performance benchmark.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "595912c2bea3ae5c961d3de63aa1c6315681efa697964668c77141c03f3d81af",
+      "reference_sha256": "02b945110d6bf9f6f10b98fd2fee34ac0adad15a27e0cccf01fac680de733a45"
+    },
+    {
+      "id": "final-cuda-002",
+      "doc_id": "cuda_samples_async_api",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "easy",
+      "capabilities": [
+        "copy_order_dataflow",
+        "initialization_overwrite"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/asyncAPI/asyncAPI.cu",
+      "primary_source_sha256": "ac361cc7268ee8df6affd68331541a5b46f2236334112c55b03c3fd5d059db50",
+      "support_spans": [
+        {
+          "start_line": 48,
+          "end_line": 62,
+          "quote": "__global__ void increment_kernel(int *g_data, int inc_value)\n{\n    int idx     = blockIdx.x * blockDim.x + threadIdx.x;\n    g_data[idx] = g_data[idx] + inc_value;\n}\n\nbool correct_output(int *data, const int n, const int x)\n{\n    for (int i = 0; i < n; i++)\n        if (data[i] != x) {\n            printf(\"Error! data[%d] = %d, ref = %d\\n\", i, data[i], x);\n            return false;\n        }\n\n    return true;",
+          "quote_sha256": "ae56dc9a45f72a85899dda776cb874a2c358c861b58047428133a2d52777d2f7"
+        },
+        {
+          "start_line": 79,
+          "end_line": 95,
+          "quote": "    int n      = 16 * 1024 * 1024;\n    int nbytes = n * sizeof(int);\n    int value  = 26;\n\n    // allocate host memory\n    int *a = 0;\n    checkCudaErrors(cudaMallocHost((void **)&a, nbytes));\n    memset(a, 0, nbytes);\n\n    // allocate device memory\n    int *d_a = 0;\n    checkCudaErrors(cudaMalloc((void **)&d_a, nbytes));\n    checkCudaErrors(cudaMemset(d_a, 255, nbytes));\n\n    // set kernel launch configuration\n    dim3 threads = dim3(512, 1);\n    dim3 blocks  = dim3(n / threads.x, 1);",
+          "quote_sha256": "32d414626a54b7db23e9636856e7cc9bcef09bdafc90441e807ea94ca96951e8"
+        },
+        {
+          "start_line": 109,
+          "end_line": 116,
+          "quote": "    // asynchronously issue work to the GPU (all to stream 0)\n    checkCudaErrors(cudaProfilerStart());\n    sdkStartTimer(&timer);\n    cudaEventRecord(start, 0);\n    cudaMemcpyAsync(d_a, a, nbytes, cudaMemcpyHostToDevice, 0);\n    increment_kernel<<<blocks, threads, 0, 0>>>(d_a, value);\n    cudaMemcpyAsync(a, d_a, nbytes, cudaMemcpyDeviceToHost, 0);\n    cudaEventRecord(stop, 0);",
+          "quote_sha256": "838b35d5a607c9000cde0a12d9a72bd34a2079074c7280f1674a038957810f5e"
+        },
+        {
+          "start_line": 134,
+          "end_line": 135,
+          "quote": "    // check the output for correctness\n    bool bFinalResults = correct_output(a, n, value);",
+          "quote_sha256": "641f36bedf8f63ee434be6fba04ce7a7da51f18b04ee8ab381d78e4802ceec86"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Host-to-device copy overwrites the poison.",
+        "Each validated element equals value=26 after successful completion."
+      ],
+      "explicit_assumptions": [
+        "All described calls succeed and the result is read after completion."
+      ],
+      "review_notes": "Tests data flow rather than event timing. No claim about interpreting the byte pattern 255 as an integer is required.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "c4bc8feb9879d3be5d7ef22b8d7f7858600f77a6777e0996d63a0a66e566f044",
+      "reference_sha256": "3a84eeaf5d2c5b6895e8ba23c811982ed84c0fb9fc0e68e48ba07ddd31aa9477"
+    },
+    {
+      "id": "final-cuda-003",
+      "doc_id": "cuda_samples_streams",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "per_stream_ordering",
+        "submission_order_vs_global_barrier"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+      "primary_source_sha256": "914e44cc640af097aa0581bf9ae6dac24bb37c2ff2a6c774e6ae1e77c6ccd3de",
+      "support_spans": [
+        {
+          "start_line": 28,
+          "end_line": 38,
+          "quote": "/*\n * This sample illustrates the usage of CUDA streams for overlapping\n * kernel execution with device/host memcopies.  The kernel is used to\n * initialize an array to a specific value, after which the array is\n * copied to the host (CPU) memory.  To increase performance, multiple\n * kernel/memcopy pairs are launched asynchronously, each pair in its\n * own stream.  Devices with Compute Capability 1.1 can overlap a kernel\n * and a memcopy as long as they are issued in different streams.  Kernels\n * are serialized.  Thus, if n pairs are launched, streamed approach\n * can reduce the memcopy cost to the (1/n)th of a single copy of the entire\n * data set.",
+          "quote_sha256": "0c0868ebaa893269d9a30ff483e655297c0994bb83ed79945e624a4a66caccc8"
+        },
+        {
+          "start_line": 378,
+          "end_line": 396,
+          "quote": "    for (int k = 0; k < nreps; k++) {\n        // asynchronously launch nstreams kernels, each operating on its own portion\n        // of data\n        for (int i = 0; i < nstreams; i++) {\n            init_array<<<blocks, threads, 0, streams[i]>>>(d_a + i * n / nstreams, d_c, niterations);\n        }\n\n        // asynchronously launch nstreams memcopies.  Note that memcopy in stream x\n        // will only\n        //   commence executing when all previous CUDA calls in stream x have\n        //   completed\n        for (int i = 0; i < nstreams; i++) {\n            checkCudaErrors(cudaMemcpyAsync(hAligned_a + i * n / nstreams,\n                                            d_a + i * n / nstreams,\n                                            nbytes / nstreams,\n                                            cudaMemcpyDeviceToHost,\n                                            streams[i]));\n        }\n    }",
+          "quote_sha256": "f1d4a9741bfb7a261481c5d8a004f1c8d7a53deff347f4b8de59995ec8a44d32"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Dependence is on prior work in the same stream.",
+        "Do not invent a host/global synchronization between the loops."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "The source has legacy hardware comments; this item relies only on its explicit same-stream ordering and code sequence, not a universal concurrency claim.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "610958750413569e6a98582263d993a03134f9782c57cd5076ffbee433bd63ec",
+      "reference_sha256": "22756392f28ebd51a47916a8eca5b81bce5ccc259f26fd9782e26085eb2c7b17"
+    },
+    {
+      "id": "final-cuda-004",
+      "doc_id": "cuda_samples_streams",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "hard",
+      "capabilities": [
+        "stream_chunk_indexing",
+        "element_offsets_vs_byte_counts",
+        "cuda_fragment_construction"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+      "primary_source_sha256": "914e44cc640af097aa0581bf9ae6dac24bb37c2ff2a6c774e6ae1e77c6ccd3de",
+      "support_spans": [
+        {
+          "start_line": 370,
+          "end_line": 395,
+          "quote": "    // time execution with nstreams streams\n    threads = dim3(512, 1);\n    blocks  = dim3(n / (nstreams * threads.x), 1);\n    memset(hAligned_a, 255,\n           nbytes);                              // set host memory bits to all 1s, for testing correctness\n    checkCudaErrors(cudaMemset(d_a, 0, nbytes)); // set device memory to all 0s, for testing correctness\n    checkCudaErrors(cudaEventRecord(start_event, 0));\n\n    for (int k = 0; k < nreps; k++) {\n        // asynchronously launch nstreams kernels, each operating on its own portion\n        // of data\n        for (int i = 0; i < nstreams; i++) {\n            init_array<<<blocks, threads, 0, streams[i]>>>(d_a + i * n / nstreams, d_c, niterations);\n        }\n\n        // asynchronously launch nstreams memcopies.  Note that memcopy in stream x\n        // will only\n        //   commence executing when all previous CUDA calls in stream x have\n        //   completed\n        for (int i = 0; i < nstreams; i++) {\n            checkCudaErrors(cudaMemcpyAsync(hAligned_a + i * n / nstreams,\n                                            d_a + i * n / nstreams,\n                                            nbytes / nstreams,\n                                            cudaMemcpyDeviceToHost,\n                                            streams[i]));\n        }",
+          "quote_sha256": "57fb0f85a8c5ae98735d6062250e7b17bcc095382702190c773b0f259235bff5"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Both pointers advance by i*n/nstreams elements.",
+        "Copy nbytes/nstreams bytes.",
+        "Use streams[i] for matching kernel and copy."
+      ],
+      "explicit_assumptions": [
+        "Named buffers, streams, kernel and launch dimensions already exist.",
+        "nstreams divides n; allocation and later synchronization are outside this requested fragment."
+      ],
+      "review_notes": "A requested fragment, not a complete executable. Source error-wrapper calls may be retained or omitted without changing these essential arguments. Distinct from the preceding conceptual ordering item because it tests pointer arithmetic and byte counts.",
+      "code_language": "CUDA C++",
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "8eaf965d2a5a49ed4197404a751e07825169ad694e05c5b6fae148ef0ef57519",
+      "reference_sha256": "cbb323ee32920e141897eb6f3465dca1881b6a6cb4520c02e929236c16be4ee0"
+    },
+    {
+      "id": "final-cuda-005",
+      "doc_id": "cuda_samples_streams",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "sample_cli_configuration",
+        "host_allocation_path",
+        "explicit_option_side_effect"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleStreams/simpleStreams.cu",
+      "primary_source_sha256": "914e44cc640af097aa0581bf9ae6dac24bb37c2ff2a6c774e6ae1e77c6ccd3de",
+      "support_spans": [
+        {
+          "start_line": 159,
+          "end_line": 177,
+          "quote": "static const char *sSyncMethod[] = {\"0 (Automatic Blocking)\",\n                                    \"1 (Spin Blocking)\",\n                                    \"2 (Yield Blocking)\",\n                                    \"3 (Undefined Blocking Method)\",\n                                    \"4 (Blocking Sync Event) = low CPU utilization\",\n                                    NULL};\n\nvoid printHelp()\n{\n    printf(\"Usage: %s [options below]\\n\", sSDKsample);\n    printf(\"\\t--sync_method=n for CPU/GPU synchronization\\n\");\n    printf(\"\\t             n=%s\\n\", sSyncMethod[0]);\n    printf(\"\\t             n=%s\\n\", sSyncMethod[1]);\n    printf(\"\\t             n=%s\\n\", sSyncMethod[2]);\n    printf(\"\\t   <Default> n=%s\\n\", sSyncMethod[4]);\n    printf(\"\\t--use_generic_memory (default) use generic page-aligned for system \"\n           \"memory\\n\");\n    printf(\"\\t--use_cuda_malloc_host (optional) use cudaMallocHost to allocate \"\n           \"system memory\\n\");",
+          "quote_sha256": "2a9514eef3202bd784cec01c9dfea054440ff14f5ef4d474ee1657c9c6f8d9f0"
+        },
+        {
+          "start_line": 189,
+          "end_line": 200,
+          "quote": "    int   nstreams    = 4;                        // number of streams for CUDA calls\n    int   nreps       = 10;                       // number of times each experiment is repeated\n    int   n           = 16 * 1024 * 1024;         // number of ints in the data set\n    int   nbytes      = n * sizeof(int);          // number of data bytes\n    dim3  threads, blocks;                        // kernel launch configuration\n    float elapsed_time, time_memcpy, time_kernel; // timing variables\n    float scale_factor = 1.0f;\n\n    // allocate generic memory and pin it laster instead of using cudaHostAlloc()\n\n    bool bPinGenericMemory  = DEFAULT_PINNED_GENERIC_MEMORY; // we want this to be the default behavior\n    int  device_sync_method = cudaDeviceBlockingSync;        // by default we use BlockingSync",
+          "quote_sha256": "c33508c24c818eedd7f67c5ef0ebd079f3a6aeee81d70fafa473ad8039737826"
+        },
+        {
+          "start_line": 211,
+          "end_line": 238,
+          "quote": "    if ((device_sync_method = getCmdLineArgumentInt(argc, (const char **)argv, \"sync_method\")) >= 0) {\n        if (device_sync_method == 0 || device_sync_method == 1 || device_sync_method == 2 || device_sync_method == 4) {\n            printf(\"Device synchronization method set to = %s\\n\", sSyncMethod[device_sync_method]);\n            printf(\"Setting reps to 100 to demonstrate steady state\\n\");\n            nreps = 100;\n        }\n        else {\n            printf(\"Invalid command line option sync_method=\\\"%d\\\"\\n\", device_sync_method);\n            return EXIT_FAILURE;\n        }\n    }\n    else {\n        printHelp();\n        return EXIT_SUCCESS;\n    }\n\n    if (checkCmdLineFlag(argc, (const char **)argv, \"use_generic_memory\")) {\n#if defined(__APPLE__) || defined(MACOSX)\n        bPinGenericMemory = false; // Generic Pinning of System Paged memory not\n                                   // currently supported on Mac OSX\n#else\n        bPinGenericMemory = true;\n#endif\n    }\n\n    if (checkCmdLineFlag(argc, (const char **)argv, \"use_cuda_malloc_host\")) {\n        bPinGenericMemory = false;\n    }",
+          "quote_sha256": "a91e3bc50d7c600c3daaaa0c6bc52e746eca2d43ca2447a70c25d5540b35b7f3"
+        },
+        {
+          "start_line": 293,
+          "end_line": 305,
+          "quote": "    // enable use of blocking sync, to reduce CPU usage\n    printf(\"> Using CPU/GPU Device Synchronization method (%s)\\n\", sDeviceSyncMethod[device_sync_method]);\n    checkCudaErrors(cudaSetDeviceFlags(device_sync_method | (bPinGenericMemory ? cudaDeviceMapHost : 0)));\n\n    // allocate host memory\n    int  c          = 5; // value to which the array will be initialized\n    int *h_a        = 0; // pointer to the array data in host memory\n    int *hAligned_a = 0; // pointer to the array data in host memory (aligned to\n                         // MEMORY_ALIGNMENT)\n\n    // Allocate Host memory (could be using cudaMallocHost or VirtualAlloc/mmap if\n    // using the new CUDA 4.0 features\n    AllocateHostMemory(bPinGenericMemory, &h_a, &hAligned_a, nbytes);",
+          "quote_sha256": "f87acfdca518215161ea65b156a21d0e1e812e6194c4e1871b89fcbde312b43c"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Use --sync_method=4 and --use_cuda_malloc_host.",
+        "Mention nreps becomes 100, rather than assuming the initialization value 10 remains."
+      ],
+      "explicit_assumptions": [
+        "A built simpleStreams executable is available in the current directory."
+      ],
+      "review_notes": "Sample-specific CLI behavior at the pinned revision. Do not generalize these options to arbitrary CUDA applications or claim any measured CPU utilization.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "71935500a6174716fd8cb8c4bb3b8dc80af9afa8a26fe1ff078e33a1af1ecca1",
+      "reference_sha256": "e52f6c409a28b635dca9cb0e172b8ad3c0c67d853ccea88734360cd8719e3cc2"
+    },
+    {
+      "id": "final-cuda-006",
+      "doc_id": "cuda_samples_zero_copy",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "mapped_host_memory_setup",
+        "mapped_device_pointer"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleZeroCopy/simpleZeroCopy.cu",
+      "primary_source_sha256": "ae8fbbadf88c44f6761cd23753579aec79b2b2df7ead3dde009af04211bc8018",
+      "support_spans": [
+        {
+          "start_line": 115,
+          "end_line": 130,
+          "quote": "    checkCudaErrors(cudaSetDevice(idev));\n\n    /* Verify the selected device supports mapped memory and set the device\n       flags for mapping host memory. */\n\n    checkCudaErrors(cudaGetDeviceProperties(&deviceProp, idev));\n\n#if CUDART_VERSION >= 2020\n\n    if (!deviceProp.canMapHostMemory) {\n        fprintf(stderr, \"Device %d does not support mapping CPU host memory!\\n\", idev);\n\n        exit(EXIT_SUCCESS);\n    }\n\n    checkCudaErrors(cudaSetDeviceFlags(cudaDeviceMapHost));",
+          "quote_sha256": "fdffc759b56855ab890ce7d486bf818eb08c914864d7406b1890da2a01059c8c"
+        },
+        {
+          "start_line": 155,
+          "end_line": 183,
+          "quote": "    /* Allocate mapped CPU memory. */\n\n    nelem = 1048576;\n    bytes = nelem * sizeof(float);\n\n    if (bPinGenericMemory) {\n#if CUDART_VERSION >= 4000\n        a_UA = (float *)malloc(bytes + MEMORY_ALIGNMENT);\n        b_UA = (float *)malloc(bytes + MEMORY_ALIGNMENT);\n        c_UA = (float *)malloc(bytes + MEMORY_ALIGNMENT);\n\n        // We need to ensure memory is aligned to 4K (so we will need to padd memory\n        // accordingly)\n        a = (float *)ALIGN_UP(a_UA, MEMORY_ALIGNMENT);\n        b = (float *)ALIGN_UP(b_UA, MEMORY_ALIGNMENT);\n        c = (float *)ALIGN_UP(c_UA, MEMORY_ALIGNMENT);\n\n        checkCudaErrors(cudaHostRegister(a, bytes, cudaHostRegisterMapped));\n        checkCudaErrors(cudaHostRegister(b, bytes, cudaHostRegisterMapped));\n        checkCudaErrors(cudaHostRegister(c, bytes, cudaHostRegisterMapped));\n#endif\n    }\n    else {\n#if CUDART_VERSION >= 2020\n        flags = cudaHostAllocMapped;\n        checkCudaErrors(cudaHostAlloc((void **)&a, bytes, flags));\n        checkCudaErrors(cudaHostAlloc((void **)&b, bytes, flags));\n        checkCudaErrors(cudaHostAlloc((void **)&c, bytes, flags));\n#endif",
+          "quote_sha256": "e39d72a47a876d0eff8ce4bf45631ed7398c843f7eac35cffaf4f3c90c9219f0"
+        },
+        {
+          "start_line": 193,
+          "end_line": 208,
+          "quote": "    /* Get the device pointers for the pinned CPU memory mapped into the GPU\n       memory space. */\n\n#if CUDART_VERSION >= 2020\n    checkCudaErrors(cudaHostGetDevicePointer((void **)&d_a, (void *)a, 0));\n    checkCudaErrors(cudaHostGetDevicePointer((void **)&d_b, (void *)b, 0));\n    checkCudaErrors(cudaHostGetDevicePointer((void **)&d_c, (void *)c, 0));\n#endif\n\n    /* Call the GPU kernel using the CPU pointers residing in CPU mapped memory.\n     */\n    printf(\"> vectorAddGPU kernel will add vectors using mapped CPU memory...\\n\");\n    dim3 block(256);\n    dim3 grid((unsigned int)ceil(nelem / (float)block.x));\n    vectorAddGPU<<<grid, block>>>(d_a, d_b, d_c, nelem);\n    checkCudaErrors(cudaDeviceSynchronize());",
+          "quote_sha256": "bf22a832d4b4c2c5603a3aeb7b380f24b46314b0b2b731b64eebb436d165022c"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Check canMapHostMemory.",
+        "Set cudaDeviceMapHost; allocate with cudaHostAllocMapped.",
+        "Obtain the kernel pointer using cudaHostGetDevicePointer."
+      ],
+      "explicit_assumptions": [
+        "Runtime takes CUDART_VERSION>=2020.",
+        "Selected device supports mapped host memory.",
+        "The cudaHostAlloc branch is selected."
+      ],
+      "review_notes": "Scope is the acquired sample and explicitly selected branch. Do not infer modern universal initialization requirements, speedups, or helper-function behavior.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "48b16f5a940b9d1bded8f3b476f3e891a0f719f05876937d1b55a3ad246aa016",
+      "reference_sha256": "8011e1cfb4cec9ec1aad92c90748c624921292083623e207425bbbd4c2bc399f"
+    },
+    {
+      "id": "final-cuda-007",
+      "doc_id": "cuda_samples_zero_copy",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "registered_memory_lifetime",
+        "aligned_vs_base_pointer_cleanup"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleZeroCopy/simpleZeroCopy.cu",
+      "primary_source_sha256": "ae8fbbadf88c44f6761cd23753579aec79b2b2df7ead3dde009af04211bc8018",
+      "support_spans": [
+        {
+          "start_line": 160,
+          "end_line": 174,
+          "quote": "    if (bPinGenericMemory) {\n#if CUDART_VERSION >= 4000\n        a_UA = (float *)malloc(bytes + MEMORY_ALIGNMENT);\n        b_UA = (float *)malloc(bytes + MEMORY_ALIGNMENT);\n        c_UA = (float *)malloc(bytes + MEMORY_ALIGNMENT);\n\n        // We need to ensure memory is aligned to 4K (so we will need to padd memory\n        // accordingly)\n        a = (float *)ALIGN_UP(a_UA, MEMORY_ALIGNMENT);\n        b = (float *)ALIGN_UP(b_UA, MEMORY_ALIGNMENT);\n        c = (float *)ALIGN_UP(c_UA, MEMORY_ALIGNMENT);\n\n        checkCudaErrors(cudaHostRegister(a, bytes, cudaHostRegisterMapped));\n        checkCudaErrors(cudaHostRegister(b, bytes, cudaHostRegisterMapped));\n        checkCudaErrors(cudaHostRegister(c, bytes, cudaHostRegisterMapped));",
+          "quote_sha256": "5ad6f49253f6af4940be1f42c8f30206a7b235b756bf6b0bbcec18b19d121f17"
+        },
+        {
+          "start_line": 227,
+          "end_line": 246,
+          "quote": "    /* Memory clean up */\n\n    printf(\"> Releasing CPU memory...\\n\");\n\n    if (bPinGenericMemory) {\n#if CUDART_VERSION >= 4000\n        checkCudaErrors(cudaHostUnregister(a));\n        checkCudaErrors(cudaHostUnregister(b));\n        checkCudaErrors(cudaHostUnregister(c));\n        free(a_UA);\n        free(b_UA);\n        free(c_UA);\n#endif\n    }\n    else {\n#if CUDART_VERSION >= 2020\n        checkCudaErrors(cudaFreeHost(a));\n        checkCudaErrors(cudaFreeHost(b));\n        checkCudaErrors(cudaFreeHost(c));\n#endif",
+          "quote_sha256": "f96bab0b78adb8e7af391fd755bad45fc9ae2d1775eae83100e3b1de04ded863"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Unregister a.",
+        "Free a_UA, preserving original allocation identity.",
+        "Do not substitute cudaFreeHost for this branch."
+      ],
+      "explicit_assumptions": [
+        "Generic registered-memory branch is active.",
+        "GPU use has completed and both pointers retain their stated meanings."
+      ],
+      "review_notes": "Memory lifecycle differs from mapped-memory setup in final-cuda-006. Does not test the vector addition kernel contained in the same source file.",
+      "code_language": "CUDA C++",
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "52163864d4bba79b4becbcc60ed0e955f88dc14e80145b5b18712d936e2d8977",
+      "reference_sha256": "84675ef3abff469363e449a947d463ce5385d7a717d91355981b441e2e1670a2"
+    },
+    {
+      "id": "final-cuda-008",
+      "doc_id": "cuda_samples_assert",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "assert_boundary_reasoning",
+        "asynchronous_error_observation",
+        "negative_test_success"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simpleAssert/simpleAssert.cu",
+      "primary_source_sha256": "31804e3c6b50bd59c9d6e7081977b7696001fdb7718549b5f789a1367c4e9542",
+      "support_spans": [
+        {
+          "start_line": 61,
+          "end_line": 65,
+          "quote": "__global__ void testKernel(int N)\n{\n    int gtid = blockIdx.x * blockDim.x + threadIdx.x;\n    assert(gtid < N);\n}",
+          "quote_sha256": "57fdfb2a19e6614a52c4397cb4cff295a16954a385520f4d7de31ff7269a673b"
+        },
+        {
+          "start_line": 74,
+          "end_line": 87,
+          "quote": "int main(int argc, char **argv)\n{\n    printf(\"%s starting...\\n\", sampleName);\n\n    runTest(argc, argv);\n\n    printf(\"%s completed, returned %s\\n\", sampleName, testResult ? \"OK\" : \"ERROR!\");\n    exit(testResult ? EXIT_SUCCESS : EXIT_FAILURE);\n}\n\nvoid runTest(int argc, char **argv)\n{\n    int         Nblocks  = 2;\n    int         Nthreads = 32;",
+          "quote_sha256": "c3c52ba8f7a3ebea77e8b1cafbc7379014c63fd75901fd2e6c99432be96db8f6"
+        },
+        {
+          "start_line": 109,
+          "end_line": 130,
+          "quote": "    // Kernel configuration, where a one-dimensional\n    // grid and one-dimensional blocks are configured.\n    dim3 dimGrid(Nblocks);\n    dim3 dimBlock(Nthreads);\n\n    printf(\"Launch kernel to generate assertion failures\\n\");\n    testKernel<<<dimGrid, dimBlock>>>(60);\n\n    // Synchronize (flushes assert output).\n    printf(\"\\n-- Begin assert output\\n\\n\");\n    error = cudaDeviceSynchronize();\n    printf(\"\\n-- End assert output\\n\\n\");\n\n    // Check for errors and failed asserts in asynchronous kernel launch.\n    if (error == cudaErrorAssert) {\n        printf(\"Device assert failed as expected, \"\n               \"CUDA error message is: %s\\n\\n\",\n               cudaGetErrorString(error));\n    }\n\n    testResult = error == cudaErrorAssert;\n}",
+          "quote_sha256": "a6827473beadef5a579c53a55763d71593a798ccece9848bd54be6192db1bd66"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Identify 60 through 63, including the boundary ID 60.",
+        "Explain synchronization observes cudaErrorAssert.",
+        "Distinguish expected-failure test success from successful kernel computation."
+      ],
+      "explicit_assumptions": [
+        "Linux execution reaches the shown kernel.",
+        "The expected device assertion is returned at synchronization."
+      ],
+      "review_notes": "Use executable assert(gtid < N), not the inaccurate nearby comment saying id > N. Linux/reaches-kernel assumption excludes the Darwin early-exit branch.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "eb1ca78adebea0731578abbd15c59378c952e45032c014db4a1be3544e8d26e2",
+      "reference_sha256": "b18f9fe17861d21bdc51dd473e2edc5b9b967afae356b0c8b050d6fa74e83387"
+    },
+    {
+      "id": "final-cuda-009",
+      "doc_id": "cuda_samples_pitch_texture",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "pitched_memory_units",
+        "host_kernel_stride_contract"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+      "primary_source_sha256": "3198457e1fa97db64cbb0d67de690e75efbe59a8a70db8aebd15aa006b0b742b",
+      "support_spans": [
+        {
+          "start_line": 66,
+          "end_line": 79,
+          "quote": "////////////////////////////////////////////////////////////////////////////////\n// NB: (1) The second argument \"pitch\" is in elements, not bytes\n//     (2) normalized coordinates are used (required for wrap address mode)\n////////////////////////////////////////////////////////////////////////////////\n//! Shifts matrix elements using pitch linear array\n//! @param odata  output data in global memory\n////////////////////////////////////////////////////////////////////////////////\n__global__ void\nshiftPitchLinear(float *odata, int pitch, int width, int height, int shiftX, int shiftY, cudaTextureObject_t texRefPL)\n{\n    int xid = blockIdx.x * blockDim.x + threadIdx.x;\n    int yid = blockIdx.y * blockDim.y + threadIdx.y;\n\n    odata[yid * pitch + xid] = tex2D<float>(texRefPL, (xid + shiftX) / (float)width, (yid + shiftY) / (float)height);",
+          "quote_sha256": "e954285b57af78996053d47004f0d8e9ea799c162204459975d24a9d3c744c48"
+        },
+        {
+          "start_line": 150,
+          "end_line": 165,
+          "quote": "    // Device memory allocation\n    // Pitch linear input data\n    float *d_idataPL;\n    size_t d_pitchBytes;\n\n    checkCudaErrors(cudaMallocPitch((void **)&d_idataPL, &d_pitchBytes, nx * sizeof(float), ny));\n\n    // Array input data\n    cudaArray            *d_idataArray;\n    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();\n\n    checkCudaErrors(cudaMallocArray(&d_idataArray, &channelDesc, nx, ny));\n\n    // Pitch linear output data\n    float *d_odata;\n    checkCudaErrors(cudaMallocPitch((void **)&d_odata, &d_pitchBytes, nx * sizeof(float), ny));",
+          "quote_sha256": "05c04d6b767900f16cc4778cbdd12eaf382946e119658ac60ddd1bb452182e83"
+        },
+        {
+          "start_line": 219,
+          "end_line": 226,
+          "quote": "    // Run ShiftPitchLinear kernel\n    checkCudaErrors(cudaMemset2D(d_odata, d_pitchBytes, 0, nx * sizeof(float), ny));\n\n    checkCudaErrors(cudaEventRecord(start, 0));\n\n    for (int i = 0; i < NUM_REPS; ++i) {\n        shiftPitchLinear<<<dimGrid, dimBlock>>>(\n            d_odata, (int)(d_pitchBytes / sizeof(float)), nx, ny, x_shift, y_shift, texRefPL);",
+          "quote_sha256": "449644734d24196e88cf018e32d27ad225bcfd72c783ed30abb3ca28faacce0c"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Pitch argument is in elements.",
+        "Divide d_pitchBytes by sizeof(float) before passing it."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "Limited to output-stride conversion. Does not endorse the separate resource-descriptor pitch assignment elsewhere in this sample.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "0edd9cb6c6d7e15326117f9730f4acd73e2da58ebeb86c25da0627f9c40c8727",
+      "reference_sha256": "d697f7a04f2eec5a462415a196d3b073d6a69212d76947b888e2e90b68f77890"
+    },
+    {
+      "id": "final-cuda-010",
+      "doc_id": "cuda_samples_pitch_texture",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "texture_descriptor_construction",
+        "normalized_wrap_configuration"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+      "primary_source_sha256": "3198457e1fa97db64cbb0d67de690e75efbe59a8a70db8aebd15aa006b0b742b",
+      "support_spans": [
+        {
+          "start_line": 188,
+          "end_line": 207,
+          "quote": "    cudaTextureDesc texDescr;\n    memset(&texDescr, 0, sizeof(cudaTextureDesc));\n\n    texDescr.normalizedCoords = true;\n    texDescr.filterMode       = cudaFilterModePoint;\n    texDescr.addressMode[0]   = cudaAddressModeWrap;\n    texDescr.addressMode[1]   = cudaAddressModeWrap;\n    texDescr.readMode         = cudaReadModeElementType;\n\n    checkCudaErrors(cudaCreateTextureObject(&texRefPL, &texRes, &texDescr, NULL));\n    memset(&texRes, 0, sizeof(cudaResourceDesc));\n    memset(&texDescr, 0, sizeof(cudaTextureDesc));\n    texRes.resType            = cudaResourceTypeArray;\n    texRes.res.array.array    = d_idataArray;\n    texDescr.normalizedCoords = true;\n    texDescr.filterMode       = cudaFilterModePoint;\n    texDescr.addressMode[0]   = cudaAddressModeWrap;\n    texDescr.addressMode[1]   = cudaAddressModeWrap;\n    texDescr.readMode         = cudaReadModeElementType;\n    checkCudaErrors(cudaCreateTextureObject(&texRefArray, &texRes, &texDescr, NULL));",
+          "quote_sha256": "6f04da2f4be60819612000d9bf56b3c2bd4b63f1d7e6c39193ba0db2a84dfb7f"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Zero-initialize the descriptor.",
+        "Set all five requested descriptor properties.",
+        "Create the texture object from texRes and texDescr."
+      ],
+      "explicit_assumptions": [
+        "texRes already describes a valid CUDA array.",
+        "texRefArray is declared and necessary headers are present."
+      ],
+      "review_notes": "Uses only the CUDA-array descriptor path, avoiding the questionable pitch-linear resource assignment. Exact whitespace is not required.",
+      "code_language": "CUDA C++",
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "dea334eda30fe3f2d7f29821089a0c051208d0139c9f31870fa8112816714ffa",
+      "reference_sha256": "e05eaac9650f97ee12750e435c446f928bd2db4867ecdd7528508fcb51335495"
+    },
+    {
+      "id": "final-cuda-011",
+      "doc_id": "cuda_samples_pitch_texture",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "easy",
+      "capabilities": [
+        "periodic_texture_addressing",
+        "reference_mapping"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+      "primary_source_sha256": "3198457e1fa97db64cbb0d67de690e75efbe59a8a70db8aebd15aa006b0b742b",
+      "support_spans": [
+        {
+          "start_line": 28,
+          "end_line": 38,
+          "quote": "/* pitchLinearTexture\n *\n * This example demonstrates how to use textures bound to pitch linear memory.\n * It performs a shift of matrix elements using wrap addressing mode (aka\n * periodic boundary conditions) on two arrays, a pitch linear and a CUDA array,\n * in order to highlight the differences in using each.\n *\n * Textures binding to pitch linear memory is a new feature in CUDA 2.2,\n * and allows use of texture features such as wrap addressing mode and\n * filtering which are not possible with textures bound to regular linear memory\n */",
+          "quote_sha256": "3280975ec7d1fc299dea0dbb0a2bb2010d493e101f2a0b3e4e259b57771fff91"
+        },
+        {
+          "start_line": 66,
+          "end_line": 79,
+          "quote": "////////////////////////////////////////////////////////////////////////////////\n// NB: (1) The second argument \"pitch\" is in elements, not bytes\n//     (2) normalized coordinates are used (required for wrap address mode)\n////////////////////////////////////////////////////////////////////////////////\n//! Shifts matrix elements using pitch linear array\n//! @param odata  output data in global memory\n////////////////////////////////////////////////////////////////////////////////\n__global__ void\nshiftPitchLinear(float *odata, int pitch, int width, int height, int shiftX, int shiftY, cudaTextureObject_t texRefPL)\n{\n    int xid = blockIdx.x * blockDim.x + threadIdx.x;\n    int yid = blockIdx.y * blockDim.y + threadIdx.y;\n\n    odata[yid * pitch + xid] = tex2D<float>(texRefPL, (xid + shiftX) / (float)width, (yid + shiftY) / (float)height);",
+          "quote_sha256": "e954285b57af78996053d47004f0d8e9ea799c162204459975d24a9d3c744c48"
+        },
+        {
+          "start_line": 117,
+          "end_line": 123,
+          "quote": "    // Set array size\n    const int nx = 2048;\n    const int ny = 2048;\n\n    // Setup shifts applied to x and y data\n    const int x_shift = 5;\n    const int y_shift = 7;",
+          "quote_sha256": "62f261895045f4c276e0707f559896a302576bc0295a39c13ab1e77fce71876c"
+        },
+        {
+          "start_line": 191,
+          "end_line": 206,
+          "quote": "    texDescr.normalizedCoords = true;\n    texDescr.filterMode       = cudaFilterModePoint;\n    texDescr.addressMode[0]   = cudaAddressModeWrap;\n    texDescr.addressMode[1]   = cudaAddressModeWrap;\n    texDescr.readMode         = cudaReadModeElementType;\n\n    checkCudaErrors(cudaCreateTextureObject(&texRefPL, &texRes, &texDescr, NULL));\n    memset(&texRes, 0, sizeof(cudaResourceDesc));\n    memset(&texDescr, 0, sizeof(cudaTextureDesc));\n    texRes.resType            = cudaResourceTypeArray;\n    texRes.res.array.array    = d_idataArray;\n    texDescr.normalizedCoords = true;\n    texDescr.filterMode       = cudaFilterModePoint;\n    texDescr.addressMode[0]   = cudaAddressModeWrap;\n    texDescr.addressMode[1]   = cudaAddressModeWrap;\n    texDescr.readMode         = cudaReadModeElementType;",
+          "quote_sha256": "a36b96eea5799cee9c890d37afacdcbff3ebe6c055dc313a33c66e9f93f5e948"
+        },
+        {
+          "start_line": 209,
+          "end_line": 216,
+          "quote": "    // Reference calculation\n    for (int j = 0; j < ny; ++j) {\n        int jshift = (j + y_shift) % ny;\n\n        for (int i = 0; i < nx; ++i) {\n            int ishift       = (i + x_shift) % nx;\n            gold[j * nx + i] = h_idata[jshift * nx + ishift];\n        }",
+          "quote_sha256": "45ed748a6720f6869d25da0bdfc4fbb53ab5fcc0cf021a6b47b7562616a38bfe"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Compute source coordinates (4,5).",
+        "Distinguish wrap from clamp."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "The indexing formula is deliberately visible in the question; this tests application of the source's periodic mapping, not memorization of a sample constant.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "6f81e9f436692e53351724cc0583544f3c4009c9d90bf9c75925bfc0013d098d",
+      "reference_sha256": "f5510928a03b81dbe8651da8a89fcacd610a3a8894a5c9365eebe49d7436661c"
+    },
+    {
+      "id": "final-cuda-012",
+      "doc_id": "cuda_samples_pitch_texture",
+      "family": "NVIDIA-CUDA-Samples-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "hard",
+      "capabilities": [
+        "repeated_kernel_timing",
+        "performance_unit_conversion"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/NVIDIA-CUDA-Samples-all-versions/Samples/0_Introduction/simplePitchLinearTexture/simplePitchLinearTexture.cu",
+      "primary_source_sha256": "3198457e1fa97db64cbb0d67de690e75efbe59a8a70db8aebd15aa006b0b742b",
+      "support_spans": [
+        {
+          "start_line": 58,
+          "end_line": 59,
+          "quote": "#define NUM_REPS 100 // number of repetitions performed\n#define TILE_DIM 16  // tile/block size",
+          "quote_sha256": "493a9e0d7dc993067233105eb0c86dfe901b5940b1d4929c078002b4439d6c8f"
+        },
+        {
+          "start_line": 219,
+          "end_line": 232,
+          "quote": "    // Run ShiftPitchLinear kernel\n    checkCudaErrors(cudaMemset2D(d_odata, d_pitchBytes, 0, nx * sizeof(float), ny));\n\n    checkCudaErrors(cudaEventRecord(start, 0));\n\n    for (int i = 0; i < NUM_REPS; ++i) {\n        shiftPitchLinear<<<dimGrid, dimBlock>>>(\n            d_odata, (int)(d_pitchBytes / sizeof(float)), nx, ny, x_shift, y_shift, texRefPL);\n    }\n\n    checkCudaErrors(cudaEventRecord(stop, 0));\n    checkCudaErrors(cudaEventSynchronize(stop));\n    float timePL;\n    checkCudaErrors(cudaEventElapsedTime(&timePL, start, stop));",
+          "quote_sha256": "4e95fa7bb6f11aa1fc16cd75424ae89398112a8c7251ad59fdd9c45b6c3a4db7"
+        },
+        {
+          "start_line": 271,
+          "end_line": 282,
+          "quote": "    float bandwidthPL    = 2.f * 1000.f * nx * ny * sizeof(float) / (1.e+9f) / (timePL / NUM_REPS);\n    float bandwidthArray = 2.f * 1000.f * nx * ny * sizeof(float) / (1.e+9f) / (timeArray / NUM_REPS);\n\n    printf(\"\\nBandwidth (GB/s) for pitch linear: %.2e; for array: %.2e\\n\", bandwidthPL, bandwidthArray);\n\n    float fetchRatePL    = nx * ny / 1.e+6f / (timePL / (1000.0f * NUM_REPS));\n    float fetchRateArray = nx * ny / 1.e+6f / (timeArray / (1000.0f * NUM_REPS));\n\n    printf(\"\\nTexture fetch rate (Mpix/s) for pitch linear: \"\n           \"%.2e; for array: %.2e\\n\\n\",\n           fetchRatePL,\n           fetchRateArray);",
+          "quote_sha256": "42a2c1aefc3c649e242e0e959e93d3eb59c600ee2b2d3afdfc2a7a217bb18996"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Divide the measured repeated interval by NUM_REPS.",
+        "Use correct millisecond/second and GB/Mpixel scaling.",
+        "Retain the specified bandwidth factor two."
+      ],
+      "explicit_assumptions": [
+        "timePL is the elapsed milliseconds for the stated repeated interval."
+      ],
+      "review_notes": "Arithmetic reproduction only. The repository README explicitly says samples are not intended for performance benchmarking; no performance result is claimed.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "7a324f7463b724dde42916d8af6bcae3cd63484c43b94596176abc6177190b32",
+      "reference_sha256": "d81c24718999a6b1c598292e794a9550efed945731a0d8676904cc16725bc08d"
+    },
+    {
+      "id": "final-ompi-001",
+      "doc_id": "ompi_build_quickstart",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "easy",
+      "capabilities": [
+        "mpi_wrapper_semantics",
+        "installation_specific_link_flags"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/building-apps/quickstart.rst",
+      "primary_source_sha256": "21042c16333e23a3c13612314e16eeb90a5a134e92b4550d95badbd343713977",
+      "support_spans": [
+        {
+          "start_line": 17,
+          "end_line": 48,
+          "quote": "Open MPI provides \"wrapper\" compilers that should be used for\ncompiling MPI and OpenSHMEM applications:\n\n+---------+-----------------------------------+\n| C       | :ref:`mpicc(1) <man1-mpicc>`,     |\n|         | :ref:`oshcc(1) <man1-oshcc>`      |\n+---------+-----------------------------------+\n| C++     | :ref:`mpic++(1) <man1-mpic++>`,   |\n|         | :ref:`oshc++(1) <man1-oshc++>`    |\n|         | (and :ref:`mpiCC(1) <man1-mpiCC>` |\n|         | and :ref:`oshCC(1) <man1-oshCC>`  |\n|         | if you filesystem is              |\n|         | case-sensitive)                   |\n+---------+-----------------------------------+\n| Fortran | :ref:`mpifort(1) <man1-mpifort>`, |\n|         | :ref:`oshfort(1) <man1-oshfort>`  |\n+---------+-----------------------------------+\n\n.. caution:: The legacy names ``mpif77`` and ``mpif90`` still exist,\n             and are simply symbolic links to the ``mpifort`` wrapper\n             compiler.  Users are strongly encouraged to update all\n             build scripts to use ``mpifort`` instead of ``mpif77``\n             and ``mpif90``.\n\nThe intent is that users can simply invoke the Open MPI wrapper\ncompiler instead of their usual language compiler.  For example,\ninstead of invoking your usual C compiler to build your MPI C\nappliance, use ``mpicc``:\n\n.. code-block:: sh\n\n   shell$ mpicc hello_world_mpi.c -o hello_world_mpi -g",
+          "quote_sha256": "d7f81cdc0d2b2288867a41fdc63ed03766a063a628299b5039b1642065cf2c92"
+        },
+        {
+          "start_line": 58,
+          "end_line": 67,
+          "quote": "All the wrapper compilers do is add a variety of compiler and linker\nflags to the command line and then invoke a back-end compiler.  To be\nspecific: the wrapper compilers do not parse source code at all; they\nare solely command-line manipulators, and have nothing to do with the\nactual compilation or linking of programs.  The end result is an MPI\nexecutable that is properly linked to all the relevant libraries.\n\n.. caution:: It is *absolutely not sufficient* to simply add ``-lmpi``\n             to your link line and assume that you will obtain a valid\n             Open MPI executable.",
+          "quote_sha256": "827f686020f9b38cefaa372da4be08b5bf6362046153a09bbf42f4198985b7a8"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Wrapper manipulates command-line flags and invokes a back-end compiler.",
+        "Reject the claim that it parses MPI source syntax.",
+        "Do not treat -lmpi alone as sufficient."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "Open MPI-specific build behavior, not a general assertion about all MPI implementations.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "8e5874895b440325b0c5ec51c85b161e0bba9d9694a9c06603d71a978e081b86",
+      "reference_sha256": "08741ee558d2a87767de20f3b11cf0204ead77098e8cd4790328a5547283d061"
+    },
+    {
+      "id": "final-ompi-002",
+      "doc_id": "ompi_wrapper_flags",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "dynamic_wrapper_flag_extraction",
+        "make_compile_link_integration"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/building-apps/extracting-wrapper-flags.rst",
+      "primary_source_sha256": "b380039a973da6e2bfd738d0c14afbaf26e4371de58b6a9772f4d3790fad1c1c",
+      "support_spans": [
+        {
+          "start_line": 4,
+          "end_line": 42,
+          "quote": "If you cannot use the wrapper compilers for some reason, there are\nmultiple supported ways to extract the compiler/linker flags that you\nwill need.\n\nUsing the ``--showme`` option\n-----------------------------\n\nThe wrapper compilers all support a ``--showme`` command line option\nthat will show what commands would have been invoked.\n\n.. code-block:: sh\n\n   # Show the flags necessary to compile MPI C applications\n   shell$ mpicc --showme:compile\n\n   # Show the flags necessary to link MPI C applications\n   shell$ mpicc --showme:link\n\n   # Show all the flags necessary to build MPI C applications\n   shell$ mpicc --showme\n\n.. note:: If you pass ``--showme`` *and additional command line\n   parameters* to the wrapper compiler, be sure to *also* pass in a\n   filename.  Otherwise, the ``--showme`` functionality will not\n   display output as expected.\n\n.. warning:: It is almost never a good idea to hard-code these results\n   in a ``Makefile`` (or other build system).  It is almost always\n   best to run (for example) ``mpicc --showme:compile`` in a dynamic\n   fashion to find out what you need.  For example, GNU Make allows\n   running commands and assigning their results to variables:\n\n   .. code-block:: make\n\n      MPI_COMPILE_FLAGS = $(shell mpicc --showme:compile)\n      MPI_LINK_FLAGS = $(shell mpicc --showme:link)\n\n      my_app: my_app.c\n              $(CC) $(MPI_COMPILE_FLAGS) my_app.c $(MPI_LINK_FLAGS) -o my_app",
+          "quote_sha256": "575f0d019e24785f72e4740f443557585041fd581a67c536d60484288d36d245"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Query compile and link flags separately with --showme:compile and --showme:link.",
+        "Apply those variables on the build recipe.",
+        "Use a valid Make recipe indentation."
+      ],
+      "explicit_assumptions": [
+        "GNU Make and a configured CC are available.",
+        "mpicc is the intended Open MPI installation's wrapper."
+      ],
+      "review_notes": "Tests dynamic build-system integration; final-ompi-001 tests wrapper semantics. Does not require the wrapper query output to match a particular machine.",
+      "code_language": "GNU Make",
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "0cdd0ff0f250cf17b6831900ad52a0af5752fea8fb99a6f5b644b4bac7cecdda",
+      "reference_sha256": "b43ccf22394de4112f6ddabfe001352ed43abc17426bb1adfc7cbc6297aa6719"
+    },
+    {
+      "id": "final-ompi-003",
+      "doc_id": "ompi_wrapper_customization",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "wrapper_override_limits",
+        "compiler_binary_compatibility"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/building-apps/customizing-wrappers.rst",
+      "primary_source_sha256": "3bb037fac77a8674b530cdc1d5e892dd2569fd665c8941ccc98c061a71af54cc",
+      "support_spans": [
+        {
+          "start_line": 6,
+          "end_line": 18,
+          "quote": "The Open MPI wrapper compilers are driven by text files that contain,\namong other things, the flags that are passed to the underlying\ncompiler.  These text files are generated automatically for Open MPI\nand are customized for the compiler set that was selected when Open\nMPI was configured; it is *not* recommended that users edit these\nfiles.\n\nHowever, there are cases where it may be necessary or desirable to\nedit these files and add to or subtract from the flags that Open MPI\nselected.  These files are installed in ``$pkgdatadir``, which\ndefaults to ``$prefix/share/openmpi/WRAPPER_NAME-wrapper-data.txt``.\nSeveral environment variables are also available for run-time\nreplacement of the wrapper's default values (from the text files):",
+          "quote_sha256": "ef735341aa27466a85bd73961d7534ea39f316fc0b26d70a55915e39a342b02c"
+        },
+        {
+          "start_line": 41,
+          "end_line": 48,
+          "quote": "   * - ``mpic++`` and ``mpiCC``\n     - ``OMPI_CXX``\n     - ``OMPI_CPPFLAGS``\n     - ``OMPI_CXXFLAGS``\n     - ``OMPI_LDFLAGS``\n     - ``OMPI_LIBS``\n     - ``mpic++-wrapper-data.txt`` and ``mpiCC-wrapper-data.txt``,\n       respectively",
+          "quote_sha256": "df6d6523ee48c37aed9b30bbd941077d359fb57b0dcf1a9ab075845685cf75c1"
+        },
+        {
+          "start_line": 58,
+          "end_line": 71,
+          "quote": ".. caution:: Note that changing the underlying compiler may not work\n   at all.\n\n   For example, C++ and Fortran compilers are notoriously binary\n   incompatible with each other (sometimes even within multiple\n   releases of the same compiler).  If you compile/install Open MPI\n   with C++ compiler vX.Y.Z and then use the ``OMPI_CXX`` environment\n   variable to change the ``mpicxx`` wrapper compiler to use the\n   vA.B.C C++ compiler, your application code may not compile and/or\n   link.  The traditional method of using multiple different compilers\n   with Open MPI is to install Open MPI multiple times; each\n   installation should be built/installed with a different compiler.\n   This is annoying, but it is beyond the scope of Open MPI to be able\n   to fix.",
+          "quote_sha256": "a30462a6f2d606718ef2e9c4a2c890b17a5561d2cd298f9b1bf2130670c6fa18"
+        }
+      ],
+      "essential_expected_behavior": [
+        "An environment override does not establish binary compatibility.",
+        "Mention separate compiler-matched Open MPI installations."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "Describes a supported explanation/approach, not an assertion that this particular failure is proven to have that cause. No installation command is invented.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "f96993a71892d19e87278e506279038e91f1d179238606285bb908992c993f58",
+      "reference_sha256": "bf28afc4ab8be44d8cf566bf7d0cd90297ff4a6bf512dea7d54faf692b015ac6"
+    },
+    {
+      "id": "final-ompi-004",
+      "doc_id": "ompi_launch_quickstart",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "mpi_working_directory",
+        "repeated_environment_export_options"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/launching-apps/quickstart.rst",
+      "primary_source_sha256": "90f6484fe148d9aa3fa1659372e84dc64bd5b6ad40b0af90c38c5d24d909a1ba",
+      "support_spans": [
+        {
+          "start_line": 17,
+          "end_line": 30,
+          "quote": "Using ``mpirun`` to launch applications\n---------------------------------------\n\nOpen MPI supports both :ref:`mpirun(1) <man1-mpirun>` and\n:ref:`mpiexec(1) <man1-mpiexec>` (they are exactly equivalent) to\nlaunch MPI applications.  For example:\n\n.. code-block:: sh\n\n   shell$ mpirun -n 2 mpi-hello-world\n   # or\n   shell$ mpiexec -n 2 mpi-hello-world\n   # or\n   shell$ mpiexec -n 1 mpi-hello-world : -n 1 mpi-hello-world",
+          "quote_sha256": "d8bf5e9a8e60489ebfd3be73a29d571205f2ae21d4c76dbf7f12eb75efc8ef98"
+        },
+        {
+          "start_line": 51,
+          "end_line": 61,
+          "quote": "* ``-n``: Indicate the number of processes to start.\n* ``--mca``: Set MCA parameters (see :ref:`how to set MCA params\n  <label-running-setting-mca-param-values>` for more details).\n* ``--wdir DIRECTORY``: Set the working directory of the started\n  applications.  If not supplied, the current working directory is\n  assumed (or ``$HOME``, if the current working directory does not\n  exist on all nodes).\n* ``-x ENV_VARIABLE_NAME``: The name of an environment variable to\n  export to the parallel application.  The ``-x`` option can be\n  specified multiple times to export multiple environment variables to\n  the parallel application.",
+          "quote_sha256": "fac8e64946d0a7a549941a64d513aef0613fe268d1c0f464a8d5a5b8541bbc0e"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Use -n 4, --wdir /work/run, and both -x variable names.",
+        "Repeat -x rather than inventing a new combined syntax."
+      ],
+      "explicit_assumptions": [
+        "The named executable and working directory are available where the job runs.",
+        "Both variables are already set; the launch has sufficient resources."
+      ],
+      "review_notes": "Directory and variable names are explicit user scenario inputs, not observed filesystem facts. Host allocation and execution success are not claimed.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "fcea4b355731858b70c80a35493136a07cb9d1b3d9b8511d89343a5c635c4d28",
+      "reference_sha256": "059cedd8cf81eb474cde050c4503627c1eaf4df9b9869f91b33d11b21a3cc229"
+    },
+    {
+      "id": "final-ompi-005",
+      "doc_id": "ompi_scheduling",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "hard",
+      "capabilities": [
+        "mpi_slot_truthfulness",
+        "oversubscription_progress_modes"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/launching-apps/scheduling.rst",
+      "primary_source_sha256": "d1b67524bb1234b1034fa4b14421a8edad4042012799e0ace6848c45370af679",
+      "support_spans": [
+        {
+          "start_line": 454,
+          "end_line": 505,
+          "quote": "Running more MPI processes than processors are available on a node is called\n*oversubscribing* the node.   Open MPI can oversubscribe nodes,\nbut it very much matters *how* you do it.\n\nSpecifically: it is critical that Open MPI *knows* that you are\noversubscribing the node, or **severe** performance degradation can\nresult.\n\n.. important:: Here is a good general rule to follow: **never specify\n               a number of slots that is more than the available\n               number of processors.**\n\nFor example, if you want to run 4 processes on a host with 2 processor\ncores, then indicate that you only have 2 slots but want to run 4\nprocesses.  For example:\n\n.. code-block:: sh\n\n   # In a hostfile, the number of slots will default to the number of\n   # processor cores on the host\n   shell$ cat my-hostfile\n   localhost\n   shell$ mpirun -n 4 --hostfile my-hostfile a.out\n\nSpecifically: we strongly suggest that you do **NOT** have a hostfile\nthat contains ``slots=4`` (because there are only two available\nprocessor cores).\n\nThat being said, the above command will fail, because you are trying\nto run 4 processes but there are only 2 slots available.  You must\nspecifically tell Open MPI that it is ok to oversubscribe via\n``--map-by :OVERSUBSCRIBE``:\n\n.. code-block:: sh\n\n   shell$ cat my-hostfile\n   # For the purposes of this example, explicitly tell Open MPI\n   # that we have 2 slots on the host.\n   localhost slots=2\n   shell$ mpirun -n 4 --hostfile my-hostfile --map-by :OVERSUBSCRIBE a.out\n\nThe reason you should tell Open MPI whether you're oversubscribing or\nnot (i.e., never specify a ``slots`` value more than the number of\nprocessor cores available) is because Open MPI basically runs its\nmessage passing progression engine in two modes: *aggressive* and\n*degraded*.\n\n#. *Degraded:* When Open MPI thinks that it is in an oversubscribed\n   mode (i.e., more processes are running than there are processor\n   cores available), MPI processes will automatically run in\n   *degraded* mode and frequently yield the processor to its peers,\n   thereby allowing all processes to make progress.",
+          "quote_sha256": "cde64ace8d244b12a4a2b8ff188f7cca8dab3db562cd39f7c1c050fea3fe1925"
+        },
+        {
+          "start_line": 512,
+          "end_line": 533,
+          "quote": "#. *Aggressive:* When Open MPI thinks that it is in an exactly- or\n   under-subscribed mode (i.e., the number of running processes is\n   equal to or less than the number of available processor cores), MPI\n   processes will automatically run in *aggressive* mode, meaning that\n   they will never voluntarily give up the processor to other\n   processes.  With some network transports, this means that Open MPI\n   will spin in tight loops attempting to make message passing\n   progress, effectively causing other processes to not get any CPU\n   cycles (and therefore never make any progress).\n\nFor example, on a node with a two processor cores:\n\n.. code-block::\n\n   shell$ cat my-hostfile\n   localhost slots=4\n   shell$ mpirun -n 4 --hostfile my-hostfile a.out\n\nThis would cause all 4 MPI processes to run in *aggressive* mode\nbecause Open MPI thinks that there are 4 available processor cores to\nuse.  This is actually a lie (there are only 2 processor core |mdash|\nnot 4), and can cause extremely bad performance.",
+          "quote_sha256": "bd82bbbb4fdf19cc9b809da3158807d7d1a7e21ca9aab61ba3018fdbd087756c"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Keep two slots for the two available cores.",
+        "Explicitly allow oversubscription with --map-by :OVERSUBSCRIBE.",
+        "Explain misleading slot counts affect Open MPI's progress mode."
+      ],
+      "explicit_assumptions": [
+        "Unscheduled local test machine with two available processor cores.",
+        "a.out is the existing application and my-hostfile is the hostfile name."
+      ],
+      "review_notes": "Specific unscheduled test scenario, not permission to oversubscribe a production allocation. No claim that this is the only possible performance cause.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "0b84268f367a29de3c918308a06e54681a6dfb93450f44431347401249c29101",
+      "reference_sha256": "934bc898bc74d8dd0f3b554a464071d72e670315dabf0d8a1fed4fc35f589618"
+    },
+    {
+      "id": "final-ompi-006",
+      "doc_id": "ompi_scheduling",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "scheduler_allocation_filtering",
+        "host_selection_vs_network_selection"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/launching-apps/scheduling.rst",
+      "primary_source_sha256": "d1b67524bb1234b1034fa4b14421a8edad4042012799e0ace6848c45370af679",
+      "support_spans": [
+        {
+          "start_line": 116,
+          "end_line": 122,
+          "quote": "The ``--hostfile`` option to ``mpirun`` takes a filename that lists\nhosts on which to launch MPI processes.\n\n.. important:: The hosts listed in a hostfile have *nothing* to do\n               with which network interfaces are used for MPI\n               communication.  They are *only* used to specify on\n               which hosts to launch MPI processes.",
+          "quote_sha256": "e45a7013b9c65d1037517a7a0b8e8b6957687bd589cebfa046a33fcab6ad15c6"
+        },
+        {
+          "start_line": 145,
+          "end_line": 179,
+          "quote": "Hostfiles works in two different ways:\n\n#. *Exclusionary:* If a list of hosts to run on has been provided by\n   another source (e.g., by a hostfile or a batch scheduler such as\n   Slurm, PBS/Torque, SGE, etc.), the hosts provided by the hostfile\n   must be in the already-provided host list.  If the\n   hostfile-specified nodes are *not* in the already-provided host\n   list, ``mpirun`` will abort without launching anything.\n\n   In this case, hostfiles act like an exclusionary filter |mdash|\n   they limit the scope of where processes will be scheduled from the\n   original list of hosts to produce a final list of hosts.\n\n   For example, say that a scheduler job contains hosts ``node01``\n   through ``node04``.  If you run:\n\n   .. code-block::\n\n      shell$ cat my_hosts\n      node03\n      shell$ mpirun -n 1 --hostfile my_hosts hostname\n\n   This will run a single copy of ``hostname`` on the host ``node03``.\n\n   However, presuming your job was allocated only to ``node03`` and\n   you run the following:\n\n   .. code-block::\n\n      shell$ cat my_hosts\n      node17\n      shell$ mpirun -n 1 --hostfile my_hosts hostname\n\n   This is an error (because ``node17`` is not allocated to your job),\n   and ``mpirun`` will abort.",
+          "quote_sha256": "ea59e05c72266d11f5b8c4697a969ac4bf4d66ed66bbce98e3666f35760178f3"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Hostfile cannot add a host outside the supplied allocation.",
+        "Unlisted node causes launch abort.",
+        "Host selection does not select communication interfaces."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "Distinct from slot-count oversubscription: tests allocation scope and network/placement separation. Does not advise changing scheduler permissions.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "b6269275b98f70c5cf6f907317d4f3e2e7a77aa15b9b397016131189c6c316cf",
+      "reference_sha256": "ff0e82338c9f0841984637821ed732e4dafde68e1b65aa6898b0b56d8a9361c7"
+    },
+    {
+      "id": "final-ompi-007",
+      "doc_id": "ompi_lost_output",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "hard",
+      "capabilities": [
+        "mpi_error_aggregation",
+        "evidence_limits_in_debugging"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/app-debug/lost-output.rst",
+      "primary_source_sha256": "58601680c8f65c79d97cfa07c748581e2141ebd198d49d06b352c54f6da39455",
+      "support_spans": [
+        {
+          "start_line": 4,
+          "end_line": 34,
+          "quote": "There many be many reasons for application output to be lost when\nan application abnormally terminates. The Open MPI Team strongly\nencourages the use of tools (such as debuggers) whenever possible.\n\nOne of the reasons, however, may come from inside Open MPI itself.  If\nyour application fails due to memory corruption, Open MPI may\nsubsequently fail to output an error message before terminating.\nOpen MPI attempts to aggregate error\nmessages from multiple processes in an attempt to show unique error\nmessages only once (vs. once for each MPI process |mdash| which can be\nunwieldy, especially when running large MPI jobs).\n\nHowever, this aggregation process requires allocating memory in the\nMPI process when it displays the error message.  If the process's\nmemory is already corrupted, Open MPI's attempt to allocate memory may\nfail and the process will simply terminate, possibly silently.  When Open\nMPI does not attempt to aggregate error messages, most of its setup\nwork is done when the MPI library is initiaized  and no memory is allocated\nduring the \"print the error\" routine.  It therefore almost always successfully\noutputs error messages in real time |mdash| but at the expense that you'll\npotentially see the same error message for *each* MPI process that\nencountered the error.\n\nHence, the error message aggregation is *usually* a good thing, but\nsometimes it can mask a real error.  You can disable Open MPI's error\nmessage aggregation with the ``opal_base_help_aggregate`` MCA\nparameter.  For example:\n\n.. code-block:: sh\n\n   shell$ mpirun --mca opal_base_help_aggregate 0 ...",
+          "quote_sha256": "5816eb123f899bef97e6515204c00bc00eac5e17ad119d600c7f17dc4e51d6b5"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Explain the aggregation path's memory allocation as a possible source of lost errors.",
+        "Name --mca opal_base_help_aggregate 0.",
+        "State duplicate/per-process output tradeoff without diagnosing the actual cause."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "Unlike the old diagnostic speculation case, this technical mechanism and control are explicitly present in this assigned source. Preserve the hypothetical qualification.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "34706669c914666f81ebd86570c39ad2cc50fb0ff4fe63f2aa208a7fef69ac6a",
+      "reference_sha256": "fd59acdabfea8ea68d8d9dac3195db14c2d2486be27cd6cfa52e2d931b2fb49d"
+    },
+    {
+      "id": "final-ompi-008",
+      "doc_id": "ompi_serial_debug",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "hard",
+      "capabilities": [
+        "mpi_serial_debug_attachment",
+        "nonbusy_debug_wait",
+        "debugger_control_fragment"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/app-debug/serial-debug.rst",
+      "primary_source_sha256": "eb026e7f01ed02aa095cd3c7a057967a62fa5411edfb5c3f5ec9cb827791dd84",
+      "support_spans": [
+        {
+          "start_line": 14,
+          "end_line": 64,
+          "quote": "You can use multiple invocations of a serial debugger to individually\nattach to every application process, or to a subset of application process. \n\nIf you are using ``gdb``, then you would log onto the nodes where you want\nto debug application processes and invoke gdb specifying the\ngdb ``--pid`` option and the PID for each application process you want to\nattach to.\n\nYou can use a similar technique to attach to application processes in\nan application that was just invoked by :ref:`mpirun(1) <man1-mpirun>`.\n\nAn inelegant-but-functional technique commonly used with this method\nis to insert the following code in your application where you want to\nsuspend the application process until the debugger is attached, such as\njust after MPI is initialized.\n\n.. code-block:: c\n\n   {\n       volatile int i = 0;\n       char hostname[256];\n       gethostname(hostname, sizeof(hostname));\n       printf(\"PID %d on %s ready for attach\\n\", getpid(), hostname);\n       fflush(stdout);\n       while (0 == i)\n           sleep(5);\n   }\n\nThis code will output a line to stdout outputting the name of the host\nwhere the process is running and the PID to attach to.  It will then\nspin on the ``sleep(3)`` function forever waiting for you to attach\nwith a debugger.  Using ``sleep(3)`` as the inside of the loop means\nthat the processor won't be pegged at 100% while waiting for you to\nattach.\n\nOnce you attach with a debugger, go up the function stack until you\nare in this block of code (you'll likely attach during the\n``sleep(3)``) then set the variable ``i`` to a nonzero value.  With\nGDB, the syntax is:\n\n.. code-block:: sh\n\n   (gdb) set var i = 7\n\nThen set a breakpoint after your block of code and continue execution\nuntil the breakpoint is hit.  Now you have control of your live MPI\napplication and use of the full functionality of the debugger.\n\nYou  can even  add  conditionals to  only allow  this  \"pause\" in  the\napplication for specific MPI  processes (e.g., ``MPI_COMM_WORLD`` rank\n0, or whatever process is misbehaving).",
+          "quote_sha256": "c4bac44170a481b8a5a938f6e9e8304b05a120fb8217c95d9dc58377fd400026"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Print hostname and PID and flush stdout.",
+        "Use volatile i and a sleep loop.",
+        "Explain setting i nonzero in the appropriate frame to release the loop."
+      ],
+      "explicit_assumptions": [
+        "Authorized debugging session; necessary headers already present.",
+        "MPI has initialized; selection of processes to pause is outside this fragment."
+      ],
+      "review_notes": "This requested fragment does not execute a debugger or connect to a node. Excludes the source's later X11 security/network configuration guidance. sleep(3) in prose is the manual section, while the actual code uses sleep(5).",
+      "code_language": "C",
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "804f275dd39095438c9085aca6ff39529b7631f0398f35600aca3729f03a9c68",
+      "reference_sha256": "cda8823d7c29aacd5140a3705e8674683badced5b60a2c016561713cedf4be12"
+    },
+    {
+      "id": "final-ompi-009",
+      "doc_id": "ompi_valgrind",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "mpi_valgrind_suppressions",
+        "library_warning_vs_application_defect"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/app-debug/valgrind.rst",
+      "primary_source_sha256": "9c03dfe1ce14e3a5d59d8c5586f0648f1db57bd4ca349df2448f28323828e4ec",
+      "support_spans": [
+        {
+          "start_line": 4,
+          "end_line": 20,
+          "quote": "The `Valgrind <https://valgrind.org/>`_ utilities may be useful in identifying application\nlogic errors. However, there are many situations where Open MPI purposefully does\nnot initialize and subsequently communicate memory, e.g., by calling ``writev(2)``.\nFurthermore, several cases are known where memory is not properly freed when\nMPI is finalized.\n\nThis certainly does not help distinguishing real errors from false positives.\nValgrind provides functionality to suppress errors and warnings from certain\nfunction contexts.\n\nIn an attempt to ease debugging using Valgrind, Open MPI provides a\nValgrind suppression file, that can be passed on the command\nline:\n\n.. code-block:: sh\n\n   shell$ mpirun -n 2 valgrind --suppressions=$PREFIX/share/openmpi/openmpi-valgrind.supp",
+          "quote_sha256": "d1cbfe5466e0590306a4ac339be6f141f7ab93b67d91c591bed742c5059939b3"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Recognize the documented Open MPI behaviors that can produce reports.",
+        "Give the installed suppression path and --suppressions option.",
+        "Avoid claiming every warning is harmless."
+      ],
+      "explicit_assumptions": [
+        "PREFIX is the intended Open MPI installation prefix."
+      ],
+      "review_notes": "The source example omits the application executable; the item asks for the suppression option/path, not an invented complete launch command.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "e84f790794675b7f74068c69f1d1dd55b6350c169c198a252049c299a5a05a60",
+      "reference_sha256": "a1090d51c0087d39af5c1b64aeefd01d2a94ae2ed229a5c816153248e1519161"
+    },
+    {
+      "id": "final-ompi-010",
+      "doc_id": "ompi_affinity",
+      "family": "Open-MPI-all-versions",
+      "split": "final_candidate",
+      "status": "DRAFT_PENDING_INDEPENDENT_REVIEW",
+      "difficulty": "medium",
+      "capabilities": [
+        "numa_locality",
+        "processor_memory_affinity_dependency",
+        "binding_vs_exclusivity"
+      ],
+      "primary_source_path": "campaigns/distillkit-20261006T231002Z/dataset_delivery_v1/sources/raw/Open-MPI-all-versions/docs/tuning-apps/affinity.rst",
+      "primary_source_sha256": "d24f645bfd33fdb5ab2d4baecd3381e3aab10f64564cea97f5024e5975eabb97",
+      "support_spans": [
+        {
+          "start_line": 9,
+          "end_line": 24,
+          "quote": "Open MPI supports processor affinity on a variety of systems through\nprocess binding, in which each MPI process, along with its threads, is\n\"bound\" to a specific subset of processing resources (cores, packages,\netc.).  That is, the operating system will constrain that process to\nrun on only that subset.\n\n.. note:: The operating system may allow other processes to run on the\n          same resources.\n\nAffinity can improve performance by inhibiting excessive process\nmovement |mdash| for example, away from \"hot\" caches or NUMA memory.\nJudicious bindings can improve performance by reducing resource\ncontention (by spreading processes apart from one another) or\nimproving interprocess communications (by placing processes close to\none another).  Binding can also improve performance reproducibility by\neliminating variable process placement.",
+          "quote_sha256": "d37e0efa1dd248a169927e42e1b8feb608cbd26ed273bf10e86fe818af860e05"
+        },
+        {
+          "start_line": 39,
+          "end_line": 64,
+          "quote": "Memory affinity is critically important on modern servers\nbecause most architectures exhibit Non-Uniform Memory Access (NUMA)\narchitectures.  In a NUMA architecture, memory is physically\ndistributed throughout the machine even though it is virtually treated\nas a single address space.  That is, memory may be physically local to\none or more processors |mdash| and therefore remote to other processors.\n\nSimply put: some memory will be faster to access (for a given process)\nthan others.\n\nOpen MPI supports general and specific memory affinity, meaning that\nit generally tries to allocate all memory local to the processor that\nasked for it.  When shared memory is used for communication, Open MPI\nuses memory affinity to make certain pages local to specific\nprocesses in order to minimize memory network/bus traffic.\n\nOpen MPI supports memory affinity on a variety of systems, and is\ncontrolled through the `Hardware Locality (hwloc)\n<https://www.open-mpi.org/projects/hwloc/>`_ library.\n\nNote that memory affinity support is enabled\n*only when processor affinity is enabled.* Specifically: using memory\naffinity does not make sense if processor affinity is not enabled\nbecause processes may allocate local memory and then move to a\ndifferent processor, potentially remote from the memory that it just\nallocated.",
+          "quote_sha256": "fab6e933022ff2f418583bfc6b99a0bbe57bf61b647bee3a2a32a8d2354114ba"
+        }
+      ],
+      "essential_expected_behavior": [
+        "Explain migration can make previously local memory remote.",
+        "State Open MPI's memory-affinity dependency on processor affinity.",
+        "Do not equate binding with exclusive ownership."
+      ],
+      "explicit_assumptions": [],
+      "review_notes": "No binding flag, measured performance benefit, or universal operating-system guarantee is invented.",
+      "code_language": null,
+      "scoring_scope": "Source-grounded answer/reference judgment; no real execution or compilation established.",
+      "supported_paraphrases_allowed": true,
+      "exact_reference_reproduction_required": false,
+      "independent_review": "pending",
+      "construction_review": "author model source/evidence check only",
+      "training_eligible": false,
+      "question_sha256": "ca6be68453dba41b5692bd35d4ec856925fb913da42528783bc396eb1ce8ba71",
+      "reference_sha256": "94bd91942938ea3db6504f182d71183e13f86852b24db15f6207c12038cc8eea"
+    }
+  ],
+  "quarantined_source_regions_and_limits": [
+    "CUDA helper_cuda.h/helper_functions.h and full build dependencies are not in this acquisition. No helper semantics, compilation or execution are claimed.",
+    "simpleStreams legacy hardware/performance comments and default-stream/global ordering beyond the cited same-stream rule are not generalized.",
+    "simpleZeroCopy legacy CUDART_VERSION<2020 branch contains questionable syntax; none of the candidates depends on it. No vector-add algorithm task is created.",
+    "simpleAssert nearby id>N comment conflicts with assert(gtid<N); the executable assertion controls the boundary answer.",
+    "simplePitchLinearTexture resource pitchInBytes uses h_pitchBytes and reuses d_pitchBytes across allocations. No candidate endorses or repairs that resource path; texture creation uses the CUDA-array path.",
+    "Open MPI scheduling illustrative mappings and prose include apparent typos; selected evidence excludes the inconsistent examples.",
+    "Open MPI serial-debug X11 permission/network instructions are excluded; only the local pause/attach fragment is used.",
+    "Open MPI license index includes other bundled component license files not acquired. No content from those components is used.",
+    "References do not traverse external hyperlinks or unresolved RST includes; exact selected spans are self-contained.",
+    "The original six seeds have 18 unknown provenance fields. Those remain unresolved and are not used to construct these 22 items."
+  ],
+  "no_training_promotion": true,
+  "no_external_publication": true
+}

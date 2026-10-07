@@ -1,0 +1,18 @@
+{
+  "version": "evaluation-model-review-v1",
+  "accepted": 151,
+  "draft_pending": 0,
+  "normal_new_reviewed": 62,
+  "tools_new_reviewed": 7,
+  "method": "Source-grounded author model review, separate model-agent evidence review, coordinator acceptance, automated bindings/schema/dedup checks",
+  "human_review": false,
+  "exact_reviewer_model_version": "unknown",
+  "infallible": false,
+  "independent_agents": "Separate passes with shared exposure, not independent model families",
+  "final_review": "All22reference/question pairs checked against50exact raw-source spans by pipeline_review; no unsupported claim found; item005 narrowed before freeze",
+  "aalto_tool_review": "evidence/independent_review_eval.json",
+  "final_construction_exposure": true,
+  "semantic_dedup": "Model inspection across old82,new69,calibration24,diagnostics10,eligible9 found no duplicate objective; lexical checks are separate and not a semantic guarantee",
+  "compile_or_cluster_execution": "NOT RUN; references/snippets reviewed only",
+  "historical_18_provenance_unknowns": "unchanged; content readiness does not establish complete licensing"
+}

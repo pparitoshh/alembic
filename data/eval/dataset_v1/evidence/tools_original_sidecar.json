@@ -1,0 +1,489 @@
+{
+  "schema": "distillkit-tool-eval-draft-review-v1",
+  "created_at": "2026-10-07T22:24:12.093560+00:00",
+  "status": "draft_pending_independent_coordinator_acceptance",
+  "split": "development_exposed",
+  "training_eligible": false,
+  "reviewed_by": "Codex pipeline_review agent; exact underlying model identifier not asserted",
+  "code_revision": "3725622a5cf9e3533257ee9169c22c802b07af53",
+  "code_root_relative_to_project": "worktrees/support-v2-integration",
+  "source_family": "original-project DistillKit tool application contract and deterministic fixture implementation",
+  "source_origin_scope": "Tool-contract fixtures, not external Slurm documentation or claims about a live Leonardo cluster. No separate source-document license is inferred.",
+  "input_bindings": {
+    "existing_tool_evaluation": {
+      "path": "worktrees/support-v2-integration/data/eval/dev_v3/tools.jsonl",
+      "sha256": "055c85bf9d622448427019334092420166873761ba2f389f7f6fd334b9ea1c96",
+      "bytes": 6291
+    },
+    "diagnostic_conversations": {
+      "path": "campaigns/distillkit-20261006T231002Z/checkpoint-06/job-status-005/outputs/conversations.jsonl",
+      "sha256": "ad82a7022bfe0c012e4ec1448cdedec6bf6a93ffae99fd433670168b781c47b3",
+      "bytes": 62353
+    },
+    "eligible_training_records": {
+      "path": "campaigns/distillkit-20261006T231002Z/repair-v2/eligible_records_v1.jsonl",
+      "sha256": "3fd618878ec68ac6ed6d4226e05bd97898d342203621237e79aeae3047d77bd0",
+      "bytes": 12772
+    },
+    "tools_source": {
+      "path": "worktrees/support-v2-integration/src/distillkit/tools.py",
+      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+      "bytes": 18766
+    },
+    "first_response_scorer_and_visible_policy": {
+      "path": "worktrees/support-v2-integration/src/distillkit/eval_tools_v2.py",
+      "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6",
+      "bytes": 6674
+    },
+    "toolcheck_source": {
+      "path": "worktrees/support-v2-integration/src/distillkit/toolcheck.py",
+      "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989",
+      "bytes": 14986
+    },
+    "job_status_guard_source": {
+      "path": "worktrees/support-v2-integration/src/distillkit/job_status_guard.py",
+      "sha256": "1c7e5da60a434cc86a070a93e26521a5d48b63d0a3060822e493319099ae9faa",
+      "bytes": 8864
+    },
+    "records_source": {
+      "path": "worktrees/support-v2-integration/src/distillkit/records.py",
+      "sha256": "e2ef43d8ce60ca8c1c08498647bca03f27aa445bf70e8667d93751ad8c23b76a",
+      "bytes": 2995
+    },
+    "checks_source": {
+      "path": "worktrees/support-v2-integration/src/distillkit/checks.py",
+      "sha256": "30e3fcd0b089c550d9c7d67d01c0d87b1e3d8d2a0430415b1441d6f10213b132",
+      "bytes": 3421
+    },
+    "slurm_flag_fixture": {
+      "path": "worktrees/support-v2-integration/src/distillkit/data/slurm_flags.txt",
+      "sha256": "08380b55ec0d3bbd841d52b642254cb8c181ae127161771efcdfc77b3845bff1",
+      "bytes": 1270
+    },
+    "mock_limits_documentation": {
+      "path": "worktrees/support-v2-integration/docs/MOCK_TOOL_LIMITS.md",
+      "sha256": "fe9bf27bd479d314c2b554565489d80131c1e68f78fc05bb9c065539f9cbcbba",
+      "bytes": 2303
+    },
+    "tools_test_fixtures": {
+      "path": "worktrees/support-v2-integration/tests/test_tools.py",
+      "sha256": "a3cbe4217e5caafd7eeefa6bd754b793b4550556974934e6a3aba4f612dc2f0d",
+      "bytes": 19270
+    }
+  },
+  "comparison_counts": {
+    "existing_tool_evaluation": 16,
+    "diagnostic_conversations": 10,
+    "eligible_training_records": 9
+  },
+  "review_scope": "First-response decision, tool name, arguments, mock executability, and candidate semantic distinction. Model review is fallible. No model inference or training data generation occurred.",
+  "preserved_protocol": {
+    "scoring_protocol": "tool-first-response-v2",
+    "application_policy": "hpc-tools-clarify-first-v1",
+    "mock_version": "isolated-actions-v1",
+    "closed_catalog_override": null,
+    "response_quality_assessed": false,
+    "task_completion_assessed": false
+  },
+  "items": [
+    {
+      "id": "tool-017",
+      "capability": "Conjunctive queue filtering",
+      "expected_reasoning": "The user explicitly requests a queue query with both state and partition restrictions. list_queue supports both optional filters, and the mock intersects them. Both arguments are essential; a state-only query is incomplete. No individual job identification is required.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 29,
+          "line_end": 40,
+          "excerpt": "    {\n        \"name\": \"list_queue\",\n        \"description\": \"List the user's queued and running jobs (like `squeue --me`), optionally filtered by state or partition.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"state\": {\"type\": \"string\", \"enum\": [\"PENDING\", \"RUNNING\"], \"description\": \"Only jobs in this state\"},\n                \"partition\": {\"type\": \"string\", \"description\": \"Only jobs in this partition\"},\n            },\n            \"required\": [],\n        },\n    },",
+          "supports": "list_queue has independent state and partition arguments."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 189,
+          "line_end": 202,
+          "excerpt": "def _list_queue(state: str | None = None, partition: str | None = None) -> dict:\n    r = _rng(\"queue\")\n    jobs = []\n    ids = {str(r.randint(4000000, 4999999)) for _ in range(8)}\n    if (session := _SESSION.get()) is not None:\n        if session[\"catalog\"] is not None:\n            ids = set(session[\"catalog\"])\n        ids.update(session[\"jobs\"])\n    for jid in sorted(ids):\n        j = _job(jid)\n        if j[\"state\"] in (\"PENDING\", \"RUNNING\"):\n            jobs.append({k: j[k] for k in (\"job_id\", \"name\", \"state\", \"partition\", \"elapsed\", \"time_limit\")} | ({\"reason\": j[\"reason\"]} if \"reason\" in j else {}))\n    jobs = [j for j in jobs if (not state or j[\"state\"] == state) and (not partition or j[\"partition\"] == partition)]\n    return {\"jobs\": jobs}",
+          "supports": "The mock applies the state and partition predicates together."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-006",
+          "difference": "Existing queue item requires only PENDING; this requires both RUNNING and partition filters. The new reasoning is conjunction, not a renamed partition alone."
+        },
+        {
+          "id": "js4-select-sole",
+          "difference": "Diagnostic begins with state-only discovery then conditional selection. This item requires a partition-restricted query and no later selection."
+        },
+        {
+          "id": "js4-pending-list",
+          "difference": "No partition restriction in the diagnostic."
+        }
+      ],
+      "scope_limit": "A correct first call is assessed. Reporting the filtered result is outside this protocol.",
+      "positive_no_call_text": null,
+      "row_sha256": "075c26863c4e157f5d6d8540145261c48ced9c5d56c35ebbfb8e3ac7f411ff07",
+      "question_sha256": "781d07cd51d052a8bde4cfd585c5429f1670d76fbb99ed23b2feebc167cf4998",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    },
+    {
+      "id": "tool-018",
+      "capability": "Explicit non-default log stream",
+      "expected_reasoning": "read_job_log is the log-reading contract. The user identifies the job and explicitly requests stdout, so omitting stream would incorrectly use stderr. tail_lines may be omitted or set to the documented default 20.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 58,
+          "line_end": 69,
+          "excerpt": "    {\n        \"name\": \"read_job_log\",\n        \"description\": \"Read the last lines of a job's stdout or stderr file.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"job_id\": _JOB_ID,\n                \"stream\": {\"type\": \"string\", \"enum\": [\"stdout\", \"stderr\"], \"default\": \"stderr\"},\n                \"tail_lines\": {\"type\": \"integer\", \"description\": \"Number of lines from the end (1-200)\", \"default\": 20},\n            },\n            \"required\": [\"job_id\"],\n        },",
+          "supports": "read_job_log defaults to stderr and 20 lines; stdout must be selected explicitly."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 262,
+          "line_end": 275,
+          "excerpt": "def _read_job_log(job_id: str, stream: str = \"stderr\", tail_lines: int = 20) -> dict:\n    if not 1 <= tail_lines <= 200:\n        raise ToolError(\"tail_lines must be between 1 and 200\")\n    j = _job(job_id)\n    if j[\"state\"] == \"PENDING\" or j.get(\"usage_recorded\") is False:\n        return {\"error\": f\"slurm-{job_id}.out does not exist yet: the job has not started\"}\n    if stream == \"stdout\":\n        devices = f\"Using {j['gpus']} GPUs: {PARTITIONS[j['partition']]['gpu_type']}\" if j[\"gpus\"] else \"CPU-only job; no GPUs allocated\"\n        lines = [devices, *_STDOUT]\n    elif j[\"state\"] == \"OUT_OF_MEMORY\" and not j[\"gpus\"]:\n        lines = _STDERR[\"OUT_OF_MEMORY\"][1:]  # host OOM kill only, no CUDA error\n    else:\n        lines = _STDERR.get(j[\"state\"], [])\n    return {\"file\": f\"slurm-{job_id}.{'out' if stream == 'stdout' else 'err'}\", \"lines\": [l.replace(\"lrdn0412\", j[\"node_list\"]).format(job=job_id) for l in lines][-tail_lines:]}",
+          "supports": "stdout and stderr use separate mock branches and file suffixes."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-002",
+          "difference": "Existing case requests stderr, where omission is valid. This case tests a required non-default stream choice; neither the job ID nor tail length is the novelty."
+        },
+        {
+          "id": "js4-status-then-log",
+          "difference": "Diagnostic first response is job_status and later reads stderr. This item requests an immediate stdout read and no status call."
+        }
+      ],
+      "scope_limit": "The selected default fixture has a readable stdout log. No diagnosis, log summarization, or claims about a real job are scored.",
+      "positive_no_call_text": null,
+      "row_sha256": "d17eccf5a6e2dd78dd7344eefbfd56980b26abb39f870de1711599b0cf4b9ac2",
+      "question_sha256": "563e2fc52c8b90ffefd16f22908b527adbdc8c7f852dc2e9ae158d0230206351",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    },
+    {
+      "id": "tool-019",
+      "capability": "All-partition configuration lookup rather than GPU availability",
+      "expected_reasoning": "The request concerns configured limits and node capacity for every partition, including CPU-only partitions. partition_info with no partition filter returns all partition configurations. gpu_availability returns GPU partitions and does not supply the requested CPU/memory/time-limit fields.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 76,
+          "line_end": 93,
+          "excerpt": "    {\n        \"name\": \"gpu_availability\",\n        \"description\": \"Free and total GPUs per partition right now (like `sinfo` with GRES), optionally for one partition.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"partition\": {\"type\": \"string\", \"description\": \"Partition name; omit for all GPU partitions\"}},\n            \"required\": [],\n        },\n    },\n    {\n        \"name\": \"partition_info\",\n        \"description\": \"Limits of a partition or QOS: max wall time, nodes, GPUs and CPUs per node, memory per node.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"partition\": {\"type\": \"string\", \"description\": \"Partition name; omit for all partitions\"}},\n            \"required\": [],\n        },\n    },",
+          "supports": "gpu_availability and partition_info expose different information and all-partition scopes."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 98,
+          "line_end": 103,
+          "excerpt": "PARTITIONS = {\n    \"boost_usr_prod\": {\"max_time\": \"24:00:00\", \"nodes\": 3456, \"gpus_per_node\": 4, \"gpu_type\": \"A100-64GB\", \"cpus_per_node\": 32, \"mem_per_node\": \"494G\"},\n    \"boost_qos_dbg\": {\"max_time\": \"00:30:00\", \"nodes\": 2, \"gpus_per_node\": 4, \"gpu_type\": \"A100-64GB\", \"cpus_per_node\": 32, \"mem_per_node\": \"494G\"},\n    \"boost_qos_lprod\": {\"max_time\": \"4-00:00:00\", \"nodes\": 3, \"gpus_per_node\": 4, \"gpu_type\": \"A100-64GB\", \"cpus_per_node\": 32, \"mem_per_node\": \"494G\"},\n    \"dcgp_usr_prod\": {\"max_time\": \"24:00:00\", \"nodes\": 1536, \"gpus_per_node\": 0, \"gpu_type\": None, \"cpus_per_node\": 112, \"mem_per_node\": \"494G\"},\n}",
+          "supports": "The default fixture includes a CPU-only partition."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 294,
+          "line_end": 320,
+          "excerpt": "def _gpu_availability(partition: str | None = None) -> dict:\n    parts = {p: v for p, v in PARTITIONS.items() if v[\"gpus_per_node\"]}\n    if partition:\n        if partition not in PARTITIONS:\n            return {\"error\": f\"sinfo: error: invalid partition specified: {partition}\"}\n        parts = {partition: PARTITIONS[partition]} if PARTITIONS[partition][\"gpus_per_node\"] else {}\n    out = []\n    for p, v in parts.items():\n        r = _rng(\"gpus\", p)\n        total = v[\"nodes\"] * v[\"gpus_per_node\"]\n        free = r.randint(0, max(1, total // 50))\n        # A fully idle node contributes all of its GPUs to this synthetic free count.\n        idle = r.randint(0, min(5, v[\"nodes\"], free // v[\"gpus_per_node\"]))\n        out.append({\"partition\": p, \"gpu_type\": v[\"gpu_type\"], \"gpus_total\": total, \"gpus_free\": free, \"idle_nodes\": idle})\n    return {\"partitions\": out}\n\n\ndef _partition_info(partition: str | None = None) -> dict:\n    if partition:\n        if partition not in PARTITIONS:\n            return {\"error\": f\"invalid partition {partition!r}; known: {sorted(PARTITIONS)}\"}\n        return {\"partition\": partition, **PARTITIONS[partition]}\n    return {\"partitions\": [{\"partition\": p, **v} for p, v in PARTITIONS.items()]}\n\n\n_IMPL = {\n    \"job_status\": _job_status,",
+          "supports": "GPU availability filters out CPU-only partitions; unfiltered partition_info returns all entries."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-005",
+          "difference": "Existing case asks one named partition for one limit; this needs an unfiltered multi-field result including CPU-only partitions."
+        },
+        {
+          "id": "tool-010",
+          "difference": "Existing all-cluster query is current GPU availability, not configured partition limits."
+        },
+        {
+          "id": "js4-resource-list",
+          "difference": "Diagnostic asks free GPUs, not CPU/memory/time configuration."
+        }
+      ],
+      "scope_limit": "Only requesting the correct full configuration result is scored; the answer need not infer live capacity or scheduling guarantees.",
+      "positive_no_call_text": null,
+      "row_sha256": "80db867a43265afb26aa76449d5c22f09c0dcd6a8722972c7e7b8466fa61844a",
+      "question_sha256": "a443d12bbde9f9cea23a2e73581ce4a17763b62d6d61d69fef20a2279934ff92",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    },
+    {
+      "id": "tool-020",
+      "capability": "Explicit submission permission and preservation of supplied script",
+      "expected_reasoning": "The user explicitly authorizes creating a job in the isolated simulator and provides the complete script. submit_job must receive that script with test_only=false or the documented false default. A validation-only call would not perform the requested mock action.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 41,
+          "line_end": 51,
+          "excerpt": "    {\n        \"name\": \"submit_job\",\n        \"description\": \"Submit a batch script (like `sbatch`). With test_only=true, only validate it and estimate the start time (like `sbatch --test-only`).\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"script\": {\"type\": \"string\", \"description\": \"Full batch script text, starting with #!/bin/bash and #SBATCH lines\"},\n                \"test_only\": {\"type\": \"boolean\", \"description\": \"Validate without submitting\", \"default\": False},\n            },\n            \"required\": [\"script\"],\n        },",
+          "supports": "submit_job accepts full script text and defaults test_only to false."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 214,
+          "line_end": 245,
+          "excerpt": "def _submit_job(script: str, test_only: bool = False) -> dict:\n    global _VALID_FLAGS\n    if _VALID_FLAGS is None:\n        _VALID_FLAGS = load_flags()\n    if not script.lstrip().startswith(\"#!\"):\n        return {\"error\": \"sbatch: error: This does not look like a batch script. The first line must start with #! followed by the path to an interpreter.\"}\n    session = _SESSION.get()\n    flags = session[\"flags\"] if session is not None else _VALID_FLAGS\n    res = check_answer(f\"```bash\\n{script}\\n```\", flags)\n    if res[\"bad_flags\"]:\n        return {\"error\": f\"sbatch: unrecognized option '--{res['bad_flags'][0]}'\"}\n    if not res[\"bash_ok\"]:\n        return {\"error\": \"sbatch: error: batch script has a shell syntax error\"}\n    part = re.search(r\"^\\s*#SBATCH\\s+(?:--partition[= ]|-p\\s*)(\\S+)\", script, re.MULTILINE)\n    if part and part.group(1) not in PARTITIONS:\n        return {\"error\": \"sbatch: error: invalid partition specified: \" + part.group(1)}\n    partition = part.group(1) if part else \"boost_usr_prod\"  # this mock's default\n    jid = str(4000000 + int(hashlib.sha256(script.encode()).hexdigest(), 16) % 1000000)\n    if test_only:\n        return {\"valid\": True, \"message\": f\"sbatch: Job {jid} to start at 2026-10-12T14:30:00 in partition {partition}\",\n                \"validation_scope\": [\"flag_names\", \"bash_syntax\", \"partition_name\"]}\n    if session is not None:\n        # Do not infer execution, allocation or usage from a successful synthetic submission.\n        _list_queue()  # reserve every initial queue fixture, including terminal observations\n        existing_ids = session[\"observed_ids\"] | session[\"jobs\"].keys()\n        while jid in existing_ids:\n            jid = str(int(jid) + 1)\n        session[\"jobs\"][jid] = {\"job_id\": jid, \"name\": \"submitted_mock_job\", \"state\": \"PENDING\",\n                                \"partition\": partition, \"elapsed\": \"00:00:00\", \"time_limit\": None,\n                                \"reason\": \"mock submission: scheduling not simulated\", \"usage_recorded\": False,\n                                \"submitted_script\": script}\n    return {\"submitted\": True, \"job_id\": jid, \"message\": f\"Submitted batch job {jid}\"}",
+          "supports": "The true path returns validation evidence; the false path creates a pending mock job and does not execute the script."
+        },
+        {
+          "binding": "tools_test_fixtures",
+          "line_start": 97,
+          "line_end": 107,
+          "excerpt": "@pytest.mark.parametrize(\"directive,partition\", [\n    (\"--partition=boost_qos_dbg\", \"boost_qos_dbg\"), (\"--partition dcgp_usr_prod\", \"dcgp_usr_prod\"),\n    (\"-p boost_qos_lprod\", \"boost_qos_lprod\"), (\"\", \"boost_usr_prod\"),\n])\ndef test_test_only_result_respects_requested_partition_without_inventing_cpus(directive, partition):\n    script = \"#!/bin/bash\\n\" + (f\"#SBATCH {directive}\\n\" if directive else \"\") + \"#SBATCH --cpus-per-task=2\\nhostname\\n\"\n    result = execute(\"submit_job\", {\"script\": script, \"test_only\": True})\n    assert result[\"valid\"] and \"submitted\" not in result\n    assert result[\"message\"].endswith(f\"in partition {partition}\")\n    assert \"32 processors\" not in result[\"message\"]\n    assert result[\"validation_scope\"] == [\"flag_names\", \"bash_syntax\", \"partition_name\"]",
+          "supports": "The exact supplied script is the existing boost_qos_dbg parameterization of this local fixture."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-009",
+          "difference": "Existing case forbids submission and requires test_only=true. This explicitly grants submission and rejects a validation-only call; distinct action permission is the novelty."
+        },
+        {
+          "id": "hpc_scheduler#0/howto/p0/s0",
+          "difference": "Eligible prose explains how to run sbatch; it does not request an available tool action on supplied contents."
+        },
+        {
+          "id": "hpc_scheduler#0/script/p3/s0",
+          "difference": "Eligible prose requests creation of a script; this supplies a fixed script and requests an isolated mock submission."
+        }
+      ],
+      "scope_limit": "Mock submission only. No script execution, allocation, job completion, resource validation, real Slurm submission, or student quality has occurred. Accepted script transport differences follow the existing v2 scorer, not a new scorer.",
+      "script_provenance": "Expanded verbatim from tests/test_tools.py test_test_only_result_respects_requested_partition_without_inventing_cpus with directive --partition=boost_qos_dbg; the action mode changes, not script contents.",
+      "positive_no_call_text": null,
+      "row_sha256": "68c8e0e0f8ccaf286c72eb6c7070b7d4bbf59cbbf8cf19dd20900fcc499054cf",
+      "question_sha256": "110eabd8097f097de4f950696be0c82b193f19fd90cfee23efaf7536d941275d",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    },
+    {
+      "id": "tool-021",
+      "capability": "Full-script requirement; filename is not script contents",
+      "expected_reasoning": "submit_job requires full script text. The user supplied only a filename, and the available schema list has no arbitrary file-reading tool. Ask for the script contents before submission; do not invent or treat the filename as a complete script.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 23,
+          "line_end": 94,
+          "excerpt": "SCHEMAS: list[dict] = [\n    {\n        \"name\": \"job_status\",\n        \"description\": \"Current state of one Slurm job (like `squeue -j` / `scontrol show job`): state, pending reason, partition, nodes, elapsed time and time limit.\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },\n    {\n        \"name\": \"list_queue\",\n        \"description\": \"List the user's queued and running jobs (like `squeue --me`), optionally filtered by state or partition.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"state\": {\"type\": \"string\", \"enum\": [\"PENDING\", \"RUNNING\"], \"description\": \"Only jobs in this state\"},\n                \"partition\": {\"type\": \"string\", \"description\": \"Only jobs in this partition\"},\n            },\n            \"required\": [],\n        },\n    },\n    {\n        \"name\": \"submit_job\",\n        \"description\": \"Submit a batch script (like `sbatch`). With test_only=true, only validate it and estimate the start time (like `sbatch --test-only`).\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"script\": {\"type\": \"string\", \"description\": \"Full batch script text, starting with #!/bin/bash and #SBATCH lines\"},\n                \"test_only\": {\"type\": \"boolean\", \"description\": \"Validate without submitting\", \"default\": False},\n            },\n            \"required\": [\"script\"],\n        },\n    },\n    {\n        \"name\": \"cancel_job\",\n        \"description\": \"Cancel a job or one array task (like `scancel`).\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },\n    {\n        \"name\": \"read_job_log\",\n        \"description\": \"Read the last lines of a job's stdout or stderr file.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"job_id\": _JOB_ID,\n                \"stream\": {\"type\": \"string\", \"enum\": [\"stdout\", \"stderr\"], \"default\": \"stderr\"},\n                \"tail_lines\": {\"type\": \"integer\", \"description\": \"Number of lines from the end (1-200)\", \"default\": 20},\n            },\n            \"required\": [\"job_id\"],\n        },\n    },\n    {\n        \"name\": \"job_accounting\",\n        \"description\": \"Resource usage of a finished or running job (like `sacct`/`seff`): state, exit code, elapsed time, peak memory, CPU and GPU utilization.\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },\n    {\n        \"name\": \"gpu_availability\",\n        \"description\": \"Free and total GPUs per partition right now (like `sinfo` with GRES), optionally for one partition.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"partition\": {\"type\": \"string\", \"description\": \"Partition name; omit for all GPU partitions\"}},\n            \"required\": [],\n        },\n    },\n    {\n        \"name\": \"partition_info\",\n        \"description\": \"Limits of a partition or QOS: max wall time, nodes, GPUs and CPUs per node, memory per node.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"partition\": {\"type\": \"string\", \"description\": \"Partition name; omit for all partitions\"}},\n            \"required\": [],\n        },\n    },\n]",
+          "supports": "The complete tool inventory contains no arbitrary file reader and submit_job requires full script text."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 214,
+          "line_end": 226,
+          "excerpt": "def _submit_job(script: str, test_only: bool = False) -> dict:\n    global _VALID_FLAGS\n    if _VALID_FLAGS is None:\n        _VALID_FLAGS = load_flags()\n    if not script.lstrip().startswith(\"#!\"):\n        return {\"error\": \"sbatch: error: This does not look like a batch script. The first line must start with #! followed by the path to an interpreter.\"}\n    session = _SESSION.get()\n    flags = session[\"flags\"] if session is not None else _VALID_FLAGS\n    res = check_answer(f\"```bash\\n{script}\\n```\", flags)\n    if res[\"bad_flags\"]:\n        return {\"error\": f\"sbatch: unrecognized option '--{res['bad_flags'][0]}'\"}\n    if not res[\"bash_ok\"]:\n        return {\"error\": \"sbatch: error: batch script has a shell syntax error\"}",
+          "supports": "Mock submission checks a shebang and shell syntax, so a bare filename is not the required input."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-009",
+          "difference": "Existing validation call includes a complete script; the missing argument here is the script body."
+        },
+        {
+          "id": "tool-012",
+          "difference": "Existing cancellation clarification lacks a job ID; this concerns unavailable script contents for a different action contract."
+        },
+        {
+          "id": "hpc_scheduler#0/howto/p0/s0",
+          "difference": "Eligible item asks for a procedure, not an agent action using a full-script API."
+        }
+      ],
+      "scope_limit": "The no-call label only checks that the first response contains no tool call and is nonempty. It does not validate whether the assistant actually requests the right missing information.",
+      "positive_no_call_text": "Please paste the full contents of batch.sh so I can submit that script.",
+      "row_sha256": "4e32e8f7a7e8ae3a52b5dcd17c09fa0a2dec12f199162f95c159109b1a3d7a5d",
+      "question_sha256": "12b8f7a02b83fc6801929c29b6f9a80de409ecd760eae3134094a72e87a83ad8",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    },
+    {
+      "id": "tool-022",
+      "capability": "Unresolved selection despite explicit candidate job IDs",
+      "expected_reasoning": "Two candidate IDs are visible, but the user has not identified which is obsolete. Neither ID may be selected for cancellation. The clarify-first policy applies to unresolved selection as well as absent identity; a queue lookup is not permission to choose the obsolete job.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 53,
+          "line_end": 57,
+          "excerpt": "    {\n        \"name\": \"cancel_job\",\n        \"description\": \"Cancel a job or one array task (like `scancel`).\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },",
+          "supports": "cancel_job accepts one specific job ID."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-004",
+          "difference": "Existing request selects exactly one identified cancellation target."
+        },
+        {
+          "id": "tool-012",
+          "difference": "Existing request supplies no ID; here multiple IDs are explicit but the intended target remains ambiguous."
+        },
+        {
+          "id": "js4-candidates-select",
+          "difference": "Diagnostic explicitly asks for a queue query before selection. This asks for cancellation without identifying which candidate is obsolete."
+        },
+        {
+          "id": "distillkit_mock_workflows#0/howto/p3/ask/s0",
+          "difference": "Eligible question is a missing-ID status clarification, not ambiguous destructive selection between explicit IDs."
+        }
+      ],
+      "scope_limit": "Only no-call behavior is scored. The semantic quality of a clarification is unscored, and the fixture states cannot establish the user meaning of obsolete.",
+      "positive_no_call_text": "Which job is obsolete and should be cancelled: 4718210 or 4718207?",
+      "row_sha256": "4ba19e8cde1a050bffab0e0b769c74da25b7ab9e84c2e4faea98d747921c311c",
+      "question_sha256": "7ad39ff71ab5475f7b7540d046ee1942bed4a180a0382343b14d4aa935d88945",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    },
+    {
+      "id": "tool-023",
+      "capability": "Unsupported direct-shell operation",
+      "expected_reasoning": "None of the eight available tools executes an arbitrary command in the user current login shell. submit_job accepts batch script text for the mock scheduler and is not a substitute for direct login-shell execution. Explain the unavailable capability without claiming observed output.",
+      "support": [
+        {
+          "binding": "tools_source",
+          "line_start": 23,
+          "line_end": 94,
+          "excerpt": "SCHEMAS: list[dict] = [\n    {\n        \"name\": \"job_status\",\n        \"description\": \"Current state of one Slurm job (like `squeue -j` / `scontrol show job`): state, pending reason, partition, nodes, elapsed time and time limit.\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },\n    {\n        \"name\": \"list_queue\",\n        \"description\": \"List the user's queued and running jobs (like `squeue --me`), optionally filtered by state or partition.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"state\": {\"type\": \"string\", \"enum\": [\"PENDING\", \"RUNNING\"], \"description\": \"Only jobs in this state\"},\n                \"partition\": {\"type\": \"string\", \"description\": \"Only jobs in this partition\"},\n            },\n            \"required\": [],\n        },\n    },\n    {\n        \"name\": \"submit_job\",\n        \"description\": \"Submit a batch script (like `sbatch`). With test_only=true, only validate it and estimate the start time (like `sbatch --test-only`).\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"script\": {\"type\": \"string\", \"description\": \"Full batch script text, starting with #!/bin/bash and #SBATCH lines\"},\n                \"test_only\": {\"type\": \"boolean\", \"description\": \"Validate without submitting\", \"default\": False},\n            },\n            \"required\": [\"script\"],\n        },\n    },\n    {\n        \"name\": \"cancel_job\",\n        \"description\": \"Cancel a job or one array task (like `scancel`).\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },\n    {\n        \"name\": \"read_job_log\",\n        \"description\": \"Read the last lines of a job's stdout or stderr file.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"job_id\": _JOB_ID,\n                \"stream\": {\"type\": \"string\", \"enum\": [\"stdout\", \"stderr\"], \"default\": \"stderr\"},\n                \"tail_lines\": {\"type\": \"integer\", \"description\": \"Number of lines from the end (1-200)\", \"default\": 20},\n            },\n            \"required\": [\"job_id\"],\n        },\n    },\n    {\n        \"name\": \"job_accounting\",\n        \"description\": \"Resource usage of a finished or running job (like `sacct`/`seff`): state, exit code, elapsed time, peak memory, CPU and GPU utilization.\",\n        \"parameters\": {\"type\": \"object\", \"properties\": {\"job_id\": _JOB_ID}, \"required\": [\"job_id\"]},\n    },\n    {\n        \"name\": \"gpu_availability\",\n        \"description\": \"Free and total GPUs per partition right now (like `sinfo` with GRES), optionally for one partition.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"partition\": {\"type\": \"string\", \"description\": \"Partition name; omit for all GPU partitions\"}},\n            \"required\": [],\n        },\n    },\n    {\n        \"name\": \"partition_info\",\n        \"description\": \"Limits of a partition or QOS: max wall time, nodes, GPUs and CPUs per node, memory per node.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\"partition\": {\"type\": \"string\", \"description\": \"Partition name; omit for all partitions\"}},\n            \"required\": [],\n        },\n    },\n]",
+          "supports": "The complete available inventory has no direct-shell execution tool."
+        },
+        {
+          "binding": "tools_source",
+          "line_start": 214,
+          "line_end": 245,
+          "excerpt": "def _submit_job(script: str, test_only: bool = False) -> dict:\n    global _VALID_FLAGS\n    if _VALID_FLAGS is None:\n        _VALID_FLAGS = load_flags()\n    if not script.lstrip().startswith(\"#!\"):\n        return {\"error\": \"sbatch: error: This does not look like a batch script. The first line must start with #! followed by the path to an interpreter.\"}\n    session = _SESSION.get()\n    flags = session[\"flags\"] if session is not None else _VALID_FLAGS\n    res = check_answer(f\"```bash\\n{script}\\n```\", flags)\n    if res[\"bad_flags\"]:\n        return {\"error\": f\"sbatch: unrecognized option '--{res['bad_flags'][0]}'\"}\n    if not res[\"bash_ok\"]:\n        return {\"error\": \"sbatch: error: batch script has a shell syntax error\"}\n    part = re.search(r\"^\\s*#SBATCH\\s+(?:--partition[= ]|-p\\s*)(\\S+)\", script, re.MULTILINE)\n    if part and part.group(1) not in PARTITIONS:\n        return {\"error\": \"sbatch: error: invalid partition specified: \" + part.group(1)}\n    partition = part.group(1) if part else \"boost_usr_prod\"  # this mock's default\n    jid = str(4000000 + int(hashlib.sha256(script.encode()).hexdigest(), 16) % 1000000)\n    if test_only:\n        return {\"valid\": True, \"message\": f\"sbatch: Job {jid} to start at 2026-10-12T14:30:00 in partition {partition}\",\n                \"validation_scope\": [\"flag_names\", \"bash_syntax\", \"partition_name\"]}\n    if session is not None:\n        # Do not infer execution, allocation or usage from a successful synthetic submission.\n        _list_queue()  # reserve every initial queue fixture, including terminal observations\n        existing_ids = session[\"observed_ids\"] | session[\"jobs\"].keys()\n        while jid in existing_ids:\n            jid = str(int(jid) + 1)\n        session[\"jobs\"][jid] = {\"job_id\": jid, \"name\": \"submitted_mock_job\", \"state\": \"PENDING\",\n                                \"partition\": partition, \"elapsed\": \"00:00:00\", \"time_limit\": None,\n                                \"reason\": \"mock submission: scheduling not simulated\", \"usage_recorded\": False,\n                                \"submitted_script\": script}\n    return {\"submitted\": True, \"job_id\": jid, \"message\": f\"Submitted batch job {jid}\"}",
+          "supports": "submit_job validates or records a synthetic pending job; it does not run the supplied command."
+        },
+        {
+          "binding": "first_response_scorer_and_visible_policy",
+          "line_start": 10,
+          "line_end": 23,
+          "excerpt": "POLICY_TEXT = \"\"\"Tool application policy (hpc-tools-clarify-first-v1):\nUse the available tools for explicit live-information or action requests. Before a\njob-specific lookup or action, require an explicitly identified job in the visible\nconversation. If its identity or selection is missing or ambiguous, ask for it\nbefore using tools; do not guess from resource numbers, names or example IDs.\nExplicit queue and resource queries do not require a job ID. A queue query supplies\ncandidates, not permission to act on an arbitrary candidate. Use returned IDs only\nafter their results are available, never from another simultaneous call.\nPerform cancellation/submission only when explicitly requested for the identified\ntarget. When asked only to validate a supplied script, preserve its text and use\nsubmit_job with test_only=true. General explanations and script-writing requests\nneed no live tool call. Do not claim an action or observation without its result.\nThis evaluation records your first response only. Make at most ONE tool call in that\nresponse; wait for its result before proposing another. Tool execution uses isolated mocks.\"\"\"",
+          "supports": "The deployed first-response policy permits explicit resource/queue requests without a job ID, requires an unambiguous selected job for job-specific actions, and permits at most one call before its result."
+        }
+      ],
+      "nearest_prior": [
+        {
+          "id": "tool-016",
+          "difference": "Existing item requests authoring a script, which intentionally needs no live tool. This requests a live operation the available tool inventory cannot perform."
+        },
+        {
+          "id": "hpc_scheduler#0/script/p3/s0",
+          "difference": "Eligible item requests writing a node-name script, not actually executing a command in the current login shell."
+        },
+        {
+          "id": "js4-operation-evidence",
+          "difference": "Diagnostic is an explanation of what prior calls establish; this is a live unsupported-operation request."
+        }
+      ],
+      "scope_limit": "The scorer cannot distinguish a truthful limitation from fabricated command output if both are nonempty no-call text. This limitation must remain visible; the draft does not claim hallucination detection.",
+      "positive_no_call_text": "The available tools cannot execute commands in your current login shell, so I cannot report observed output from that command.",
+      "row_sha256": "33f237829db2f323aaa0618166d9de43eb0d5664011cf390d6438bdc076fdfe8",
+      "question_sha256": "af98326f209bdf0da5d8ad919abb5c200bdbdb63e70ba1139d4d6c997fb92a49",
+      "assigned_split": "development_exposed",
+      "model_review": {
+        "author_pass": "drafted against the local tool inventory and visible policy",
+        "second_pass": "same author agent reviewed source support, nearest prior items, task scope, and scoring limitations",
+        "independent_coordinator_acceptance": "pending",
+        "human_review": false
+      }
+    }
+  ],
+  "not_drafted": [
+    {
+      "idea": "Explain whether cancellation has a validation-only flag",
+      "reason": "Would add another generic explanation/no-call item without testing the flag distinction through the first-response scorer."
+    },
+    {
+      "idea": "Check status then accounting/log with different IDs",
+      "reason": "The scored first response would repeat existing status-first cases; later task steps are outside this metric."
+    },
+    {
+      "idea": "Different log tail sizes or job IDs",
+      "reason": "Argument-value changes alone do not create a new reasoning requirement."
+    }
+  ],
+  "remaining_requirements": [
+    "Independent coordinator acceptance before any release integration.",
+    "A model answering these draft items has not been run.",
+    "No-call responses remain ungraded for explanation quality, and multi-turn completion is out of scope.",
+    "Do not merge these evaluation questions or sidecar explanations into training, gold examples, or teacher prompts."
+  ]
+}

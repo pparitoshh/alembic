@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "normal_development_ready": 106,
+  "first_response_tool_development_ready": 23,
+  "final_normal_ready": 22,
+  "total_ready": 151,
+  "draft_pending": 0,
+  "calibration_pairs_separate": 24,
+  "duplicate_ids": 0,
+  "normalized_duplicate_questions": 0,
+  "json_schema_errors": 0,
+  "references_nonempty": 128,
+  "metadata_records": 151,
+  "exact_evidence_spans": 130,
+  "acquired_source_hashes": 49,
+  "inherited_82_unchanged": true,
+  "old_26_added_again": false,
+  "normal_tasks": {
+    "script": 27,
+    "concept": 32,
+    "howto": 35,
+    "debug": 34
+  },
+  "new_training_records": 0,
+  "semantic_guarantee": false,
+  "model_inference_or_compilation": "NOT RUN"
+}
