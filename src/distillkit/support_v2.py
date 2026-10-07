@@ -79,9 +79,17 @@ record's expected mode to admit evidence; tool decisions remain a separate verdi
     if row.get('source_sha256') != hashlib.sha256(source.encode()).hexdigest():
         raise ValueError('source hash missing or different from generation evidence')
     transcript = messages(row)
+    if not isinstance(transcript, list) or any(not isinstance(m, dict) for m in transcript):
+        raise ValueError('invalid transcript message list')
     for message in transcript:
-        for call in message.get('tool_calls') or []:
-            if call['function'].get('name') not in _REVIEWED_TOOLS:
+        calls = message.get('tool_calls') or []
+        if not isinstance(calls, list):
+            raise ValueError('malformed assistant tool call list')
+        for call in calls:
+            function = call.get('function') if isinstance(call, dict) else None
+            if not isinstance(function, dict) or not isinstance(function.get('name'), str):
+                raise ValueError('malformed assistant tool call')
+            if function['name'] not in _REVIEWED_TOOLS:
                 raise ValueError('support protocol covers read-only diagnostics; other tool arguments need separate content review')
     has_calls = any(isinstance(m, dict) and (m.get('tool_calls') or m.get('role') == 'tool')
                     for m in transcript)

@@ -133,6 +133,18 @@ def test_unexecuted_or_altered_result_is_rejected_before_reviewer_request(cfg):
     assert fake.requests==[]
 
 
+@pytest.mark.parametrize('malformed',[['bad-message'],[None],[{'role':'assistant','tool_calls':'bad'}],
+                                    [{'role':'assistant','tool_calls':[{}]}],
+                                    [{'role':'assistant','tool_calls':[{'function':{'name':[]}}]}]])
+def test_malformed_evidence_fails_closed_without_a_review_request(cfg,malformed):
+    row=record(cfg,'A supported answer.');row['messages']=malformed
+    fake=FakeReviewer({})
+    with pytest.raises(ValueError):
+        support.request_review(fake,row,SOURCE,protocol=v2.PROTOCOL)
+    assert not fake.requests
+    assert support.check_support(row,SOURCE,None,protocol=v2.PROTOCOL)['status']=='uncertain'
+
+
 @pytest.mark.parametrize('name,args',[('submit_job',{'script':'#!/bin/bash\ntrue','test_only':True}),
                                     ('cancel_job',{'job_id':'4718210'})])
 def test_out_of_scope_action_never_enters_registry_or_reviewer_request(cfg,name,args):
