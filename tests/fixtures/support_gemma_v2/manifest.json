@@ -1,0 +1,18 @@
+{
+  "purpose": "Exposed development regression fixtures; never training or blind final test.",
+  "provenance": "Captured google/gemma-4-26B-A4B-it independent-model source-support-v2 reviews from job 59657195, frozen production revision c91690094ada9bbeeeada4ad4455f6f8b51157c3.",
+  "transformation": "Select the ten original diagnostic report lines byte-for-byte from the eighteen-report captured file; no report labels or raw responses changed. Reuse support_checkpoint06 records/source, whose excluded metadata fields never enter a support packet. Eight synthetic control reviews are not copied here.",
+  "original_report_sha256": "66d53d930337f0e69e92840be4960bbb1383619f0b6d95a6a8accf9c7e5c9c4b",
+  "original_records_sha256": "ad82a7022bfe0c012e4ec1448cdedec6bf6a93ffae99fd433670168b781c47b3",
+  "fixture_hashes": {
+    "reviews_v2.jsonl": "10f66b816c88357030fd29c344195d16dc304110432419f28a5b03e97de79e5c"
+  },
+  "record_fixture_sha256": "e761380d242470994cb2c4fb72047270c7b577ac1c65e2e44488f4dc278bc0c1",
+  "source_sha256": "dbd655d498129aac063f5fa4313faeab1b420311489f519e1f96ca4bd7168f1b",
+  "frozen_v2_outcomes": {
+    "kept": 0,
+    "rejected": 9,
+    "pending": 1
+  },
+  "human_review": false
+}
