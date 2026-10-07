@@ -115,15 +115,15 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+      "sha256": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
     },
     {
       "path": "src/distillkit/toolcheck.py",
-      "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+      "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
     },
     {
       "path": "src/distillkit/tools.py",
-      "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
     },
     {
       "path": "tests/test_eval_dev_v3.py",
@@ -151,5 +151,67 @@
   },
   "no_new_training_records": true,
   "all_evaluation_material_excluded_from_training": true,
-  "validation": "validation.json records actual exact checks; tests exercise production scorer and prompt/cache paths with CPU mocks, not model inference."
+  "validation": "validation.json records actual exact checks; tests exercise production scorer and prompt/cache paths with CPU mocks, not model inference.",
+  "code_integration_history": [
+    {
+      "version": "support-review-handoff-binding-v1",
+      "created_utc": "2026-10-07T23:38:47.744970+00:00",
+      "base_revision": "e533c98756ff24798c0ca6a9bdac1d015f413061",
+      "integrated_source_revision": "039c2ca08ac400e8533f44b1743fd575189a8e39",
+      "support_head_revision": "e3207f433b9d952e2330ce2eba0777e22434d3de",
+      "previous_manifest_sha256": "3a7072afb8fc22427404197a4f1ee0f80a3950a3b446a753ec3b0c17a52a0f1a",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1",
+          "after": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b",
+          "after": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "before": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193",
+          "after": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Integrate the opt-in job-status/support-review paths with current dev and its training audit. Only the three explicitly listed code bindings change; original source, question, reference and scoring-fixture bindings stay exact.",
+      "compatibility": "EvalCfg, tool SCHEMAS, score_tool_item, evaluate.py, gguf_eval.py and eval_tools_v2.py remain identical to the integration base. New trace guards are separate from first-response evaluation. Support-review defaults remain v1/off; v3 runtime limits are documented.",
+      "validation_scope": "Exact release validators and the full real-dependency CPU suite are run on the isolated integration snapshot and recorded in the handoff evidence. This entry does not assert a model-inference or training result."
+    }
+  ]
 }

@@ -46,12 +46,16 @@ class GenerateCfg(_Section):
     tool_mix: dict[Literal["call", "ask", "none"], float] = {"call": 0.6, "ask": 0.2, "none": 0.2}
     max_tool_rounds: int = 3
     gold_dir: Path | None = None  # prose.json / tool_trace.json few-shot anchors (data/gold)
+    job_status_discovery: Literal['clarify_first', 'allow_readonly'] | None = None
 
 
 class VerifyCfg(_Section):
     dedup_threshold: float = 0.8  # Jaccard on question word 3-grams
     flag_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_flags.txt)
     max_answer_chars: int = 4000
+    require_grounding_review: bool = False
+    grounding_reviews: Path | None = None  # separate, hash-bound model support reports; never generated answers
+    grounding_review_protocol: Literal['source-support-v1', 'source-support-v2', 'source-support-v3'] = 'source-support-v1'
 
 
 class StudentCfg(_Section):

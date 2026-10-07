@@ -427,17 +427,17 @@
     {
       "root": "repository",
       "path": "src/distillkit/toolcheck.py",
-      "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+      "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
     },
     {
       "root": "repository",
       "path": "src/distillkit/tools.py",
-      "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
     },
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+      "sha256": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
     },
     {
       "root": "repository",
@@ -478,6 +478,75 @@
       "root": "repository",
       "path": "data/seeds/slurm_requeue_signals.md",
       "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4"
+    }
+  ],
+  "code_integration_history": [
+    {
+      "version": "support-review-handoff-binding-v1",
+      "created_utc": "2026-10-07T23:38:47.746695+00:00",
+      "base_revision": "e533c98756ff24798c0ca6a9bdac1d015f413061",
+      "integrated_source_revision": "039c2ca08ac400e8533f44b1743fd575189a8e39",
+      "support_head_revision": "e3207f433b9d952e2330ce2eba0777e22434d3de",
+      "previous_manifest_sha256": "3a11ccb162cb052e2d27be8b40427bfabdcfd6042070292e6384a0e4f548eb77",
+      "previous_code_bindings": [
+        {
+          "root": "repository",
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "root": "repository",
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+        },
+        {
+          "root": "repository",
+          "path": "src/distillkit/tools.py",
+          "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+        },
+        {
+          "root": "repository",
+          "path": "src/distillkit/config.py",
+          "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+        },
+        {
+          "root": "repository",
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "root": "repository",
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "root": "repository",
+          "path": "tests/test_eval_dataset_v1.py",
+          "sha256": "f6b06468f198552243452a2b4eded9330a7d20f2d35f376a6ab7e59dd40e999c"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b",
+          "after": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "before": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193",
+          "after": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "before": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1",
+          "after": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Integrate the opt-in job-status/support-review paths with current dev and its training audit. Only the three explicitly listed code bindings change; original source, question, reference and scoring-fixture bindings stay exact.",
+      "compatibility": "EvalCfg, tool SCHEMAS, score_tool_item, evaluate.py, gguf_eval.py and eval_tools_v2.py remain identical to the integration base. New trace guards are separate from first-response evaluation. Support-review defaults remain v1/off; v3 runtime limits are documented.",
+      "validation_scope": "Exact release validators and the full real-dependency CPU suite are run on the isolated integration snapshot and recorded in the handoff evidence. This entry does not assert a model-inference or training result."
     }
   ]
 }
