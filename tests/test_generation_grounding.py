@@ -88,6 +88,16 @@ class GroundingPromptTests(unittest.TestCase):
                 self.assertIn("TRAIN_SOURCE_73e381", prompt)
                 self.assertIn("explicitly scoped code fragment in a language supported by the source", prompt)
                 self.assertIn("do not invent error messages or causal premises", prompt)
+                # Regression for source-grounded answers to unanswerable stored
+                # questions: the student never receives the hidden source table
+                # or function that the question author saw. These checks exercise
+                # all real question-building paths, not model compliance.
+                self.assertIn("student's entire user context", prompt)
+                self.assertIn("the source and scenario brief are not", prompt)
+                self.assertIn("table values, code being changed, bounds", prompt)
+                self.assertIn("an example that is absent from the question", prompt)
+                self.assertIn("Do not copy the reference answer into it", prompt)
+                self.assertIn("preserve the intentionally missing required user input", prompt)
                 self.assertNotIn("GOLD_STYLE_ONLY_12bd8d", json.dumps(request))
                 self.assertNotIn("FORBIDDEN_EVAL_MARKER_68ef03", json.dumps(request))
 

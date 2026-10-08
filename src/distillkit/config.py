@@ -49,6 +49,8 @@ class GenerateCfg(_Section):
     max_tool_rounds: int = 3
     gold_dir: Path | None = None  # prose.json / tool_trace.json few-shot anchors (data/gold)
     job_status_discovery: Literal['clarify_first', 'allow_readonly'] | None = None
+    # Explicit opt-in: archived configs keep their original request-parser semantics.
+    job_status_policy_version: Literal['job-status-policy-v2', 'job-status-policy-v3'] = 'job-status-policy-v2'
 
 
 class VerifyCfg(_Section):
