@@ -10,7 +10,10 @@ from pathlib import Path
 from .config import Config
 
 
-def admitted_training_rows(cfg: Config) -> list[dict]:
+def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> list[dict]:
+    if cfg.train.input_manifest is not None:
+        from .training_inputs import admitted_rows
+        return admitted_rows(cfg, evidence_dir=evidence_dir)
     from .io import read_jsonl
     from .source_registry import admitted_sources
     from .support import source_for_record
@@ -30,7 +33,7 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
     """
     # Admission is checked before tokenizer/model loading, including direct train
     # invocations that reuse an older verified file without rerunning verification.
-    rows = admitted_training_rows(cfg)
+    rows = admitted_training_rows(cfg, evidence_dir=cfg.run_dir)
     import torch
     from datasets import Dataset
     from peft import LoraConfig
