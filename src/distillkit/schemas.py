@@ -6,11 +6,27 @@ Teacher *answers* stay free text on purpose: the student learns whatever format 
 import re
 from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 
 class GeneratedQuestion(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     question: str = Field(min_length=10, description="The question text only, in the persona's own words")
+
+
+QUESTION_TRANSPORT_VERSION = 'question-json-v2-client-length-validation'
+
+
+def question_transport_schema() -> dict:
+    """Keep semantic length validation in Pydantic, not the decoder grammar.
+
+    Installed xgrammar 0.2.7 compiles minLength strings to a character rule that
+    forbids JSON escapes, including newlines and quotes needed in code questions.
+    This known single-field transport relaxation never changes parse_json checks.
+    """
+    schema = GeneratedQuestion.model_json_schema()
+    schema['properties']['question'].pop('minLength')
+    return schema
 
 
 class JudgeVerdict(BaseModel):

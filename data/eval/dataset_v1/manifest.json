@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "98a6de333f25b43fe97ea28837b983d915b900b156bb4b0c2fe72b62eb75f388"
+      "sha256": "065f1061f75f58c33a76a337505b34461ad6d137b16f6ca5ed5f5485adc31f08"
     },
     {
       "root": "repository",
@@ -723,6 +723,33 @@
         "skipped": 0
       },
       "validation_scope": "Original failed suite retained at multi-origin-cpu-001. Manifest-only binding correction requires fresh strict release validation; no runtime training or model inference claimed."
+    },
+    {
+      "version": "question-decoding-binding-v1",
+      "created_utc": "2026-10-08T21:35:10.193654+00:00",
+      "base_revision": "ee384a0012f2ac4c94b713a03b0bd1dbe885e30a",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "9106bfb4b7fecb669a32a056f958500b04ad823c44c10dba55a4cc83dfb35fbc",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "98a6de333f25b43fe97ea28837b983d915b900b156bb4b0c2fe72b62eb75f388",
+          "after": "065f1061f75f58c33a76a337505b34461ad6d137b16f6ca5ed5f5485adc31f08"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add explicit opt-in generation.question_repetition_detection. Only the config.py code binding changes; retain previous hash and all existing history.",
+      "compatibility": "EvalCfg AST, evaluation answering inputs/schemas/scorers, tool definitions and judge verdict schema/protocol remain unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified. Teacher question transport and its finish handling are separate from the existing judge contract.",
+      "pre_binding_validation": {
+        "full_passed": 860,
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused prior config.py hash; preserved complete full suite log/XML.",
+        "skipped": 0,
+        "focused_passed": 182,
+        "campaign_tests_passed": 50
+      },
+      "validation_scope": "Metadata-only binding update is followed by affected release checks, recorded separately. The earlier full suite is not relabeled as a pass on this amended snapshot; no real inference or data acceptance is asserted."
     }
   ]
 }
