@@ -95,8 +95,11 @@ def evidence_packet(row, source):
             'policy':row.get('tool_policy'), 'workflow_version':row.get('workflow_version'), 'turns':turns}
 
 
-def source_for_record(cfg, row):
+def source_for_record(cfg, row, *, resolver=None):
     """Resolve reviewed bytes from this run's training sources, not an answer's own citations."""
+    if resolver is not None:
+        resolver.check_config(cfg)
+        return resolver.source_for_record(row)
     from .source_registry import record_source_binding
     record_source_binding(cfg, row)
     if row.get('doc_id') in cfg.seeds.eval_docs:
@@ -117,6 +120,15 @@ def source_for_record(cfg, row):
     if hashlib.sha256(source.encode()).hexdigest() != row.get('source_sha256'):
         raise ValueError('source hash missing or different from generation evidence')
     return source
+
+
+def source_for_records(cfg, rows):
+    """Resolve a complete batch once, checking snapshot bytes before returning."""
+    from .source_resolver import SourceResolver
+    resolver = SourceResolver(cfg)
+    sources = [source_for_record(cfg, row, resolver=resolver) for row in rows]
+    resolver.assert_unchanged()
+    return sources
 
 
 def request_review(reviewer, row, source, *, protocol=PROTOCOL):

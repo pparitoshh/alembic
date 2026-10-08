@@ -13,7 +13,7 @@ from .toolcheck import check_trace
 from .tools import SCHEMAS, set_valid_flags
 from .job_status_guard import WORKFLOW_VERSION, JobStatusPolicy
 from .support import check_support, source_for_record
-from .source_registry import admitted_sources, record_source_binding
+from .source_resolver import SourceResolver
 
 
 def _shingles(text: str, n: int = 3) -> set[tuple[str, ...]]:
@@ -27,9 +27,12 @@ def _jaccard(a: set, b: set) -> float:
 
 def run(cfg: Config) -> Path:
     vcfg, run_dir = cfg.verify, cfg.run_dir
-    admitted_sources(cfg)  # fail before writing outputs if the configured source basis is invalid
     # generate appends rows in completion order; sort so "first copy wins" in dedup is reproducible
     rows = sorted(read_jsonl(run_dir / "generated.jsonl"), key=lambda r: r.get("id", ""))
+    # Legacy runs without source checks keep their existing behavior. Registry
+    # admission and support-enabled runs share one explicit immutable source view.
+    resolver = SourceResolver(cfg) if (cfg.seeds.registry is not None or vcfg.require_grounding_review or
+               any(r.get('workflow_version') == WORKFLOW_VERSION for r in rows)) else None
     valid_flags = load_flags(vcfg.flag_list)
     set_valid_flags(valid_flags)  # tool checks run submit_job on the mock sbatch
     eval_shingles = [_shingles(r["question"]) for r in read_jsonl(cfg.eval.file)]
@@ -56,7 +59,8 @@ def run(cfg: Config) -> Path:
         reason = None
         q, a = r["question"], final_answer(r)
         try:
-            record_source_binding(cfg, r)
+            if resolver is not None:
+                resolver.check_record(r)
         except (OSError, ValueError) as exc:
             pending_review.append({**r, "pending_reason":"source_admission_unresolved",
                                    "source_admission_error":str(exc)})
@@ -114,7 +118,7 @@ def run(cfg: Config) -> Path:
                 elif r.get('tools') is not None and r['tools'] != SCHEMAS:
                     raise ValueError('record schemas differ from the configured tool implementation')
                 else:
-                    source = source_for_record(cfg, r)
+                    source = source_for_record(cfg, r, resolver=resolver)
                     issue = review_errors.get('*') or review_errors.get(r.get('id'))
                     support = ({'status':'uncertain','reason':issue} if issue else
                                check_support(r, source, reviews.get(r.get('id')),
@@ -135,6 +139,8 @@ def run(cfg: Config) -> Path:
             kept.append(r)
             kept_questions[q] = _shingles(q)  # pending/rejected rows do not reserve the accepted copy
 
+    if resolver is not None:
+        resolver.assert_unchanged()  # fail before any acceptance/rejection output is persisted
     write_jsonl(run_dir / "verified.jsonl", kept)
     write_jsonl(run_dir / "rejected.jsonl", rejected)
     write_jsonl(run_dir / "pending_review.jsonl", pending_review)

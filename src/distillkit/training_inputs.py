@@ -15,7 +15,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .config import Config
 from . import records
-from .source_registry import Registry, admitted_sources
+from .source_registry import Registry
+from .source_resolver import SourceResolver
 
 SHA = Annotated[str, Field(pattern=r'^[0-9a-f]{64}$')]
 
@@ -121,6 +122,7 @@ def _index(rows):
 class _Inputs:
     def __init__(self, root, bindings):
         self.root, self.bindings, self.cache = root.resolve(), bindings, {}
+        self.source_resolvers = []
 
     def path(self, rel):
         path = Path(rel)
@@ -262,7 +264,9 @@ def _origin(origin, inputs, contract):
     relocated = cfg.model_copy(update={
         'seeds':cfg.seeds.model_copy(update={'dir':seed_dir, 'registry':inputs.path(origin.registry) if registered else None}),
         'generate':cfg.generate.model_copy(update={'gold_dir':inputs.path(origin.run_root+'/corpus/gold') if cfg.generate.gold_dir else None})})
-    selected = admitted_sources(relocated)
+    resolver = SourceResolver(relocated, config_path=inputs.path(origin.config))
+    inputs.source_resolvers.append(resolver)
+    selected = resolver.admitted
     from .generate import _gold
     for name in ('prose', 'tool_trace'):
         _gold(relocated, name)
@@ -279,8 +283,7 @@ def _origin(origin, inputs, contract):
     docs = {d['doc_id']:d for d in documents}
     _require(len(docs) == len(documents), 'duplicate source-manifest IDs')
     certificate = (_registered_certificate if registered else _legacy_certificate)(origin,inputs,rows)
-    from .seeds import load_chunks
-    chunks = {c['chunk_id']:c for c in load_chunks(relocated)[0]}
+    chunks = {c['chunk_id']:c for c in resolver.load_chunks()[0]}
     from .support import source_for_record
     for row in rows:
         qid = row['id'].rsplit('/s',1)[0]
@@ -299,7 +302,7 @@ def _origin(origin, inputs, contract):
         if registered:
             _require(row.get('generation_manifest_sha256') == q.get('generation_manifest_sha256') == generation['binding_sha256'],
                      'record/question generation binding differs')
-            source_for_record(relocated,row)
+            source_for_record(relocated,row,resolver=resolver)
             _require(_sha(q['text'].encode()) == row['source_sha256'], 'original question source hash differs')
         else:
             r = certificate[row['id']]
@@ -409,6 +412,8 @@ def admitted_rows(cfg, *, evidence_dir=None):
     _require(path.read_bytes() == raw, 'manifest changed during checks')
     for rel,h in inputs.bindings.items():
         _require(_sha(inputs.path(rel).read_bytes()) == h, 'input changed during checks: ' + rel)
+    for resolver in inputs.source_resolvers:
+        resolver.assert_unchanged()
     if evidence_dir is not None:
         output = Path(evidence_dir); output.mkdir(parents=True,exist_ok=True)
         report = {'version':'multi-origin-training-admission-v1','manifest_sha256':reference.sha256,
