@@ -19,7 +19,7 @@ from pathlib import Path
 from .config import Config
 from .io import JsonlAppender, read_jsonl
 from .records import prose_row
-from .schemas import GeneratedQuestion
+from .schemas import GeneratedQuestion, QUESTION_TRANSPORT_VERSION, question_transport_schema
 from .seeds import load_chunks
 from .teacher import Teacher
 from .checks import load_flags
@@ -481,6 +481,8 @@ def run(cfg: Config) -> Path:
                               'question_check_version': CONTEXT_QUESTION_CHECK_VERSION,
                               'question': CONTEXT_Q_PROMPT, 'suffix': CONTEXT_Q_SUFFIX},
             'schemas': SCHEMAS, 'partitions': PARTITIONS,
+             'question_schema': GeneratedQuestion.model_json_schema(),
+             'question_transport': {'version': QUESTION_TRANSPORT_VERSION, 'schema': question_transport_schema()},
         })
         jobs = [{**j, 'generation_manifest_sha256': binding} for j in jobs]
     # Registry-enabled campaigns cannot reuse legacy/stale source text solely
@@ -503,7 +505,10 @@ def run(cfg: Config) -> Path:
     def make_question(j):
         scenario = _scenario(j)
         prompt = _question_prompt(j, scenario)
-        q, raw = teacher.chat_json(_system_version(Q_SYSTEM, j), prompt, GeneratedQuestion)
+        detection = getattr(gcfg, 'question_repetition_detection', None)
+        question_options = ({'extra_body': {'repetition_detection': detection.model_dump()}}
+                            if detection is not None else {})
+        q, raw = teacher.chat_json(_system_version(Q_SYSTEM, j), prompt, GeneratedQuestion, **question_options)
         if q:
             row = {**j, "question": scenario_plan.compose_question(j, q.question), "scenario": scenario,
                    "prompt_version": _prompt_version(j),
@@ -528,7 +533,7 @@ def run(cfg: Config) -> Path:
     if getattr(cfg.seeds, 'registry', None) is not None:
         _check_cached_questions(cfg, jobs, questions)
     if len(questions) < len(jobs):
-        print(f"[generate] {len(jobs) - len(questions)} questions had invalid JSON; rerun to retry them")
+        print(f"[generate] {len(jobs) - len(questions)} questions produced no usable candidate; inspect attempt evidence")
     # Recompute from the stored text, including on resume; annotations cannot
     # authorize an incomplete question. Rejections remain in questions.jsonl,
     # so they are not retried as missing/invalid-JSON question requests.

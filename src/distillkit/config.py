@@ -34,12 +34,26 @@ class EndpointCfg(_Section):
     extra_body: dict = {}
 
 
+class QuestionRepetitionCfg(_Section):
+    """Optional vLLM token-loop detection for questions only; not a quality judge."""
+    min_pattern_size: int = Field(1, ge=1, le=64)
+    max_pattern_size: int = Field(16, ge=1, le=64)
+    min_count: int = Field(16, ge=2, le=64)
+
+    @model_validator(mode='after')
+    def _ordered_sizes(self):
+        if self.min_pattern_size > self.max_pattern_size:
+            raise ValueError('min_pattern_size must not exceed max_pattern_size')
+        return self
+
+
 class GenerateCfg(_Section):
     questions_per_chunk: int
     answers_per_question: int
     personas: list[str]
     task_types: list[str]
     scenario_plan: Path | None = None  # opt-in explicit, source-bound scenarios instead of grid sampling
+    question_repetition_detection: QuestionRepetitionCfg | None = None  # opt-in, serving support must be verified
     # share of questions that become tool-calling traces, split by mode:
     # call = needs a tool, ask = needs a tool but a required detail is missing, none = tools offered but not needed
     tool_fraction: float = Field(0.0, ge=0, le=1)
