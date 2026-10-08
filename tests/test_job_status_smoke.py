@@ -9,13 +9,13 @@ from openai import OpenAI
 
 from distillkit.config import Config
 from distillkit.teacher import Teacher
-from distillkit.job_status_guard import LEGACY_POLICY_VERSION, POLICY_VERSION
+from distillkit.job_status_guard import LEGACY_POLICY_VERSION, POLICY_VERSION, RESOURCE_POLICY_VERSION
 from distillkit.tools import CATALOG_VERSION, execute
 from distillkit.io import read_jsonl
 from test_pipeline import _cfg_dict
 
 
-@pytest.mark.parametrize('version', [None, POLICY_VERSION])
+@pytest.mark.parametrize('version', [None, POLICY_VERSION, RESOURCE_POLICY_VERSION])
 def test_smoke_orchestration_retains_all_cases_and_requests(tmp_path,monkeypatch,version):
     spec=importlib.util.spec_from_file_location('job_status_smoke',Path(__file__).parents[1]/'slurm/job_status_smoke.py')
     smoke=importlib.util.module_from_spec(spec);spec.loader.exec_module(smoke)
