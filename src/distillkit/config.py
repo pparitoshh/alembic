@@ -67,7 +67,13 @@ class StudentCfg(_Section):
     system_prompt: str
 
 
+class TrainingInputManifestCfg(_Section):
+    path: Path
+    sha256: str = Field(pattern=r'^[0-9a-f]{64}$')
+
+
 class TrainCfg(_Section):
+    input_manifest: TrainingInputManifestCfg | None = None
     method: Literal["lora", "dora"] = "lora"
     load_in_4bit: bool = False  # QLoRA / QDoRA: bitsandbytes NF4 base weights
     lora_r: int = 16

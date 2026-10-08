@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "fc8d7b22a42d53555304d0909ad4d53eb64d95e90894d82204773a33b86381a7"
+      "sha256": "98a6de333f25b43fe97ea28837b983d915b900b156bb4b0c2fe72b62eb75f388"
     },
     {
       "root": "repository",
@@ -697,6 +697,32 @@
       "reason": "Explicit opt-in job-status-policy-v4 in GenerateCfg; preserve v2 default and v3 replay. This binding update records that actual configuration change.",
       "compatibility": "Only GenerateCfg AST changes. EvalCfg, evaluation prompts, tool schemas, first-response scorer, dataset rows, references, evidence and scoring fixtures remain unchanged.",
       "validation_scope": "Full real-dependency CPU suite to run on this exact candidate; no new teacher behavior claimed."
+    },
+    {
+      "version": "multi-origin-training-inputs-binding-v1",
+      "created_utc": "2026-10-08T06:40:55.878551+00:00",
+      "base_revision": "e5799235c83b4113360547a83f196e5268562e6a",
+      "previous_manifest_sha256": "9c7a16d69d834f4104889564c82f55c3baaa894ee34e8cb512b97a3b815ebbad",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "fc8d7b22a42d53555304d0909ad4d53eb64d95e90894d82204773a33b86381a7",
+          "after": "98a6de333f25b43fe97ea28837b983d915b900b156bb4b0c2fe72b62eb75f388"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add typed opt-in train.input_manifest for preserving original per-run provenance in the production training loader. Default remains None.",
+      "compatibility": "All original Config classes/functions except TrainCfg are AST-identical. Evaluation answering inputs, references, tools, source spans, scoring and fixtures remain byte-identical. No old baseline rescoring or inference.",
+      "pre_binding_validation": {
+        "focused_passed": 86,
+        "full_passed": 820,
+        "full_subtests_passed": 28,
+        "full_failed": 1,
+        "full_failure": "Strict evaluation release binding correctly refused old config.py hash after the typed training option was added.",
+        "skipped": 0
+      },
+      "validation_scope": "Original failed suite retained at multi-origin-cpu-001. Manifest-only binding correction requires fresh strict release validation; no runtime training or model inference claimed."
     }
   ]
 }
