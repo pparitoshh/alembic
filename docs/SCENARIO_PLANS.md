@@ -71,6 +71,116 @@ remain provenance metadata. Existing messages, tools and prose logprob formats
 are unchanged. Tool mode behavior remains the existing production behavior;
 this extension does not add tools or make unsupported source/tool pairings valid.
 
+## Optional source input in v2 plans
+
+`source-scenario-plan-v2` adds an optional `context_spans` list to each entry.
+All v1 fields are still required. V1 continues to reject this field and retains
+its exact entry-digest formula and IDs; the legacy grid is unchanged. V2 entries
+use `scenario-v2/` IDs bound to their version, full entry and resolved persona.
+Changing source input changes the ID; it does not prove a new learning objective.
+An entry with no context keeps the existing question and tool behavior.
+
+Each explicit span has only `start`, `end` and `sha256`. For example, the following
+is an illustrative entry-field fragment, not a runnable plan:
+
+```json
+{
+  "context_spans": [
+    {"start": 40, "end": 83, "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"start": 120, "end": 250, "sha256": "0000000000000000000000000000000000000000000000000000000000000000"}
+  ]
+}
+```
+
+Offsets are strict integer **character** positions, with an inclusive start and
+exclusive end, in the exact normalized text from `seeds.load_chunks(cfg)`.
+They are not byte offsets or positions in the original Markdown file. SHA-256
+hashes the exact UTF-8 substring. The list must be nonempty when present, ordered
+and nonoverlapping. Empty/whitespace spans, invalid bounds, changed hashes and
+forbidden or unresolved training sources fail before a teacher client exists.
+Context is currently permitted only for `prose`, so it cannot supply tool targets
+or alter action authority or intentionally missing arguments in clarification
+examples. V2 tool entries without context remain supported.
+
+Select the smallest sufficient problem input: code being examined, table values
+and headers, and explicit preconditions. The generator never selects all code
+fences, removes comments or metadata, fills boilerplate, or invents facts. Plain
+preconditions and bounded code fragments do not need to be whole programs. When
+a selected span contains line-start Markdown fences, its fences must balance;
+quoted/commented markers inside a plain code fragment remain data. This is a
+narrow structural screen, not a Markdown parser or language/compiler check.
+
+The `source-input-context-v1` renderer puts each exact span in a **separate**
+numbered quoted-data block (`Provided input 1`, `Provided input 2`, ...). It never
+concatenates separate programs as one program. Each outer backtick fence is
+longer than any backtick run in its span. Source bytes are unchanged inside each
+block; ordinal labels and block separators are visible formatting only. The
+question row's `scenario_context` binds the version, span offsets/hashes/text and
+the SHA-256 of the complete rendered input. These fields also accompany answers.
+
+Only context-enabled questions use
+`source-grounded-v10-bound-input-context`: the question teacher sees the exact
+selected input and is told it will be attached automatically. The stored
+`question` is the stripped teacher question followed by the deterministic input
+blocks. That identical string enters the actual answer prompt and the student's
+stored user message. The full source still grounds the answer teacher; the
+scenario brief does not enter its prompt. Source text is quoted data, never a
+system instruction. No teacher answer or evaluation reference is inserted.
+
+`question_generation` preserves the original unstripped parsed question, the raw
+text returned by `Teacher.chat_json`, both hashes, capture version and composed
+question hash. This is not a provider HTTP-envelope/finish-reason claim; campaign
+capture remains separate. Metadata is not used as a student message or target by
+`records.training_example`. Existing answer and prose-logprob formats stay intact.
+
+For context-enabled questions, `question-code-fence-v2-raw-and-composed` checks
+the raw teacher question and effective question independently. An appended input
+block must not conceal a truncated raw question. Rejections retain the exact
+candidate and captured raw text; they are not regenerated, repaired or converted
+into artificial answer rows on resume. Campaign capture validators must use the
+effective per-record check version and both-text check, rather than recomputing
+only `_question_issue(candidate['question'])`. Planned-answer counts still include
+answers blocked by a rejected question.
+
+Resume checks reconstruct the input and composed question, verify raw-response
+parsing and capture hashes, and compare the actual cached answer's user turn
+before a client exists. A context-enabled cached prose answer must retain the
+production two-turn user/assistant shape, with no extra user/system turns or tool
+fields. The run manifest binds context rendering/capture/check
+versions and prompts as well as plan/source/code. A changed span, prompt or code
+requires a fresh run directory; copying a manifest is not a valid migration.
+These consistency checks do not authenticate adversarially rewritten output plus
+all of its hashes; preserve the independent campaign capture and artifact hashes.
+
+Source hashes cannot establish that a selected span is appropriate input. The
+agreed model-review process must exclude answer keys, `@@expect` metadata,
+output-revealing comments, reference answers and explanatory conclusions that
+give away the requested answer. There are no arbitrary text, answer or hidden
+label fields in the span schema. Review generated questions against their actual
+attached inputs for premise validity, relevance, completeness and novelty.
+
+Token preflight must include all rendered input blocks in the outgoing question
+request, effective user question and answer request; reserve the teacher's
+question output and student's response budget. Do not relax truncation/loader
+limits to fit overly broad excerpts. The actual Q builder is
+`generate._question_prompt(job, scenario)`; `scenario_plan.context_block(job)`
+provides the exact appended input for budget calculations. These helpers make
+preflight match production; they do not run a model. No real-model improvement or
+semantic completeness is established by the deterministic feature or its tests.
+
+`tests/test_source_context_inputs.py` exercises actual generation, source
+admission, planner, schemas, appenders and the record adapter with synthetic
+fixtures and a fake teacher. It covers legacy IDs/prompts, separate spans,
+Unicode/newline positions, input/hash/holdout failures before requests, raw
+capture, actual prompt/user positions, tool-context exclusion, rejected-question
+preservation and exact/partial/stale resumes. Run the focused and full suites in
+the existing compatible dependency environment; no generated code is executed:
+
+```sh
+PYTHONPATH=src python -B -m pytest -q tests/test_source_context_inputs.py tests/test_scenario_plan.py tests/test_prose_answer_scope.py tests/test_source_registry.py
+PYTHONPATH=src python -B -m pytest -q
+```
+
 ## Fresh runs and exact resumption
 
 Before any teacher client or output appender, scenario generation writes a new
