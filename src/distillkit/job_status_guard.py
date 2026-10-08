@@ -16,7 +16,7 @@ _RESULT = re.compile(r'"job_id"\s*:\s*"([0-9]+(?:_[0-9]+)?)"')
 
 def identified_jobs(question, results=(), *, policy=None):
     """Conservative visible identifiers, never reference answers or expected modes."""
-    explicit = _EXPLICIT_V3 if policy and policy.version == POLICY_VERSION else _EXPLICIT
+    explicit = _EXPLICIT_V3 if policy and policy.version in {POLICY_VERSION, RESOURCE_POLICY_VERSION} else _EXPLICIT
     known = set().union(*(set(p.findall(question)) for p in (explicit, _STATUS, _IS, _ACTION, _USAGE, _RESULT)))
     def collect(value):
         if isinstance(value, dict):
@@ -54,6 +54,7 @@ LEGACY_WORKFLOW_VERSION = "job-status-evidence-v1"
 WORKFLOW_VERSION = "job-status-evidence-v2"
 LEGACY_POLICY_VERSION = "job-status-policy-v2"
 POLICY_VERSION = "job-status-policy-v3"
+RESOURCE_POLICY_VERSION = "job-status-policy-v4"
 _READ_ONLY = {'job_status', 'list_queue', 'read_job_log', 'job_accounting', 'gpu_availability', 'partition_info'}
 _DISCOVERY = re.compile(r'\b(?:list|show|find|search)\b[^.!?]*\b(?:jobs|queue)\b', re.I)
 _RESOURCES = re.compile(r'\b(?:show|list|check|look up)\s+(?:the\s+)?(?:current\s+)?(?:free|available|partition)\b', re.I)
@@ -73,6 +74,27 @@ _NO_LOOKUP = re.compile(r"\b(?:do not|don't|never)\s+(?:use\s+(?:any\s+)?tools|c
 _NO_LOOKUP_V3 = re.compile(r'\bwithout\s+(?:(?:using|calling)\s+)?(?:any\s+)?tools\b', re.I)
 _SELECT_SINGLE_RESULT = re.compile(r'\b(?:check|inspect)\b[^.!?]*\b(?:only|single)\b[^.!?]*\b(?:result|job)\b', re.I)
 
+# V4 is opt-in: keep v3 matching and archived audit reconstruction unchanged.
+# New request verbs must start an imperative/question clause, not merely occur
+# inside a reported instruction, historical attempt or quoted source description.
+_RESOURCE_REQUEST_V4 = re.compile(
+    r'^\s*(?:please\s+)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?'
+    r'|how\s+(?:can|could|do)\s+I\s+)?'
+    r'(?:show|list|check|look\s+up|report|provide|tell\s+(?:me|us))\b(?P<scope>[^.!?;\n]*)', re.I)
+_PARTITION_DETAIL_V4 = re.compile(_PARTITION_DETAIL.pattern + r'|\bnodes?\b', re.I)
+_RESOURCE_EXPLANATION_V4 = re.compile(
+    r'^\s*(?:(?:me|us)\s+)?(?:(?:an?|the|some)\s+)?'
+    r'(?:examples?|commands?|syntax|instructions?|steps?|documentation|meaning)\b'
+    r'|^\s*how\s+(?:(?:can|could|do|should|would)\s+(?:I|we)|to|I|we|one|someone)\b'
+    r'|^\s*(?:what|which)\s+(?:commands?|syntax|instructions?|steps?)\b'
+    r'|^\s*(?:what|which)\b.*\bmeans?\b'
+    r'|^\s*(?:why|no)\b', re.I)
+_NO_LOOKUP_V4 = re.compile(
+    r"\b(?:do not|don't|never)\s+(?:report|provide|tell\s+(?:me|us))\b"
+    r'|\bwithout\s+(?:querying|invoking|accessing)\s+(?:any\s+)?tools\b'
+    r'|\bask\b[^.!?]*\bbefore\b[^.!?]*\b(?:reporting|providing|telling)\b', re.I)
+_EXCLUDED_RESOURCE_V4 = re.compile(r'(?:,\s*|\b(?:but|and)\s+)not\b|\b(?:excluding|without)\b', re.I)
+
 
 def _resource_requested(name, question):
     for clause in re.split(r'[.!?;\n]', question):
@@ -87,6 +109,42 @@ def _resource_requested(name, question):
             if name == 'partition_info' and _PARTITION.search(scope) and (
                     _PARTITION_DETAIL.search(scope) or _BARE_PARTITIONS.fullmatch(scope)):
                 return True
+    return False
+
+
+def _resource_clauses_v4(question):
+    """Markdown code text does not become an imperative resource request."""
+    fence = None
+    for line in question.splitlines():
+        marker = re.match(r'^\s*(`{3,}|~{3,})', line)
+        if fence is not None:
+            if re.fullmatch(re.escape(fence[0]) + '{' + str(len(fence)) + ',}', line.strip()):
+                fence = None
+            continue
+        if re.match(r'^(?: {4}| {0,3}\t)', line):
+            continue  # fail closed for Markdown's indented-code representation
+        if marker:
+            fence = marker[1]
+            continue
+        yield from re.split(r'[.!?;]', line)
+
+
+def _resource_requested_v4(name, question):
+    for clause in _resource_clauses_v4(question):
+        request = _RESOURCE_REQUEST_V4.match(clause)
+        if request is None:
+            continue
+        scope = request['scope']
+        if _RESOURCE_EXPLANATION_V4.search(scope):
+            continue
+        # An excluded capability is not permission to query it. Keep only the
+        # positive prefix; this deliberately does not parse arbitrary negation.
+        scope = _EXCLUDED_RESOURCE_V4.split(scope, maxsplit=1)[0]
+        if name == 'gpu_availability' and _GPU.search(scope) and _GPU_SUPPLY.search(scope):
+            return True
+        if name == 'partition_info' and _PARTITION.search(scope) and (
+                _PARTITION_DETAIL_V4.search(scope) or _BARE_PARTITIONS.fullmatch(scope)):
+            return True
     return False
 
 
@@ -122,7 +180,7 @@ class JobStatusPolicy:
     version: str = LEGACY_POLICY_VERSION
 
     def __post_init__(self):
-        if self.version not in {LEGACY_POLICY_VERSION, POLICY_VERSION} or self.discovery not in {'clarify_first', 'allow_readonly'}:
+        if self.version not in {LEGACY_POLICY_VERSION, POLICY_VERSION, RESOURCE_POLICY_VERSION} or self.discovery not in {'clarify_first', 'allow_readonly'}:
             raise ValueError('unknown job-status application policy')
 
     def as_dict(self):
@@ -139,7 +197,9 @@ def policy_error(call, question, results, policy):
     """Check a call against visible user intent and already executed earlier turns."""
     if not isinstance(call, dict) or not isinstance(call.get('name'), str):
         return 'Malformed tool call; no lookup or action was executed.'
-    if _NO_LOOKUP.search(question) or (policy.version == POLICY_VERSION and _NO_LOOKUP_V3.search(question)):
+    if (_NO_LOOKUP.search(question)
+            or (policy.version in {POLICY_VERSION, RESOURCE_POLICY_VERSION} and _NO_LOOKUP_V3.search(question))
+            or (policy.version == RESOURCE_POLICY_VERSION and _NO_LOOKUP_V4.search(question))):
         return 'The user requested clarification before lookup or prohibited tool use.'
     name = call.get('name')
     if name not in _READ_ONLY:
@@ -147,7 +207,8 @@ def policy_error(call, question, results, policy):
     if name in {'gpu_availability', 'partition_info'}:
         if policy.version == LEGACY_POLICY_VERSION:
             return None if _RESOURCES.search(question) else 'A live resource lookup requires an explicit resource request.'
-        if not _resource_requested(name, question):
+        requested = _resource_requested_v4 if policy.version == RESOURCE_POLICY_VERSION else _resource_requested
+        if not requested(name, question):
             return 'A live resource lookup requires an explicit request for that resource capability.'
         return _partition_error(call, question, results)
     targets = identified_jobs(question, policy=policy)

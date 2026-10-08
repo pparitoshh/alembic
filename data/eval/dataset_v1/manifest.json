@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "51069852b0d08d931c4be2758c02073b024f3b1072ce31f1564486eeac69f07b"
+      "sha256": "fc8d7b22a42d53555304d0909ad4d53eb64d95e90894d82204773a33b86381a7"
     },
     {
       "root": "repository",
@@ -679,6 +679,24 @@
         "skipped": 0
       },
       "validation_scope": "CPU-001/002 evidence is preserved under tool_policy_parser_handoff. The affected release test and both strict validators are recorded separately in CPU-003 after this manifest-only update. No real-model behavior or student-improvement result is asserted."
+    },
+    {
+      "version": "resource-request-policy-v4-integration-binding-v1",
+      "created_utc": "2026-10-08T02:23:34.604053+00:00",
+      "base_revision": "d558bc579b238cd5ed539bd02e921ef18f4351a5",
+      "previous_manifest_sha256": "5fe1088ed9f64589767f53e10f3dadff2f67d22c9a818d6cf62fa3b06aeede67",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "51069852b0d08d931c4be2758c02073b024f3b1072ce31f1564486eeac69f07b",
+          "after": "fc8d7b22a42d53555304d0909ad4d53eb64d95e90894d82204773a33b86381a7"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Explicit opt-in job-status-policy-v4 in GenerateCfg; preserve v2 default and v3 replay. This binding update records that actual configuration change.",
+      "compatibility": "Only GenerateCfg AST changes. EvalCfg, evaluation prompts, tool schemas, first-response scorer, dataset rows, references, evidence and scoring fixtures remain unchanged.",
+      "validation_scope": "Full real-dependency CPU suite to run on this exact candidate; no new teacher behavior claimed."
     }
   ]
 }
