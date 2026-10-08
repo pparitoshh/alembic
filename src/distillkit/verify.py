@@ -87,7 +87,8 @@ def run(cfg: Config) -> Path:
         if reason is None and r.get("mode") in ("call", "ask", "none"):
             tool = check_trace(r, valid_flags)
             r = {**r, "tool_checks": tool}
-            if cfg.generate.job_status_discovery and r.get('tool_policy') != JobStatusPolicy(cfg.generate.job_status_discovery).as_dict():
+            if cfg.generate.job_status_discovery and r.get('tool_policy') != JobStatusPolicy(
+                    cfg.generate.job_status_discovery, cfg.generate.job_status_policy_version).as_dict():
                 reason = 'application_policy_mismatch'
             elif tool.get('application_policy_errors'):
                 reason = 'application_policy_violation'  # blocked attempts are not model compliance

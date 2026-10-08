@@ -18,7 +18,7 @@ from .tools import CATALOG_VERSION, MOCK_VERSION, ToolError, execute, mock_sessi
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
 # looking the job up (list_queue, then calls on the ids it returned) are both fine; grounding
 # rejects the bad case, a call on an id the user never gave.
-TRAINING_TRACE_POLICY_VERSION = "explicit-job-targets-v3"
+TRAINING_TRACE_POLICY_VERSION = "explicit-job-targets-v4"
 EXPECTED_DECISION = {"call": "call", "none": "no_call"}
 
 _HERMES = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
@@ -142,7 +142,7 @@ def _check_trace(row: dict) -> dict:
             expected_role = "assistant"
         elif role == "assistant":
             if guard_triggered:
-                if (m.get('content') != clarification_response(question) or
+                if (m.get('content') != clarification_response(question, policy=policy) or
                         m.get('origin') != 'runtime_guard' or m.get('tool_calls') or
                         i != len(transcript) - 1):
                     trace_errors.append('guard intervention must terminate with the exact application clarification and origin')
@@ -173,7 +173,7 @@ def _check_trace(row: dict) -> dict:
                     continue
                 ungrounded += ungrounded_ids(c, context)
                 partitions += ungrounded_partition(c, context)
-                target_issue = target_error(c, question, observed_results)
+                target_issue = target_error(c, question, observed_results, policy=policy)
                 if target_issue:
                     job_id = str(parse_arguments(c["arguments"])["job_id"])
                     if job_id not in ungrounded:
@@ -216,7 +216,7 @@ def _check_trace(row: dict) -> dict:
     if policy:
         audit = row.get('runtime_audit', {})
         origin = 'runtime_guard' if guard_triggered else 'teacher'
-        delivered = clarification_response(question) if guard_triggered else final_answer(row)
+        delivered = clarification_response(question, policy=policy) if guard_triggered else final_answer(row)
         expected_audit = {'version':'tool-runtime-audit-v1','policy':policy.as_dict(),'events':expected_events,
                           'response_origin':origin,'user_response':delivered,
                           'model_final_answer':None if guard_triggered else final_answer(row)}

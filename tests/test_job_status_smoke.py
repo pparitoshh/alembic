@@ -4,19 +4,24 @@ import json
 from pathlib import Path
 
 import httpx
+import pytest
 from openai import OpenAI
 
 from distillkit.config import Config
 from distillkit.teacher import Teacher
+from distillkit.job_status_guard import LEGACY_POLICY_VERSION, POLICY_VERSION
 from distillkit.tools import CATALOG_VERSION, execute
 from distillkit.io import read_jsonl
 from test_pipeline import _cfg_dict
 
 
-def test_smoke_orchestration_retains_all_cases_and_requests(tmp_path,monkeypatch):
+@pytest.mark.parametrize('version', [None, POLICY_VERSION])
+def test_smoke_orchestration_retains_all_cases_and_requests(tmp_path,monkeypatch,version):
     spec=importlib.util.spec_from_file_location('job_status_smoke',Path(__file__).parents[1]/'slurm/job_status_smoke.py')
     smoke=importlib.util.module_from_spec(spec);spec.loader.exec_module(smoke)
-    d=_cfg_dict(tmp_path);d['generate']['gold_dir']=None;d['teacher']['api_key_env']=None;cfg=Config.model_validate(d)
+    d=_cfg_dict(tmp_path);d['generate']['gold_dir']=None;d['teacher']['api_key_env']=None
+    if version is not None:d['generate']['job_status_policy_version']=version
+    cfg=Config.model_validate(d)
     jid='8310001';status=execute('job_status',{'job_id':jid})
     cases=[{'id':'call','mode':'call','question':f'Check job {jid}.','expected_job_id':jid,'doc_id':'fixture'},
            {'id':'ask','mode':'ask','question':'Check my job.','expected_job_id':None,'doc_id':'fixture'},
@@ -45,5 +50,6 @@ def test_smoke_orchestration_retains_all_cases_and_requests(tmp_path,monkeypatch
     assert all(r['status']=='complete' and r['verification']['passed'] for r in rows)
     assert all(r['deterministic_case_check']['exact_requested_call'] for r in rows)
     assert all(r['training_eligible'] is False for r in rows)
+    assert all(r['tool_policy']['version']==(version or LEGACY_POLICY_VERSION) for r in rows)
     assert all(r['status']=='success' and r['messages'] for r in requests)
     assert {r['case_id'] for r in requests}=={'call','ask','none'}
