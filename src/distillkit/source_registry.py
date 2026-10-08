@@ -44,8 +44,14 @@ def admitted_sources(cfg):
     path = getattr(cfg.seeds, 'registry', None)
     if path is None:
         return None
-    path = Path(path)
-    raw = path.read_bytes()
+    return _admitted_snapshot(cfg, Path(path).read_bytes(),
+                              [(p, p.read_bytes()) for p in sorted(cfg.seeds.dir.glob('*.md'))])
+
+
+def _admitted_snapshot(cfg, raw, documents):
+    """The same admission rules over captured bytes; callers own snapshot checks."""
+    if raw is None:
+        return None
     registry = Registry.model_validate_json(raw)
     docs = {d.doc_id:d for d in registry.documents}
     if len(docs) != len(registry.documents):
@@ -81,7 +87,7 @@ def admitted_sources(cfg):
     held_hashes = {d.sha256 for d in registry.documents
                    if d in held_documents or d.family in held_families}
     selected = {}
-    for source in sorted(cfg.seeds.dir.glob('*.md')):
+    for source, source_bytes in documents:
         doc_id = source.stem
         if doc_id not in docs:
             raise ValueError(f'unlisted selected source {doc_id!r}: {source}')
@@ -89,7 +95,7 @@ def admitted_sources(cfg):
         relative = Path(d.path)
         if relative.is_absolute() or '..' in relative.parts or (root/relative).resolve() != source.resolve() or not source.resolve().is_relative_to(root):
             raise ValueError(f'source registry path mismatch or escape for {doc_id!r}')
-        if hashlib.sha256(source.read_bytes()).hexdigest() != d.sha256:
+        if hashlib.sha256(source_bytes).hexdigest() != d.sha256:
             raise ValueError(f'source registry hash mismatch for {doc_id!r}')
         if doc_id in cfg.seeds.eval_docs:
             continue  # Existing explicit holdout exclusion remains additional protection.
@@ -109,6 +115,11 @@ def admitted_sources(cfg):
 def record_source_binding(cfg, row):
     """Fail closed on stale registry metadata before using a record as training evidence."""
     selected = admitted_sources(cfg)
+    _record_binding(selected, row)
+
+
+def _record_binding(selected, row):
+    """Check every row against its original, already validated source bindings."""
     if selected is None:
         return
     doc_id = row.get('doc_id')

@@ -15,13 +15,10 @@ def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> 
         from .training_inputs import admitted_rows
         return admitted_rows(cfg, evidence_dir=evidence_dir)
     from .io import read_jsonl
-    from .source_registry import admitted_sources
-    from .support import source_for_record
+    from .support import source_for_records
     rows = read_jsonl(cfg.run_dir / 'verified.jsonl')
     if getattr(cfg.seeds, 'registry', None) is not None:
-        admitted_sources(cfg)
-        for row in rows:
-            source_for_record(cfg, row)
+        source_for_records(cfg, rows)
     return rows
 
 
