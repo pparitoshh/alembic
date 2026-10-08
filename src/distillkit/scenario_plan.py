@@ -176,7 +176,7 @@ def freeze_run(cfg, jobs, gold, prompts):
                 previous.get('inputs') != inputs):
             raise ValueError('generation manifest differs; use a fresh run directory')
     else:
-        artifacts = ('questions.jsonl', 'generated.jsonl', 'teacher_logprobs.jsonl.gz',
+        artifacts = ('questions.jsonl', 'question_rejections.jsonl', 'generated.jsonl', 'teacher_logprobs.jsonl.gz',
                      'verified.jsonl', 'rejected.jsonl', 'pending_review.jsonl')
         if any((cfg.run_dir / name).exists() for name in artifacts):
             raise ValueError('generation artifacts exist without a matching manifest; use a fresh run directory')
