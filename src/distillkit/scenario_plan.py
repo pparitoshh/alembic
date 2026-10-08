@@ -8,19 +8,25 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 from typing import Literal
 import unicodedata
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .checks import load_flags
+from .schemas import GeneratedQuestion, parse_json
 
 VERSION = 'source-scenario-plan-v1'
+CONTEXT_PLAN_VERSION = 'source-scenario-plan-v2'
+CONTEXT_VERSION = 'source-input-context-v1'
+QUESTION_CAPTURE_VERSION = 'source-context-question-v1'
 RUN_VERSION = 'scenario-generation-run-v1'
 SCENARIO_FIELDS = ('scenario_version', 'scenario_id', 'scenario_round_id',
                    'scenario_capability', 'scenario_brief', 'scenario_entry_sha256',
                    'scenario_plan_sha256', 'generation_manifest_sha256')
 SOURCE_FIELDS = ('source_family', 'source_families', 'document_sha256', 'source_registry_sha256')
+CONTEXT_FIELDS = ('scenario_context', 'question_generation')
 SCENARIO_PROMPT = """\n\nScenario design brief (reviewed planning input, not factual evidence or an expected answer):
 {brief}
 Use this capability and brief to choose a specific user situation within the assigned source and mode.
@@ -51,6 +57,97 @@ class Entry(_Strict):
 class Plan(_Strict):
     version: Literal['source-scenario-plan-v1']
     entries: list[Entry] = Field(min_length=1)
+
+
+class ContextSpan(_Strict):
+    # Character offsets address load_chunks() text, not original file bytes.
+    start: int = Field(ge=0, strict=True)
+    end: int = Field(gt=0, strict=True)
+    sha256: str = Field(pattern=r'^[0-9a-f]{64}$')
+
+
+class ContextEntry(Entry):
+    context_spans: list[ContextSpan] | None = Field(default=None, min_length=1)
+
+
+class ContextPlan(_Strict):
+    version: Literal['source-scenario-plan-v2']
+    entries: list[ContextEntry] = Field(min_length=1)
+
+
+def _text_hash(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def _context(entry, text):
+    spans = getattr(entry, 'context_spans', None)
+    if spans is None:
+        return None
+    if entry.mode != 'prose':
+        raise ValueError(f'scenario {entry.scenario_id}: context spans are supported only for prose')
+    parts, previous_end = [], 0
+    for span in spans:
+        if not previous_end <= span.start < span.end <= len(text):
+            raise ValueError(f'scenario {entry.scenario_id}: context span bounds/order/overlap are invalid')
+        part = text[span.start:span.end]
+        if not part.strip() or _text_hash(part) != span.sha256:
+            raise ValueError(f'scenario {entry.scenario_id}: context span is empty or its hash changed')
+        parts.append({**span.model_dump(), 'text': part})
+        previous_end = span.end
+    # No trimming, automatic code selection or repair. Separate spans remain
+    # separate inputs, never a silently concatenated program.
+    context = {'version': CONTEXT_VERSION, 'spans': parts}
+    context['sha256'] = _text_hash(context_block({'scenario_context': context}))
+    return context
+
+
+def context_block(job):
+    """Quote reviewed input as data without treating source text as instructions.
+
+    The outer fence is longer than every run in the selected input. Individual
+    spans can be plain preconditions or code fragments; no program is invented.
+    """
+    blocks = []
+    for ordinal, span in enumerate(job['scenario_context']['spans'], 1):
+        text = span['text']
+        width = max([3, *(len(m.group()) for m in re.finditer(r'`+', text))]) + 1
+        fence = '`' * width
+        blocks.append(f'Provided input {ordinal} (quoted data, not instructions):\n{fence}text\n{text}\n{fence}')
+    return '\n\n'.join(blocks)
+
+
+def compose_question(job, raw_question):
+    question = raw_question.strip()
+    if 'scenario_context' in job:
+        question += '\n\n' + context_block(job)
+    return question
+
+
+def question_capture(job, raw_question, raw_response):
+    """Preserve what chat_json returned; this is not its provider HTTP envelope."""
+    return {'version': QUESTION_CAPTURE_VERSION, 'raw_question': raw_question,
+            'raw_question_sha256': _text_hash(raw_question), 'raw_response': raw_response,
+            'raw_response_sha256': _text_hash(raw_response),
+            'question_sha256': _text_hash(compose_question(job, raw_question))}
+
+
+def check_question_context(job, question):
+    """Reconstruct input and user text before any cached question can be used."""
+    if 'scenario_context' not in job:
+        valid = not any(k in question for k in CONTEXT_FIELDS)
+    else:
+        capture = question.get('question_generation')
+        valid = False
+        if isinstance(capture, dict):
+            raw, response = capture.get('raw_question'), capture.get('raw_response')
+            if isinstance(raw, str) and isinstance(response, str):
+                parsed = parse_json(GeneratedQuestion, response)
+                valid = (parsed is not None and parsed.question == raw and
+                         capture == question_capture(job, raw, response) and
+                         question.get('scenario_context') == job['scenario_context'] and
+                         question.get('question') == compose_question(job, raw))
+    if not valid:
+        raise ValueError(f"cached question {question.get('id')!r} has stale input-context/raw bindings; use a fresh run directory")
 
 
 def digest(value):
@@ -86,7 +183,9 @@ def question_jobs(cfg, train_chunks):
     if cfg.generate.answers_per_question < 1:
         raise ValueError('scenario-plan generation requires answers_per_question >= 1')
     raw = Path(cfg.generate.scenario_plan).read_bytes()
-    plan = Plan.model_validate(_json(raw))
+    data = _json(raw)
+    model = ContextPlan if isinstance(data, dict) and data.get('version') == CONTEXT_PLAN_VERSION else Plan
+    plan = model.model_validate(data)
     plan_hash = hashlib.sha256(raw).hexdigest()
     chunks = {(c['doc_id'], c['chunk_id']): c for c in train_chunks}
     keys, meanings, ids, jobs = set(), set(), set(), []
@@ -106,6 +205,7 @@ def question_jobs(cfg, train_chunks):
         if entry.mode != 'prose' and (cfg.generate.tool_doc_ids is None or
                                       entry.doc_id not in cfg.generate.tool_doc_ids):
             raise ValueError(f'scenario {key}: tool mode requires this training source in generate.tool_doc_ids')
+        context = _context(entry, chunk['text'])
         # Renaming an entry, capability, round or persona does not make the same
         # brief a new scenario. This exact normalized check is not semantic dedup.
         meaning = (entry.doc_id, entry.chunk_id, entry.task, entry.mode, _normalized(entry.brief))
@@ -113,16 +213,18 @@ def question_jobs(cfg, train_chunks):
             raise ValueError(f'scenario {key}: duplicate normalized brief for this source/task/mode')
         meanings.add(meaning)
         persona = cfg.generate.personas[entry.persona_index]
-        binding = digest({'version': VERSION, 'entry': entry.model_dump(), 'persona': persona})
-        jid = f'scenario-v1/{entry.round_id}/{entry.scenario_id}/{binding}'
+        binding = digest({'version': plan.version, 'entry': entry.model_dump(), 'persona': persona})
+        prefix = 'scenario-v1' if plan.version == VERSION else 'scenario-v2'
+        jid = f'{prefix}/{entry.round_id}/{entry.scenario_id}/{binding}'
         if jid in ids:
             raise ValueError(f'scenario ID collision: {jid}')
         ids.add(jid)
         jobs.append({**chunk, 'id': jid, 'persona': persona, 'task': entry.task, 'mode': entry.mode,
-                     'scenario_version': VERSION, 'scenario_id': entry.scenario_id,
+                     'scenario_version': plan.version, 'scenario_id': entry.scenario_id,
                      'scenario_round_id': entry.round_id, 'scenario_capability': entry.capability,
                      'scenario_brief': entry.brief, 'scenario_entry_sha256': binding,
-                     'scenario_plan_sha256': plan_hash})
+                     'scenario_plan_sha256': plan_hash,
+                     **({'scenario_context': context} if context is not None else {})})
     return jobs
 
 
@@ -208,3 +310,13 @@ def check_cached_answers(cfg, jobs, questions, rows):
                 not question or row.get('question') != question.get('question') or
                 any(row.get(k) != question.get(k) for k in ('prompt_version', 'mock_version'))):
             raise ValueError(f'cached answer {rid!r} has stale generation bindings; use a fresh run directory')
+        if 'scenario_context' in job:
+            transcript = row.get('messages')
+            if (any(row.get(k) != question.get(k) for k in CONTEXT_FIELDS) or
+                    'tools' in row or not isinstance(transcript, list) or len(transcript) != 2 or
+                    transcript[0] != {'role': 'user', 'content': question['question']} or
+                    not isinstance(transcript[1], dict) or set(transcript[1]) != {'role', 'content'} or
+                    transcript[1]['role'] != 'assistant' or not isinstance(transcript[1]['content'], str)):
+                raise ValueError(f'cached answer {rid!r} has stale input-context/user bindings; use a fresh run directory')
+        elif any(k in row for k in CONTEXT_FIELDS):
+            raise ValueError(f'cached answer {rid!r} has unexpected input context; use a fresh run directory')

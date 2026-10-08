@@ -6,6 +6,14 @@ different contexts: source support for a numerical answer does not make a
 question about an absent table answerable, and an exact source rewrite is not
 a useful training target when the user never supplied the function or bounds.
 
+That remains the default for legacy grid and v1 scenario generation. Explicit
+v2 scenario plans can now attach reviewed, hash-bound input spans deterministically;
+see [the source-input contract](SCENARIO_PLANS.md#optional-source-input-in-v2-plans).
+Only those context-enabled entries use `source-grounded-v10-bound-input-context`.
+They retain the raw teacher question separately and give the answer prompt and
+student user message the same composed question. This opt-in change does not
+rewrite historical questions or eliminate the need for semantic premise review.
+
 Prompt version `source-grounded-v8-self-contained-resource-policy` introduced the rule that asks
 the author to include necessary table values, code, bounds and assumptions in
 the question, or choose a narrower objective. It forbids treating unseen
