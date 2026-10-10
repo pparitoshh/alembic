@@ -24,6 +24,11 @@ SEEDS_DIR="${SEEDS_DIR:-$RUN_DIR/seeds}"
 REVIEW_MODEL="${REVIEW_MODEL:-$CROSS_JUDGE_MODEL}"
 [ -f "$SEEDS_DIR/sources_manifest.json" ] || { echo "[job] no $SEEDS_DIR/sources_manifest.json: run distillkit.fetch_sources first"; exit 1; }
 SET=(--set run_dir="$RUN_DIR" --set seeds.dir="$SEEDS_DIR" --set verify.grounding_reviews="$RUN_DIR/grounding_reviews.jsonl")
+# The few-shot gold examples (data/gold) must find their train-split source docs in seeds.dir
+for doc in $("$VENV/bin/python" -c 'import json; p = json.load(open("data/gold/provenance.json"))
+print(" ".join(s["doc_id"] for e in p["examples"].values() for s in e["sources"] if s["split"] == "train"))'); do
+    cp -n "data/seeds/$doc.md" "$SEEDS_DIR/" || exit 1
+done
 
 PORT=$(job_port)
 start_vllm "$TEACHER_MODEL" "$PORT" $(teacher_args)
