@@ -1,6 +1,6 @@
 # Certified Qwen teacher Q&A: 11,167 rows
 
-This immutable snapshot contains 11,167 distinct Q&A accepted under the campaign's automated gates as of 2026-10-10 22:09 UTC. It crosses the 10,000 milestone and is an intermediate release toward 30,000.
+This immutable snapshot contains 11,167 distinct Q&A accepted under the campaign's automated gates as of 2026-10-10 22:09 UTC. It crosses the 10,000 milestone. The active campaign target was subsequently raised to at least 50,000; this dataset file and its certificate remain unchanged.
 
 - `verified.jsonl`: the exact cumulative release, SHA-256 `454a9498377b344d5e6a85d4ac769fe5eb3e7d11bbf4c3fe5af52b9ef81b75aa`.
 - `certification_report_third.json`, `certification_report_fourth.json`, and `certification_report.json`: corrected certificates for the three cohorts since the 8,450-row release. They add 1,286, 249, and 1,182 Q&A respectively.
