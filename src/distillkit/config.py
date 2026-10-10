@@ -105,6 +105,11 @@ class TrainCfg(_Section):
     # same run_dir resumes from the newest one (a job killed at the wall time loses < N steps)
     save_steps: int | None = Field(None, gt=0)
     save_total_limit: int = Field(2, gt=0)
+    # share of examples held out for eval loss at every save_steps, split by source document so the
+    # validation questions don't share a document with training ones; 0 = no validation set
+    val_fraction: float = Field(0.0, ge=0, lt=0.5)
+    # trainer metric sinks, e.g. [mlflow] (tracking URI/experiment from MLFLOW_* env vars); [] = none
+    report_to: list[str] = []
 
     @model_validator(mode="after")
     def _one_precision(self):

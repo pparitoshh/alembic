@@ -84,6 +84,7 @@ def test_run_wires_checkpointing_into_the_trainer(tmp_path, monkeypatch, save_st
 
     class Trainer:
         def __init__(self, **kw): seen['args'] = kw['args']
+        def add_callback(self, c): seen.setdefault('callbacks', []).append(type(c).__name__)
         def train(self, resume_from_checkpoint=None): seen['resume'] = resume_from_checkpoint
         def save_model(self, p): pass
     monkeypatch.setattr(trl, 'SFTTrainer', Trainer)
@@ -91,10 +92,12 @@ def test_run_wires_checkpointing_into_the_trainer(tmp_path, monkeypatch, save_st
     if save_steps:  # a killed earlier attempt left a checkpoint for the same inputs
         train.run(cfg)
         (cfg.run_dir / 'checkpoints' / 'checkpoint-200').mkdir()
+        seen.clear()
     train.run(cfg)
     assert seen['args'].save_strategy == ('no' if save_steps is None else 'steps')
     if save_steps:
         assert seen['args'].save_steps == 100
         assert seen['resume'] == str(cfg.run_dir / 'checkpoints' / 'checkpoint-200')
+        assert seen['callbacks'] == ['KeepAdapters']  # copies each checkpoint's adapter for later eval
     else:
         assert seen['resume'] is None and not (cfg.run_dir / 'checkpoints' / 'inputs.sha256').exists()

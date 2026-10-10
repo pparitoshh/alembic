@@ -22,6 +22,7 @@ train = [
     "datasets>=3.0",
     "accelerate>=1.0",
     "bitsandbytes>=0.45",
+    "mlflow-skinny>=3.0",   # report_to: [mlflow] and the `track` stage; `mlflow ui` needs full mlflow
 ]
 export = [
     "protobuf>=7.36.2",

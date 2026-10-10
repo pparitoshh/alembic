@@ -7,6 +7,8 @@ Multi-GPU: launch with `accelerate launch --config_file configs/accelerate/fsdp.
 
 import hashlib
 import json
+import random
+import shutil
 from pathlib import Path
 
 from .config import Config
@@ -44,7 +46,7 @@ def length_report(lengths: list[int], max_length: int) -> str:
 
 def inputs_fingerprint(cfg: Config, examples: list[dict]) -> str:
     """What a checkpoint was trained on; resuming with other data or settings would mix two runs."""
-    train = cfg.train.model_dump(mode="json", exclude={"save_steps", "save_total_limit"})
+    train = cfg.train.model_dump(mode="json", exclude={"save_steps", "save_total_limit", "report_to"})
     blob = json.dumps({"examples": examples, "student": cfg.student.model, "train": train},
                       sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode()).hexdigest()
@@ -63,6 +65,40 @@ def resume_checkpoint(ckpt_dir: Path, fingerprint: str) -> str | None:
         raise ValueError(f"{ckpt_dir} holds checkpoints from other training data or settings; "
                          "use a new run_dir or delete the checkpoints")
     return str(found[-1])
+
+
+def split_by_document(rows: list[dict], examples: list[dict], fraction: float, seed: int) -> tuple[list[dict], list[dict]]:
+    """(train, validation) examples; whole source documents go to validation until it holds >= fraction."""
+    if not fraction:
+        return examples, []
+    doc = [r.get("doc_id") or r["id"] for r in rows]
+    order = sorted(set(doc))
+    random.Random(seed).shuffle(order)
+    held, n = set(), 0
+    for d in order:
+        if n >= fraction * len(rows):
+            break
+        held.add(d)
+        n += doc.count(d)
+    train = [e for d, e in zip(doc, examples) if d not in held]
+    val = [e for d, e in zip(doc, examples) if d in held]
+    if not train:
+        raise ValueError("val_fraction leaves no training examples")
+    return train, val
+
+
+ADAPTER_FILES_SKIPPED = {"optimizer.pt", "scheduler.pt", "rng_state.pth", "training_args.bin"}
+
+
+def keep_adapter(checkpoint: Path, run_dir: Path, step: int) -> Path:
+    """Copy a checkpoint's adapter to run_dir/adapters/step_<N>/adapter, the layout `answer`/`evaluate`
+    read, so it survives save_total_limit pruning and can be evaluated later."""
+    dst = run_dir / "adapters" / f"step_{step}" / "adapter"
+    dst.mkdir(parents=True, exist_ok=True)
+    for f in checkpoint.iterdir():
+        if f.is_file() and f.name not in ADAPTER_FILES_SKIPPED:
+            shutil.copy2(f, dst / f.name)
+    return dst
 
 
 def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
@@ -87,8 +123,10 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
 
     tok = AutoTokenizer.from_pretrained(scfg.model)
     examples = [training_example(r, scfg.system_prompt) for r in rows]
-    ds = Dataset.from_list(examples)
-    print(f"[train] {len(ds)} examples, student={scfg.model}, method={tcfg.method}, 4bit={tcfg.load_in_4bit}")
+    train_ex, val_ex = split_by_document(rows, examples, tcfg.val_fraction, tcfg.seed)
+    ds = Dataset.from_list(train_ex)
+    val_ds = Dataset.from_list(val_ex) if val_ex else None
+    print(f"[train] {len(ds)} examples (+{len(val_ex)} validation), student={scfg.model}, method={tcfg.method}, 4bit={tcfg.load_in_4bit}")
     print(length_report(token_lengths(tok, examples), tcfg.max_length))
     ckpt_dir = run_dir / "checkpoints"
     resume = resume_checkpoint(ckpt_dir, inputs_fingerprint(cfg, examples)) if tcfg.save_steps else None
@@ -126,8 +164,12 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         save_strategy="steps" if tcfg.save_steps else "no",
         save_steps=tcfg.save_steps or 500,
         save_total_limit=tcfg.save_total_limit,
+        eval_strategy="steps" if val_ds is not None else "no",
+        eval_steps=tcfg.save_steps or 100,
+        per_device_eval_batch_size=tcfg.batch_size,
         seed=tcfg.seed,
-        report_to="none",
+        report_to=tcfg.report_to or "none",
+        run_name=str(run_dir),  # the `track` stage finds this run by name
         model_init_kwargs=model_kwargs,
     )
     peft_cfg = LoraConfig(
@@ -142,6 +184,7 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         model=scfg.model,
         args=args,
         train_dataset=ds,
+        eval_dataset=val_ds,
         processing_class=tok,
         peft_config=peft_cfg,
     )
@@ -150,6 +193,15 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         for p in trainer.model.parameters():
             if p.requires_grad:
                 p.data = p.data.float()
+    if tcfg.save_steps:
+        from transformers import TrainerCallback
+
+        class KeepAdapters(TrainerCallback):
+            def on_save(self, args, state, control, **kw):
+                if state.is_world_process_zero:
+                    keep_adapter(Path(args.output_dir) / f"checkpoint-{state.global_step}", run_dir, state.global_step)
+
+        trainer.add_callback(KeepAdapters())
     for callback in callbacks:
         trainer.add_callback(callback)
     if before_train is not None:

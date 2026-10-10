@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "fa7e88dac361cf125c456e4b2fd490feee281ebd51fc6ef66d86a23c30681ea9"
+      "sha256": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995"
     },
     {
       "root": "repository",
@@ -773,6 +773,29 @@
         "full_failed": 1,
         "full_failure": "Strict151 release validation refused prior config.py hash.",
         "skipped": 0
+      },
+      "validation_scope": "Metadata-only binding update is followed by the full suite."
+    },
+    {
+      "version": "train-tracking-binding-v1",
+      "created_utc": "2026-10-10T15:59:48.623745+00:00",
+      "base_revision": "5873df7799532a470fe696b5e9d90b3a26526418",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "2396c0decacd4da36c8f2353d097bf9e21106be4e4b96352801ae92ba1298318",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "fa7e88dac361cf125c456e4b2fd490feee281ebd51fc6ef66d86a23c30681ea9",
+          "after": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add opt-in train.val_fraction and train.report_to for validation loss and MLflow tracking. Only the config.py code binding changes; retain previous hash and all existing history.",
+      "compatibility": "Only TrainCfg gains two optional fields. EvalCfg, evaluation answering inputs/schemas/scorers, tool definitions and judge verdict schema/protocol remain unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified.",
+      "pre_binding_validation": {
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused prior config.py hash."
       },
       "validation_scope": "Metadata-only binding update is followed by the full suite."
     }
