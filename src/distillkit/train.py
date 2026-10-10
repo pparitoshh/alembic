@@ -5,6 +5,8 @@ so tool results and user turns are context, not targets.
 Multi-GPU: launch with `accelerate launch --config_file configs/accelerate/fsdp.yaml -m distillkit.cli train -c ...`.
 """
 
+import hashlib
+import json
 from pathlib import Path
 
 from .config import Config
@@ -20,6 +22,47 @@ def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> 
     if getattr(cfg.seeds, 'registry', None) is not None:
         source_for_records(cfg, rows)
     return rows
+
+
+def token_lengths(tok, examples: list[dict]) -> list[int]:
+    """Tokens per example as the trainer renders it (system prompt, tools, chat template)."""
+    lengths = []
+    for ex in examples:
+        tools = json.loads(ex["tools"]) if ex.get("tools") else None
+        text = tok.apply_chat_template(ex["messages"], tools=tools, tokenize=False,
+                                       **ex.get("chat_template_kwargs", {}))
+        lengths.append(len(tok(text, add_special_tokens=False)["input_ids"]))
+    return lengths
+
+
+def length_report(lengths: list[int], max_length: int) -> str:
+    over = sum(n > max_length for n in lengths)
+    s = sorted(lengths)
+    return (f"[train] tokens per example: median {s[len(s) // 2]}, max {s[-1]}; "
+            f"{over} of {len(s)} over max_length={max_length} (truncated, losing the answer's end)")
+
+
+def inputs_fingerprint(cfg: Config, examples: list[dict]) -> str:
+    """What a checkpoint was trained on; resuming with other data or settings would mix two runs."""
+    train = cfg.train.model_dump(mode="json", exclude={"save_steps", "save_total_limit"})
+    blob = json.dumps({"examples": examples, "student": cfg.student.model, "train": train},
+                      sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(blob.encode()).hexdigest()
+
+
+def resume_checkpoint(ckpt_dir: Path, fingerprint: str) -> str | None:
+    """Newest checkpoint-<step> in ckpt_dir to resume from, after checking it belongs to these inputs."""
+    stamp = ckpt_dir / "inputs.sha256"
+    found = sorted((d for d in ckpt_dir.glob("checkpoint-*") if d.name.split("-")[-1].isdigit()),
+                   key=lambda d: int(d.name.split("-")[-1]))
+    if not found:
+        ckpt_dir.mkdir(parents=True, exist_ok=True)
+        stamp.write_text(fingerprint + "\n")
+        return None
+    if not stamp.exists() or stamp.read_text().strip() != fingerprint:
+        raise ValueError(f"{ckpt_dir} holds checkpoints from other training data or settings; "
+                         "use a new run_dir or delete the checkpoints")
+    return str(found[-1])
 
 
 def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
@@ -43,8 +86,14 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
     out_dir = run_dir / "adapter"
 
     tok = AutoTokenizer.from_pretrained(scfg.model)
-    ds = Dataset.from_list([training_example(r, scfg.system_prompt) for r in rows])
+    examples = [training_example(r, scfg.system_prompt) for r in rows]
+    ds = Dataset.from_list(examples)
     print(f"[train] {len(ds)} examples, student={scfg.model}, method={tcfg.method}, 4bit={tcfg.load_in_4bit}")
+    print(length_report(token_lengths(tok, examples), tcfg.max_length))
+    ckpt_dir = run_dir / "checkpoints"
+    resume = resume_checkpoint(ckpt_dir, inputs_fingerprint(cfg, examples)) if tcfg.save_steps else None
+    if resume:
+        print(f"[train] resuming from {resume}")
 
     # fp16 AMP needs fp32 master weights (GPUs without bf16, e.g. RTX 20xx)
     load_dtype = torch.float32 if tcfg.fp16 else torch.bfloat16
@@ -60,7 +109,7 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         )
 
     args = SFTConfig(
-        output_dir=str(run_dir / "checkpoints"),
+        output_dir=str(ckpt_dir),
         num_train_epochs=tcfg.epochs,
         per_device_train_batch_size=tcfg.batch_size,
         gradient_accumulation_steps=tcfg.grad_accum,
@@ -74,7 +123,9 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},  # required under FSDP, fine without
         logging_steps=1,
-        save_strategy="no",
+        save_strategy="steps" if tcfg.save_steps else "no",
+        save_steps=tcfg.save_steps or 500,
+        save_total_limit=tcfg.save_total_limit,
         seed=tcfg.seed,
         report_to="none",
         model_init_kwargs=model_kwargs,
@@ -103,7 +154,7 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         trainer.add_callback(callback)
     if before_train is not None:
         before_train(trainer)
-    trainer.train()
+    trainer.train(resume_from_checkpoint=resume)
     trainer.save_model(str(out_dir))
     tok.save_pretrained(str(out_dir))
     print(f"[train] adapter saved -> {out_dir}")

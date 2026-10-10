@@ -9,6 +9,7 @@
 #SBATCH --output=slurm/logs/%x-%A_%a.out
 # QDoRA student, one seed per array task and per GPU (seeds from $SEEDS; --array must match its length).
 # Each seed gets $RUN_DIR/seed_<n>/ sharing the verified data.
+# Killed at the wall time? Resubmit the same array task: it resumes from the newest checkpoint (train.save_steps).
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"
 

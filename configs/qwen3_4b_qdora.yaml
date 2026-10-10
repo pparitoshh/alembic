@@ -67,6 +67,7 @@ train:
   grad_accum: 4
   max_length: 2048   # tool-calling traces are longer than prose answers
   bf16: true
+  save_steps: 100    # a job killed at the wall time resumes from the newest checkpoint on resubmission
 
 eval:
   file: data/eval/eval_all_v2.jsonl
