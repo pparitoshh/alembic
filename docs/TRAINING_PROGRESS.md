@@ -109,12 +109,34 @@ uses ~10x more invalid command-line flags, and calls tools on half the questions
 
 ### Per-step dev eval (dataset_v1 development slice)
 
-106 normal + 23 tool items. Pending: seed 42 job 59914860 (steps 800, 897), seed 1 job 59916409
-(steps 100-852), seed 2 job 59915060.
+106 normal + 23 tool items (`development_normal.jsonl`, `development_tools.jsonl`), same judge and
+protocol, 212/212 verdicts valid. Base and student both answer at every step.
+
+**Seed 42** (job 59914860; its trailing `track` fails: no MLflow run; results are complete):
+
+| Metric | Base | Step 800 | Step 897 (final) |
+|---|---|---|---|
+| Win rate vs base (0.5 = tie) | – | **0.330** | **0.349** |
+| Check pass rate | 0.943 | 0.915 | 0.915 |
+| Bad-flag rate | 0.029 | 0.211 | 0.250 |
+| Answers with bad flags | 3 | 9 | 9 |
+| Tool decision accuracy | 0.957 | 0.913 | 0.913 |
+| Tool false-call rate | 0.111 | 0.222 | 0.222 |
+| Tool first-response pass rate | 0.957 | 0.870 | 0.870 |
+| Tool raw call rate | 0.652 | 0.696 | 0.696 |
+| Tool valid / AST / exec ok | 1.0 / 1.0 / 1.0 | 1.0 / 0.929 / 1.0 | 1.0 / 0.929 / 1.0 |
+| Tool grounded rate | 1.0 | 1.0 | 1.0 |
+
+Same picture as the config eval set: the student loses about 2:1 to the base and adds invalid flags.
+Steps 800 and 897 barely differ.
+
+**Seed 1** (job 59916409, steps 100-852) and **seed 2** (job 59915060): pending. Each step takes
+~10-12 min to answer (base is re-answered every step), so a 9-step seed takes ~2.5 h.
 
 | Step | Seed 42 win rate | Seed 1 win rate | Seed 2 win rate |
 |---|---|---|---|
-| | | | |
+| 800 | 0.330 | | |
+| 897 / 852 (final) | 0.349 | | |
 
 ### Open questions
 
