@@ -227,7 +227,7 @@ Jobs 59918668_{0,1,2}; `track` logged the results into each seed's MLflow run (f
 The regression comes from the data, not from overtraining; settings alone will not get the student
 past the base.
 
-## Data: Slurm + tool teacher records (2026-10-10, in progress)
+## Data: Slurm + tool teacher records (2026-10-10)
 
 Fills batch 1's gap (0.8% Slurm, 3 tool traces) with the repo's own pipeline (`generate` → `verify`).
 
@@ -279,7 +279,11 @@ separates the effect of Slurm prose from the effect of tool traces.
   `runs/b3b_tools/verified.jsonl` (hashes above). To rebuild: base 4,775 + the new records (3a: prose
   only) appended 3 times, copies 2 and 3 with ids suffixed `#up1` / `#up2`.
 
-Results: pending.
+- **Training:** 3a 284+ steps, ~18-21 min per seed; 3b 316 steps, ~24.5 min per seed. 3b seed 42
+  validation loss 1.171 → 1.156 → 1.154 → 1.154 (steps 100, 200, 300, 316). 0 records over
+  `max_length` (3b median 168 tokens, max 1,690).
+
+Results: see the batch comparison below.
 
 ## Batch 3b-r8: rank 8 on the 3b data (2026-10-10)
 
@@ -291,9 +295,9 @@ Does a smaller adapter drift less from the base? Identical to 3b except the adap
 - **Jobs:** train 59920258 (seeds 42, 1, 2), `evaluate` 59920260, `evaluate_checkpoints` 59920263.
 - **Adapters:** `runs/b3b_r8/seed_<n>/adapter/` and `.../adapters/step_<N>/adapter/`.
 
-Results: pending.
+Results: see the batch comparison below. Rank 8 is no better than rank 16; keep rank 16.
 
-## Data prototype: When2Call "ask a follow-up" records (2026-10-10, not trained yet)
+## Data prototype: When2Call "ask a follow-up" records (2026-10-10, dropped)
 
 Public data search (Hugging Face, Kaggle, papers): no public Slurm Q&A dataset exists. The one
 ready-made set aimed at our tool failure is [nvidia/When2Call](https://huggingface.co/datasets/nvidia/When2Call)
@@ -315,5 +319,58 @@ tool fits ([Hammer, arXiv 2410.04587](https://arxiv.org/pdf/2410.04587)). `hpcgr
 - **Spot check (12 rows):** 11 ask for a genuinely missing required argument; 1 is doubtful
   (asks how many items to skip). Off-domain: 3 of 300 mention jobs/GPUs/clusters at all.
 - **Where:** converter and sample only in the session scratchpad so far (not on Leonardo, not in git).
-- **Proposed use:** batch 4 = 3b data + these 300 records, to test whether general "ask instead of
-  call" examples lower the false-call rate without hurting normal answers.
+- **Decision: not used.** 3b's own Slurm tool traces already bring the false-call rate to 0, so
+  general-domain ask examples would only add off-topic data.
+
+## Batch comparison: final adapters (2026-10-10)
+
+Config eval set, judge `openai/gpt-oss-20b`, final adapter of each seed. Mean over seeds 42, 1, 2
+(batch 1: seeds 42, 1), seed range in brackets.
+
+**Normal questions (66, judged + checked):**
+
+| Batch | Change | Win rate vs base | Check pass rate | Bad-flag rate |
+|---|---|---|---|---|
+| Base | – | – | 0.955 | 0.025 |
+| B1 | 4,775 records, 3 epochs, lr 1e-4 | 0.324 [0.307-0.341] | 0.864 | 0.289 |
+| B2 | 1 epoch, lr 5e-5 | 0.326 [0.292-0.367] | 0.899 | 0.220 |
+| B3a | + Slurm prose (119 x3) | **0.359** [0.333-0.379] | 0.904 | 0.098 |
+| **B3b** | **+ Slurm prose and tools (182 x3)** | **0.359** [0.356-0.364] | **0.924** | **0.059** |
+| B3b-r8 | 3b, rank 8 | 0.355 [0.326-0.375] | 0.919 | 0.082 |
+
+**Tool questions (16):**
+
+| Batch | Decision accuracy | False-call rate | Grounded rate |
+|---|---|---|---|
+| Base | 1.0 | 0.167 | 1.0 |
+| B1 | 0.875 | 0.500 | 0.923 |
+| B2 | 0.854 | 0.389 | 0.838 |
+| B3a | 0.875 | 0.333 | 0.833 |
+| **B3b** | **1.000** | **0.000** | **1.000** |
+| B3b-r8 | 0.979 | 0.167 | 0.970 |
+
+Correct-call (AST) accuracy is 1.0 for every batch and the base.
+
+**Per-step dev slice (dataset_v1 development, 106 normal + 23 tool), win rate vs base:**
+
+| Run | Step 100 | Step 200 | Final step |
+|---|---|---|---|
+| B1 seed 42 | – | – | 0.330 (800), 0.349 (897) |
+| B2 seed 42 | 0.325 | 0.316 | 0.314 (284) |
+| B2 seed 1 | 0.333 | 0.307 | 0.300 (284) |
+| B2 seed 2 | 0.302 | 0.300 | pending |
+
+Dev-slice tool false-call rate is 0.222 at every B2 step (base 0.111). Batch 3 per-step dev results:
+pending (jobs 59920008, 59920016, 59920263).
+
+### Conclusions
+
+1. **Settings alone (B1 → B2) change nothing**: the regression came from the data, not overtraining.
+2. **On-topic Slurm prose (B3a)** halves invalid flags (0.22 → 0.10) and lifts the win rate to 0.36.
+3. **Slurm tool traces (B3b)** are the best run: invalid flags 0.06, and on tool questions it matches
+   or beats the base (decision 1.0, 0 false calls vs the base's 0.167, no invented job ids).
+4. **Rank 8** is no better than rank 16 (more flags, false calls back to 0.167): keep rank 16.
+5. **Earlier checkpoints do not help**: dev win rate is flat at 0.30-0.35 across steps.
+6. **Still below the base on normal questions** (0.36 vs 0.5) with only 182 new records (3% of the
+   mix). Next: ~10k quality-gated Slurm / cluster-usage records, see `docs/plan/HPC10K_DATA.md`
+   (branch `feat/data-hpc10k`).
