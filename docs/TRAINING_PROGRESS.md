@@ -292,3 +292,28 @@ Does a smaller adapter drift less from the base? Identical to 3b except the adap
 - **Adapters:** `runs/b3b_r8/seed_<n>/adapter/` and `.../adapters/step_<N>/adapter/`.
 
 Results: pending.
+
+## Data prototype: When2Call "ask a follow-up" records (2026-10-10, not trained yet)
+
+Public data search (Hugging Face, Kaggle, papers): no public Slurm Q&A dataset exists. The one
+ready-made set aimed at our tool failure is [nvidia/When2Call](https://huggingface.co/datasets/nvidia/When2Call)
+(CC-BY-4.0): when to call a tool, ask, or abstain. General function-calling sets (xLAM-60k, Glaive,
+Hermes) are avoided: training on xLAM-60k is reported to make small models call tools *more* when no
+tool fits ([Hammer, arXiv 2410.04587](https://arxiv.org/pdf/2410.04587)). `hpcgroup/hpc-instruct`
+(MIT, 122k) is HPC *code* (MPI/CUDA/OpenMP), not Slurm usage: same mismatch as the 4,775 records.
+
+- **What the SFT split is:** 15,000 two-message rows, none with a tool call: ~7,100 clarifying
+  questions ("Could you provide the ticker IDs?") and ~7,900 refusals ("I'm unable to provide
+  real-time information").
+- **Kept:** only clarifying questions on rows offering >= 1 tool (7,109 candidates). Refusals are
+  left out: our "none" mode means *answer from knowledge*, and refusal data could teach the student
+  to decline Slurm questions it should answer.
+- **Conversion:** xLAM-style tool schemas (`dict`/`str`/`int`, `required` outside `parameters`)
+  rewritten as JSON Schema like our own tools; each row its own `doc_id` (`when2call:<row>`), with
+  `source_origin` and `license` fields. A 300-row random sample (seed 0) renders through
+  `records.training_example`; 1-5 tools per row.
+- **Spot check (12 rows):** 11 ask for a genuinely missing required argument; 1 is doubtful
+  (asks how many items to skip). Off-domain: 3 of 300 mention jobs/GPUs/clusters at all.
+- **Where:** converter and sample only in the session scratchpad so far (not on Leonardo, not in git).
+- **Proposed use:** batch 4 = 3b data + these 300 records, to test whether general "ask instead of
+  call" examples lower the false-call rate without hurting normal answers.
