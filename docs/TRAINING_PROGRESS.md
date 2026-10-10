@@ -138,10 +138,41 @@ Steps 800 and 897 barely differ.
 | 800 | 0.330 | | |
 | 897 / 852 (final) | 0.349 | | |
 
+### Findings: training data does not match the eval
+
+Checked on `verified.jsonl` with the same `check_answer` the eval uses:
+
+| | Training data (4,775 records) | Eval sets |
+|---|---|---|
+| Topics | ROCm systems/libraries/examples ~1,290, JAX 447, PyTorch + tutorials 569, Spark 393, Ray 350, Dask 267, Spack 182, Kokkos 103, ... | Slurm job arrays / requeue (config set 66/66, dev 66/106), Aalto Triton cluster usage (dev 40/106) |
+| Records mentioning Slurm | **36 (0.8%)** | almost all |
+| Records with a tool call | **3** (10 offer tools) | 16 (config) / 23 (dev) tool items |
+| Answers with invalid Slurm flags | 0 | student 21-32% bad-flag rate |
+| Task mix | concept 2,341, script 1,767, debug 394, howto 273 | |
+
+The student is trained on GPU/Python-library material and tested on Slurm and tool use. It does
+not learn Slurm from the teacher (the teacher data has no bad flags); it drifts from what the base
+already knew, and invents flags and tool calls. More epochs make the drift worse (validation loss
+rises in epoch 3).
+
+### Next steps
+
+1. **Data (the real fix):** generate teacher records from Slurm and cluster-usage documents (still
+   excluding the held-out `slurm_job_arrays`, `slurm_requeue_signals` and Aalto docs) and a few
+   hundred tool records with balanced call / no-call / ask outcomes; aim for Slurm + tools at
+   30-50% of the mix.
+2. **Train less:** `epochs: 1` (validation loss is lowest at steps 300-500). Confirm with seed 1's
+   per-step dev win rates before changing.
+3. **Gentler updates:** `learning_rate: 5e-5` (from 1e-4), optionally `lora_r: 8`. Limits drift,
+   but only data can make the student better than base on Slurm.
+4. **In-domain eval:** a small held-out slice on the training topics (ROCm, JAX, PyTorch) to check
+   whether the student improves where it was trained.
+
+Proposed batch 2: same data, `epochs: 1`, `learning_rate: 5e-5`, 3 seeds (~20 min each), to measure
+how much of the regression is overtraining, while the data fix is prepared.
+
 ### Open questions
 
-- Is the regression from overtraining (compare early steps on the dev slice) or from the data
-  itself (bad flags and eager tool calls in the teacher records)?
 - Training data was checked by the verifier and gpt-oss-20b only; no human audit yet.
 
 ### Infrastructure notes
