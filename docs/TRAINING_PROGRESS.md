@@ -247,3 +247,15 @@ separates the effect of Slurm prose from the effect of tool traces.
 - **Adapters:** `runs/b3{a_prose,b_tools}/seed_<n>/adapter/` and `.../adapters/step_<N>/adapter/`.
 
 Results: pending.
+
+## Batch 3b-r8: rank 8 on the 3b data (2026-10-10)
+
+Does a smaller adapter drift less from the base? Identical to 3b except the adapter size.
+
+- **Config:** `configs/qwen3_4b_qdora_r8.yaml` = batch 2 config with `lora_r: 8` (was 16) and
+  `lora_alpha: 16` (was 32; alpha kept at 2x rank, as in every batch).
+- **Data:** the 3b file (`0124a446…`, 5,321 records), copied to `runs/b3b_r8/`.
+- **Jobs:** train 59920258 (seeds 42, 1, 2), `evaluate` 59920260, `evaluate_checkpoints` 59920263.
+- **Adapters:** `runs/b3b_r8/seed_<n>/adapter/` and `.../adapters/step_<N>/adapter/`.
+
+Results: pending.
