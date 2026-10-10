@@ -21,9 +21,13 @@
 
 ## Log
 
-### 2026-10-10: quality review and production training status
+### 2026-10-10: second corrected teacher release
 
-The [quality review status](docs/QUALITY_REVIEW_STATUS.md) records a corrected, hash-validated [4,775-row automated-gate release](data/teacher/verified_qwen_4775/README.md): 1,100 prior accepted rows plus 3,675 accepted from 6,000 new-document questions, with 2,325 withheld. The current target is 30,000 distinct certified Q&A. A follow-on cohort selected 5,307 source-bound questions from 6,915 proposals; its answer job was running at the status check, so none of those questions are counted yet. An interim 1,100-row QDoRA run completed 207 optimizer steps and saved an adapter; the final 30,000-row run and student-improvement measurement remain pending. Raw attempts and model artifacts remain outside Git.
+The [8,450-row Qwen teacher release](data/teacher/verified_qwen_8450/README.md) is hash-validated and extends the earlier 4,775-row release byte-for-byte. The second 5,307-answer batch contributed 3,675 accepted Q&A after independent Gemma source review, GPT-OSS high-risk audit, deduplication, provenance and real TRL loader checks; 1,632 were withheld. A third 2,097-answer batch has finished raw generation and entered its independent gate. The 30,000-row QDoRA job remains held pending a corrected certificate at the target; no final student-improvement claim is made.
+
+### 2026-10-10: earlier quality review and interim training status
+
+The earlier corrected, hash-validated [4,775-row automated-gate release](data/teacher/verified_qwen_4775/README.md) contained 1,100 prior accepted rows plus 3,675 accepted from 6,000 new-document questions, with 2,325 withheld. At that checkpoint, a follow-on cohort had selected 5,307 source-bound questions from 6,915 proposals; its answers had not yet been certified. An interim 1,100-row QDoRA run completed 207 optimizer steps and saved an adapter. Raw attempts and model artifacts remain outside Git.
 
 ### 2026-10-06: teacher serving decided, judges and sizes in GOAL.md
 
