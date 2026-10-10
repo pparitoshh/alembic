@@ -1,0 +1,23 @@
+# Quality review and training status
+
+As of 2026-10-10 08:42 UTC, the evaluation release is ready, while the production training dataset and student training are still in progress. This is a status report, not a release of the private teacher data.
+
+| Area | Current result | Limit |
+|---|---|---|
+| Evaluation | 151 source-grounded tasks: 106 normal development, 23 first-response tool development, 22 frozen final | Tool tasks score first-response decisions and arguments; they do not establish full multi-turn success. |
+| Accepted teacher Q&A | 1,100 distinct original Qwen3-32B-AWQ records from 631 source IDs; 8,900 remain toward the 10,000-record target | The private accepted release is immutable and source/review-bound. It is not committed to this repository. |
+| Latest 40-answer review | 25 accepted after individual source/answer review, a second source reading, novelty and production checks, and real CPU loader/logprob certification; 11 rejected, four held pending | The four pending answers contain claims stronger than their selected source evidence. They have not been promoted. |
+| Next new-document batch | 1,031 CPU-planned scenarios over 1,019 unused source units in 38 families; 3,969 short of the requested 5,000 candidates | These are source-bound objectives, not generated questions or verified answers. No 5,000-candidate GPU job has launched. |
+| Student training | An eight-record QDoRA sanity run passed and its code was merged in [PR #10](https://github.com/pparitoshh/alembic/pull/10) | Production training on the 1,100-record release, or on a completed 10,000-record corpus, has not been run. Student improvement has not been measured. |
+
+The accepted training release has 1,100 unique IDs and normalized questions. Its SHA-256 is `ff5786f5ad3e20ef88bc5c5edfb041679ed437cebc72e60c302fed9874b66037`. The latest 25-row addition passed the real CPU training-loader roundtrip, assistant-only mask, EOS, padding, truncation, and logprob checks. The pinned tokenizer census counts 148,487 assistant-content tokens across all accepted records, but full supervision-token coverage for the ten tool/clarification records has not been remeasured.
+
+Quality review remains a substantive gate. A risk-selected independent audit of 36 earlier candidate answers found 11 semantic false accepts, including nine that passed the structural production verifier, and three unresolved approvals. This was not a random sample and does not estimate the error rate of the accepted release. It demonstrates why a verifier pass or model-judge agreement alone cannot justify bulk admission. The latest 40-answer cohort was read individually against pinned sources; its second pass was another model-agent source reading, not independent human or blind review. Rejected and pending attempts remain preserved.
+
+The fresh-batch planner and prior-use preflight passed for the 1,031 scenarios, with zero exact scenario, seed, or origin conflicts against previous teacher attempts. Exact checks do not prove semantic novelty of future generated questions. The batch remains below 5,000, so generation is held. Campaign accounting shows 19.5056 of the authorized 24 GPU-hours consumed and 4.4944 hours remaining. A higher cap has been proposed but has not been approved.
+
+The latest code PR before this report was [PR #22](https://github.com/pparitoshh/alembic/pull/22), merged into `dev` at `4cbe6e61532d40be257d8fc36871c8aada5ddadc`. The newer source curation, answer audits, and accepted teacher release are private campaign artifacts and were not part of that PR. This report carries only counts, limitations, and evidence references; it does not contain raw training rows or model weights.
+
+Private campaign evidence (outside this Git repository): `dataset_delivery_v1/accepted_inventory_1100.json`, `dataset_delivery_v1/accepted_raw_1100.jsonl`, `dataset_delivery_v1/newdocs_hip_exec_interop_kcpp_answer40_audit_v1/review_report.json`, `dataset_delivery_v1/newdocs-hip-exec-interop-kcpp-answer40-cert25-v1/cpu_capture/results/certificate.json`, `dataset_delivery_v1/answers923_independent_audit_v2/validation.json`, `dataset_delivery_v1/newdocs_fresh1031_plan_v1/validation.json`, `dataset_delivery_v1/newdocs_fresh1031_plan_v1/prior_use_preflight.json`, and `resource_ledger.jsonl`.
+
+Next: finish source and question-quality review for a genuinely new 5,000-candidate batch, reconcile the GPU budget before launch, certify each retained answer, then run and evaluate production student training. A completed training claim requires the training run and measured student result, not only a working trainer or the eight-record sanity run.

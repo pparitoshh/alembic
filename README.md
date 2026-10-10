@@ -112,6 +112,7 @@ The assistant has 8 Slurm tools (`src/distillkit/tools.py`): `job_status`, `list
 - **[slurm/README.md](slurm/README.md):** running on Leonardo: setup, day-1 smoke tests, the job pipeline.
 - **[research/](research/README.md):** committed results with the machine they ran on: laptop config, judge calibration, laptop benchmarks.
 - **[PROGRESS.md](PROGRESS.md):** running log of what is done.
+- **[Quality review status](docs/QUALITY_REVIEW_STATUS.md):** current verified data, review findings, and production training boundary.
 
 ## Planned stack
 
