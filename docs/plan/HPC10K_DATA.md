@@ -135,6 +135,12 @@ this branch at `d85d066`. Return it to `dev` once PR #31 is merged. All data is 
 | 4 | 59925726 | `runs/hpc10k_s4` | 7 | 203,259 |
 | 5 | 59925727 | `runs/hpc10k_s5` | 7 | 203,282 |
 
+Status at 22:38 (47 min in): generation done in all shards, **14,670 records generated**
+(s1 2,934 · s2 2,970 · s3 2,970 · s4 2,934 · s5 2,862); reviewer (Gemma) loaded in 5-9 min; review at
+~13 records/min per shard (112-167 done each), so ~3.5-4 h more, expected end ~02:00-03:00. The shards
+review with `repetition_penalty` 1.05, so expect ~25% malformed reviews as in pilot 2; redo them after the
+fix (review only, no regeneration). The test job 59928215 was still pending (our GPU share is in use).
+
 Check: `sacct -j 59925723,59925724,59925725,59925726,59925727 -X -o JobID,State,Elapsed` and the stage
 lines in `slurm/logs/dk-gen-gated-<job>.out`. A failed or timed-out shard: rerun the same submit command
 (it reuses the shard seed dirs, generate/review resume):
