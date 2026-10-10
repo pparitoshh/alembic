@@ -196,8 +196,36 @@ Tests how much of batch 1's regression is overtraining / drift, with no data cha
   `evaluate_checkpoints` 59918671, each seed's evals starting when its own training finishes
   (`--dependency=aftercorr`).
 - **Adapters:** `runs/b2_ep1_lr5e-5/seed_<n>/adapter/` (final), `.../adapters/step_<N>/adapter/`.
+- **Training:** 284 steps, ~18.7 min per seed. Validation loss (step 100 → 200 → 284): seed 42
+  1.178 → 1.166 → 1.165; seed 1 1.207 → 1.195 → 1.194; seed 2 1.175 → 1.160 → 1.158. Validation
+  documents differ by seed, so compare a seed only with itself (seed 1 batch 1 best: 1.172).
 
-Results: pending.
+### Batch 2 final adapter, config eval set
+
+Jobs 59918668_{0,1,2}; `track` logged the results into each seed's MLflow run (first use of PR #29).
+
+**Normal questions (66, judged + checked):**
+
+| Metric | Base | Seed 42 | Seed 1 | Seed 2 | Batch 2 mean | Batch 1 mean |
+|---|---|---|---|---|---|---|
+| Win rate vs base | – | 0.367 | 0.292 | 0.318 | **0.326** | 0.324 |
+| Check pass rate | 0.955 | 0.909 | 0.879 | 0.909 | 0.899 | 0.864 |
+| Bad-flag rate | 0.025 | 0.216 | 0.244 | 0.200 | 0.220 | 0.290 |
+| Answers with bad flags | 2 | 6 | 8 | 6 | 6.7 | 8.5 |
+
+**Tool questions (16):**
+
+| Metric | Base | Seed 42 | Seed 1 | Seed 2 | Batch 2 mean | Batch 1 mean |
+|---|---|---|---|---|---|---|
+| Decision accuracy | 1.0 | 0.875 | 0.812 | 0.875 | 0.854 | 0.875 |
+| False-call rate | 0.167 | 0.333 | 0.500 | 0.333 | 0.389 | 0.500 |
+| Correct call (AST) | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 |
+| Grounded rate | 1.0 | 0.833 | 0.846 | 0.833 | 0.837 | 0.923 |
+
+**Verdict:** 1 epoch at half the learning rate does not fix it. The judged win rate is unchanged
+(0.326 vs 0.324); invalid flags and false tool calls drop a little but stay far above the base.
+The regression comes from the data, not from overtraining; settings alone will not get the student
+past the base.
 
 ## Data: Slurm + tool teacher records (2026-10-10, in progress)
 
