@@ -12,14 +12,18 @@
 | Tools: 8 schemas + mock cluster | ✅ | ✅ | `tools.py`: deterministic, Leonardo-like partitions |
 | Tool-call checker | ✅ | ✅ | `toolcheck.py`: schema, execution, job-id grounding, decision, BFCL-style AST |
 | Gold examples | ✅ | ✅ | `data/gold/prose.json`, `tool_trace.json` |
-| `generate` (prose + tool traces) | ✅ | ✅ | Qwen3-32B-AWQ on Leonardo: [4,775 certified records](data/teacher/verified_qwen_4775/README.md) toward the current 30,000 target. The released mix is 4,765 prose and ten legacy non-prose rows; the planned 30% tool-trace mix has not been achieved. |
+| `generate` (prose + tool traces) | ✅ | ✅ | Qwen3-32B-AWQ on Leonardo: [11,167 certified Q&A](data/teacher/verified_qwen_11167/README.md) toward the 30,000 target. The release remains overwhelmingly prose; the planned 30% tool-trace mix has not been achieved. |
 | `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination. Question decontamination checks `cfg.eval.file` (`eval_all_v2.jsonl`), not the `dataset_v1` items |
-| `train` (LoRA / QDoRA) | ✅ | ✅ | Eight-record Qwen3-4B sanity run ([PR #10](https://github.com/pparitoshh/alembic/pull/10)); interim 1,100-row QDoRA run completed with 207 optimizer steps and a saved adapter. The 30,000-row run and student-improvement evaluation remain pending; FSDP config untested. |
+| `train` (LoRA / QDoRA) | ✅ | ✅ | Eight-record Qwen3-4B sanity run ([PR #10](https://github.com/pparitoshh/alembic/pull/10)); interim 1,100-row QDoRA run completed with 207 optimizer steps and a saved adapter. A separate 11,167-row QDoRA milestone job started on Leonardo; its outcome, the 30,000-row run, and student-improvement evaluation remain pending. FSDP config untested. |
 | `evaluate` | ✅ | — | prose judge + tool-slice scoring; not yet run on a tool-trained student |
 | Teacher top-20 logprob capture | ✅ | ✅ | vLLM + Qwen3-32B-AWQ smoke passed on Leonardo (job 59544756, [PR #2](https://github.com/pparitoshh/alembic/pull/2)): top-20 logprobs, token IDs, tool call. Not captured for multi-turn traces; training is SFT only |
 | `export` (GGUF/Ollama) | ✅ | ✅ | merge → bf16 GGUF → imatrix → Q4_K_M/Q8_0 → Modelfile → `ollama create` + tool-call smoke test |
 
 ## Log
+
+### 2026-10-10: 10,000 milestone crossed and parallel student training started
+
+The [11,167-row corrected Qwen teacher release](data/teacher/verified_qwen_11167/README.md) adds 2,717 verified Q&A from three cohorts after the 8,450-row release. It was validated against each corrected certificate and preserves the 8,450-row prefix byte-for-byte. A separate one-GPU Qwen3-4B QDoRA job started on this milestone while the next answer-quality gates continue toward 30,000. The 30,000-row training job remains held. Neither a training result nor student improvement is claimed yet.
 
 ### 2026-10-10: second corrected teacher release
 
