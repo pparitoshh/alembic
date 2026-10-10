@@ -70,6 +70,22 @@ def test_incomplete_judging_is_not_logged_as_a_score(tmp_path):
     assert 'dev/student_vs_base_win_rate' not in tracking.checkpoint_metrics(tmp_path)[100]
 
 
+def test_final_metrics_prefix_by_judge_tag(tmp_path):
+    (tmp_path / 'eval_summary.json').write_text(json.dumps(summary(0.6)))
+    (tmp_path / 'eval_summary_gemma4.json').write_text(json.dumps(summary(0.65)))
+    metrics = tracking.final_metrics(tmp_path)
+    assert metrics['eval/student_vs_base_win_rate'] == 0.6
+    assert metrics['eval/gemma4/student_vs_base_win_rate'] == 0.65
+    assert metrics['eval/gemma4/student/check_pass_rate'] == 0.6
+
+
+def test_final_step_is_the_last_kept_checkpoint(tmp_path):
+    assert tracking.final_step(tmp_path) == 0
+    for step in (100, 852, 800):
+        (tmp_path / 'adapters' / f'step_{step}').mkdir(parents=True)
+    assert tracking.final_step(tmp_path) == 852
+
+
 def test_track_logs_into_the_training_run_by_name(tmp_path, monkeypatch):
     mlflow = pytest.importorskip('mlflow')
     from distillkit.config import Config
@@ -85,6 +101,23 @@ def test_track_logs_into_the_training_run_by_name(tmp_path, monkeypatch):
     tracking.run(cfg)
     history = mlflow.MlflowClient().get_metric_history(run_id, 'dev/student_vs_base_win_rate')
     assert [(m.step, m.value) for m in history] == [(100, 0.55), (200, 0.6)]
+
+
+def test_track_logs_the_final_eval_at_the_last_step(tmp_path, monkeypatch):
+    mlflow = pytest.importorskip('mlflow')
+    from distillkit.config import Config
+    from test_pipeline import _cfg_dict
+    monkeypatch.setenv('MLFLOW_TRACKING_URI', (tmp_path / 'mlruns').as_uri())
+    monkeypatch.setenv('MLFLOW_ALLOW_FILE_STORE', 'true')
+    cfg = Config.model_validate(_cfg_dict(tmp_path))
+    with mlflow.start_run(run_name=str(cfg.run_dir)) as r:
+        run_id = r.info.run_id
+    write_summaries(cfg.run_dir, {100: 0.55, 200: 0.6})
+    (cfg.run_dir / 'eval_summary.json').write_text(json.dumps(summary(0.7)))
+    tracking.run(cfg)
+    client = mlflow.MlflowClient()
+    assert [(m.step, m.value) for m in client.get_metric_history(run_id, 'eval/student_vs_base_win_rate')] == [(200, 0.7)]
+    assert len(client.get_metric_history(run_id, 'dev/student_vs_base_win_rate')) == 2
 
 
 def test_track_fails_without_a_training_run(tmp_path, monkeypatch):
