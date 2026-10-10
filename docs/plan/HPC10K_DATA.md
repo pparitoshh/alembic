@@ -1,6 +1,6 @@
 # Plan: ~10k quality-gated Slurm / cluster-usage training records
 
-Status: draft, 2026-10-10. Branch `feat/data-hpc10k`. Results so far live in
+Status: running, 2026-10-10 (see **Status and handover** at the end). Branch `feat/data-hpc10k`. Results so far live in
 `docs/TRAINING_PROGRESS.md` (branch `docs/training-progress`).
 
 ## Why
@@ -87,3 +87,60 @@ already bring false calls to 0, so it is dropped (decision 2026-10-10).
 - Human spot-check of the 100-record sample: who (user / Vaibhav / second model only)?
 - Extra sources beyond Slurm docs + HPC Carpentry.
 - Retention share of the original 4,775 records (2k proposed).
+
+## Status and handover (2026-10-10, night)
+
+Leonardo checkout `$REPO` (= `/leonardo_work/EUHPC_D30_031/alembic/alembic`, shared with Vaibhav) is on
+this branch at `d85d066`. Return it to `dev` once PR #31 is merged. All data is under `$REPO/runs/`, not in git.
+
+**Fetch (done).** `runs/hpc10k/seeds/`: 34 docs, 1,017,342 chars, 181 held-out blocks dropped →
+800 chunks x 18 questions (`questions_per_chunk: 18`) = 14,400 questions.
+
+**Pilot 1 (job 59923908, `runs/hpc10k_pilot100`, `--limit` docs, 126 generated): kept only 3/126.**
+- 114 reviews were malformed JSON: truncated at `max_tokens` 4096 (median review ~13k chars, one
+  explanation per answer unit) or stuck in a greedy repetition loop ("- own- own ...").
+- 6 tool traces: "tool evidence does not match complete ordered mock replay"; verify rejects those
+  anyway (`tool_ungrounded_id`). 1 `tool_decision` reject.
+- Fix (`d85d066`): reviewer `max_tokens` 8192 and `repetition_penalty` 1.05 (env `REVIEW_MAX_TOKENS`,
+  `REVIEW_REPETITION_PENALTY` in `slurm/generate_gated.sbatch`); `review` now drops malformed reports and
+  redoes them on rerun. Concurrency stays 16: Gemma's KV cache (4.95 GiB, ~55k tokens) is already ~100% full.
+- Timing: teacher load ~6 min, reviewer load ~7 min, review 8-16 records/min at concurrency 16.
+
+**Pilot 2 (job 59925542, same run dir, resumes):** re-reviews the 114 malformed rows. Check:
+`grep -aE '^\[(review|verify|decontam)\]' slurm/logs/dk-gen-gated-59925542.out`.
+Success = most of 126 kept, few pending. If many are still pending: inspect `pending_review.jsonl`
+reasons and the raw reviews in `grounding_reviews.jsonl`, fix, push, `git pull` on Leonardo, resubmit the
+shards (they resume).
+
+**Full run: 5 shards submitted before pilot 2 finished (user's call)** with
+`slurm/submit_gated_shards.sh` (24 h limit each):
+
+| Shard | Job | Run dir | Docs | Chars |
+|---|---|---|---|---|
+| 1 | 59925723 | `runs/hpc10k_s1` | 6 | 203,800 |
+| 2 | 59925724 | `runs/hpc10k_s2` | 7 | 203,818 |
+| 3 | 59925725 | `runs/hpc10k_s3` | 7 | 203,183 |
+| 4 | 59925726 | `runs/hpc10k_s4` | 7 | 203,259 |
+| 5 | 59925727 | `runs/hpc10k_s5` | 7 | 203,282 |
+
+Check: `sacct -j 59925723,59925724,59925725,59925726,59925727 -X -o JobID,State,Elapsed` and the stage
+lines in `slurm/logs/dk-gen-gated-<job>.out`. A failed or timed-out shard: rerun the same submit command
+(it reuses the shard seed dirs, generate/review resume):
+```
+source $WORK/alembic/me.env; cd $REPO
+export SBATCH_ACCOUNT=EUHPC_D30_031 CONFIG=configs/gen_hpc10k.yaml; source slurm/env.sh
+SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_gated_shards.sh
+```
+(It resubmits all 5; cancel the ones that already finished, or `RUN_DIR=runs/hpc10k_sN sbatch
+--time=24:00:00 slurm/generate_gated.sbatch` for one.)
+
+**Next steps**
+1. Read pilot 2 gate counts; fix anything it shows before the shards reach their review stage.
+2. When the shards finish: merge `runs/hpc10k_s{1..5}/clean.jsonl` → `runs/hpc10k/clean.jsonl` with a
+   cross-shard near-duplicate pass. The gold-example source docs (`slurm_sbatch_basics`,
+   `slurm_monitoring`) are copied into every shard, so their records repeat with the same ids: keep one copy.
+3. Write per-gate counts (per shard and total) and a 100-record spot-check sample into PR #31 and
+   `docs/TRAINING_PROGRESS.md`.
+4. Batch 5: train on 4,775 + new clean data (batch 2 settings, rank 16, 3 seeds); compare with 3b.
+5. Still to add to `TRAINING_PROGRESS.md`: per-step dev evals of batch 3/r8 (jobs 59920008, 59920016,
+   59920263) and batch 2 seed 2 step 284.
