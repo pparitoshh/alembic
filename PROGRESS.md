@@ -6,17 +6,17 @@
 
 | Stage | Code | Ran locally | Notes |
 |---|---|---|---|
-| Seeds + doc-level split | ✅ | ✅ | 6 Slurm docs; `slurm_job_arrays` and `slurm_requeue_signals` held out for eval |
-| Eval set (prose) | ✅ | — | 26 hand-written Qs from 2 held-out docs (target: ~50 from 3+ docs before Oct 6) |
-| Eval set (tool slice) | ✅ | — | `data/eval/eval_tools.jsonl`: 16 draft items (10 call, 6 no-call), needs human review |
+| Seeds + doc-level split | ✅ | ✅ | 6 Slurm docs; `slurm_job_arrays` and `slurm_requeue_signals` held out for eval. Opt-in hash-bound source-family registry and held-out family ancestry checks ([PR #14](https://github.com/pparitoshh/alembic/pull/14), [#20](https://github.com/pparitoshh/alembic/pull/20)) |
+| Eval set (prose) | ✅ | — | [`dataset_v1`](data/eval/dataset_v1/README.md): 106 development + 22 frozen final (12 CUDA Samples, 10 Open MPI; families held out). Model-reviewed only; GOAL.md's human review still pending |
+| Eval set (tool slice) | ✅ | — | `dataset_v1/development_tools.jsonl`: 23 first-response items (decision + arguments, not full multi-turn); no final tool split |
 | Tools: 8 schemas + mock cluster | ✅ | ✅ | `tools.py`: deterministic, Leonardo-like partitions |
 | Tool-call checker | ✅ | ✅ | `toolcheck.py`: schema, execution, job-id grounding, decision, BFCL-style AST |
 | Gold examples | ✅ | ✅ | `data/gold/prose.json`, `tool_trace.json` |
-| `generate` (prose + tool traces) | ✅ | ✅ | resumable; ~30% tool traces in the Leonardo config |
-| `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination |
-| `train` (LoRA / QDoRA) | ✅ | ✅ | QDoRA on Qwen3-0.6B (RTX 2060); FSDP config written, untested |
+| `generate` (prose + tool traces) | ✅ | ✅ | resumable; ~30% tool traces in the Leonardo config. Ran on Leonardo with Qwen3-32B-AWQ: 1,100 accepted records toward 10,000 ([status](docs/QUALITY_REVIEW_STATUS.md); data private, counts not verifiable from the repo) |
+| `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination. Question decontamination checks `cfg.eval.file` (`eval_all_v2.jsonl`), not the `dataset_v1` items |
+| `train` (LoRA / QDoRA) | ✅ | ✅ | QDoRA on Qwen3-0.6B (RTX 2060); eight-record QDoRA sanity run on Qwen3-4B, one A100 ([PR #10](https://github.com/pparitoshh/alembic/pull/10)). Production training not run; FSDP config untested |
 | `evaluate` | ✅ | — | prose judge + tool-slice scoring; not yet run on a tool-trained student |
-| Teacher top-20 logprob capture | ✅ | ✅ | works against the toy API; needs a vLLM test on the cluster with Qwen3-32B-AWQ (`smoke_teacher.sbatch`) |
+| Teacher top-20 logprob capture | ✅ | ✅ | vLLM + Qwen3-32B-AWQ smoke passed on Leonardo (job 59544756, [PR #2](https://github.com/pparitoshh/alembic/pull/2)): top-20 logprobs, token IDs, tool call. Not captured for multi-turn traces; training is SFT only |
 | `export` (GGUF/Ollama) | ✅ | ✅ | merge → bf16 GGUF → imatrix → Q4_K_M/Q8_0 → Modelfile → `ollama create` + tool-call smoke test |
 
 ## Log
