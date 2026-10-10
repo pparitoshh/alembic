@@ -20,7 +20,8 @@ STAGES = {
     "evaluate": "evaluate",
     "export": "export",
 }
-EXTRA = {"calibrate": "calibrate", "bench": "bench", "track": "tracking"}  # not part of `all`
+EXTRA = {"calibrate": "calibrate", "bench": "bench", "track": "tracking",
+         "review": "review", "decontam": "heldout"}  # not part of `all`; review needs a reviewer server
 
 
 def main() -> None:

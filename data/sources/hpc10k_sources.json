@@ -1,0 +1,313 @@
+{
+  "version": "hpc-sources-v1",
+  "note": "Seed documents for the ~10k Slurm/cluster-usage data (docs/plan/HPC10K_DATA.md). Excluded on purpose: Slurm job_array and preempt pages, HPC Carpentry 21-array (job arrays), Aalto guides (dataset_v1 development). Blocks matching heldout_pattern are dropped from every fetched page.",
+  "heldout_pattern": "(?i)--array\\b|\\bjob[ -]arrays?\\b|\\barray[ -](job|task)s?\\b|SLURM_ARRAY|ARRAY_TASK|requeue|--signal\\b|\\bsignals?\\b|\\bpreempt",
+  "sources": [
+    {
+      "doc_id": "slurm_man_sbatch",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sbatch.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_srun",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/srun.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_salloc",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/salloc.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_squeue",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/squeue.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sacct",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sacct.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_scontrol",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/scontrol.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sinfo",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sinfo.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_scancel",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/scancel.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sstat",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sstat.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sprio",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sprio.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sshare",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sshare.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sattach",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sattach.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_man_sbcast",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/man/man1/sbcast.1",
+      "format": "roff",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_quickstart",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/quickstart.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_gres",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/gres.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_mpi_guide",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/mpi_guide.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_heterogeneous_jobs",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/heterogeneous_jobs.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_cpu_management",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/cpu_management.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_mc_support",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/mc_support.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_faq",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/faq.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_job_exit_code",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/job_exit_code.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_dist_plane",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/dist_plane.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_job_launch",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/job_launch.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "slurm_guide_containers",
+      "url": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/doc/html/containers.shtml",
+      "format": "html",
+      "license": "GPL-2.0",
+      "permission_evidence": "https://raw.githubusercontent.com/SchedMD/slurm/slurm-26-05-4-1/COPYING (\"All Slurm code and documentation is available under the GNU General Public License\")",
+      "family": "slurm_docs",
+      "source_version": "slurm-26-05-4-1"
+    },
+    {
+      "doc_id": "hpc_carpentry_10_hpc_intro",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/10-hpc-intro.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_11_connecting",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/11-connecting.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_12_cluster",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/12-cluster.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_13_scheduler",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/13-scheduler.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_14_environment_variables",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/14-environment-variables.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_15_modules",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/15-modules.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_16_transferring_files",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/16-transferring-files.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_17_parallel",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/17-parallel.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_18_resources",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/18-resources.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    },
+    {
+      "doc_id": "hpc_carpentry_19_responsibility",
+      "url": "https://carpentries-incubator.github.io/hpc-intro/19-responsibility.html",
+      "format": "html",
+      "license": "CC-BY-4.0",
+      "family": "hpc_carpentry_intro",
+      "permission_evidence": "https://github.com/carpentries-incubator/hpc-intro/blob/7081080674aceeb0a4bc57b9348da22d876af802/LICENSE.md",
+      "source_version": "rendered site; repo commit 7081080674aceeb0a4bc57b9348da22d876af802 at planning time"
+    }
+  ]
+}
