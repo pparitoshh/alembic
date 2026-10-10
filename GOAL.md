@@ -4,6 +4,7 @@
 *Companion to [RESEARCH.md](RESEARCH.md), which covers the state of the art and the design rationale.*
 *Updated Oct 4, 2026: teacher/student finalized, QDoRA + FSDP, tool calling, shared single node, eval-first ordering. Student set to Qwen3-4B-Instruct-2507.*
 *Updated Oct 6, 2026: judge models (gpt-oss-20b + Gemma 4 cross-check) added; GPU memory and disk sizes per model; teacher switched to Qwen3-32B-AWQ on vLLM (GGUF as fallback).*
+*Updated Oct 10, 2026: the active dataset target is 30,000 distinct, source-grounded, automatically certified Qwen Q&A. The earlier 10,000 target is an intermediate milestone. Run independent source and question reviews concurrently when resources permit, while serializing answer acceptance against the cumulative deduplication bank. Production training follows a hash-validated 30,000-record release.*
 
 ---
 
@@ -52,13 +53,13 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 
 | Focus | What we will do on the cluster |
 |---|---|
-| **Distributed teacher inference** | Batch generation with Qwen3-32B-AWQ under vLLM on one GPU (more if available). Start with ~10k examples, evaluate, then scale up if time allows. Measure throughput (tokens/s per GPU) and cost per 1k verified examples. |
+| **Distributed teacher inference** | Batch generation with Qwen3-32B-AWQ under vLLM. Reach 30,000 distinct verified examples from source-grounded documents, with 10,000 as an intermediate milestone. Measure throughput (tokens/s per GPU) and cost per 1k verified examples. |
 | **Parallel student training** | QDoRA on Qwen3-4B-Instruct-2507 with FSDP; several seeds and ablations in parallel. A student family (1.7B / 4B) is a stretch goal (no 2507 release of 1.7B: use Qwen3-1.7B with thinking off). |
 | **Accuracy vs. size under quantization** | Evaluate every (student size × quant level) pair on the same held-out set. Produce an **accuracy–size–speed Pareto frontier**. |
 
 ### Compute
 
-- **Cluster:** Leonardo (CINECA). **One node (4× A100 64 GB), shared across hackathon teams.** Plan for 1–2 GPUs at a time.
+- **Cluster:** Leonardo (CINECA). Submit independent work concurrently within the live account allocation, scheduler policy, and available storage. Check `saldo`, Slurm limits, and quota before scaling submissions.
 - **Teacher:** Qwen3-32B-AWQ fits on a single 64 GB A100.
 - **Student:** Qwen3-4B-Instruct-2507 QDoRA is small; FSDP gives clean multi-GPU scaling when GPUs are free.
 - **Judges:** one A100 each. Student/base answers are cached first, so the judge runs after the training GPU is freed.
@@ -114,7 +115,7 @@ An **MIT-licensed, tokenizer-independent, sequence-level distillation framework*
 1. **Eval set first** — it defines the task.
 2. **Tool schemas** — 5–10 HPC tools with names, parameters, return types.
 3. **Gold examples** — hand-craft one prose answer and one prose + tool-call trace (question → reasoning → tool call → tool result → final answer). Used as few-shot anchors so teacher output stays consistently formatted.
-4. **Generate ~10k** — ~70% prose, ~30% tool-calling traces. Coverage over volume: every tool, varied phrasings.
+4. **Generate and certify 30k distinct Q&A** — source-bound questions and answers, cumulative deduplication, independent LLM review, and a real training-loader check. Preserve coverage over volume; record the actual prose/tool mix.
 5. **Train → evaluate → generate more of what the student fails on.** Scale up only if time permits.
 
 ## 7. Success metrics
@@ -137,7 +138,7 @@ of reach for a 4B model on a CPU-only laptop at any quant level (12 tokens/s at 
 | Laptop streaming generation (2,048 tokens in context) | — | ≥ 8 tokens/s |
 | Laptop time to first token, follow-up question (system prompt + tools already processed) | — | ≤ 3 s |
 | Laptop time to first token, first question of a session | — | measured and reported |
-| Verified examples produced | — | ≥ 10k (scale up if throughput allows) |
+| Verified examples produced | — | ≥ 30k distinct, hash-validated records; 10k is an intermediate milestone |
 
 ### Eval set (~150–200 questions, human-reviewed, strictly held out)
 
