@@ -14,7 +14,7 @@
 | Gold examples | ✅ | ✅ | `data/gold/prose.json`, `tool_trace.json` |
 | `generate` (prose + tool traces) | ✅ | ✅ | Qwen3-32B-AWQ on Leonardo: [4,775 certified records](data/teacher/verified_qwen_4775/README.md) toward the current 30,000 target. The released mix is 4,765 prose and ten legacy non-prose rows; the planned 30% tool-trace mix has not been achieved. |
 | `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination. Question decontamination checks `cfg.eval.file` (`eval_all_v2.jsonl`), not the `dataset_v1` items |
-| `train` (LoRA / QDoRA) | ✅ | ✅ | QDoRA on Qwen3-0.6B (RTX 2060); eight-record QDoRA sanity run on Qwen3-4B, one A100 ([PR #10](https://github.com/pparitoshh/alembic/pull/10)). Production training not run; FSDP config untested |
+| `train` (LoRA / QDoRA) | ✅ | ✅ | Eight-record Qwen3-4B sanity run ([PR #10](https://github.com/pparitoshh/alembic/pull/10)); interim 1,100-row QDoRA run completed with 207 optimizer steps and a saved adapter. The 30,000-row run and student-improvement evaluation remain pending; FSDP config untested. |
 | `evaluate` | ✅ | — | prose judge + tool-slice scoring; not yet run on a tool-trained student |
 | Teacher top-20 logprob capture | ✅ | ✅ | vLLM + Qwen3-32B-AWQ smoke passed on Leonardo (job 59544756, [PR #2](https://github.com/pparitoshh/alembic/pull/2)): top-20 logprobs, token IDs, tool call. Not captured for multi-turn traces; training is SFT only |
 | `export` (GGUF/Ollama) | ✅ | ✅ | merge → bf16 GGUF → imatrix → Q4_K_M/Q8_0 → Modelfile → `ollama create` + tool-call smoke test |
@@ -23,7 +23,7 @@
 
 ### 2026-10-10: quality review and production training status
 
-The [quality review status](docs/QUALITY_REVIEW_STATUS.md) records a corrected, hash-validated [4,775-row automated-gate release](data/teacher/verified_qwen_4775/README.md): 1,100 prior accepted rows plus 3,675 accepted from 6,000 new-document questions, with 2,325 withheld. The current target is 30,000 distinct certified Q&A. A follow-on cohort selected 5,307 source-bound questions from 6,915 proposals; its answer job was running at the status check, so none of those questions are counted yet. An eight-record QDoRA sanity run passed in [PR #10](https://github.com/pparitoshh/alembic/pull/10); production student training and improvement measurement remain pending. Raw attempts and model artifacts remain outside Git.
+The [quality review status](docs/QUALITY_REVIEW_STATUS.md) records a corrected, hash-validated [4,775-row automated-gate release](data/teacher/verified_qwen_4775/README.md): 1,100 prior accepted rows plus 3,675 accepted from 6,000 new-document questions, with 2,325 withheld. The current target is 30,000 distinct certified Q&A. A follow-on cohort selected 5,307 source-bound questions from 6,915 proposals; its answer job was running at the status check, so none of those questions are counted yet. An interim 1,100-row QDoRA run completed 207 optimizer steps and saved an adapter; the final 30,000-row run and student-improvement measurement remain pending. Raw attempts and model artifacts remain outside Git.
 
 ### 2026-10-06: teacher serving decided, judges and sizes in GOAL.md
 
