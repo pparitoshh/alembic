@@ -1,0 +1,98 @@
+# ~10k quality-gated Slurm / cluster-usage teacher data (docs/plan/HPC10K_DATA.md).
+# Chain (slurm/generate_gated.sbatch): fetch_sources -> generate (Qwen3-32B-AWQ) -> review (independent
+# reviewer, source-support-v3) -> verify (deterministic gates + require_grounding_review) -> decontam.
+# Training settings below are batch 1's; train on the result with configs/qwen3_4b_qdora_b2.yaml settings.
+# Leonardo template (GOAL.md §3): Qwen3-32B teacher on one A100 64 GB -> Qwen3-4B-Instruct-2507 student, QDoRA.
+# Start the teacher first, e.g. on a compute node:
+#   vllm serve Qwen/Qwen3-32B-AWQ --max-logprobs 20 --tool-call-parser hermes --enable-auto-tool-choice
+# then point base_url at it (ssh tunnel or the node's hostname).
+run_dir: runs/hpc10k   # slurm/generate_gated.sbatch overrides it with $RUN_DIR
+
+seeds:
+  dir: runs/hpc10k/seeds   # fetched by distillkit.fetch_sources from data/sources/hpc10k_sources.json
+  eval_docs: [slurm_job_arrays, slurm_requeue_signals]   # held out BEFORE any generation
+  chunk_chars: 1500
+
+teacher:
+  base_url: http://localhost:8000/v1   # vllm serve; no api_key_env for a local server
+  model: Qwen/Qwen3-32B-AWQ            # or the GGUF Q4_K_M via llama-server (RESEARCH.md §2.2)
+  temperature: 0.7
+  max_tokens: 1024
+  concurrency: 32                      # vLLM batches concurrent requests; tune from the day-1 throughput test
+  top_logprobs: 20                     # saved to run_dir/teacher_logprobs.jsonl.gz for v2 logit KD
+  extra_body:
+    return_tokens_as_token_ids: true   # vLLM: tokens come back as "token_id:<n>"
+    chat_template_kwargs: {enable_thinking: false}
+
+# Judge: gpt-oss-20b (OpenAI, Apache 2.0, ~16 GB MXFP4), served on the cluster by slurm/evaluate.sbatch;
+# base_url is set per job with --set. Cross-check judge: Gemma 4 26B-A4B IT (Google, Apache 2.0), same
+# answers, run with `--set eval.tag=gemma4 --set judge.model=google/gemma-4-26B-A4B-it` (see slurm/README.md).
+# Validate either judge first with the `calibrate` stage.
+judge:
+  base_url: http://127.0.0.1:8001/v1
+  model: openai/gpt-oss-20b
+  temperature: 0.0
+  max_tokens: 4096          # reasons before the verdict; reasoning is returned separately by vLLM
+  concurrency: 16
+  extra_body:
+    reasoning_effort: medium
+
+generate:
+  questions_per_chunk: 18   # 34 fetched docs = 800 chunks -> 14,400 questions (~10k after the gates); max 48 = 12 x 4
+  answers_per_question: 1   # one shared GPU: spend extra samples on failure areas instead (GOAL.md §6)
+  personas:
+    - a new PhD student who has never used a cluster
+    - a research software engineer porting code to GPUs
+    - an ML engineer running multi-GPU training jobs
+    - a sysadmin debugging stuck or failing jobs
+    - a bioinformatician running many small pipeline jobs
+    - a climate scientist running long MPI simulations
+    - a chemist running licensed software on a shared cluster
+    - a data scientist moving from a laptop to the cluster
+    - a teaching assistant helping students submit their first jobs
+    - a postdoc who needs results before a paper deadline
+    - an engineer benchmarking code on different partitions
+    - a user whose job keeps failing with out-of-memory errors
+  task_types: [concept, howto, script, debug]
+  tool_fraction: 0.3        # ~30% tool-calling traces (GOAL.md §6), split call/ask/none below
+  tool_mix: {call: 0.4, ask: 0.2, none: 0.4}   # batch 3b: no-call traces took false calls to 0
+  gold_dir: data/gold       # few-shot anchors: prose.json, tool_trace.json
+
+verify:
+  dedup_threshold: 0.8
+  max_answer_chars: 4000
+  require_grounding_review: true             # gate: every kept answer reviewed against its source
+  grounding_review_protocol: source-support-v3
+  # grounding_reviews: set per run by slurm/generate_gated.sbatch ($RUN_DIR/grounding_reviews.jsonl)
+
+student:
+  model: Qwen/Qwen3-4B-Instruct-2507   # non-thinking, better tool use (GOAL.md §3, RESEARCH.md §2.1)
+  system_prompt: You are an HPC assistant. Answer questions about Slurm, CUDA, MPI and profiling concisely and correctly. Put scripts in fenced code blocks.
+
+train:
+  method: dora
+  load_in_4bit: true
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.0   # DoRA's fast path
+  learning_rate: 1.0e-4   # starting point: re-tune with a short sweep on day 1
+  epochs: 3
+  seed: 42
+  batch_size: 4
+  grad_accum: 4
+  max_length: 2048   # tool-calling traces are longer than prose answers
+  bf16: true
+  save_steps: 100    # a job killed at the wall time resumes from the newest checkpoint on resubmission
+  val_fraction: 0.05 # eval loss every save_steps on whole held-out source documents
+  report_to: [mlflow]
+
+eval:
+  file: data/eval/eval_all_v2.jsonl
+  tool_file: data/eval/eval_tools.jsonl   # tool-calling slice (draft; model review pending)
+  calibration_file: data/eval/judge_calibration.jsonl   # known-label pairs for `calibrate`
+  max_new_tokens: 512
+
+export:
+  llama_cpp: ~/tools/llama.cpp       # on Leonardo: a checkout in $WORK with the release binaries
+  quants: [Q4_K_M, Q8_0, Q5_K_M, Q3_K_M]   # >= 3 levels for the Pareto frontier (G6)
+  ollama_name: hpc-assistant
