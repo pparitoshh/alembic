@@ -106,11 +106,19 @@ this branch at `d85d066`. Return it to `dev` once PR #31 is merged. All data is 
   redoes them on rerun. Concurrency stays 16: Gemma's KV cache (4.95 GiB, ~55k tokens) is already ~100% full.
 - Timing: teacher load ~6 min, reviewer load ~7 min, review 8-16 records/min at concurrency 16.
 
-**Pilot 2 (job 59925542, same run dir, resumes):** re-reviews the 114 malformed rows. Check:
-`grep -aE '^\[(review|verify|decontam)\]' slurm/logs/dk-gen-gated-59925542.out`.
-Success = most of 126 kept, few pending. If many are still pending: inspect `pending_review.jsonl`
-reasons and the raw reviews in `grounding_reviews.jsonl`, fix, push, `git pull` on Leonardo, resubmit the
-shards (they resume).
+**Pilot 2 (job 59925542, same run dir, resumed; 20 min): kept 62/126** (was 3).
+- `[verify] kept 62/126; rejected: {'tool_ungrounded_id': 6, 'unsupported_claim': 5, 'tool_decision': 1}; pending review: 52`;
+  decontam dropped 0 (391 held-out questions, 11 files).
+- Pending 52: 33 still "malformed review", 8 "supported unit lacks evidence", 4 "citation absent/altered",
+  3 "unknown or duplicate target unit", 4 no reason.
+- The 34 malformed reviews are *not* truncated now: 0.8-3k chars, all start `{"units": [{` and stop right
+  after the units list (`... } ]`), without the required `uncertainty` field. Odd, since the request sends a
+  `json_schema` response_format (vLLM guided decoding should forbid that). To check tomorrow: is guided
+  decoding actually applied for Gemma 4 in our vLLM? Does `repetition_penalty` 1.05 cause the early stop
+  (rerun those 34 without it)? A retry pass for malformed reports is the fallback.
+- Not urgent for the shards: `review` redoes malformed reports on every rerun, so after a fix just rerun
+  review + verify + decontam on each shard dir (no regeneration). At ~49% kept, 14,400 questions give
+  ~7k records; fixing the malformed ~27% would add up to ~3.5k more.
 
 **Full run: 5 shards submitted before pilot 2 finished (user's call)** with
 `slurm/submit_gated_shards.sh` (24 h limit each):
@@ -135,7 +143,7 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
 --time=24:00:00 slurm/generate_gated.sbatch` for one.)
 
 **Next steps**
-1. Read pilot 2 gate counts; fix anything it shows before the shards reach their review stage.
+1. Fix the early-stopping reviews (see pilot 2), test on `runs/hpc10k_pilot100`, then re-review the shards.
 2. When the shards finish: merge `runs/hpc10k_s{1..5}/clean.jsonl` → `runs/hpc10k/clean.jsonl` with a
    cross-shard near-duplicate pass. The gold-example source docs (`slurm_sbatch_basics`,
    `slurm_monitoring`) are copied into every shard, so their records repeat with the same ids: keep one copy.
