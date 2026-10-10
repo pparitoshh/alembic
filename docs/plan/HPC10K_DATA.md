@@ -116,6 +116,10 @@ this branch at `d85d066`. Return it to `dev` once PR #31 is merged. All data is 
   `json_schema` response_format (vLLM guided decoding should forbid that). To check tomorrow: is guided
   decoding actually applied for Gemma 4 in our vLLM? Does `repetition_penalty` 1.05 cause the early stop
   (rerun those 34 without it)? A retry pass for malformed reports is the fallback.
+- **Test submitted: job 59928215** (`dk-rp1-test`), a copy of the pilot in `runs/hpc10k_pilot100_rp1` with
+  `REVIEW_REPETITION_PENALTY=1.0`; only the 34 malformed + 6 failed rows are re-reviewed. Read
+  `grep -aE '^\[(review|verify)\]' slurm/logs/dk-rp1-test-59928215.out`: if malformed drops to ~0, set the
+  default penalty to 1.0 in `slurm/generate_gated.sbatch` and re-review the shards.
 - Not urgent for the shards: `review` redoes malformed reports on every rerun, so after a fix just rerun
   review + verify + decontam on each shard dir (no regeneration). At ~49% kept, 14,400 questions give
   ~7k records; fixing the malformed ~27% would add up to ~3.5k more.
