@@ -38,7 +38,7 @@ judge:
     reasoning_effort: medium
 
 generate:
-  questions_per_chunk: 48   # = personas x task_types (12 x 4); the planner caps at that product
+  questions_per_chunk: 18   # 34 fetched docs = 800 chunks -> 14,400 questions (~10k after the gates); max 48 = 12 x 4
   answers_per_question: 1   # one shared GPU: spend extra samples on failure areas instead (GOAL.md §6)
   personas:
     - a new PhD student who has never used a cluster
