@@ -21,6 +21,10 @@
 
 ## Log
 
+### 2026-10-10: quality review and production training status
+
+The [quality review status](docs/QUALITY_REVIEW_STATUS.md) records 1,100 accepted original Qwen teacher Q&A toward the 10,000 target, the latest 40-answer audit (25 accepted, 11 rejected, four pending), and 1,031 source-bound scenarios toward the requested new-document 5,000-candidate batch. These scenarios are not generated Q&A. An eight-record QDoRA sanity run passed in [PR #10](https://github.com/pparitoshh/alembic/pull/10); production student training and improvement measurement remain pending. Private raw data and model artifacts remain outside Git.
+
 ### 2026-10-06: teacher serving decided, judges and sizes in GOAL.md
 
 - **Teacher: vLLM + `Qwen/Qwen3-32B-AWQ`** (~19 GB, one A100 64 GB). Closes GOAL.md's open decision on logprob capture: vLLM returns top-20 logprobs and token IDs (`return_tokens_as_token_ids`) in one call; AWQ runs via the Marlin kernel on Ampere (A100 has no FP8). `slurm/env.sh` already downloads this model. Fallback if vLLM can't be installed on Leonardo: llama.cpp + GGUF Q4_K_M (~20 GB), same OpenAI-compatible API, so `teacher.py` doesn't change.
