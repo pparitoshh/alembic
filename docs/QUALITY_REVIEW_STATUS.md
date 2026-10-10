@@ -1,5 +1,7 @@
 # Quality review and training status
 
+**Current update, 2026-10-11:** The campaign has reached [11,167 corrected, certified Q&A](../data/teacher/verified_qwen_11167/README.md). A separate Qwen3-4B QDoRA run on that milestone is underway, and answer-quality gates continue. The active dataset target is now **at least 50,000**; the held full-run training job triggers only at 50,000. The historical 1,100-row release and 1,031-scenario plan cited during review of PR #23 are accessible on Leonardo at `/leonardo_work/EUHPC_D30_031/alembic/campaign_evidence/pr23_1100_1031/`, including a checksum manifest and reproducible evaluation-family boundary audit. The rest of this document is the dated 2026-10-10 19:03 UTC snapshot.
+
 As of 2026-10-10 19:03 UTC, **8,450/30,000** distinct Qwen teacher Q&A are accepted under the automated gates. The 10,000-row mark is an intermediate milestone; training on the final 30,000-row release has not yet run.
 
 | Area | Current result | Boundary |
