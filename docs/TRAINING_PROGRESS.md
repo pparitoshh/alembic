@@ -219,3 +219,31 @@ Fills batch 1's gap (0.8% Slurm, 3 tool traces) with the repo's own pipeline (`g
   sbatch_basics 96, gpu_jobs 48, monitoring 48, srun_steps 48. (The config file now has run 2's
   settings; run 1 = same file with the original 4 personas.)
 - **Plan:** batch 3 = 4,775 records + the verified Slurm/tool records, batch 2's settings.
+
+Run 2 result (job 59919372, 8.5 min incl. 6.2 min vLLM load): `verify` kept **182/240**; rejected:
+tool_ungrounded_id 30, tool_decision 20, tool_ungrounded_partition 2, near_duplicate 2,
+bash_syntax 2, tool_call_invalid 2. Kept: 119 prose, 34 no-call, 17 call, 12 ask (24 multi-turn);
+sbatch_basics 76, gpu_jobs 37, srun_steps 35, monitoring 34. 0 of 410 Slurm flags invalid; 0 exact
+question overlap with any eval/dev file. Spot check: some answers reason weakly (e.g. "more CPU cores
+per GPU avoids GPU out-of-memory"); automated gates only, no human review. Run 1's 61 records are not
+used (same seeds, older 4-persona plan).
+
+## Batch 3: + Slurm data, prose only (3a) vs prose + tools (3b) (2026-10-10)
+
+Same settings as batch 2 (`configs/qwen3_4b_qdora_b2.yaml`: 1 epoch, lr 5e-5), new data. 3a vs 3b
+separates the effect of Slurm prose from the effect of tool traces.
+
+| | 3a: `runs/b3a_prose` | 3b: `runs/b3b_tools` |
+|---|---|---|
+| Records | 4,775 + 119 Slurm prose x3 = 5,132 | 4,775 + 182 Slurm (prose + tool) x3 = 5,321 |
+| New-data share | 7.0% | 10.3% |
+| `verified.jsonl` SHA-256 | `499fd901…` | `0124a446…` |
+| Train / evaluate / eval-ckpt jobs | 59920006 / 59920007 / 59920008 | 59920009 / 59920014 / 59920016 |
+
+- **Upsampling:** each new record appears 3 times (copies get `#up1`, `#up2` id suffixes) so the new
+  data is not lost in 4,775 records; in one epoch that is 3 passes over it.
+- **Validation split:** whole documents; checked for seeds 42, 1, 2 that no Slurm seed doc lands in
+  validation (all new records are trained on).
+- **Adapters:** `runs/b3{a_prose,b_tools}/seed_<n>/adapter/` and `.../adapters/step_<N>/adapter/`.
+
+Results: pending.
