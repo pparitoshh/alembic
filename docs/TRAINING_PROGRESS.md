@@ -179,3 +179,36 @@ how much of the regression is overtraining, while the data fix is prepared.
 
 - The first evaluate job (59914592) failed in vLLM startup on a CUDA 13 `torchcodec` wheel; fixed in
   the vLLM venv with the CPU build and resubmitted as 59917194.
+- Batch 1 stopped early (2026-10-10 ~19:45): seed 1 per-step dev eval (59916409, steps 100 and 200
+  answered, not judged) and seed 2's evals (59915059, 59915060) were cancelled once the data/eval
+  mismatch was found. Seed 2's adapters are kept in `runs/verified4775_qdora_v2/seed_2/` (48.6 min).
+
+## Batch 2: 1 epoch, lr 5e-5, same data (2026-10-10)
+
+Tests how much of batch 1's regression is overtraining / drift, with no data change.
+
+- **Config:** `configs/qwen3_4b_qdora_b2.yaml` = batch 1 config with `epochs: 1` (was 3) and
+  `learning_rate: 5.0e-5` (was 1e-4). Everything else unchanged (validation split 5%, save_steps 100,
+  MLflow on).
+- **Data:** same `verified.jsonl` (`3f99eefb…`), copied to `runs/b2_ep1_lr5e-5/`.
+- **Code:** dev 3738b9b.
+- **Jobs:** train 59918667 (array 0-2 = seeds 42, 1, 2), `evaluate` 59918668 and
+  `evaluate_checkpoints` 59918671, each seed's evals starting when its own training finishes
+  (`--dependency=aftercorr`).
+- **Adapters:** `runs/b2_ep1_lr5e-5/seed_<n>/adapter/` (final), `.../adapters/step_<N>/adapter/`.
+
+Results: pending.
+
+## Data: Slurm + tool teacher records (2026-10-10, in progress)
+
+Fills batch 1's gap (0.8% Slurm, 3 tool traces) with the repo's own pipeline (`generate` → `verify`).
+
+- **Config:** `configs/gen_slurm_tools.yaml` = batch 1 config with `questions_per_chunk: 30` (was 12),
+  `tool_fraction: 0.5` (was 0.3), `tool_mix: {call: 0.4, ask: 0.2, none: 0.4}` (was 0.6/0.2/0.2: more
+  no-call traces, since the students over-call tools).
+- **Sources:** the 4 trainable Slurm seeds in `data/seeds/` (`slurm_sbatch_basics`, `slurm_srun_steps`,
+  `slurm_gpu_jobs`, `slurm_monitoring`). `slurm_job_arrays` and `slurm_requeue_signals` stay held out
+  (`seeds.eval_docs`); the Aalto dev docs are not in the seeds.
+- **Teacher:** `Qwen/Qwen3-32B-AWQ` on one A100 (`slurm/generate.sbatch`), then `distillkit verify`.
+- **Job:** 59918760, output in `runs/gen_slurm_tools/`.
+- **Plan:** batch 3 = 4,775 records + the verified Slurm/tool records, batch 2's settings.
