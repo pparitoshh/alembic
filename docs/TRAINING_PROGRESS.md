@@ -273,6 +273,11 @@ separates the effect of Slurm prose from the effect of tool traces.
 - **Validation split:** whole documents; checked for seeds 42, 1, 2 that no Slurm seed doc lands in
   validation (all new records are trained on).
 - **Adapters:** `runs/b3{a_prose,b_tools}/seed_<n>/adapter/` and `.../adapters/step_<N>/adapter/`.
+- **Data location (not in git, on purpose: size):** only on Leonardo under `$REPO`:
+  new records `runs/gen_slurm_tools_p12/verified.jsonl` (182; rejected, questions and teacher
+  logprobs in the same folder); combined files `runs/b3a_prose/verified.jsonl` and
+  `runs/b3b_tools/verified.jsonl` (hashes above). To rebuild: base 4,775 + the new records (3a: prose
+  only) appended 3 times, copies 2 and 3 with ids suffixed `#up1` / `#up2`.
 
 Results: pending.
 
