@@ -210,5 +210,12 @@ Fills batch 1's gap (0.8% Slurm, 3 tool traces) with the repo's own pipeline (`g
   `slurm_gpu_jobs`, `slurm_monitoring`). `slurm_job_arrays` and `slurm_requeue_signals` stay held out
   (`seeds.eval_docs`); the Aalto dev docs are not in the seeds.
 - **Teacher:** `Qwen/Qwen3-32B-AWQ` on one A100 (`slurm/generate.sbatch`), then `distillkit verify`.
-- **Job:** 59918760, output in `runs/gen_slurm_tools/`.
+- **Run 1** (job 59918760, `runs/gen_slurm_tools/`, 9.6 min incl. 8.3 min vLLM load): only **80
+  questions** planned (45 tool-mode). The planner takes at most personas x task_types = 4 x 4 = 16
+  questions per chunk and the 4 docs are 5 chunks, so `questions_per_chunk: 30` had no effect.
+  `verify` kept **61/80**; rejected: tool_decision 7, tool_ungrounded_id 11, empty_or_too_long 1.
+- **Run 2** (job 59919372, `runs/gen_slurm_tools_p12/`): 8 more personas (12 total) and
+  `questions_per_chunk: 48` → **240 questions** planned: 122 prose, 52 call, 46 no-call, 20 ask;
+  sbatch_basics 96, gpu_jobs 48, monitoring 48, srun_steps 48. (The config file now has run 2's
+  settings; run 1 = same file with the original 4 personas.)
 - **Plan:** batch 3 = 4,775 records + the verified Slurm/tool records, batch 2's settings.

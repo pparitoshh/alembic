@@ -4,7 +4,7 @@
 # Start the teacher first, e.g. on a compute node:
 #   vllm serve Qwen/Qwen3-32B-AWQ --max-logprobs 20 --tool-call-parser hermes --enable-auto-tool-choice
 # then point base_url at it (ssh tunnel or the node's hostname).
-run_dir: runs/gen_slurm_tools
+run_dir: runs/gen_slurm_tools_p12
 
 seeds:
   dir: data/seeds
@@ -36,13 +36,22 @@ judge:
     reasoning_effort: medium
 
 generate:
-  questions_per_chunk: 30   # gen_slurm_tools: few Slurm seed docs, so more questions each
+  questions_per_chunk: 48   # gen_slurm_tools: capped at personas x task_types per chunk (12 x 4)
   answers_per_question: 1   # one shared GPU: spend extra samples on failure areas instead (GOAL.md §6)
   personas:
     - a new PhD student who has never used a cluster
     - a research software engineer porting code to GPUs
     - an ML engineer running multi-GPU training jobs
     - a sysadmin debugging stuck or failing jobs
+    # gen_slurm_tools: 8 more personas so each chunk yields 48 questions instead of 16
+    - a bioinformatician running many small pipeline jobs
+    - a climate scientist running long MPI simulations
+    - a chemist running licensed software on a shared cluster
+    - a data scientist moving from a laptop to the cluster
+    - a teaching assistant helping students submit their first jobs
+    - a postdoc who needs results before a paper deadline
+    - an engineer benchmarking code on different partitions
+    - a user whose job keeps failing with out-of-memory errors
   task_types: [concept, howto, script, debug]
   tool_fraction: 0.5        # gen_slurm_tools: batch 1 had 3 tool traces in 4,775
   tool_mix: {call: 0.4, ask: 0.2, none: 0.4}   # gen_slurm_tools: batch 1 students over-call tools
