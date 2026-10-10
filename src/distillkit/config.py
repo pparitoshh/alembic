@@ -101,6 +101,10 @@ class TrainCfg(_Section):
     max_length: int = 1024
     fp16: bool = False  # GPUs without bf16 (e.g. RTX 20xx)
     bf16: bool | None = None  # default: the opposite of fp16
+    # None = save only the final adapter; N = checkpoint every N optimizer steps, and a rerun in the
+    # same run_dir resumes from the newest one (a job killed at the wall time loses < N steps)
+    save_steps: int | None = Field(None, gt=0)
+    save_total_limit: int = Field(2, gt=0)
 
     @model_validator(mode="after")
     def _one_precision(self):

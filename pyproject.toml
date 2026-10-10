@@ -46,3 +46,13 @@ dev = ["pytest>=8.0"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-p no:cacheprovider"  # no .pytest_cache written into the checkout
+
+# torch from the CUDA 12.9 index: Leonardo's Booster driver is CUDA 12.2, which can't run PyPI's
+# default CUDA 13 wheel; a 12.9 build runs there (minor-version compatibility) and on newer drivers.
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu129", marker = "sys_platform == 'linux'" }]

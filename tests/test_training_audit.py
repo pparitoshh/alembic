@@ -91,6 +91,8 @@ def test_production_run_audit_precedes_optimizer_and_can_stop_it(tmp_path,monkey
     events=[]
     class Tokenizer:
         def save_pretrained(self,*a):events.append('tokenizer_saved')
+        def apply_chat_template(self,messages,**k):return ' '.join(m['content'] for m in messages)
+        def __call__(self,text,**k):return {'input_ids':text.split()}
     monkeypatch.setattr(transformers.AutoTokenizer,'from_pretrained',lambda *a,**k:Tokenizer())
     class Trainer:
         def __init__(self,**kw):
@@ -98,7 +100,7 @@ def test_production_run_audit_precedes_optimizer_and_can_stop_it(tmp_path,monkey
             assert kw['train_dataset'][0]['messages'][0]['role']=='system'
             events.append('constructed')
         def add_callback(self,c):events.append('callback')
-        def train(self):events.append('optimized')
+        def train(self,resume_from_checkpoint=None):events.append('optimized')
         def save_model(self,p):events.append('saved')
     monkeypatch.setattr(trl,'SFTTrainer',Trainer)
     def inspect(t):

@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "065f1061f75f58c33a76a337505b34461ad6d137b16f6ca5ed5f5485adc31f08"
+      "sha256": "fa7e88dac361cf125c456e4b2fd490feee281ebd51fc6ef66d86a23c30681ea9"
     },
     {
       "root": "repository",
@@ -750,6 +750,31 @@
         "campaign_tests_passed": 50
       },
       "validation_scope": "Metadata-only binding update is followed by affected release checks, recorded separately. The earlier full suite is not relabeled as a pass on this amended snapshot; no real inference or data acceptance is asserted."
+    },
+    {
+      "version": "train-checkpoint-binding-v1",
+      "created_utc": "2026-10-10T15:32:16.139657+00:00",
+      "base_revision": "4f39c1202b87d7c6d8a1b1e8d1514b457accc627",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "c798c7fec00968fd64b05acdd862cef018ae0ded0aeb427139eac8a1b10d99fb",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "065f1061f75f58c33a76a337505b34461ad6d137b16f6ca5ed5f5485adc31f08",
+          "after": "fa7e88dac361cf125c456e4b2fd490feee281ebd51fc6ef66d86a23c30681ea9"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add opt-in train.save_steps / train.save_total_limit for resumable student checkpoints. Only the config.py code binding changes; retain previous hash and all existing history.",
+      "compatibility": "Only TrainCfg gains two optional fields. EvalCfg, evaluation answering inputs/schemas/scorers, tool definitions and judge verdict schema/protocol remain unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified.",
+      "pre_binding_validation": {
+        "full_passed": 869,
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused prior config.py hash.",
+        "skipped": 0
+      },
+      "validation_scope": "Metadata-only binding update is followed by the full suite."
     }
   ]
 }
