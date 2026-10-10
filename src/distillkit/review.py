@@ -4,8 +4,8 @@ Runs the existing support review (`verify.grounding_review_protocol`, e.g. sourc
 each row of run_dir/generated.jsonl, using the `judge` endpoint as the reviewer (serve a model other
 than the teacher, e.g. --set judge.model=google/gemma-4-26B-A4B-it). Reports are appended to
 `verify.grounding_reviews` (default run_dir/grounding_reviews.jsonl); rows already reviewed are
-skipped, so a killed job resumes. `verify` with `require_grounding_review: true` then rejects
-unsupported answers and holds uncertain ones as pending. Rows whose source cannot be resolved are
+skipped and malformed reviews (e.g. truncated JSON) redone, so a rerun resumes and repairs.
+`verify` with `require_grounding_review: true` then rejects unsupported answers and holds uncertain ones as pending. Rows whose source cannot be resolved are
 not reviewed; verify holds them as pending.
 """
 import json
@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from .config import Config
-from .io import read_jsonl
+from .io import read_jsonl, write_jsonl
 from .support import request_review, source_for_record
 
 
@@ -24,7 +24,12 @@ def reviews_path(cfg: Config) -> Path:
 def run(cfg: Config, reviewer=None) -> Path:
     out = reviews_path(cfg)
     rows = read_jsonl(cfg.run_dir / "generated.jsonl")
-    done = {r["id"] for r in read_jsonl(out)} if out.exists() else set()
+    existing = read_jsonl(out) if out.exists() else []
+    parsed = [r for r in existing if r.get("review") is not None]
+    if len(parsed) < len(existing):  # malformed (e.g. truncated) reviews are redone, not kept as final
+        write_jsonl(out, parsed)
+        print(f"[review] dropped {len(existing) - len(parsed)} malformed reviews to redo them")
+    done = {r["id"] for r in parsed}
     todo, unresolved = [], 0
     resolver = None
     if cfg.seeds.registry is not None:

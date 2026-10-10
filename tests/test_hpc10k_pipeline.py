@@ -8,6 +8,7 @@ from pathlib import Path
 
 from distillkit import fetch_sources, heldout, review, verify
 from distillkit.io import read_jsonl, write_jsonl
+from distillkit.teacher import Completion
 from test_support_review import cfg, FakeReviewer  # noqa: F401  (cfg is a fixture)
 from test_support_review_v3 import SYNTHETIC_SOURCE, payload, prose_record
 
@@ -90,6 +91,20 @@ def test_review_writes_reports_resumes_and_feeds_verify(cfg):  # noqa: F811
     kept = read_jsonl(cfg.run_dir / "verified.jsonl")
     assert [r["grounding_checks"]["status"] for r in kept] == ["supported"]
     assert read_jsonl(cfg.run_dir / "rejected.jsonl") == read_jsonl(cfg.run_dir / "pending_review.jsonl") == []
+
+
+def test_review_redoes_malformed_reviews(cfg):  # noqa: F811
+    cfg.verify.grounding_review_protocol = "source-support-v3"
+    row = prose_record(cfg, "A count alone does not establish a failure cause.")
+    write_jsonl(cfg.run_dir / "generated.jsonl", [row])
+    truncated = FakeReviewer(None)
+    truncated.complete = lambda messages, **kw: (truncated.requests.append(1), Completion('{"units": [{"unit_id": "u'))[1]
+    review.run(cfg, reviewer=truncated)
+    assert [r["review"] for r in read_jsonl(cfg.verify.grounding_reviews)] == [None]
+    good = FakeReviewer(payload(row))
+    review.run(cfg, reviewer=good)  # the malformed report is replaced, not duplicated
+    reports = read_jsonl(cfg.verify.grounding_reviews)
+    assert len(good.requests) == 1 and len(reports) == 1 and reports[0]["review"] is not None
 
 
 def test_review_skips_unresolvable_sources_for_verify_to_hold(cfg, tmp_path):  # noqa: F811

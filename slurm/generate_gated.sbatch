@@ -38,8 +38,11 @@ stop_vllm
 
 PORT=$(job_port 1)
 start_vllm "$REVIEW_MODEL" "$PORT" $(judge_args "$REVIEW_MODEL")
+# Reviews list every answer unit with an explanation: 4,096 tokens truncated most of the pilot's, and
+# greedy JSON decoding sometimes loops on a phrase, hence the room and the mild repetition penalty.
 distillkit review -c "$CONFIG" "${SET[@]}" --set judge.base_url="http://127.0.0.1:$PORT/v1" \
-    --set judge.model="$REVIEW_MODEL" || exit 1
+    --set judge.model="$REVIEW_MODEL" --set judge.max_tokens="${REVIEW_MAX_TOKENS:-8192}" \
+    --set judge.extra_body="{repetition_penalty: ${REVIEW_REPETITION_PENALTY:-1.05}}" || exit 1
 stop_vllm
 
 distillkit verify -c "$CONFIG" "${SET[@]}" || exit 1
