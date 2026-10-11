@@ -247,3 +247,13 @@ Coverage in the 12,773 training records: `--dependency` 103 (`afternotok` 23, `a
 of the real one. Fix: targeted generation on these sbatch options (gold examples or forced-topic chunks for
 `--dependency` types, `--open-mode`, `--requeue`, `--signal`, `--mail-type`, array task scancel). Before that,
 check the overlap with the eval set (decontamination) so the new records don't copy the eval questions.
+
+**sbatch option coverage (B6 data, 12,773 records).** 98 sbatch options are in the fetched man page and the
+valid-flag list. Records mentioning each: 0 for 5 options, 1-4 for 3, 5-19 for 22, 20+ for 68. Low: `--open-mode` 7,
+`--kill-on-invalid-dep` 11, `--wrap` 11, `--hold` 15, `--mail-type` 27; `--dependency` 100. **`--array`,
+`--requeue`, `--no-requeue` and `--signal` have no man-page text at all**: `data/sources/hpc10k_sources.json`
+`heldout_pattern` drops every block about arrays, requeue, signals and preemption, because those are the eval's
+held-out topics (generalization test). So 4 of the 7 B6 bad-flag answers (req-004, req-005, req-cand-008,
+arr-cand-018) are on held-out topics by design; the dependency ones (arr-cand-006/010/017) are not.
+Top-up config for the allowed options: `configs/gen_hpc10k_options.yaml` (sbatch man only, 84 chunks x 16 = 1,344
+questions, 4 new personas). Not submitted.
