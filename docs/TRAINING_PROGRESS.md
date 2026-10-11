@@ -27,7 +27,8 @@ Adapters: `<run>/seed_<n>/adapter/` (final, + tokenizer), `<run>/seed_<n>/adapte
 | B3a | + Slurm prose (119 x3) | **0.359** [0.333-0.379] | 0.904 | 0.098 | 0.875 | 0.333 | 0.833 |
 | **B3b** | **+ Slurm prose and tools (182 x3)** | **0.359** [0.356-0.364] | **0.924** | **0.059** | **1.000** | **0.000** | **1.000** |
 | B3b-r8 | 3b, rank 8 | 0.355 [0.326-0.375] | 0.919 | 0.082 | 0.979 | 0.167 | 0.970 |
-| B5 | HPC10K snapshot 7,743 + 2k retained | pending | pending | pending | pending | pending | pending |
+| B5 | HPC10K snapshot 7,743 + 2k retained | cancelled | – | – | – | – | – |
+| B6 | HPC10K merged 10,773 + 2k retained | pending | pending | pending | pending | pending | pending |
 
 **Conclusions (B1-B3)**
 1. Settings alone (B1 → B2) change nothing: the regression comes from the data, not overtraining.
@@ -198,14 +199,22 @@ source (source-support-v3) → deterministic verify → decontam against all hel
 | First pass | 14,670 generated, 4,485 unique clean; ~47% of reviews malformed (whitespace after the JSON until `max_tokens`, `finish_reason=length`) |
 | Fix | reviewer `--structured-outputs-config {"backend":"xgrammar","disable_any_whitespace":true}` + `--max-model-len 24576`; pilot of 126 (job 59972524): kept 62 → **92**, malformed 33 → **0** |
 | Re-review s2-s5 (jobs 59974759-62) | clean 905/920/932/921 → **1,616/1,609/1,589/1,585**; 97% of redone reviews valid; 2 of 3,678 old clean dropped as near-duplicates |
-| Top-up (`configs/gen_hpc10k_topup.yaml`: 4 new personas, 9 q/chunk) | t5 kept 806/1,431; t1-t4 and s1 re-review running; expected ~11k after dedupe |
+| Top-up (`configs/gen_hpc10k_topup.yaml`: 4 new personas, 9 q/chunk) | t1-t5 clean 781/850/795/794/806; s1 re-reviewed 1,562 |
+| **Merged** `runs/hpc10k/clean.jsonl` | 11,987 in → **10,773 unique** (dropped: same id 909 = gold docs repeated per shard, same normalized question 113, near-dup in same doc (token Jaccard ≥ 0.85) 192). Tasks: concept 2,840, howto 2,790, script 2,853, debug 2,290. Modes: prose 8,346, none 1,467, ask 684, call 276 |
 
 Pre-re-review backup: `runs/hpc10k_backup_20261011/`.
 
-## Batch 5: HPC10K snapshot + 2k retained (2026-10-11, submitted)
+## Batch 5: HPC10K snapshot + 2k retained (2026-10-11, cancelled)
 
 `runs/b5_hpc10k/verified.jsonl`, **9,743 records**: 7,743 HPC10K clean (s2-s5 re-reviewed, t5, s1 from
 the backup; deduped by id and normalized question) + 2,000 random (seed 42) from verified_qwen_4775.
 Modes: prose 7,997, none 1,061, ask 498, call 187. Slurm / cluster share ≈ 80% (B3b ~3%). B2 settings,
 seeds 42, 1, 2; train 59980667 (array 0-2), eval 59980668 (`aftercorr`). Goal: beat B3b (results in the
 summary table). Not final data: batch 6 on the full merged HPC10K set (~11k + retained) follows.
+**Cancelled** during seed 42 training, replaced by batch 6.
+
+## Batch 6: full merged HPC10K + 2k retained (2026-10-11, submitted)
+
+`runs/b6_hpc10k/verified.jsonl`, **12,773 records**: all 10,773 from `runs/hpc10k/clean.jsonl` + the same 2,000
+retained verified_qwen_4775 records as B5. Modes: prose 10,340, none 1,471, ask 685, call 277. B2 settings
+(`configs/qwen3_4b_qdora_b2.yaml`), seeds 42, 1, 2; train 59981776 (array 0-2), eval 59981778 (`aftercorr`).
