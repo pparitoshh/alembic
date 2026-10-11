@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "training_rows": 12092,
+  "dataset_sha256": "0d26fd2ec8fa5fb5221d22aa6249f6d107201d9f4ae0b06da4734fd105f7fd9c",
+  "exact_eval_question_overlap": 0,
+  "protected_source_family_overlap": 0,
+  "heldout_doc_id_overlap": 0,
+  "limitation": "Exact and metadata checks do not establish absence of all semantic contamination."
+}

@@ -1,0 +1,85 @@
+{
+  "dataset_rows": 12092,
+  "dataset_sha256": "0d26fd2ec8fa5fb5221d22aa6249f6d107201d9f4ae0b06da4734fd105f7fd9c",
+  "variants": [
+    {
+      "name": "lr1e4-seed42",
+      "seed": 42,
+      "learning_rate": 0.0001,
+      "output": "student-training-12092-v1",
+      "train_job_id": "59940941",
+      "eval_job_id": "59942531"
+    },
+    {
+      "name": "lr1e4-seed43",
+      "seed": 43,
+      "learning_rate": 0.0001,
+      "output": "student-training-12092-lr1e4-seed43-v1",
+      "train_job_id": "59942532",
+      "eval_job_id": "59942533"
+    },
+    {
+      "name": "lr1e4-seed44",
+      "seed": 44,
+      "learning_rate": 0.0001,
+      "output": "student-training-12092-lr1e4-seed44-v1",
+      "train_job_id": "59942534",
+      "eval_job_id": "59942535"
+    },
+    {
+      "name": "lr5e5-seed42",
+      "seed": 42,
+      "learning_rate": 5e-05,
+      "output": "student-training-12092-lr5e5-seed42-v1",
+      "train_job_id": "59942536",
+      "eval_job_id": "59942537"
+    },
+    {
+      "name": "lr5e5-seed43",
+      "seed": 43,
+      "learning_rate": 5e-05,
+      "output": "student-training-12092-lr5e5-seed43-v1",
+      "train_job_id": "59942541",
+      "eval_job_id": "59942542"
+    },
+    {
+      "name": "lr5e5-seed44",
+      "seed": 44,
+      "learning_rate": 5e-05,
+      "output": "student-training-12092-lr5e5-seed44-v1",
+      "train_job_id": "59942543",
+      "eval_job_id": "59942544"
+    }
+  ],
+  "code_commit": "c7d0e32467ddf61162a3d8fd567b4e9adcc91194",
+  "eval_hashes": {
+    "data/eval/dataset_v1/development_normal.jsonl": "12a04af09046abe7cfeb02984277a51684338c40509e8c767d8037ab3b6a7794",
+    "data/eval/dataset_v1/development_tools.jsonl": "a5bb5fb807f1f394cc10733bb3ad9e8c575fa347c4d995a9b473e8fbe5e3079b",
+    "data/eval/judge_calibration.jsonl": "307282a2282ec94249320fd4d021a83b0e8e209cd738d1e1a71460c71f2954de"
+  },
+  "calibration_gate": {
+    "accuracy_min": 0.8,
+    "position_consistency_min": 0.8,
+    "unparsed_max": 0
+  },
+  "evaluation_scope": "development: 106 normal + 23 first-response tool tasks; final test excluded",
+  "comparison": "paired seeds; learning rate is the only varied hyperparameter; mean and sample standard deviation per configuration; no inference from training loss",
+  "status": "SUBMITTED",
+  "aggregate_job_id": "59942545",
+  "historical_reference": {
+    "name": "pilot11167",
+    "seed": 42,
+    "learning_rate": 0.0001,
+    "output": "milestone-training-10k-v1",
+    "train_job_id": "59924945",
+    "dataset_rows": 11167,
+    "dataset_sha256": "454a9498377b344d5e6a85d4ac769fe5eb3e7d11bbf4c3fe5af52b9ef81b75aa",
+    "controlled_seed": false,
+    "scope": "Historical pilot; excluded from matched configuration statistics",
+    "eval_job_id": "59942591"
+  },
+  "validation": {
+    "evaluation_scorer_tests_passed": 91,
+    "input_overlap_preflight": "PASS"
+  }
+}
