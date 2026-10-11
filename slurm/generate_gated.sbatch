@@ -37,8 +37,12 @@ distillkit generate -c "$CONFIG" "${SET[@]}" --set teacher.base_url="http://127.
 stop_vllm
 
 PORT=$(job_port 1)
-# REVIEW_VLLM_ARGS: extra vLLM flags for the reviewer (later flags override judge_args)
-start_vllm "$REVIEW_MODEL" "$PORT" $(judge_args "$REVIEW_MODEL") ${REVIEW_VLLM_ARGS:-}
+# REVIEW_VLLM_ARGS: extra vLLM flags for the reviewer (later flags override judge_args). Default = the fix
+# for malformed reviews (whitespace after the JSON until max_tokens: 47% -> ~2.6%, docs/plan/HPC10K_DATA.md);
+# REVIEW_VLLM_ARGS="" turns it off.
+REVIEW_VLLM_ARGS="${REVIEW_VLLM_ARGS-"--max-model-len 24576 --structured-outputs-config {\"backend\":\"xgrammar\",\"disable_any_whitespace\":true}"}"
+echo "[job] reviewer vLLM args: $REVIEW_VLLM_ARGS"
+start_vllm "$REVIEW_MODEL" "$PORT" $(judge_args "$REVIEW_MODEL") ${REVIEW_VLLM_ARGS}
 # Reviews list every answer unit with an explanation: 4,096 tokens truncated most of the pilot's, and
 # greedy JSON decoding sometimes loops on a phrase, hence the room and the mild repetition penalty.
 distillkit review -c "$CONFIG" "${SET[@]}" --set judge.base_url="http://127.0.0.1:$PORT/v1" \
