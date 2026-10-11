@@ -209,6 +209,10 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
 --time=24:00:00 slurm/generate_gated.sbatch` for one.)
 
 **Next steps**
+0. **Submitted 2026-10-11: job 59967327** (`dk-gc-test`): `runs/hpc10k_pilot100_gc` = pilot copy without
+   reviews (all 126 re-reviewed, penalty 1.05 as pilot 2), `REVIEW_VLLM_ARGS="--generation-config vllm
+   --max-model-len 24576"`. Compare with pilot 2 (62 kept, 33 malformed): `grep -aE '^\[(review|verify)\]'
+   slurm/logs/dk-gc-test-59967327.out`, plus `stop_reason` counts in its `grounding_reviews.jsonl`.
 1. Run the pilot fix test above (`--generation-config vllm`, `stop_reason` logged), then re-review the shards.
 2. Raise Gemma `max_model_len` for the 115 context failures; look into the 760 tool-evidence mock-replay
    errors (deterministic, so rerunning won't fix them).
