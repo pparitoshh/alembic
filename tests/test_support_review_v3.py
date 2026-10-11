@@ -310,3 +310,17 @@ def test_v1_v2_defaults_requests_and_captured_outcomes_are_unchanged(cfg):
     manifest = json.loads((GEMMA / 'manifest.json').read_text())
     for name, sha in manifest['fixture_hashes'].items():
         assert hashlib.sha256((GEMMA / name).read_bytes()).hexdigest() == sha
+
+
+def test_early_stopped_review_keeps_stop_reason_and_stays_malformed(cfg):
+    row = prose_record(cfg, 'The count alone does not establish a cause.')
+    data = payload(row)
+    raw = json.dumps(data)[:json.dumps(data).index(', "uncertainty"')]  # stopped after the units array
+    class Reviewer:
+        model = 'synthetic-early-stop-no-inference'
+        def complete(self, *args, **kwargs): return Completion(raw, finish_reason='stop', stop_reason=106)
+    report = support.request_review(Reviewer(), row, SYNTHETIC_SOURCE, protocol=v3.PROTOCOL)
+    assert report['review'] is None and (report['finish_reason'], report['stop_reason']) == ('stop', 106)
+    cfg.verify.grounding_review_protocol = v3.PROTOCOL
+    kept, rejected, pending = validate_run(cfg, row, [report])
+    assert not kept and not rejected and pending[0]['grounding_checks']['reason'] == 'malformed review'

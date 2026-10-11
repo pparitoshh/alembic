@@ -167,10 +167,32 @@ fix (review only, no regeneration). The test job 59928215 was still pending (our
   | unreviewed assistant target units | 1 | 0 | 0 |
 
   Malformed is 77% of pending and ~40% of the 13,666 reviews written: fixing it is the main lever.
+
+**Root causes (checked 2026-10-11 on `runs/hpc10k_s1` raw responses and the pilot rp1 copy)**
+- **Malformed = early stop, not truncation or loops.** s1: 1,286 reviews with `review: null`. 1,235 fail
+  with "Expecting ',' delimiter" at end of input: every one starts `{"units": [{`, ends right after the
+  closed units array (`..."} ]`), 1.3-4k chars (median good review 1.8k), so `uncertainty` and the final `}`
+  are missing. Only 2 have a repetition tail. 42 are "Unterminated string", 15-22k chars: real truncation
+  at `max_tokens`. 8 are valid JSON with `uncertainty: {present: true, reason: null}`, which the
+  `Uncertainty` validator rejects (a genuine reviewer error). rp1 test: all 25 remaining are the early stop.
+- **Why the grammar lets it stop:** vLLM 0.31.0, `structured_outputs_config backend='auto'`, no reasoning
+  parser, no grammar errors in the vLLM log. Gemma 4's `generation_config.json` has three EOS ids
+  `[1 <eos>, 106 <turn|>, 50 <|tool_response>]`; the tokenizer's `eos_token` is only `<eos>`. Most
+  likely the grammar only knows id 1 as a stop token, so the model ends its turn with `<turn|>` and the
+  grammar doesn't block it. Not yet proven: reviews did not record `finish_reason`/`stop_reason`. Now
+  they do (`support_v3.request_review`), so the next run shows the stop token id.
+- **262 empty-reason pending** are valid reviews whose status is `uncertain` (a unit judged uncertain or
+  `uncertainty.present`). Expected outcome, not a bug.
+- **Proposed fix (one pilot GPU job, ~20 min, needs the user's OK):** rerun review on a copy of
+  `runs/hpc10k_pilot100` with `--generation-config vllm` added to the Gemma `judge_args` (vLLM then
+  uses only the tokenizer's `<eos>`), check `stop_reason` and malformed count. If malformed is still >0, try
+  `--structured-outputs-config.backend guidance`. Also raise Gemma `--max-model-len` to 24576 for the 115
+  context failures. If it works: re-review all 5 shards (review only, ~4 h each, ~5.5k more reviews).
 - Top rejections: `bad_flags`, `tool_decision`, `tool_ungrounded_id`, `unsupported_claim`. Decontam dropped 0.
-- **All 1,004 review failures are context-length errors**: vLLM max context 16,384, review asks for 8,192
-  output tokens, so any prompt over ~8,192 tokens fails. Rerunning will not fix them: lower review
-  `max_tokens` (e.g. 6k) or raise `max_model_len` first.
+- **Review request failures (1,004)**, from the `[review] request failed` lines: 760 "tool evidence does not
+  match complete ordered mock replay", 129 "support protocol covers read-only diagnostics" (both are
+  deterministic evidence-packet errors: a rerun repeats them), 115 context length (vLLM max 16,384 tokens,
+  review asks for 8,192 output tokens, so prompts over ~8,192 tokens fail).
 - **Repetition-penalty test (job 59928215, 15 min)**: re-reviewing the 34 malformed with penalty 1.0 gave
   kept 66/126 (was 62), pending 47 (was 52). Not the hoped-for ~0 malformed, so penalty 1.0 alone is not
   the fix.
@@ -187,10 +209,9 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
 --time=24:00:00 slurm/generate_gated.sbatch` for one.)
 
 **Next steps**
-1. Pending is broken down (above). Find what the 262 empty-reason rows are;
-   fix the early-stopping reviews (5,490 malformed; penalty 1.0 left 25 of 34 malformed), test on the pilot, then re-review the shards.
-2. Fix the context-length failures (review `max_tokens` vs `max_model_len`) and rerun review + verify +
-   decontam on each shard (no regeneration).
+1. Run the pilot fix test above (`--generation-config vllm`, `stop_reason` logged), then re-review the shards.
+2. Raise Gemma `max_model_len` for the 115 context failures; look into the 760 tool-evidence mock-replay
+   errors (deterministic, so rerunning won't fix them).
 3. Merge `runs/hpc10k_s{1..5}/clean.jsonl` → `runs/hpc10k/clean.jsonl` with a
    cross-shard near-duplicate pass. The gold-example source docs (`slurm_sbatch_basics`,
    `slurm_monitoring`) are copied into every shard, so their records repeat with the same ids: keep one copy.

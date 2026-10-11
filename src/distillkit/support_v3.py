@@ -173,7 +173,10 @@ def request_review(reviewer, row, source):
             'units_sha256':packet['units_sha256'], 'reviewer':reviewer.model,
             'created_utc':datetime.now(timezone.utc).isoformat(),
             'prompt_sha256':hashlib.sha256(REVIEW_SYSTEM.encode()).hexdigest(),
-            'raw_response':response.content, 'unexpected_tool_calls':response.tool_calls, 'review':review}
+            'raw_response':response.content, 'unexpected_tool_calls':response.tool_calls, 'review':review,
+            # why decoding ended (vLLM stop_reason = the stop token id): tells truncation from early stop
+            'finish_reason':getattr(response, 'finish_reason', None),
+            'stop_reason':getattr(response, 'stop_reason', None)}
 
 
 def check_support(row, source, report):
