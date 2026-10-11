@@ -1,0 +1,17 @@
+{
+  "judge": "openai/gpt-oss-20b",
+  "pairs": 24,
+  "accuracy": 0.9166666666666666,
+  "position_consistency": 0.875,
+  "unparsed": 0,
+  "accuracy_by_defect": {
+    "invented_flag": 1.0,
+    "length_bait": 1.0,
+    "tie": 0.5,
+    "wrong_command": 1.0,
+    "wrong_fact": 1.0,
+    "wrong_math": 1.0,
+    "wrong_semantics": 1.0,
+    "wrong_syntax": 1.0
+  }
+}

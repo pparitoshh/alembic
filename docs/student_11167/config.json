@@ -1,0 +1,97 @@
+{
+  "run_dir": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/distillkit-20261006T231002Z/milestone-training-10k-v1/run",
+  "seeds": {
+    "dir": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/distillkit-20261006T231002Z/interim-training-1100-v1/unused-seeds",
+    "eval_docs": [
+      "slurm_job_arrays",
+      "slurm_requeue_signals"
+    ],
+    "chunk_chars": 1500,
+    "registry": null
+  },
+  "teacher": {
+    "base_url": "http://localhost:8000/v1",
+    "model": "Qwen/Qwen3-32B-AWQ",
+    "temperature": 0.7,
+    "max_tokens": 1024,
+    "concurrency": 32,
+    "top_logprobs": 20,
+    "extra_body": {
+      "return_tokens_as_token_ids": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "judge": {
+    "base_url": "http://127.0.0.1:8001/v1",
+    "model": "openai/gpt-oss-20b",
+    "temperature": 0.0,
+    "max_tokens": 4096,
+    "concurrency": 16,
+    "extra_body": {
+      "reasoning_effort": "medium"
+    }
+  },
+  "generate": {
+    "questions_per_chunk": 12,
+    "answers_per_question": 1,
+    "personas": [
+      "a new PhD student who has never used a cluster",
+      "a research software engineer porting code to GPUs",
+      "an ML engineer running multi-GPU training jobs",
+      "a sysadmin debugging stuck or failing jobs"
+    ],
+    "task_types": [
+      "concept",
+      "howto",
+      "script",
+      "debug"
+    ],
+    "tool_fraction": 0.3,
+    "tool_mix": {
+      "call": 0.6,
+      "ask": 0.2,
+      "none": 0.2
+    },
+    "gold_dir": null
+  },
+  "verify": {
+    "dedup_threshold": 0.8,
+    "max_answer_chars": 4000
+  },
+  "student": {
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "system_prompt": "You are an HPC assistant. Answer questions about Slurm, CUDA, MPI and profiling concisely and correctly. Put scripts in fenced code blocks."
+  },
+  "train": {
+    "method": "dora",
+    "load_in_4bit": true,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "learning_rate": 0.0001,
+    "epochs": 3,
+    "seed": 42,
+    "batch_size": 4,
+    "grad_accum": 4,
+    "max_length": 2048,
+    "bf16": true
+  },
+  "eval": {
+    "file": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/distillkit-20261006T231002Z/interim-training-1100-v1/unused-eval.jsonl",
+    "tool_file": null,
+    "calibration_file": null,
+    "max_new_tokens": 512
+  },
+  "export": {
+    "llama_cpp": "~/tools/llama.cpp",
+    "quants": [
+      "Q4_K_M",
+      "Q8_0",
+      "Q5_K_M",
+      "Q3_K_M"
+    ],
+    "ollama_name": "hpc-assistant"
+  }
+}

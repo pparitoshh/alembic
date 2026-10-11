@@ -1,0 +1,20 @@
+{
+  "status": "ANSWERED",
+  "utc": "2026-10-11T05:33:57.922939+00:00",
+  "job_id": "59942537",
+  "training_job_id": "59942536",
+  "adapter_sha256": "da61cd847b6312ef2d756245fe0eb80c0aef6cecbf01d7c648ec785e4bbd4dc9",
+  "dataset_sha256": "0d26fd2ec8fa5fb5221d22aa6249f6d107201d9f4ae0b06da4734fd105f7fd9c",
+  "code_commit": "c7d0e32467ddf61162a3d8fd567b4e9adcc91194",
+  "cache_sha256": "7737ef8038072958ca2017409adcbfdbd8a37245b5646f7e988794e3b9c426bd",
+  "packages": {
+    "torch": "2.13.0+cu129",
+    "transformers": "5.17.0",
+    "peft": "0.21.1"
+  },
+  "limitations": [
+    "Development data, not a blind final benchmark.",
+    "Static checks and mock tool execution do not establish real cluster execution or multi-turn task completion.",
+    "Generation capped at 512 new tokens; the production path does not retain finish reasons."
+  ]
+}

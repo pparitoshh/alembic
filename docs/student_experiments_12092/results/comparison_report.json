@@ -1,0 +1,264 @@
+{
+  "status": "COMPLETE",
+  "scope": "development: 106 normal + 23 first-response tool tasks; final test excluded",
+  "dataset_sha256": "0d26fd2ec8fa5fb5221d22aa6249f6d107201d9f4ae0b06da4734fd105f7fd9c",
+  "missing": [],
+  "configurations": {
+    "lr1e4": {
+      "oss": {
+        "student_vs_base_win_rate": {
+          "n": 3,
+          "mean": 0.29952830188679247,
+          "sample_std": 0.01780621329073291,
+          "values": [
+            0.2971698113207547,
+            0.2830188679245283,
+            0.31839622641509435
+          ]
+        }
+      },
+      "gemma": {
+        "student_vs_base_win_rate": {
+          "n": 3,
+          "mean": 0.3356918238993711,
+          "sample_std": 0.009531726142281557,
+          "values": [
+            0.32547169811320753,
+            0.33726415094339623,
+            0.3443396226415094
+          ]
+        }
+      },
+      "check_pass_rate": {
+        "base": {
+          "n": 3,
+          "mean": 0.9433962264150944,
+          "sample_std": 0.0,
+          "values": [
+            0.9433962264150944,
+            0.9433962264150944,
+            0.9433962264150944
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.9213836477987422,
+          "sample_std": 0.01441061539294289,
+          "values": [
+            0.9056603773584906,
+            0.9339622641509434,
+            0.9245283018867925
+          ]
+        }
+      },
+      "tool_first_response_pass_rate": {
+        "base": {
+          "n": 3,
+          "mean": 0.9565217391304348,
+          "sample_std": 0.0,
+          "values": [
+            0.9565217391304348,
+            0.9565217391304348,
+            0.9565217391304348
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.8985507246376812,
+          "sample_std": 0.025102185616940234,
+          "values": [
+            0.9130434782608695,
+            0.8695652173913043,
+            0.9130434782608695
+          ]
+        }
+      },
+      "tool_decision_acc": {
+        "base": {
+          "n": 3,
+          "mean": 0.9565217391304348,
+          "sample_std": 0.0,
+          "values": [
+            0.9565217391304348,
+            0.9565217391304348,
+            0.9565217391304348
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.9130434782608695,
+          "sample_std": 0.0,
+          "values": [
+            0.9130434782608695,
+            0.9130434782608695,
+            0.9130434782608695
+          ]
+        }
+      },
+      "tool_ast_acc": {
+        "base": {
+          "n": 3,
+          "mean": 1.0,
+          "sample_std": 0.0,
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.9761904761904762,
+          "sample_std": 0.041239304942116105,
+          "values": [
+            1.0,
+            0.9285714285714286,
+            1.0
+          ]
+        }
+      }
+    },
+    "lr5e5": {
+      "oss": {
+        "student_vs_base_win_rate": {
+          "n": 3,
+          "mean": 0.3121069182389937,
+          "sample_std": 0.015162972894643008,
+          "values": [
+            0.31839622641509435,
+            0.294811320754717,
+            0.3231132075471698
+          ]
+        }
+      },
+      "gemma": {
+        "student_vs_base_win_rate": {
+          "n": 3,
+          "mean": 0.31446540880503143,
+          "sample_std": 0.024090492839692713,
+          "values": [
+            0.30424528301886794,
+            0.2971698113207547,
+            0.3419811320754717
+          ]
+        }
+      },
+      "check_pass_rate": {
+        "base": {
+          "n": 3,
+          "mean": 0.9433962264150944,
+          "sample_std": 0.0,
+          "values": [
+            0.9433962264150944,
+            0.9433962264150944,
+            0.9433962264150944
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.9245283018867925,
+          "sample_std": 0.009433962264150941,
+          "values": [
+            0.9150943396226415,
+            0.9245283018867925,
+            0.9339622641509434
+          ]
+        }
+      },
+      "tool_first_response_pass_rate": {
+        "base": {
+          "n": 3,
+          "mean": 0.9565217391304348,
+          "sample_std": 0.0,
+          "values": [
+            0.9565217391304348,
+            0.9565217391304348,
+            0.9565217391304348
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.9130434782608695,
+          "sample_std": 0.0,
+          "values": [
+            0.9130434782608695,
+            0.9130434782608695,
+            0.9130434782608695
+          ]
+        }
+      },
+      "tool_decision_acc": {
+        "base": {
+          "n": 3,
+          "mean": 0.9565217391304348,
+          "sample_std": 0.0,
+          "values": [
+            0.9565217391304348,
+            0.9565217391304348,
+            0.9565217391304348
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 0.9130434782608695,
+          "sample_std": 0.0,
+          "values": [
+            0.9130434782608695,
+            0.9130434782608695,
+            0.9130434782608695
+          ]
+        }
+      },
+      "tool_ast_acc": {
+        "base": {
+          "n": 3,
+          "mean": 1.0,
+          "sample_std": 0.0,
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "student": {
+          "n": 3,
+          "mean": 1.0,
+          "sample_std": 0.0,
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "paired_learning_rate_differences": {
+    "oss": {
+      "n": 3,
+      "mean": 0.012578616352201274,
+      "sample_std": 0.008282746661047762,
+      "values": [
+        0.021226415094339646,
+        0.011792452830188704,
+        0.004716981132075471
+      ]
+    },
+    "gemma": {
+      "n": 3,
+      "mean": -0.021226415094339608,
+      "sample_std": 0.01886792452830191,
+      "values": [
+        -0.02122641509433959,
+        -0.04009433962264153,
+        -0.0023584905660377076
+      ]
+    }
+  },
+  "limitations": [
+    "Three training seeds; spread is not a statistical significance claim.",
+    "Development evaluation used for configuration comparison; final holdout not evaluated.",
+    "Bash syntax/flag checks and isolated tool mocks do not establish compiled CUDA/MPI correctness or multi-turn completion.",
+    "No inference about semantic contamination from exact checks alone."
+  ]
+}
