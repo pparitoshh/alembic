@@ -175,7 +175,7 @@ fix (review only, no regeneration). The test job 59928215 was still pending (our
   are missing. Only 2 have a repetition tail. 42 are "Unterminated string", 15-22k chars: real truncation
   at `max_tokens`. 8 are valid JSON with `uncertainty: {present: true, reason: null}`, which the
   `Uncertainty` validator rejects (a genuine reviewer error). rp1 test: all 25 remaining are the early stop.
-- **Why the grammar lets it stop:** vLLM 0.31.0, `structured_outputs_config backend='auto'`, no reasoning
+- **(Disproved by job 59967327, see Next steps 0: it is whitespace to `max_tokens`, not a stop token.)** Why the grammar lets it stop: vLLM 0.31.0, `structured_outputs_config backend='auto'`, no reasoning
   parser, no grammar errors in the vLLM log. Gemma 4's `generation_config.json` has three EOS ids
   `[1 <eos>, 106 <turn|>, 50 <|tool_response>]`; the tokenizer's `eos_token` is only `<eos>`. Most
   likely the grammar only knows id 1 as a stop token, so the model ends its turn with `<turn|>` and the
@@ -213,6 +213,18 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
    reviews (all 126 re-reviewed, penalty 1.05 as pilot 2), `REVIEW_VLLM_ARGS="--generation-config vllm
    --max-model-len 24576"`. Compare with pilot 2 (62 kept, 33 malformed): `grep -aE '^\[(review|verify)\]'
    slurm/logs/dk-gc-test-59967327.out`, plus `stop_reason` counts in its `grounding_reviews.jsonl`.
+   **Result: COMPLETED in 22 min; the stop-token fix did not help, and the cause is different.** vLLM started
+   fine with `max_model_len` 24576 and `generation_config: vllm`. `[verify] kept 66/126` (pilot 2: 62),
+   pending 47, 6 mock-replay failures. 35/120 reviews malformed (pilot 2: 33). `stop_reason` shows: all 85
+   good reviews end with `finish_reason=stop`, `stop_reason=106` (`<turn|>`, so the grammar *does* allow that
+   stop correctly); **all 35 malformed end with `finish_reason=length`** while their content is only ~1-4k
+   chars, ending `..."} ]`. So the model spends the remaining ~7k of 8,192 tokens on whitespace after the units
+   array, which the JSON grammar allows (`disable_any_whitespace=False`), until `max_tokens`. `Teacher` strips
+   it (`.strip()`), which made it look like an early stop. This also wastes ~8k tokens of decode per malformed
+   review, which is much of the review time.
+   **Next fix to test:** start the reviewer with `--structured-outputs-config '{"disable_any_whitespace": true}'`
+   (via `REVIEW_VLLM_ARGS`; drop `--generation-config vllm`, which isn't needed). Same pilot copy; expect
+   malformed ~0 and a faster review.
 1. Run the pilot fix test above (`--generation-config vllm`, `stop_reason` logged), then re-review the shards.
 2. Raise Gemma `max_model_len` for the 115 context failures; look into the 760 tool-evidence mock-replay
    errors (deterministic, so rerunning won't fix them).
