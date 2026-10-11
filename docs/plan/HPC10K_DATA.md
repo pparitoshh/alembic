@@ -152,7 +152,21 @@ fix (review only, no regeneration). The test job 59928215 was still pending (our
 | s5 | 2,862 | 2,628 (234) | 921 | 513 | 1,428 |
 | **Total** | **14,670** | **13,666 (1,004)** | **4,534** | **2,963** | **7,173** |
 
-- Kept 31%, pending 49% (pilot 2 suggested ~25% malformed). Pending reasons per shard not yet broken down.
+- Kept 31%, pending 49% (pilot 2 suggested ~25% malformed). All pending are `grounding_review_unresolved`;
+  by `grounding_checks.reason` (shards total 7,173; per shard within ±60 of total/5):
+
+  | Reason | Shards | Pilot 2 | rp1 test |
+  |---|---|---|---|
+  | malformed review | 5,490 | 33 | 25 |
+  | supported unit lacks evidence | 761 | 8 | 11 |
+  | unknown or duplicate target unit | 413 | 3 | 3 |
+  | (empty reason) | 262 | 4 | 4 |
+  | missing support review | 104 | 0 | 0 |
+  | citation absent, altered or unavailable | 74 | 4 | 4 |
+  | invalid support evidence (non read-only tool args) | 68 | 0 | 0 |
+  | unreviewed assistant target units | 1 | 0 | 0 |
+
+  Malformed is 77% of pending and ~40% of the 13,666 reviews written: fixing it is the main lever.
 - Top rejections: `bad_flags`, `tool_decision`, `tool_ungrounded_id`, `unsupported_claim`. Decontam dropped 0.
 - **All 1,004 review failures are context-length errors**: vLLM max context 16,384, review asks for 8,192
   output tokens, so any prompt over ~8,192 tokens fails. Rerunning will not fix them: lower review
@@ -173,8 +187,8 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
 --time=24:00:00 slurm/generate_gated.sbatch` for one.)
 
 **Next steps**
-1. Break down the 47 pending in `runs/hpc10k_pilot100_rp1` and the 7,173 pending in the shards by reason;
-   fix the early-stopping reviews (penalty 1.0 barely helped), test on the pilot, then re-review the shards.
+1. Pending is broken down (above). Find what the 262 empty-reason rows are;
+   fix the early-stopping reviews (5,490 malformed; penalty 1.0 left 25 of 34 malformed), test on the pilot, then re-review the shards.
 2. Fix the context-length failures (review `max_tokens` vs `max_model_len`) and rerun review + verify +
    decontam on each shard (no regeneration).
 3. Merge `runs/hpc10k_s{1..5}/clean.jsonl` → `runs/hpc10k/clean.jsonl` with a
