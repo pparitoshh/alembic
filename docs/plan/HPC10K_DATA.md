@@ -233,6 +233,8 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
    6, `unsupported_claim` 7, `tool_decision` 1); decontam dropped 0. The keep rate goes from ~50% to 73%.
    Next: re-review all 5 shards with these `REVIEW_VLLM_ARGS` (only the malformed/unresolved rows need it) and
    submit the top-up shards (`configs/gen_hpc10k_topup.yaml`, `RUN_PREFIX=runs/hpc10k_t`).
+   **Submitted 2026-10-11** with those `REVIEW_VLLM_ARGS`: re-review s1-s5 = jobs 59974758-59974762 (6,183
+   `review: null` rows are dropped and redone); top-up t1-t5 = jobs 59974763-59974767.
 1. Run the pilot fix test above (`--generation-config vllm`, `stop_reason` logged), then re-review the shards.
 2. Raise Gemma `max_model_len` for the 115 context failures; look into the 760 tool-evidence mock-replay
    errors (deterministic, so rerunning won't fix them).
