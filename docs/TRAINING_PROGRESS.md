@@ -264,4 +264,6 @@ exit code (req-012, req-cand-009), `scontrol hold/release/update` and `--time-mi
 Top-up toward ~10k more clean (same gates, 8 new skill-aimed personas, 24 total):
 `configs/gen_hpc10k_focus.yaml` (sbatch, scontrol, sacct, squeue, scancel man + faq, quickstart,
 job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_broad.yaml` (other docs,
-~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected. Not submitted.
+~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected.
+**Submitted 2026-10-11** (reviewer fix now the default in `slurm/generate_gated.sbatch`, 70c583e): focus f1-f5 =
+jobs 59996931-35, broad b1-b3 = 59996936, 59996939, 59996940.
