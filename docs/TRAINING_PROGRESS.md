@@ -374,3 +374,39 @@ pending (jobs 59920008, 59920016, 59920263).
 6. **Still below the base on normal questions** (0.36 vs 0.5) with only 182 new records (3% of the
    mix). Next: ~10k quality-gated Slurm / cluster-usage records, see `docs/plan/HPC10K_DATA.md`
    (branch `feat/data-hpc10k`).
+
+## Data: HPC10K quality-gated Slurm / cluster-usage records (2026-10-11)
+
+Plan and full gate counts: `docs/plan/HPC10K_DATA.md` (branch `feat/data-hpc10k`). 34 pinned
+Slurm docs + HPC Carpentry pages, 5 shards on Leonardo: Qwen3-32B-AWQ generates, Gemma 4 26B-A4B
+reviews every answer against its source (source-support-v3), then deterministic verify + decontam
+against all held-out eval questions.
+
+- **First pass:** 14,670 generated, 4,485 unique clean. ~47% of reviews were malformed: the
+  reviewer emitted whitespace after the JSON until `max_tokens` (`finish_reason=length`).
+- **Fix:** reviewer vLLM `--structured-outputs-config {"backend":"xgrammar","disable_any_whitespace":true}`
+  (+ `--max-model-len 24576`). Pilot of 126: kept 62 → **92**, malformed 33 → **0** (job 59972524).
+- **Re-review of shards 2-5** (jobs 59974759-62): clean 905/920/932/921 → **1,616/1,609/1,589/1,585**;
+  97% of redone reviews valid. Old clean records kept (2 of 3,678 dropped as near-duplicates).
+- **Top-up** (4 new personas, 9 questions/chunk, `configs/gen_hpc10k_topup.yaml`): shard t5 kept
+  806/1,431; t1-t4 and s1 re-review still running. Expected total after dedupe: ~11k.
+- Backup of the pre-re-review shard outputs: `runs/hpc10k_backup_20261011/` on Leonardo.
+
+## Batch 5: HPC10K snapshot + 2k retained (2026-10-11, submitted)
+
+Data `runs/b5_hpc10k/verified.jsonl`, **9,743 records**: 7,743 new HPC10K clean records (shards
+s2-s5 re-reviewed, t5, s1 from the backup; deduped by id and normalized question) + 2,000 random
+(seed 42) retained from verified_qwen_4775. Modes: prose 7,997, none 1,061, ask 498, call 187.
+Slurm / cluster-usage share ≈ 80% (B3b: ~3%).
+
+Settings = B2/B3b (`configs/qwen3_4b_qdora_b2.yaml`: QDoRA rank 16, 1 epoch, lr 5e-5), seeds 42, 1, 2.
+Train job 59980667 (array 0-2), eval job 59980668 (`aftercorr`, gpt-oss-20b judge, config eval set).
+Goal: beat B3b (win rate 0.359, bad flags 0.059, tool decision 1.0, false calls 0).
+
+| Batch | Win rate vs base | Check pass rate | Bad-flag rate | Tool decision | False-call rate |
+|---|---|---|---|---|---|
+| B3b | 0.359 | 0.924 | 0.059 | 1.000 | 0.000 |
+| B5 | pending | pending | pending | pending | pending |
+
+Not the final data: a batch 6 on the full merged HPC10K set (~11k + retained) follows when all
+shards finish.
