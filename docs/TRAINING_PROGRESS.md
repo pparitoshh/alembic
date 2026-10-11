@@ -198,7 +198,8 @@ source (source-support-v3) → deterministic verify → decontam against all hel
 | First pass | 14,670 generated, 4,485 unique clean; ~47% of reviews malformed (whitespace after the JSON until `max_tokens`, `finish_reason=length`) |
 | Fix | reviewer `--structured-outputs-config {"backend":"xgrammar","disable_any_whitespace":true}` + `--max-model-len 24576`; pilot of 126 (job 59972524): kept 62 → **92**, malformed 33 → **0** |
 | Re-review s2-s5 (jobs 59974759-62) | clean 905/920/932/921 → **1,616/1,609/1,589/1,585**; 97% of redone reviews valid; 2 of 3,678 old clean dropped as near-duplicates |
-| Top-up (`configs/gen_hpc10k_topup.yaml`: 4 new personas, 9 q/chunk) | t5 kept 806/1,431; t1-t4 and s1 re-review running; expected ~11k after dedupe |
+| Top-up (`configs/gen_hpc10k_topup.yaml`: 4 new personas, 9 q/chunk) | t1-t5 clean 781/850/795/794/806; s1 re-reviewed 1,562 |
+| **Merged** `runs/hpc10k/clean.jsonl` | 11,987 in → **10,773 unique** (dropped: same id 909 = gold docs repeated per shard, same normalized question 113, near-dup in same doc (token Jaccard ≥ 0.85) 192). Tasks: concept 2,840, howto 2,790, script 2,853, debug 2,290. Modes: prose 8,346, none 1,467, ask 684, call 276 |
 
 Pre-re-review backup: `runs/hpc10k_backup_20261011/`.
 

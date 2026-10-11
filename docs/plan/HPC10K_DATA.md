@@ -235,6 +235,10 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
    submit the top-up shards (`configs/gen_hpc10k_topup.yaml`, `RUN_PREFIX=runs/hpc10k_t`).
    **Submitted 2026-10-11** with those `REVIEW_VLLM_ARGS`: re-review s1-s5 = jobs 59974758-59974762 (6,183
    `review: null` rows are dropped and redone); top-up t1-t5 = jobs 59974763-59974767.
+   **Done 2026-10-11:** all 10 jobs COMPLETED. Clean: s1-s5 1,562/1,616/1,609/1,589/1,585, t1-t5
+   781/850/795/794/806 = 11,987. **Merged → `runs/hpc10k/clean.jsonl`: 10,773** (dropped 909 same id, i.e. gold
+   docs repeated in every shard; 113 same normalized question; 192 near-dups within a doc, token Jaccard ≥ 0.85).
+   Of 856 old s1 clean ids, 846 are kept, 9 removed as cross-shard dups, 1 rejected on re-review.
 1. Run the pilot fix test above (`--generation-config vllm`, `stop_reason` logged), then re-review the shards.
 2. Raise Gemma `max_model_len` for the 115 context failures; look into the 760 tool-evidence mock-replay
    errors (deterministic, so rerunning won't fix them).
