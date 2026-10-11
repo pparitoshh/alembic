@@ -28,10 +28,7 @@ Adapters: `<run>/seed_<n>/adapter/` (final, + tokenizer), `<run>/seed_<n>/adapte
 | **B3b** | **+ Slurm prose and tools (182 x3)** | **0.359** [0.356-0.364] | **0.924** | **0.059** | **1.000** | **0.000** | **1.000** |
 | B3b-r8 | 3b, rank 8 | 0.355 [0.326-0.375] | 0.919 | 0.082 | 0.979 | 0.167 | 0.970 |
 | B5 | HPC10K snapshot 7,743 + 2k retained | cancelled | – | – | – | – | – |
-| **B6** | **HPC10K merged 10,773 + 2k retained** | **0.390** [0.386-0.394]¹ | **0.949** | 0.098 | **1.000** | **0.000** | **1.000** |
-
-¹ B6 win rate is seeds 42 and 1 only: seed 2's judge run is `incomplete` (1 invalid verdict, 65/66 pairs),
-so it has no win rate. Rerun the seed 2 judge to complete it.
+| **B6** | **HPC10K merged 10,773 + 2k retained** | **0.369** [0.326-0.394] | **0.949** | 0.098 | **1.000** | **0.000** | **1.000** |
 
 **Conclusions (B1-B3)**
 1. Settings alone (B1 → B2) change nothing: the regression comes from the data, not overtraining.
@@ -226,7 +223,47 @@ retained verified_qwen_4775 records as B5. Modes: prose 10,340, none 1,471, ask 
 |---|---|---|---|---|---|---|
 | 42 | 0.394 | 0.939 | 0.119 | 1.0 | 0.0 | 1.0 |
 | 1 | 0.386 | 0.970 | 0.050 | 1.0 | 0.0 | 1.0 |
-| 2 | – (judge incomplete, 65/66) | 0.939 | 0.125 | 1.0 | 0.0 | 1.0 |
+| 2 | 0.326 (judge rerun 59996053; first run 65/66 pairs) | 0.939 | 0.125 | 1.0 | 0.0 | 1.0 |
 
-Best win rate so far (B3b 0.359 → 0.390) and best check pass (0.949, base 0.955); tool metrics match B3b.
+Best win rate so far, but only just (B3b 0.359 → 0.369, seed range 0.326-0.394 overlaps B3b) and best check pass (0.949, base 0.955); tool metrics match B3b.
 Still below the base (target > 0.5). Bad-flag rate 0.098 is worse than B3b (0.059) and 4x the base (0.025).
+
+**B6 bad flags (invented sbatch options).** Student: 4 answers per seed at most, all on requeue / signal /
+dependency questions; the base invents flags on other questions (`--array-start`, `--mail-time`).
+
+| Topic | Questions | Invented by student (seeds) | Correct answer |
+|---|---|---|---|
+| Dependencies | arr-cand-006, -010, -017 | `--onfail`, `--on-success/-failure/-end/-begins/-complete`, `--diagnose(-after)` (42, 1, 2) | `--dependency=afterok/afternotok/afterany:<jid>` |
+| Requeue output | req-004, req-cand-008 | `--keep-old-logs`, `--retain-output`, `--retain` (42, 1, 2) | `--open-mode=append` (+ `--requeue`, `--mail-type=REQUEUE`) |
+| Signal | req-005 | `--kill-after=2m` (42) | `--signal=B:USR1@120` |
+| Array resubmit | arr-cand-018 | `--array-retry`, `--array-retry-max` (2) | `scancel 8642_1`; `sbatch --array=1,7` |
+
+Coverage in the 12,773 training records: `--dependency` 103 (`afternotok` 23, `afterany` 21),
+`--open-mode` 8, `--signal` 0, `--requeue` 0, `mail-type=REQUEUE` 0, `scancel <job>_<task>` 3, even though
+`slurm_man_sbatch` is a source (1,157 records). The model makes up a flag name when the data has no example
+of the real one. Fix: targeted generation on these sbatch options (gold examples or forced-topic chunks for
+`--dependency` types, `--open-mode`, `--requeue`, `--signal`, `--mail-type`, array task scancel). Before that,
+check the overlap with the eval set (decontamination) so the new records don't copy the eval questions.
+
+**sbatch option coverage (B6 data, 12,773 records).** 98 sbatch options are in the fetched man page and the
+valid-flag list. Records mentioning each: 0 for 5 options, 1-4 for 3, 5-19 for 22, 20+ for 68. Low: `--open-mode` 7,
+`--kill-on-invalid-dep` 11, `--wrap` 11, `--hold` 15, `--mail-type` 27; `--dependency` 100. **`--array`,
+`--requeue`, `--no-requeue` and `--signal` have no man-page text at all**: `data/sources/hpc10k_sources.json`
+`heldout_pattern` drops every block about arrays, requeue, signals and preemption, because those are the eval's
+held-out topics (generalization test). So 4 of the 7 B6 bad-flag answers (req-004, req-005, req-cand-008,
+arr-cand-018) are on held-out topics by design; the dependency ones (arr-cand-006/010/017) are not.
+Superseded by the weak-area top-up below.
+
+**B6 weak areas.** All 66 win-rate questions are from the two held-out docs (`slurm_requeue_signals` 36,
+`slurm_job_arrays` 30), so the win rate measures transfer to unseen topics. Per-question win over 3 seeds
+(seed 2: 65 q): `req-cand` 0.23, `arr-cand` 0.36, `arr` 0.42, `req` 0.51; by task howto 0.30, debug 0.35,
+script 0.38, concept 0.44. 21 questions lost on every seed. The skills behind them are allowed topics:
+job dependencies and `--parsable` chaining (arr-005, -009, arr-cand-006/010/014/015/017), `sacct` state /
+exit code (req-012, req-cand-009), `scontrol hold/release/update` and `--time-min` (req-cand-002/003/017),
+`--mail-type` / `--open-mode` (req-cand-007/019), and multi-constraint or "what does this snippet do" questions.
+Top-up toward ~10k more clean (same gates, 8 new skill-aimed personas, 24 total):
+`configs/gen_hpc10k_focus.yaml` (sbatch, scontrol, sacct, squeue, scancel man + faq, quickstart,
+job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_broad.yaml` (other docs,
+~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected.
+**Submitted 2026-10-11** (reviewer fix now the default in `slurm/generate_gated.sbatch`, 70c583e): focus f1-f5 =
+jobs 59996931-35, broad b1-b3 = 59996936, 59996939, 59996940.
