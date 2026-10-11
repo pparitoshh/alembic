@@ -230,3 +230,20 @@ retained verified_qwen_4775 records as B5. Modes: prose 10,340, none 1,471, ask 
 
 Best win rate so far (B3b 0.359 → 0.390) and best check pass (0.949, base 0.955); tool metrics match B3b.
 Still below the base (target > 0.5). Bad-flag rate 0.098 is worse than B3b (0.059) and 4x the base (0.025).
+
+**B6 bad flags (invented sbatch options).** Student: 4 answers per seed at most, all on requeue / signal /
+dependency questions; the base invents flags on other questions (`--array-start`, `--mail-time`).
+
+| Topic | Questions | Invented by student (seeds) | Correct answer |
+|---|---|---|---|
+| Dependencies | arr-cand-006, -010, -017 | `--onfail`, `--on-success/-failure/-end/-begins/-complete`, `--diagnose(-after)` (42, 1, 2) | `--dependency=afterok/afternotok/afterany:<jid>` |
+| Requeue output | req-004, req-cand-008 | `--keep-old-logs`, `--retain-output`, `--retain` (42, 1, 2) | `--open-mode=append` (+ `--requeue`, `--mail-type=REQUEUE`) |
+| Signal | req-005 | `--kill-after=2m` (42) | `--signal=B:USR1@120` |
+| Array resubmit | arr-cand-018 | `--array-retry`, `--array-retry-max` (2) | `scancel 8642_1`; `sbatch --array=1,7` |
+
+Coverage in the 12,773 training records: `--dependency` 103 (`afternotok` 23, `afterany` 21),
+`--open-mode` 8, `--signal` 0, `--requeue` 0, `mail-type=REQUEUE` 0, `scancel <job>_<task>` 3, even though
+`slurm_man_sbatch` is a source (1,157 records). The model makes up a flag name when the data has no example
+of the real one. Fix: targeted generation on these sbatch options (gold examples or forced-topic chunks for
+`--dependency` types, `--open-mode`, `--requeue`, `--signal`, `--mail-type`, array task scancel). Before that,
+check the overlap with the eval set (decontamination) so the new records don't copy the eval questions.
