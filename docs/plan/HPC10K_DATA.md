@@ -225,6 +225,14 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
    **Next fix to test:** start the reviewer with `--structured-outputs-config '{"disable_any_whitespace": true}'`
    (via `REVIEW_VLLM_ARGS`; drop `--generation-config vllm`, which isn't needed). Same pilot copy; expect
    malformed ~0 and a faster review.
+   **Whitespace test: job 59972524** (`runs/hpc10k_pilot100_ws`, `REVIEW_VLLM_ARGS="--max-model-len 24576
+   --structured-outputs-config {\"backend\":\"xgrammar\",\"disable_any_whitespace\":true}"`; backend `auto`
+   is refused with that flag, job 59969764). **Result: fixed.** COMPLETED; **`[verify] kept 92/126`** (pilot 2:
+   62, gc test: 66). Reviews: 119 `finish_reason=stop`, 1 `length`, **0 malformed** (was 33/35). Pending 20, all
+   `grounding_review_unresolved` (6 mock-replay failures + 14 unresolved verdicts); rejected 14 (`tool_ungrounded_id`
+   6, `unsupported_claim` 7, `tool_decision` 1); decontam dropped 0. The keep rate goes from ~50% to 73%.
+   Next: re-review all 5 shards with these `REVIEW_VLLM_ARGS` (only the malformed/unresolved rows need it) and
+   submit the top-up shards (`configs/gen_hpc10k_topup.yaml`, `RUN_PREFIX=runs/hpc10k_t`).
 1. Run the pilot fix test above (`--generation-config vllm`, `stop_reason` logged), then re-review the shards.
 2. Raise Gemma `max_model_len` for the 115 context failures; look into the 760 tool-evidence mock-replay
    errors (deterministic, so rerunning won't fix them).
