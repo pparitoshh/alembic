@@ -37,7 +37,8 @@ distillkit generate -c "$CONFIG" "${SET[@]}" --set teacher.base_url="http://127.
 stop_vllm
 
 PORT=$(job_port 1)
-start_vllm "$REVIEW_MODEL" "$PORT" $(judge_args "$REVIEW_MODEL")
+# REVIEW_VLLM_ARGS: extra vLLM flags for the reviewer (later flags override judge_args)
+start_vllm "$REVIEW_MODEL" "$PORT" $(judge_args "$REVIEW_MODEL") ${REVIEW_VLLM_ARGS:-}
 # Reviews list every answer unit with an explanation: 4,096 tokens truncated most of the pilot's, and
 # greedy JSON decoding sometimes loops on a phrase, hence the room and the mild repetition penalty.
 distillkit review -c "$CONFIG" "${SET[@]}" --set judge.base_url="http://127.0.0.1:$PORT/v1" \
