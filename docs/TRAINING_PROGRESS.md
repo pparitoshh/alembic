@@ -255,5 +255,16 @@ valid-flag list. Records mentioning each: 0 for 5 options, 1-4 for 3, 5-19 for 2
 `heldout_pattern` drops every block about arrays, requeue, signals and preemption, because those are the eval's
 held-out topics (generalization test). So 4 of the 7 B6 bad-flag answers (req-004, req-005, req-cand-008,
 arr-cand-018) are on held-out topics by design; the dependency ones (arr-cand-006/010/017) are not.
-Top-up config for the allowed options: `configs/gen_hpc10k_options.yaml` (sbatch man only, 84 chunks x 16 = 1,344
-questions, 4 new personas). Not submitted.
+Superseded by the weak-area top-up below.
+
+**B6 weak areas.** All 66 win-rate questions are from the two held-out docs (`slurm_requeue_signals` 36,
+`slurm_job_arrays` 30), so the win rate measures transfer to unseen topics. Per-question win over 3 seeds
+(seed 2: 65 q): `req-cand` 0.23, `arr-cand` 0.36, `arr` 0.42, `req` 0.51; by task howto 0.30, debug 0.35,
+script 0.38, concept 0.44. 21 questions lost on every seed. The skills behind them are allowed topics:
+job dependencies and `--parsable` chaining (arr-005, -009, arr-cand-006/010/014/015/017), `sacct` state /
+exit code (req-012, req-cand-009), `scontrol hold/release/update` and `--time-min` (req-cand-002/003/017),
+`--mail-type` / `--open-mode` (req-cand-007/019), and multi-constraint or "what does this snippet do" questions.
+Top-up toward ~10k more clean (same gates, 8 new skill-aimed personas, 24 total):
+`configs/gen_hpc10k_focus.yaml` (sbatch, scontrol, sacct, squeue, scancel man + faq, quickstart,
+job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_broad.yaml` (other docs,
+~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected. Not submitted.
