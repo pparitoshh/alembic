@@ -1,6 +1,6 @@
 # Quality review and training status
 
-**Current update, 2026-10-11:** The [12,092 certified Q&A release](../data/teacher/verified_qwen_12092/README.md) is published, and [student training on all 12,092 examples has completed](student_12092/README.md). The earlier 11,167-example adapter is preserved. Both completed adapters are checksum-verified; held-out evaluation remains pending. Dataset production continues toward the published 50,000-example milestone. The remaining sections below are the historical 2026-10-10 snapshot.
+**Current update, 2026-10-11:** The [14,304 certified Q&A release](../data/teacher/verified_qwen_14304/README.md) is published, adding 2,212 corrected admissions from the eighth advanced-document cohort. [Student training on the earlier 12,092-example snapshot](student_12092/README.md) and the [six-run controlled development comparison](student_experiments_12092/RESULTS.md) completed. Across both learning rates and three seeds, the trained student won only about 30–34% of pairwise development comparisons against its untrained base; G2 improvement has **not** been demonstrated. The final holdout remains separate. Dataset production continues toward the published 50,000-example milestone. The remaining sections below are the historical 2026-10-10 snapshot.
 
 As of 2026-10-10 19:03 UTC, **8,450/30,000** distinct Qwen teacher Q&A are accepted under the automated gates. The 10,000-row mark is an intermediate milestone; training on the final 30,000-row release has not yet run.
 
