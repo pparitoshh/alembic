@@ -1,6 +1,6 @@
 # Eval v3: a larger trained-topic eval set
 
-Status: open task, spec only. No code or data in this PR yet.
+Status (2026-10-11): source freeze, generator, review/release gates and source decontamination are implemented. Build job `60026161` is queued; evaluation array `60026318` and audit job `60026319` depend on a successful release. No v3 evaluation questions or scores are released yet. See `research/eval_v3/README.md` for reproducible commands and live paths.
 
 ## Why
 
@@ -48,7 +48,7 @@ Task mix roughly like v2: script, concept, howto, debug. B6 is weakest on howto 
 2. **No overlap with training.** `distillkit decontam` drops training records that overlap anything under
    `data/eval/`. Run it against `runs/hpc10k/clean.jsonl` and the top-up runs once v3 lands, and report how many
    records it removes.
-3. **Source family (decision needed).** `data/eval/README.md` says fresh final testing needs separately
+3. **Source family (chosen: option b, development only).** `data/eval/README.md` says fresh final testing needs separately
    held-out source families. Our top-up generation already uses the sbatch, sacct, scontrol, squeue and scancel
    man pages, so options are:
    - (a) Hold out whole source docs (e.g. another site's user guide) and keep them out of training. Cleaner;
@@ -73,3 +73,9 @@ Task mix roughly like v2: script, concept, howto, debug. B6 is weakest on howto 
 - `eval_v3.jsonl` with ~200 reviewed items and its manifest is merged.
 - Decontam has run against the training data and its counts are in the README.
 - Base and B6 have v3 numbers in `docs/TRAINING_PROGRESS.md`.
+
+## Implementation evidence
+
+The source freeze contains 53 existing source chunks, 4 recovered option blocks from the same pinned upstream Slurm manuals, and 8 evaluation-only composite documents. The composite documents are also excluded from training. `source_exposure_before_release.json` records 910 overlapping source rows in historical B6 and 1,300 in the eight top-ups. These are source-overlap counts, not duplicate-question counts. B6 is not a clean holdout result on these sources; v3 is for development, and future merged inputs must exclude these chunks. The final lexical audit depends on accepted v3 questions and has not run yet.
+
+Question-level sampling errors quoted above are rough independent-item approximations. Shared source chunks, repeated seeds on the same questions, and two judge orders are correlated; 400 verdicts do not count as 400 independent evaluation questions. Small changes must not be described as established improvements.

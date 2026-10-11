@@ -41,3 +41,44 @@ the same sample. References go to the judge, not the closed-book answering model
 
 The tool evaluation remains a draft with model review pending. Calibration tests
 the judge; it is not evidence of student accuracy.
+
+## Eval v3: trained-topic development set (build pending)
+
+The frozen 66-row `eval_all_v2.jsonl` and its scoring protocol are unchanged.
+`eval_v3.holdout.json` freezes source exclusions before candidate generation, with
+text hashes, original chunk IDs, upstream URLs, licenses and Slurm version.
+Eight bundles in `v3_sources/` target 200 normal QAs across dependencies (30),
+accounting (30), job control (25), output/mail (25), resources (30), queue/cancel
+(20), multi-constraint scripts (20), and debugging (20).
+
+**Not released yet:** the planned 512 candidates are not 200 accepted questions.
+The build requires independent source support review, deterministic verification,
+a separate question-completeness review, exact/normalized/lexical near deduplication,
+and all topic quotas. Selection never uses student scores. Review is automated;
+no human review is claimed. Failed or uncertain reviews cannot release a row.
+References cite their bundle chunk; the evidence sidecar resolves original chunks.
+
+`decontam` now also checks `*.holdout.json`. Training admission rejects matching
+sources even if an old verified file is reused. These protections apply only in
+checkouts that contain this change and the manifest. The teammate-owned live
+Leonardo checkout is read-only to this account: **apply this PR before merging or
+training B7**, or use the isolated patched checkout described in the runbook.
+
+The pre-generation source audit found:
+
+| Historical input | Rows | Source matches | Remaining before question audit |
+|---|---:|---:|---:|
+| hpc10k | 10,773 | 910 | 9,863 |
+| Eight top-ups, summed (not deduplicated across runs) | 10,248 | 1,300 | 8,948 |
+| B6 training, historical exposure only | 12,773 | 910 | 11,863 |
+
+The final question-plus-source audit runs after release and writes new filtered
+copies. None of these numbers represents an already-clean merged training set.
+Historical B6 exposure cannot be undone: this is a development set, not blind
+testing or evidence of generalization to unseen source text. A genuinely blind
+test still needs separately reserved source families.
+
+Evidence: `research/eval_v3/source_exposure_before_release.json`. Build instructions
+and job paths: `research/eval_v3/README.md`. Report v2 and v3 separately, including
+per-topic results; shared sources mean an independent-item ±0.07 margin is only
+a rough approximation, not a validated uncertainty bound.

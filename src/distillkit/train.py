@@ -17,12 +17,22 @@ from .config import Config
 def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> list[dict]:
     if cfg.train.input_manifest is not None:
         from .training_inputs import admitted_rows
-        return admitted_rows(cfg, evidence_dir=evidence_dir)
-    from .io import read_jsonl
-    from .support import source_for_records
-    rows = read_jsonl(cfg.run_dir / 'verified.jsonl')
-    if getattr(cfg.seeds, 'registry', None) is not None:
-        source_for_records(cfg, rows)
+        rows = admitted_rows(cfg, evidence_dir=evidence_dir)
+    else:
+        from .io import read_jsonl
+        from .support import source_for_records
+        rows = read_jsonl(cfg.run_dir / 'verified.jsonl')
+        if getattr(cfg.seeds, 'registry', None) is not None:
+            source_for_records(cfg, rows)
+    # A stale verified file must not bypass a newly frozen evaluation source
+    # exclusion. Reject before importing GPU libraries or loading model weights.
+    from .eval_holdout import load_source_holdouts, source_overlap
+    from .heldout import EVAL_ROOT
+    held = load_source_holdouts(EVAL_ROOT)
+    excluded = [r.get('id', '<missing>') for r in rows if source_overlap(r, held)]
+    if excluded:
+        raise ValueError(f'{len(excluded)} training records overlap frozen evaluation sources '
+                         f'(examples: {excluded[:5]}). Rerun decontam and build new filtered training inputs.')
     return rows
 
 
