@@ -18,3 +18,7 @@ The pipeline uses parallel independent source and question reviews where useful,
 The interim run's private `interim-training-1100-v1/training_evidence.json` reports `PASS`, 1,100 loader-checked rows, 150,795 supervised tokens, 207 optimizer steps, and adapter SHA-256 `c96eb213cb17bf062d5f415cbbc7142584de9385e12d991820fc9a45ddee8072`. It ran from 09:09:23 to 09:22:11 UTC. This establishes training execution and adapter creation, not improvement over the base model.
 
 Next: finish the third cohort's independent review and corrected certificate, then continue source-bound batches to 30,000. Full-release QDoRA training and held-out evaluation follow the certified target. A complete outcome claim requires the measured student result, not a queued job or an interim adapter.
+
+## Controlled 12,092-example student comparison
+
+See [results and artifacts](student_experiments_12092/RESULTS.md). Status: **COMPLETE**. This is development evaluation, not a final held-out improvement claim.
