@@ -28,10 +28,7 @@ Adapters: `<run>/seed_<n>/adapter/` (final, + tokenizer), `<run>/seed_<n>/adapte
 | **B3b** | **+ Slurm prose and tools (182 x3)** | **0.359** [0.356-0.364] | **0.924** | **0.059** | **1.000** | **0.000** | **1.000** |
 | B3b-r8 | 3b, rank 8 | 0.355 [0.326-0.375] | 0.919 | 0.082 | 0.979 | 0.167 | 0.970 |
 | B5 | HPC10K snapshot 7,743 + 2k retained | cancelled | – | – | – | – | – |
-| **B6** | **HPC10K merged 10,773 + 2k retained** | **0.390** [0.386-0.394]¹ | **0.949** | 0.098 | **1.000** | **0.000** | **1.000** |
-
-¹ B6 win rate is seeds 42 and 1 only: seed 2's judge run is `incomplete` (1 invalid verdict, 65/66 pairs),
-so it has no win rate. Rerun the seed 2 judge to complete it.
+| **B6** | **HPC10K merged 10,773 + 2k retained** | **0.369** [0.326-0.394] | **0.949** | 0.098 | **1.000** | **0.000** | **1.000** |
 
 **Conclusions (B1-B3)**
 1. Settings alone (B1 → B2) change nothing: the regression comes from the data, not overtraining.
@@ -226,9 +223,9 @@ retained verified_qwen_4775 records as B5. Modes: prose 10,340, none 1,471, ask 
 |---|---|---|---|---|---|---|
 | 42 | 0.394 | 0.939 | 0.119 | 1.0 | 0.0 | 1.0 |
 | 1 | 0.386 | 0.970 | 0.050 | 1.0 | 0.0 | 1.0 |
-| 2 | – (judge incomplete, 65/66) | 0.939 | 0.125 | 1.0 | 0.0 | 1.0 |
+| 2 | 0.326 (judge rerun 59996053; first run 65/66 pairs) | 0.939 | 0.125 | 1.0 | 0.0 | 1.0 |
 
-Best win rate so far (B3b 0.359 → 0.390) and best check pass (0.949, base 0.955); tool metrics match B3b.
+Best win rate so far, but only just (B3b 0.359 → 0.369, seed range 0.326-0.394 overlaps B3b) and best check pass (0.949, base 0.955); tool metrics match B3b.
 Still below the base (target > 0.5). Bad-flag rate 0.098 is worse than B3b (0.059) and 4x the base (0.025).
 
 **B6 bad flags (invented sbatch options).** Student: 4 answers per seed at most, all on requeue / signal /
