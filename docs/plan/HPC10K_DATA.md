@@ -1,6 +1,6 @@
 # Plan: ~10k quality-gated Slurm / cluster-usage training records
 
-Status: running, 2026-10-10 (see **Status and handover** at the end). Branch `feat/data-hpc10k`. Results so far live in
+Status: shards finished, 2026-10-11; review needs a second pass (see **Status and handover** at the end). Branch `feat/data-hpc10k`. Results so far live in
 `docs/TRAINING_PROGRESS.md` (branch `docs/training-progress`).
 
 ## Why
@@ -141,6 +141,26 @@ Status at 22:38 (47 min in): generation done in all shards, **14,670 records gen
 review with `repetition_penalty` 1.05, so expect ~25% malformed reviews as in pilot 2; redo them after the
 fix (review only, no regeneration). The test job 59928215 was still pending (our GPU share is in use).
 
+**Result (checked 2026-10-11): all 5 shards COMPLETED** (ended 03:07-03:41, 5h16-5h50 each).
+
+| Shard | Generated | Reviewed (failed) | Kept = clean | Rejected | Pending review |
+|---|---|---|---|---|---|
+| s1 | 2,934 | 2,766 (168) | 856 | 644 | 1,434 |
+| s2 | 2,970 | 2,786 (184) | 905 | 591 | 1,474 |
+| s3 | 2,970 | 2,764 (206) | 920 | 621 | 1,429 |
+| s4 | 2,934 | 2,722 (212) | 932 | 594 | 1,408 |
+| s5 | 2,862 | 2,628 (234) | 921 | 513 | 1,428 |
+| **Total** | **14,670** | **13,666 (1,004)** | **4,534** | **2,963** | **7,173** |
+
+- Kept 31%, pending 49% (pilot 2 suggested ~25% malformed). Pending reasons per shard not yet broken down.
+- Top rejections: `bad_flags`, `tool_decision`, `tool_ungrounded_id`, `unsupported_claim`. Decontam dropped 0.
+- **All 1,004 review failures are context-length errors**: vLLM max context 16,384, review asks for 8,192
+  output tokens, so any prompt over ~8,192 tokens fails. Rerunning will not fix them: lower review
+  `max_tokens` (e.g. 6k) or raise `max_model_len` first.
+- **Repetition-penalty test (job 59928215, 15 min)**: re-reviewing the 34 malformed with penalty 1.0 gave
+  kept 66/126 (was 62), pending 47 (was 52). Not the hoped-for ~0 malformed, so penalty 1.0 alone is not
+  the fix.
+
 Check: `sacct -j 59925723,59925724,59925725,59925726,59925727 -X -o JobID,State,Elapsed` and the stage
 lines in `slurm/logs/dk-gen-gated-<job>.out`. A failed or timed-out shard: rerun the same submit command
 (it reuses the shard seed dirs, generate/review resume):
@@ -153,12 +173,15 @@ SHARDS=5 SEEDS_ALL=runs/hpc10k/seeds RUN_PREFIX=runs/hpc10k_s bash slurm/submit_
 --time=24:00:00 slurm/generate_gated.sbatch` for one.)
 
 **Next steps**
-1. Fix the early-stopping reviews (see pilot 2), test on `runs/hpc10k_pilot100`, then re-review the shards.
-2. When the shards finish: merge `runs/hpc10k_s{1..5}/clean.jsonl` → `runs/hpc10k/clean.jsonl` with a
+1. Break down the 47 pending in `runs/hpc10k_pilot100_rp1` and the 7,173 pending in the shards by reason;
+   fix the early-stopping reviews (penalty 1.0 barely helped), test on the pilot, then re-review the shards.
+2. Fix the context-length failures (review `max_tokens` vs `max_model_len`) and rerun review + verify +
+   decontam on each shard (no regeneration).
+3. Merge `runs/hpc10k_s{1..5}/clean.jsonl` → `runs/hpc10k/clean.jsonl` with a
    cross-shard near-duplicate pass. The gold-example source docs (`slurm_sbatch_basics`,
    `slurm_monitoring`) are copied into every shard, so their records repeat with the same ids: keep one copy.
-3. Write per-gate counts (per shard and total) and a 100-record spot-check sample into PR #31 and
+4. Write per-gate counts (per shard and total) and a 100-record spot-check sample into PR #31 and
    `docs/TRAINING_PROGRESS.md`.
-4. Batch 5: train on 4,775 + new clean data (batch 2 settings, rank 16, 3 seeds); compare with 3b.
-5. Still to add to `TRAINING_PROGRESS.md`: per-step dev evals of batch 3/r8 (jobs 59920008, 59920016,
+5. Batch 5: train on 4,775 + new clean data (batch 2 settings, rank 16, 3 seeds); compare with 3b.
+6. Still to add to `TRAINING_PROGRESS.md`: per-step dev evals of batch 3/r8 (jobs 59920008, 59920016,
    59920263) and batch 2 seed 2 step 284.
