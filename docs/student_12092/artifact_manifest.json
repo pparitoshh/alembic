@@ -1,0 +1,11 @@
+{
+  "status": "TRAINING_COMPLETED_EVALUATION_PENDING",
+  "records": 12092,
+  "job_id": "59940941",
+  "optimizer_steps": 2268,
+  "dataset_sha256": "0d26fd2ec8fa5fb5221d22aa6249f6d107201d9f4ae0b06da4734fd105f7fd9c",
+  "adapter_sha256": "c3c31cba5b9d243279c511e0366d34661ab8bbf336e31f627801e9fcfe170bc7",
+  "archive_sha256": "207d2012504a89aefb841cae4a5b6df06ebeb01ebd056a056dc1188bc1e9832b",
+  "archive_bytes": 55304185,
+  "download_url": "https://github.com/pparitoshh/alembic/releases/download/student-12092-20261011/student-12092-qdora.tar.gz"
+}
