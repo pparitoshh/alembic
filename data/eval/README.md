@@ -63,9 +63,10 @@ References cite their bundle chunk; the evidence sidecar resolves original chunk
 
 `decontam` now also checks `*.holdout.json`. Training admission rejects matching
 sources even if an old verified file is reused. These protections apply only in
-checkouts that contain this change and the manifest. The teammate-owned live
-Leonardo checkout is read-only to this account: **apply this PR before merging or
-training B7**, or use the isolated patched checkout described in the runbook.
+checkouts that contain this change and the manifest. The owner applied the
+exclusions from a separate PR worktree before merging B7. The older shared
+checkout remains unpatched; future merges and training must use a checkout with
+these protections and the frozen manifest.
 
 The completed post-release audit found:
 
@@ -92,5 +93,16 @@ and job paths: `research/eval_v3/README.md`. Report v2 and v3 separately, includ
 per-topic results; shared sources mean an independent-item ±0.07 margin is only
 a rough approximation, not a validated uncertainty bound.
 
-Base/B6 v3 comparison is pending: the three B6 weight files are owner-only and
-unreadable to the evaluating account. See the runbook for the exact access fix.
+The independent final B7 audit (`60211738`) found **zero source matches and zero
+lexical question matches across all 20,472 merged rows**. Input SHA-256:
+`8c20deb5c05b68c7bc9e855182d8adb00bab6381b5ccff1c2816b9b6575c86ad`.
+Evidence: `research/eval_v3/b7_final_audit.json` and its context sidecar. The input
+file remained unchanged. B7 training had already started when this rerun finished.
+
+The audit now anchors evaluation paths to the module's checkout and requires the
+v3 holdout and complete unchanged release before writing any output. Its context
+sidecar binds every question file, so an older working directory cannot silently
+turn this into an audit without v3.
+
+B6 adapter read access is resolved. The base/B6 comparison is being rerun with
+the locked CUDA 12.9 environment; no v3 model scores are available yet.

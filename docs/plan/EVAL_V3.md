@@ -1,6 +1,12 @@
 # Eval v3: a larger trained-topic eval set
 
-Status (2026-10-12): **200 reviewed Slurm questions released**, with all eight topic quotas filled; the original 66-question v2 is unchanged. Build `60045425` and final audit `60045496` completed. The audit found zero lexical question matches and excluded 910 source matches from hpc10k and 1,300 across the eight top-ups into new filtered copies. Base/B6 comparison `60045495` failed before inference because all three B6 weight files are owner-only (`0600`). No v3 model scores exist yet; read access and the shared checkout's B7 source guard still require the owner's action. See `research/eval_v3/README.md` for commands and evidence.
+Status (2026-10-12): **200 reviewed Slurm questions released**; v2 is unchanged.
+The final merged B7 audit passed with 20,472 rows and zero source/lexical-question
+matches. The audit now resolves the module checkout's eval directory and fails on
+missing holdouts or an incomplete/changed release. B6 weights are readable, but
+comparison array `60211313` exposed a CUDA 13 environment mismatch and was
+cancelled before answer generation. Replacement array **`60213268`** uses a private environment built from the
+locked CUDA 12.9 dependencies. No v3 model scores yet. See the runbook for evidence.
 
 ## Why
 

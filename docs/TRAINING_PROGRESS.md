@@ -269,7 +269,7 @@ job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_bro
 jobs 59996931-35, broad b1-b3 = 59996936, 59996939, 59996940.
 
 
-## Eval v3: trained-topic development comparison (2026-10-12, awaiting access)
+## Eval v3: trained-topic development comparison (2026-10-12, rerun in progress)
 
 The new `data/eval/eval_v3.jsonl` release contains **200 model-reviewed Slurm QAs**
 across eight trained-topic areas. The 66-question v2 and its existing B6 results
@@ -281,7 +281,7 @@ B6 adapter is not retroactively a clean holdout model.
 | Evaluation | Seed 42 win rate | Seed 1 win rate | Seed 2 win rate | Status |
 |---|---:|---:|---:|---|
 | v2, 66 held-out-topic questions | 0.394 | 0.386 | 0.326 | Existing complete results |
-| v3, 200 trained-topic questions | Pending | Pending | Pending | B6 weights unreadable |
+| v3, 200 trained-topic questions | Pending | Pending | Pending | Runtime corrected for rerun |
 
 Build job `60045425` and audit `60045496` completed. The comparison tasks
 `60045495_0`, `_1`, `_2` all stopped after five seconds, before answer generation:
@@ -289,10 +289,21 @@ Build job `60045425` and audit `60045496` completed. The comparison tasks
 seeds. The evaluating account `a08trc09` cannot read those files. Report job
 `60045542` therefore correctly returned incomplete, with no fabricated scores.
 
-The owner needs to grant read access to those three files; exact commands and
-resubmission instructions are in `research/eval_v3/README.md`. Do not infer any
-model improvement from release completion. Once access works, evaluate the same
-200 questions for base/B6 with greedy 512-token answers and the unchanged
+The owner has now granted read access. Replacement array `60211313` started, but
+its `.venv` pointed to a CUDA 13 PyTorch build incompatible with the allocated
+nodes. It was cancelled before writing answer caches. Replacement array **`60213268`** uses a private environment built from the
+repository's locked CUDA 12.9 dependencies. The job
+script now checks that CUDA works before loading weights and saves runtime versions.
+
+The independent final-question audit `60211738` checked the merged B7 file:
+**20,472 records, zero frozen-source matches, zero exact/normalized/lexical-near
+question matches**, with the input hash unchanged. B7 training had already started
+when this rerun completed. The audit deliberately ran from the older shared checkout
+using this PR's module, confirming the working-directory bug is fixed. Evidence is
+in `research/eval_v3/b7_final_audit.json` and `b7_final_audit_context.json`.
+
+Do not infer any model improvement from release completion. The rerun uses the
+same 200 questions for base/B6 with greedy 512-token answers and the unchanged
 `paired-orders-v2-invalid-incomplete` gpt-oss-20b judge at temperature zero.
 Publish complete per-seed and per-topic results only after the report validates
 all paired judgments. The existing tool-use evaluation remains separate.

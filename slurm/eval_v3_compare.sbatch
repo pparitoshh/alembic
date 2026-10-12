@@ -18,6 +18,29 @@ SEED_DIR="runs/eval_v3_b6/seed_$SEED"
 ADAPTER="$B6_RUN/seed_$SEED/adapter"
 test -s "$ADAPTER/adapter_model.safetensors"
 mkdir -p "$SEED_DIR"
+test -r "$ADAPTER/adapter_config.json" && test -r "$ADAPTER/adapter_model.safetensors"
+# Do not silently run inference on CPUs if a checkout points to a CUDA 13
+# environment on Leonardo's CUDA 12 driver. Use the repository's locked stack.
+TORCH_DISABLE_NATIVE_JIT=1 "$VENV/bin/python" - "$SEED_DIR" <<'PY'
+import importlib.metadata
+import json
+from pathlib import Path
+import sys
+import torch
+
+if not torch.cuda.is_available():
+    raise RuntimeError(f"CUDA unavailable in {sys.executable} (torch {torch.__version__}, "
+                       f"CUDA {torch.version.cuda}); provision the locked Linux environment before retrying")
+probe = torch.empty(1, device="cuda")
+torch.cuda.synchronize()
+runtime = {"python": sys.version, "executable": sys.executable,
+           "torch": torch.__version__, "cuda": torch.version.cuda,
+           "gpu": torch.cuda.get_device_name(),
+           "packages": {name: importlib.metadata.version(name)
+                        for name in ("transformers", "peft", "bitsandbytes", "accelerate")}}
+(Path(sys.argv[1]) / "runtime.json").write_text(json.dumps(runtime, indent=2) + "\n")
+print(json.dumps(runtime), flush=True)
+PY
 if [ ! -e "$SEED_DIR/adapter" ]; then ln -s "$ADAPTER" "$SEED_DIR/adapter"; fi
 test "$(readlink -f "$SEED_DIR/adapter")" = "$(readlink -f "$ADAPTER")"
 sha256sum "$ADAPTER/adapter_config.json" "$ADAPTER/adapter_model.safetensors" > "$SEED_DIR/adapter.before.sha256"

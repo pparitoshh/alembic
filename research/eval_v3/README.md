@@ -8,20 +8,40 @@ unchanged. The new release must contain 200 accepted, distinct normal QAs.
 
 - **Released: 200 normal Slurm QAs**, with every topic quota filled, manifest and
   complete selected-row review evidence. The original 66-row v2 is unchanged.
-- Repair/release job `60045425`: **completed**, 42m10s. Of 512 original candidates,
-  368 passed source review and verification, 353 passed question-quality review,
-  and 200 were selected without consulting model scores.
-- Audit job `60045496`: **completed**, 1m10s. It found zero question matches under
-  the exact/normalized/lexical-near checks, and excluded 910 source matches from
-  hpc10k and 1,300 across the eight top-ups into new filtered copies. Historical
-  B6 separately has 910 source matches; these are not additional distinct rows.
-- Comparison array `60045495_[0-2]`: **failed before inference**, each after 5s.
-  All three `adapter_model.safetensors` files are owned by `a08trc06`, mode `0600`,
-  and unreadable to `a08trc09`. No new base/B6 scores exist. Report `60045542`
-  correctly reports incomplete results. No replacement GPU jobs were submitted
-  while this access problem remains.
-- The shared checkout still lacks `src/distillkit/eval_holdout.py`; the B7 source
-  guard must be applied there before the next merge/training.
+- Build `60045425` and the original training-input audit `60045496` completed.
+- The adapter owner granted read access to all three B6 weight files. Direct
+  reads as `a08trc09` now succeed.
+- Final B7 audit **`60211738` completed** against the final frozen v3 release:
+  **20,472 rows, zero source matches, zero lexical question matches**, input hash
+  unchanged. Evidence: `b7_final_audit.json` and `b7_final_audit_context.json`.
+- The owner applied exclusions in a separate PR worktree and merged B7 there,
+  without patching the older shared checkout. B7 training was already running
+  when this independent final-question audit completed; this was not a claim
+  that our audit preceded training.
+- Comparison array `60211313` reached inference but exposed an incorrect runtime:
+  the private checkout's `.venv` linked to a shared CUDA 13 build incompatible
+  with the allocated nodes. It was cancelled before any answer caches were
+  written. Replacement array **`60213268`** uses a private environment provisioned from
+  the repository's locked CUDA 12.9 dependencies. The comparison now tests
+  GPU availability before loading weights and records runtime versions.
+- No new v3 model scores are available yet. The PR remains draft until all three
+  paired comparisons finish and the validated results are published.
+- Report job `60213647` depends on completion of array `60213268` and validates
+  all three seeds plus the final B7 audit before reporting success.
+
+### Audit path fix
+
+`eval_v3 audit` and `check-release` resolve the evaluation directory from the
+checkout supplying the Python module (`heldout.EVAL_ROOT`). The caller's working
+folder cannot silently substitute an older eval directory. Audit fails before
+writing outputs if the v3 holdout is missing/empty or the complete frozen release
+is unavailable or has changed. `audit_context.json` records the resolved directory,
+release/holdout hashes and every question-file hash. Inputs and output paths remain
+relative to the caller, as normal command-line paths.
+
+The final B7 audit intentionally ran from the older shared checkout with this
+worktree's module on `PYTHONPATH`, reproducing the reported invocation while
+correctly excluding against the frozen 200-question release.
 
 ### Build history
 
@@ -61,15 +81,16 @@ The code and frozen inputs are in the isolated writable Leonardo directory:
 
 The teammate-owned checkout `/leonardo_work/EUHPC_D30_031/alembic/alembic` is
 read-only to this account. A guarded deployment attempt was refused before any
-live file was written. **Apply this PR's code and holdout manifest before merging
-or training B7**, or perform the merge/training in the isolated patched checkout.
+live file was written. The owner used a separate PR worktree to apply exclusions
+before merging B7.
+Future merges/training must likewise use a checkout containing the code and freeze.
 Do not assume the older live `decontam` script enforces these source exclusions.
 Old adapters, historical training records and v2 outputs are unchanged.
 
-### Unblock comparison access
+### Adapter access handoff (resolved)
 
-The adapter owner (`a08trc06`, Paritosh's account) needs to grant **read access to
-these three weight files only**, on Leonardo:
+The adapter owner granted read access to the three weight files. The original
+least-privilege handoff command was:
 
 ```bash
 for seed in 42 1 2; do
@@ -102,8 +123,8 @@ PY
 
 The completed release and audit do not need rerunning. After all three seeds
 finish, run the report command below; it must validate all 200 paired judgments
-per seed before publishing scores. Applying the B7 source guard is a separate
-owner action from granting access to B6 weights.
+per seed before publishing scores. The B7 source exclusions were handled
+separately in the owner's PR worktree.
 
 ## Frozen sources and audit
 

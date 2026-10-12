@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from .checks import check_answer, load_flags
 from .config import load_config
 from .eval_holdout import load_source_holdouts, source_overlap
-from .heldout import heldout_questions
+from .heldout import EVAL_ROOT, heldout_questions
 from .io import read_jsonl, write_jsonl
 from .records import final_answer
 from .seeds import load_chunks
@@ -315,8 +315,8 @@ def release(cfg):
     output.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
-def check_release():
-    root = Path("data/eval")
+def check_release(root=None):
+    root = EVAL_ROOT if root is None else Path(root)
     manifest = json.loads((root / "eval_v3.manifest.json").read_text())
     if sha((root / "eval_v3.jsonl").read_bytes()) != manifest["sha256"]:
         raise ValueError("release data changed")
@@ -324,7 +324,7 @@ def check_release():
         raise ValueError("frozen v2 changed")
     if sha((root / "eval_v3.holdout.json").read_bytes()) != manifest["source_holdout_sha256"]:
         raise ValueError("source holdouts changed")
-    if sha(Path(manifest["evidence_path"]).read_bytes()) != manifest["evidence_sha256"]:
+    if sha((root.parent.parent / manifest["evidence_path"]).read_bytes()) != manifest["evidence_sha256"]:
         raise ValueError("review evidence changed")
     rows = unique_rows(root / "eval_v3.jsonl")
     if len(rows) != 200 or manifest["rows"] != 200:
@@ -338,9 +338,25 @@ def check_release():
 
 def audit(inputs, output):
     """Write NEW filtered copies and exposure counts; never mutate historical inputs."""
-    root = Path("data/eval")
+    # Resolve against the checkout supplying this module, not a caller's cwd.
+    # A shared checkout can contain older eval questions but lack the v3 freeze.
+    root = EVAL_ROOT
+    holdout = root / "eval_v3.holdout.json"
+    if not holdout.is_file():
+        raise ValueError(f"required eval v3 source holdout manifest is missing: {holdout}")
     held = load_source_holdouts(root)
+    if not held:
+        raise ValueError(f"no source exclusions found in required eval v3 holdout: {holdout}")
+    # This command audits the released evaluation, never an incomplete build.
+    manifest = check_release(root)
     questions = [(f, normalized(q), _shingles(normalized(q))) for f, q, _ in heldout_questions(root)]
+    context = {"created_utc": datetime.now(timezone.utc).isoformat(), "eval_root": str(root),
+        "eval_v3_sha256": manifest["sha256"],
+        "source_holdout_sha256": manifest["source_holdout_sha256"],
+        "source_exclusions": len(held), "questions": len(questions),
+        "question_files": {str(p.relative_to(root)): sha(p.read_bytes())
+                           for p in sorted(root.rglob("*.jsonl"))},
+        "question_match": "NFKC/casefold/whitespace normalization, exact or word-trigram Jaccard >= 0.8"}
     output.mkdir(parents=True, exist_ok=True)
     summary = []
     for index, path in enumerate(inputs):
@@ -366,6 +382,7 @@ def audit(inputs, output):
             "question_overlap": question_hits, "excluded_union": len(dirty), "remaining": len(clean),
             "output": str(target / "clean.jsonl"), "output_sha256": sha((target / "clean.jsonl").read_bytes())})
     (output / "audit.json").write_text(json.dumps(summary, indent=2) + "\n")
+    (output / "audit_context.json").write_text(json.dumps(context, indent=2) + "\n")
     print(json.dumps(summary, indent=2), flush=True)
 
 
