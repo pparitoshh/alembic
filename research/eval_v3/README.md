@@ -6,22 +6,37 @@ unchanged. The new release must contain 200 accepted, distinct normal QAs.
 
 ## Status, 2026-10-12
 
-- Source freeze: complete; v2 is unchanged.
+- **Released: 200 normal Slurm QAs**, with every topic quota filled, manifest and
+  complete selected-row review evidence. The original 66-row v2 is unchanged.
+- Repair/release job `60045425`: **completed**, 42m10s. Of 512 original candidates,
+  368 passed source review and verification, 353 passed question-quality review,
+  and 200 were selected without consulting model scores.
+- Audit job `60045496`: **completed**, 1m10s. It found zero question matches under
+  the exact/normalized/lexical-near checks, and excluded 910 source matches from
+  hpc10k and 1,300 across the eight top-ups into new filtered copies. Historical
+  B6 separately has 910 source matches; these are not additional distinct rows.
+- Comparison array `60045495_[0-2]`: **failed before inference**, each after 5s.
+  All three `adapter_model.safetensors` files are owned by `a08trc06`, mode `0600`,
+  and unreadable to `a08trc09`. No new base/B6 scores exist. Report `60045542`
+  correctly reports incomplete results. No replacement GPU jobs were submitted
+  while this access problem remains.
+- The shared checkout still lacks `src/distillkit/eval_holdout.py`; the B7 source
+  guard must be applied there before the next merge/training.
+
+### Build history
+
 - Initial build `60026161`: ran for 46m22s, generated 512/512 candidates;
   144 passed source review, 23 were rejected and 345 stayed pending. The release
   failed closed; dependent comparisons/audit were cancelled.
 - Root causes: the quality gate treated the literal uncertainty value `none` as
   uncertainty, and many support reviews copied invalid evidence/unit IDs.
-- Corrected CPU replay of the preserved reviews: **134 quality-eligible candidates,
-  111 selected toward the fixed topic quotas; no 200-row release yet**.
-- Format-repair job **`60045425` is running**, reusing existing candidates in
-  `runs/eval_v3_repair_20261012`. It may retry 292 structurally invalid reviews;
+- Corrected CPU replay initially yielded 134 quality-eligible candidates and
+  111 toward the fixed topic quotas. The completed repair filled the deficits.
+- Format-repair job `60045425` reused existing candidates in
+  `runs/eval_v3_repair_20261012`. It could retry 292 structurally invalid reviews;
   53 pending reviews with negative/uncertain judgments remain excluded. Original
   generation and review evidence stays in `runs/eval_v3_generation`.
-- Replacement base/B6 array `60045495` and audit `60045496` depend on repair/release
-  success. Report job `60045542` follows their termination. The original report
-  `60026845` correctly recorded an incomplete result rather than inventing scores.
-- Accepted v3 release and new model scores: **not yet available**.
+- The original report `60026845` correctly recorded an incomplete result.
 - Original submission `60025762` was cancelled while pending to correct sampling;
   it produced no candidates.
 
@@ -51,6 +66,45 @@ or training B7**, or perform the merge/training in the isolated patched checkout
 Do not assume the older live `decontam` script enforces these source exclusions.
 Old adapters, historical training records and v2 outputs are unchanged.
 
+### Unblock comparison access
+
+The adapter owner (`a08trc06`, Paritosh's account) needs to grant **read access to
+these three weight files only**, on Leonardo:
+
+```bash
+for seed in 42 1 2; do
+  setfacl -m u:a08trc09:r "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_${seed}/adapter/adapter_model.safetensors"
+done
+```
+
+This does not grant write access or change model bytes. Directory traversal and
+adapter config reads already work. Verify actual file reads as `a08trc09` before
+resubmitting the comparison array; file existence alone did not establish access.
+Then use the isolated patched checkout and the existing B6 adapters:
+
+```bash
+export REPO=/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code
+export B6_RUN=/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k
+export VLLM_VENV=/leonardo_work/EUHPC_D30_031/venvs/vllm
+export HF_HOME=/leonardo_work/EUHPC_D30_031/hf_cache
+export SBATCH_ACCOUNT=EUHPC_D30_031 SBATCH_PARTITION=boost_usr_prod
+cd "$REPO"
+python3 - <<'PY' && sbatch slurm/eval_v3_compare.sbatch
+import os
+from pathlib import Path
+for seed in (42, 1, 2):
+    for name in ('adapter_config.json', 'adapter_model.safetensors'):
+        with (Path(os.environ['B6_RUN']) / f'seed_{seed}' / 'adapter' / name).open('rb') as f:
+            assert f.read(1), (seed, name)
+print('All three adapters are readable.')
+PY
+```
+
+The completed release and audit do not need rerunning. After all three seeds
+finish, run the report command below; it must validate all 200 paired judgments
+per seed before publishing scores. Applying the B7 source guard is a separate
+owner action from granting access to B6 weights.
+
 ## Frozen sources and audit
 
 `data/eval/eval_v3.holdout.json` includes original chunk IDs and exact text hashes,
@@ -64,6 +118,11 @@ fetcher's broad array/requeue filter, using the same pinned upstream manuals.
 runs contain 1,300 additional source matches across 10,248 rows. These counts
 are **not** final question-contamination counts or a deduplicated merged size.
 Historical exposure cannot be reversed, so no blind-test claim is made.
+
+The completed post-release audit is in `decontamination_audit.json`, including
+input/output hashes, source and question counts, and locations of filtered copies.
+All ten inputs had zero exact/normalized/lexical-near question matches against the
+evaluation files. This does not prove absence of semantic paraphrases.
 
 Future decontamination excludes exact source hashes (including aliases), matching
 document/chunk IDs, whole held-out documents, and conservatively unbound records

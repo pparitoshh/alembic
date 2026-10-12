@@ -267,3 +267,32 @@ job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_bro
 ~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected.
 **Submitted 2026-10-11** (reviewer fix now the default in `slurm/generate_gated.sbatch`, 70c583e): focus f1-f5 =
 jobs 59996931-35, broad b1-b3 = 59996936, 59996939, 59996940.
+
+
+## Eval v3: trained-topic development comparison (2026-10-12, awaiting access)
+
+The new `data/eval/eval_v3.jsonl` release contains **200 model-reviewed Slurm QAs**
+across eight trained-topic areas. The 66-question v2 and its existing B6 results
+above are unchanged. V3 selection used fixed topic quotas and no student scores.
+This is a development comparison: historical B6 contains 910 records from the
+reserved source chunks. Future B7 input must exclude those chunks; the historical
+B6 adapter is not retroactively a clean holdout model.
+
+| Evaluation | Seed 42 win rate | Seed 1 win rate | Seed 2 win rate | Status |
+|---|---:|---:|---:|---|
+| v2, 66 held-out-topic questions | 0.394 | 0.386 | 0.326 | Existing complete results |
+| v3, 200 trained-topic questions | Pending | Pending | Pending | B6 weights unreadable |
+
+Build job `60045425` and audit `60045496` completed. The comparison tasks
+`60045495_0`, `_1`, `_2` all stopped after five seconds, before answer generation:
+`adapter_model.safetensors` is mode `0600`, owned by `a08trc06`, for all three B6
+seeds. The evaluating account `a08trc09` cannot read those files. Report job
+`60045542` therefore correctly returned incomplete, with no fabricated scores.
+
+The owner needs to grant read access to those three files; exact commands and
+resubmission instructions are in `research/eval_v3/README.md`. Do not infer any
+model improvement from release completion. Once access works, evaluate the same
+200 questions for base/B6 with greedy 512-token answers and the unchanged
+`paired-orders-v2-invalid-incomplete` gpt-oss-20b judge at temperature zero.
+Publish complete per-seed and per-topic results only after the report validates
+all paired judgments. The existing tool-use evaluation remains separate.

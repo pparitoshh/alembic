@@ -1,0 +1,112 @@
+[
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k/clean.jsonl",
+    "input_sha256": "179868f8b4f2fc2146266f60bb0f5fe05e6ad6192d4ba6e647ac31e70a386d01",
+    "rows": 10773,
+    "source_overlap": 910,
+    "question_overlap": 0,
+    "excluded_union": 910,
+    "remaining": 9863,
+    "output": "runs/eval_v3_audit/00-hpc10k/clean.jsonl",
+    "output_sha256": "a2518a376c85ddb1128858c7ba66e09869188d4b70cf595c5e26178ec269af4e"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f1/clean.jsonl",
+    "input_sha256": "cbcc7edd4952ed446d355268b5e2800ef43c83db94087e124412fe038cbcb988",
+    "rows": 1903,
+    "source_overlap": 584,
+    "question_overlap": 0,
+    "excluded_union": 584,
+    "remaining": 1319,
+    "output": "runs/eval_v3_audit/01-hpc10k_f1/clean.jsonl",
+    "output_sha256": "b8245e6d26f92de93378569d62344ed6ad41166ea70e4644cd6a67e6e0f3f354"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f2/clean.jsonl",
+    "input_sha256": "38ea0d7767fc86bd4178437c8036d3c7e887c38b9754eaea412b5f9c8e5aaf1e",
+    "rows": 1751,
+    "source_overlap": 102,
+    "question_overlap": 0,
+    "excluded_union": 102,
+    "remaining": 1649,
+    "output": "runs/eval_v3_audit/02-hpc10k_f2/clean.jsonl",
+    "output_sha256": "0ae835b20643e33231f996c0cab52ef87a637417118212983317f304140c44c4"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f3/clean.jsonl",
+    "input_sha256": "a468e0c819efb2e520b85506c0641c563c4afe983e52ecd336615f16b04c5911",
+    "rows": 1456,
+    "source_overlap": 107,
+    "question_overlap": 0,
+    "excluded_union": 107,
+    "remaining": 1349,
+    "output": "runs/eval_v3_audit/03-hpc10k_f3/clean.jsonl",
+    "output_sha256": "59512279f39ce6a8c30b384f3a448d9b433dc033e81498876851788b5764bb4c"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f4/clean.jsonl",
+    "input_sha256": "66e467f20c5921c926c6abbc9e2b5cf05c11dc110556577aa53a528007750639",
+    "rows": 998,
+    "source_overlap": 300,
+    "question_overlap": 0,
+    "excluded_union": 300,
+    "remaining": 698,
+    "output": "runs/eval_v3_audit/04-hpc10k_f4/clean.jsonl",
+    "output_sha256": "08c4cc57ecd4672e4134562cc3960395bcc796ae09ae6afcb8168d272e1bb649"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f5/clean.jsonl",
+    "input_sha256": "eb6b2fcc70e8fd6751c7acf7842c63f9eb97abbcdd70337e9c50dd9ef6aee45f",
+    "rows": 887,
+    "source_overlap": 132,
+    "question_overlap": 0,
+    "excluded_union": 132,
+    "remaining": 755,
+    "output": "runs/eval_v3_audit/05-hpc10k_f5/clean.jsonl",
+    "output_sha256": "719e33e91a332e28cffb4a7028fa597744d815f3fec02655bf45085604439d25"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_b1/clean.jsonl",
+    "input_sha256": "9de2ed903f704b9a5cb9a8a9e1eed205f3c8688ec5272ac0b20962f7c73b2d6b",
+    "rows": 1075,
+    "source_overlap": 4,
+    "question_overlap": 0,
+    "excluded_union": 4,
+    "remaining": 1071,
+    "output": "runs/eval_v3_audit/06-hpc10k_b1/clean.jsonl",
+    "output_sha256": "2533499aba785e91395f3344394106a32b1e6d293cd77d70778d4362086f9d50"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_b2/clean.jsonl",
+    "input_sha256": "a0d812401bee3d1372566a8474fbf49a3bcda52e1c3a4312c503f933946ec53b",
+    "rows": 1091,
+    "source_overlap": 71,
+    "question_overlap": 0,
+    "excluded_union": 71,
+    "remaining": 1020,
+    "output": "runs/eval_v3_audit/07-hpc10k_b2/clean.jsonl",
+    "output_sha256": "6a1cd9412107a4047c5a590e816308d5b602ba3a015c96f4e404d520bc5c68e0"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_b3/clean.jsonl",
+    "input_sha256": "88212992ed867b5c25270b357cf4afc71b785f6ae2b5a33badbcaf079b4b90c4",
+    "rows": 1087,
+    "source_overlap": 0,
+    "question_overlap": 0,
+    "excluded_union": 0,
+    "remaining": 1087,
+    "output": "runs/eval_v3_audit/08-hpc10k_b3/clean.jsonl",
+    "output_sha256": "88212992ed867b5c25270b357cf4afc71b785f6ae2b5a33badbcaf079b4b90c4"
+  },
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/verified.jsonl",
+    "input_sha256": "3742ab280c6308ba909272fd122b36b2745b0020bdd1550986333212e06d5734",
+    "rows": 12773,
+    "source_overlap": 910,
+    "question_overlap": 0,
+    "excluded_union": 910,
+    "remaining": 11863,
+    "output": "runs/eval_v3_audit/09-b6_hpc10k/clean.jsonl",
+    "output_sha256": "c64191d03121924164f1cdfe25e655d627f18c607079cb1e2222b1178821f5a0"
+  }
+]

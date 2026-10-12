@@ -42,7 +42,7 @@ the same sample. References go to the judge, not the closed-book answering model
 The tool evaluation remains a draft with model review pending. Calibration tests
 the judge; it is not evidence of student accuracy.
 
-## Eval v3: trained-topic development set (build pending)
+## Eval v3: trained-topic development set (200 questions released)
 
 The frozen 66-row `eval_all_v2.jsonl` and its scoring protocol are unchanged.
 `eval_v3.holdout.json` freezes source exclusions before candidate generation, with
@@ -51,7 +51,10 @@ Eight bundles in `v3_sources/` target 200 normal QAs across dependencies (30),
 accounting (30), job control (25), output/mail (25), resources (30), queue/cancel
 (20), multi-constraint scripts (20), and debugging (20).
 
-**Not released yet:** 512 candidates were generated. After correcting an uncertainty-sentinel bug, 134 pass both review gates and 111 fill the requested topic quotas. A bounded format-repair run is processing invalid support IDs; no 200-row release exists yet.
+**Released:** `eval_v3.jsonl` contains 200 questions, with hashes and counts in
+`eval_v3.manifest.json`. From 512 original candidates, 368 passed source review
+and verification, 353 passed question-quality review, and 200 filled the fixed
+quotas. Tasks: 63 how-to, 46 debug, 57 script and 34 concept.
 The build requires independent source support review, deterministic verification,
 a separate question-completeness review, exact/normalized/lexical near deduplication,
 and all topic quotas. Selection never uses student scores. Review is automated;
@@ -64,21 +67,30 @@ checkouts that contain this change and the manifest. The teammate-owned live
 Leonardo checkout is read-only to this account: **apply this PR before merging or
 training B7**, or use the isolated patched checkout described in the runbook.
 
-The pre-generation source audit found:
+The completed post-release audit found:
 
-| Historical input | Rows | Source matches | Remaining before question audit |
-|---|---:|---:|---:|
-| hpc10k | 10,773 | 910 | 9,863 |
-| Eight top-ups, summed (not deduplicated across runs) | 10,248 | 1,300 | 8,948 |
-| B6 training, historical exposure only | 12,773 | 910 | 11,863 |
+| Historical input | Rows | Source matches | Question matches | Excluded union | Remaining |
+|---|---:|---:|---:|---:|---:|
+| hpc10k | 10,773 | 910 | 0 | 910 | 9,863 |
+| Eight top-ups, summed (not deduplicated across runs) | 10,248 | 1,300 | 0 | 1,300 | 8,948 |
+| B6 training, historical exposure only | 12,773 | 910 | 0 | 910 | 11,863 |
 
-The final question-plus-source audit runs after release and writes new filtered
-copies. None of these numbers represents an already-clean merged training set.
+Question matches use exact/normalized text and word-trigram Jaccard at 0.8 against
+the evaluation files, including the final v3 questions. Zero lexical matches does
+not establish absence of semantic paraphrases. Job `60045496` wrote new filtered
+copies under the isolated checkout's `runs/eval_v3_audit/`; original inputs were
+not changed. None of these numbers represents an already-clean merged training set.
 Historical B6 exposure cannot be undone: this is a development set, not blind
 testing or evidence of generalization to unseen source text. A genuinely blind
 test still needs separately reserved source families.
 
-Evidence: `research/eval_v3/source_exposure_before_release.json`. Build instructions
+Evidence: `research/eval_v3/decontamination_audit.json` (per-input final counts and
+hashes), `research/eval_v3/release_evidence.json` (all 200 selected source and
+quality reviews), and `research/eval_v3/source_exposure_before_release.json`.
+Build instructions
 and job paths: `research/eval_v3/README.md`. Report v2 and v3 separately, including
 per-topic results; shared sources mean an independent-item ±0.07 margin is only
 a rough approximation, not a validated uncertainty bound.
+
+Base/B6 v3 comparison is pending: the three B6 weight files are owner-only and
+unreadable to the evaluating account. See the runbook for the exact access fix.

@@ -1,6 +1,6 @@
 # Eval v3: a larger trained-topic eval set
 
-Status (2026-10-12): initial build generated 512 candidates but failed release. A quality-gate `none` sentinel bug is fixed; preserved reports now yield 134 quality-eligible candidates and 111 toward topic quotas. Job `60045425` is retrying only structurally invalid support reviews. Replacement comparison `60045495`, audit `60045496` and report `60045542` are scheduled. No v3 release or new model scores exist yet. See `research/eval_v3/README.md` for evidence, safeguards and run paths.
+Status (2026-10-12): **200 reviewed Slurm questions released**, with all eight topic quotas filled; the original 66-question v2 is unchanged. Build `60045425` and final audit `60045496` completed. The audit found zero lexical question matches and excluded 910 source matches from hpc10k and 1,300 across the eight top-ups into new filtered copies. Base/B6 comparison `60045495` failed before inference because all three B6 weight files are owner-only (`0600`). No v3 model scores exist yet; read access and the shared checkout's B7 source guard still require the owner's action. See `research/eval_v3/README.md` for commands and evidence.
 
 ## Why
 
@@ -76,6 +76,6 @@ Task mix roughly like v2: script, concept, howto, debug. B6 is weakest on howto 
 
 ## Implementation evidence
 
-The source freeze contains 53 existing source chunks, 4 recovered option blocks from the same pinned upstream Slurm manuals, and 8 evaluation-only composite documents. The composite documents are also excluded from training. `source_exposure_before_release.json` records 910 overlapping source rows in historical B6 and 1,300 in the eight top-ups. These are source-overlap counts, not duplicate-question counts. B6 is not a clean holdout result on these sources; v3 is for development, and future merged inputs must exclude these chunks. The final lexical audit depends on accepted v3 questions and has not run yet.
+The source freeze contains 53 existing source chunks, 4 recovered option blocks from the same pinned upstream Slurm manuals, and 8 evaluation-only composite documents. The composite documents are also excluded from training. `research/eval_v3/decontamination_audit.json` records final source/question counts and input/output hashes. Historical B6 contains 910 source matches; the eight top-ups contain 1,300. All ten audited inputs have zero exact/normalized/lexical-near question matches. Source matches are not duplicate questions. B6 is not a clean holdout result on these sources; v3 is for development, and future merged inputs must exclude these chunks.
 
 Question-level sampling errors quoted above are rough independent-item approximations. Shared source chunks, repeated seeds on the same questions, and two judge orders are correlated; 400 verdicts do not count as 400 independent evaluation questions. Small changes must not be described as established improvements.
