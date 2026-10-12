@@ -1,12 +1,12 @@
 # Eval v3: a larger trained-topic eval set
 
-Status (2026-10-12): **200 reviewed Slurm questions released**; v2 is unchanged.
-The final merged B7 audit passed with 20,472 rows and zero source/lexical-question
-matches. The audit now resolves the module checkout's eval directory and fails on
-missing holdouts or an incomplete/changed release. B6 weights are readable, but
-comparison array `60211313` exposed a CUDA 13 environment mismatch and was
-cancelled before answer generation. Replacement array **`60213268`** uses a private environment built from the
-locked CUDA 12.9 dependencies. No v3 model scores yet. See the runbook for evidence.
+Status (2026-10-12): **200 reviewed Slurm questions released and all three B6
+comparisons completed**. V2 is unchanged. V3 mean student-versus-base score is
+**42.67%**, with sample SD **1.02 percentage points** across seeds. The student
+remains below the 50% comparison baseline. The final merged B7 audit passed with
+20,472 rows and zero source/lexical-question matches. The cwd-dependent audit bug
+is fixed, including fail-closed release prerequisites. See
+`research/eval_v3/b6_v3_comparison.md` for complete results and limitations.
 
 ## Why
 

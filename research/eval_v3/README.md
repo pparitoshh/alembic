@@ -24,10 +24,17 @@ unchanged. The new release must contain 200 accepted, distinct normal QAs.
   written. Replacement array **`60213268`** uses a private environment provisioned from
   the repository's locked CUDA 12.9 dependencies. The comparison now tests
   GPU availability before loading weights and records runtime versions.
-- No new v3 model scores are available yet. The PR remains draft until all three
-  paired comparisons finish and the validated results are published.
-- Report job `60213647` depends on completion of array `60213268` and validates
-  all three seeds plus the final B7 audit before reporting success.
+- Comparison array **`60213268` completed** for all three seeds. V3 scores:
+  seed 42 **43.125%**, seed 1 **43.375%**, seed 2 **41.500%**. Mean **42.67%**,
+  with sample SD **1.02 percentage points** across seeds. B6 remains below the
+  50% comparison baseline, so no overall model-quality improvement is established.
+- Report **`60213647` completed** and was rerun locally. All 600 question/seed
+  pairs have both judge orders, with zero invalid verdicts. Base answers are
+  identical across seeds. Historical v2 results are unchanged and reported
+  separately (mean 36.87%, seed SD 3.74 percentage points).
+- Results: `b6_v3_comparison.md`, `b6_v3_comparison.json`, all per-question paired
+  scores in `b6_v3_verdicts.jsonl`, and runtime/adapter/artifact bindings in
+  `b6_v3_run_manifest.json`. The requested comparison and final B7 audit are done.
 
 ### Audit path fix
 

@@ -104,5 +104,10 @@ v3 holdout and complete unchanged release before writing any output. Its context
 sidecar binds every question file, so an older working directory cannot silently
 turn this into an audit without v3.
 
-B6 adapter read access is resolved. The base/B6 comparison is being rerun with
-the locked CUDA 12.9 environment; no v3 model scores are available yet.
+The completed three-seed B6 comparison gives v3 scores of 43.125%, 43.375% and
+41.500% (mean 42.67%, sample SD 1.02 percentage points). This remains below the
+50% pairwise baseline. The validated report has 200 complete paired judgments
+per seed and zero invalid verdicts. See `research/eval_v3/b6_v3_comparison.md` and
+`docs/TRAINING_PROGRESS.md` for v2/v3 results, checker rates, topic scores and
+limitations. Higher scores on a different topic mix do not establish model
+improvement, and historical B6 source exposure prevents a blind-test claim.

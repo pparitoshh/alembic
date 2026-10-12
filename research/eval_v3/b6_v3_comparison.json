@@ -1,0 +1,427 @@
+{
+  "status": "complete",
+  "v2": {
+    "42": {
+      "summary": {
+        "base": {
+          "check_pass_rate": 0.9545454545454546,
+          "bad_flag_rate": 0.024793388429752067,
+          "answers_with_bad_flags": 2,
+          "tool_decision_acc": 1.0,
+          "tool_false_call_rate": 0.16666666666666666,
+          "tool_valid_rate": 1.0,
+          "tool_ast_acc": 1.0,
+          "tool_exec_ok_rate": 1.0,
+          "tool_grounded_rate": 1.0
+        },
+        "student": {
+          "check_pass_rate": 0.9393939393939394,
+          "bad_flag_rate": 0.11864406779661017,
+          "answers_with_bad_flags": 4,
+          "tool_decision_acc": 1.0,
+          "tool_false_call_rate": 0.0,
+          "tool_valid_rate": 1.0,
+          "tool_ast_acc": 1.0,
+          "tool_exec_ok_rate": 1.0,
+          "tool_grounded_rate": 1.0
+        },
+        "judge_protocol": "paired-orders-v2-invalid-incomplete",
+        "judge_comparisons": {
+          "student_vs_base": {
+            "status": "complete",
+            "questions": 66,
+            "expected_verdicts": 132,
+            "invalid_verdicts": 0,
+            "complete_pairs": 66
+          }
+        },
+        "student_vs_base_win_rate": 0.3939393939393939,
+        "judge_unparsed": 0,
+        "judge": "openai/gpt-oss-20b"
+      },
+      "outputs_sha256": "c68ed7735a72aa3059a7d95403405db0817410b12a5d7e10399483fd3d654af1"
+    },
+    "1": {
+      "summary": {
+        "base": {
+          "check_pass_rate": 0.9545454545454546,
+          "bad_flag_rate": 0.024793388429752067,
+          "answers_with_bad_flags": 2,
+          "tool_decision_acc": 1.0,
+          "tool_false_call_rate": 0.16666666666666666,
+          "tool_valid_rate": 1.0,
+          "tool_ast_acc": 1.0,
+          "tool_exec_ok_rate": 1.0,
+          "tool_grounded_rate": 1.0
+        },
+        "student": {
+          "check_pass_rate": 0.9696969696969697,
+          "bad_flag_rate": 0.05,
+          "answers_with_bad_flags": 2,
+          "tool_decision_acc": 1.0,
+          "tool_false_call_rate": 0.0,
+          "tool_valid_rate": 1.0,
+          "tool_ast_acc": 1.0,
+          "tool_exec_ok_rate": 1.0,
+          "tool_grounded_rate": 1.0
+        },
+        "judge_protocol": "paired-orders-v2-invalid-incomplete",
+        "judge_comparisons": {
+          "student_vs_base": {
+            "status": "complete",
+            "questions": 66,
+            "expected_verdicts": 132,
+            "invalid_verdicts": 0,
+            "complete_pairs": 66
+          }
+        },
+        "student_vs_base_win_rate": 0.38636363636363635,
+        "judge_unparsed": 0,
+        "judge": "openai/gpt-oss-20b"
+      },
+      "outputs_sha256": "9ae53cdaa8883f82e3b082f7a5e876e7c8ae2cb64731ceb09e2ecb397f4b6f0c"
+    },
+    "2": {
+      "summary": {
+        "base": {
+          "check_pass_rate": 0.9545454545454546,
+          "bad_flag_rate": 0.024793388429752067,
+          "answers_with_bad_flags": 2,
+          "tool_decision_acc": 1.0,
+          "tool_false_call_rate": 0.16666666666666666,
+          "tool_valid_rate": 1.0,
+          "tool_ast_acc": 1.0,
+          "tool_exec_ok_rate": 1.0,
+          "tool_grounded_rate": 1.0
+        },
+        "student": {
+          "check_pass_rate": 0.9393939393939394,
+          "bad_flag_rate": 0.125,
+          "answers_with_bad_flags": 4,
+          "tool_decision_acc": 1.0,
+          "tool_false_call_rate": 0.0,
+          "tool_valid_rate": 1.0,
+          "tool_ast_acc": 1.0,
+          "tool_exec_ok_rate": 1.0,
+          "tool_grounded_rate": 1.0
+        },
+        "judge_protocol": "paired-orders-v2-invalid-incomplete",
+        "judge_comparisons": {
+          "student_vs_base": {
+            "status": "complete",
+            "questions": 66,
+            "expected_verdicts": 132,
+            "invalid_verdicts": 0,
+            "complete_pairs": 66
+          }
+        },
+        "student_vs_base_win_rate": 0.32575757575757575,
+        "judge_unparsed": 0,
+        "judge": "openai/gpt-oss-20b"
+      },
+      "outputs_sha256": "fc8ec61886b2a930a71783f83906bedc960f55cc393fe7347677c08fbf53b408"
+    }
+  },
+  "v3": {
+    "42": {
+      "summary": {
+        "base": {
+          "check_pass_rate": 0.885,
+          "bad_flag_rate": 0.020527859237536656,
+          "answers_with_bad_flags": 12
+        },
+        "student": {
+          "check_pass_rate": 0.915,
+          "bad_flag_rate": 0.05592105263157895,
+          "answers_with_bad_flags": 17
+        },
+        "judge_protocol": "paired-orders-v2-invalid-incomplete",
+        "judge_comparisons": {
+          "student_vs_base": {
+            "status": "complete",
+            "questions": 200,
+            "expected_verdicts": 400,
+            "invalid_verdicts": 0,
+            "complete_pairs": 200
+          }
+        },
+        "student_vs_base_win_rate": 0.43125,
+        "judge_unparsed": 0,
+        "judge": "openai/gpt-oss-20b"
+      },
+      "outputs_sha256": "2570775732e718becc27e6e00092b2f2fe22d83384e24355a113195de6a01956",
+      "topics": {
+        "accounting": {
+          "questions": 30,
+          "win_rate": 0.5083333333333333
+        },
+        "debug": {
+          "questions": 20,
+          "win_rate": 0.3
+        },
+        "dependencies": {
+          "questions": 30,
+          "win_rate": 0.38333333333333336
+        },
+        "job_control": {
+          "questions": 25,
+          "win_rate": 0.51
+        },
+        "multi_constraint": {
+          "questions": 20,
+          "win_rate": 0.7625
+        },
+        "output_mail": {
+          "questions": 25,
+          "win_rate": 0.15
+        },
+        "queue_cancel": {
+          "questions": 20,
+          "win_rate": 0.3625
+        },
+        "resources": {
+          "questions": 30,
+          "win_rate": 0.48333333333333334
+        }
+      }
+    },
+    "1": {
+      "summary": {
+        "base": {
+          "check_pass_rate": 0.885,
+          "bad_flag_rate": 0.020527859237536656,
+          "answers_with_bad_flags": 12
+        },
+        "student": {
+          "check_pass_rate": 0.91,
+          "bad_flag_rate": 0.05732484076433121,
+          "answers_with_bad_flags": 18
+        },
+        "judge_protocol": "paired-orders-v2-invalid-incomplete",
+        "judge_comparisons": {
+          "student_vs_base": {
+            "status": "complete",
+            "questions": 200,
+            "expected_verdicts": 400,
+            "invalid_verdicts": 0,
+            "complete_pairs": 200
+          }
+        },
+        "student_vs_base_win_rate": 0.43375,
+        "judge_unparsed": 0,
+        "judge": "openai/gpt-oss-20b"
+      },
+      "outputs_sha256": "391db29c1fac208948cbb5d82d99d6f2466a499c9208d652daeccab5c6759ba9",
+      "topics": {
+        "accounting": {
+          "questions": 30,
+          "win_rate": 0.425
+        },
+        "debug": {
+          "questions": 20,
+          "win_rate": 0.3125
+        },
+        "dependencies": {
+          "questions": 30,
+          "win_rate": 0.325
+        },
+        "job_control": {
+          "questions": 25,
+          "win_rate": 0.52
+        },
+        "multi_constraint": {
+          "questions": 20,
+          "win_rate": 0.7
+        },
+        "output_mail": {
+          "questions": 25,
+          "win_rate": 0.17
+        },
+        "queue_cancel": {
+          "questions": 20,
+          "win_rate": 0.6375
+        },
+        "resources": {
+          "questions": 30,
+          "win_rate": 0.4666666666666667
+        }
+      }
+    },
+    "2": {
+      "summary": {
+        "base": {
+          "check_pass_rate": 0.885,
+          "bad_flag_rate": 0.020527859237536656,
+          "answers_with_bad_flags": 12
+        },
+        "student": {
+          "check_pass_rate": 0.945,
+          "bad_flag_rate": 0.03514376996805112,
+          "answers_with_bad_flags": 11
+        },
+        "judge_protocol": "paired-orders-v2-invalid-incomplete",
+        "judge_comparisons": {
+          "student_vs_base": {
+            "status": "complete",
+            "questions": 200,
+            "expected_verdicts": 400,
+            "invalid_verdicts": 0,
+            "complete_pairs": 200
+          }
+        },
+        "student_vs_base_win_rate": 0.415,
+        "judge_unparsed": 0,
+        "judge": "openai/gpt-oss-20b"
+      },
+      "outputs_sha256": "214500fd4283cf9553688412a9a1e8f2176817875e8af02d798e7ff96b01bbfe",
+      "topics": {
+        "accounting": {
+          "questions": 30,
+          "win_rate": 0.3
+        },
+        "debug": {
+          "questions": 20,
+          "win_rate": 0.3625
+        },
+        "dependencies": {
+          "questions": 30,
+          "win_rate": 0.36666666666666664
+        },
+        "job_control": {
+          "questions": 25,
+          "win_rate": 0.47
+        },
+        "multi_constraint": {
+          "questions": 20,
+          "win_rate": 0.75
+        },
+        "output_mail": {
+          "questions": 25,
+          "win_rate": 0.17
+        },
+        "queue_cancel": {
+          "questions": 20,
+          "win_rate": 0.2875
+        },
+        "resources": {
+          "questions": 30,
+          "win_rate": 0.6333333333333333
+        }
+      }
+    }
+  },
+  "errors": [],
+  "eval_v3_sha256": "e86bcd5aff7bfcd0000a43c03f092d77e5721467679371d9c935aedf094e87fc",
+  "training_audit": [
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k/clean.jsonl",
+      "input_sha256": "179868f8b4f2fc2146266f60bb0f5fe05e6ad6192d4ba6e647ac31e70a386d01",
+      "rows": 10773,
+      "source_overlap": 910,
+      "question_overlap": 0,
+      "excluded_union": 910,
+      "remaining": 9863,
+      "output": "runs/eval_v3_audit/00-hpc10k/clean.jsonl",
+      "output_sha256": "a2518a376c85ddb1128858c7ba66e09869188d4b70cf595c5e26178ec269af4e"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f1/clean.jsonl",
+      "input_sha256": "cbcc7edd4952ed446d355268b5e2800ef43c83db94087e124412fe038cbcb988",
+      "rows": 1903,
+      "source_overlap": 584,
+      "question_overlap": 0,
+      "excluded_union": 584,
+      "remaining": 1319,
+      "output": "runs/eval_v3_audit/01-hpc10k_f1/clean.jsonl",
+      "output_sha256": "b8245e6d26f92de93378569d62344ed6ad41166ea70e4644cd6a67e6e0f3f354"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f2/clean.jsonl",
+      "input_sha256": "38ea0d7767fc86bd4178437c8036d3c7e887c38b9754eaea412b5f9c8e5aaf1e",
+      "rows": 1751,
+      "source_overlap": 102,
+      "question_overlap": 0,
+      "excluded_union": 102,
+      "remaining": 1649,
+      "output": "runs/eval_v3_audit/02-hpc10k_f2/clean.jsonl",
+      "output_sha256": "0ae835b20643e33231f996c0cab52ef87a637417118212983317f304140c44c4"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f3/clean.jsonl",
+      "input_sha256": "a468e0c819efb2e520b85506c0641c563c4afe983e52ecd336615f16b04c5911",
+      "rows": 1456,
+      "source_overlap": 107,
+      "question_overlap": 0,
+      "excluded_union": 107,
+      "remaining": 1349,
+      "output": "runs/eval_v3_audit/03-hpc10k_f3/clean.jsonl",
+      "output_sha256": "59512279f39ce6a8c30b384f3a448d9b433dc033e81498876851788b5764bb4c"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f4/clean.jsonl",
+      "input_sha256": "66e467f20c5921c926c6abbc9e2b5cf05c11dc110556577aa53a528007750639",
+      "rows": 998,
+      "source_overlap": 300,
+      "question_overlap": 0,
+      "excluded_union": 300,
+      "remaining": 698,
+      "output": "runs/eval_v3_audit/04-hpc10k_f4/clean.jsonl",
+      "output_sha256": "08c4cc57ecd4672e4134562cc3960395bcc796ae09ae6afcb8168d272e1bb649"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_f5/clean.jsonl",
+      "input_sha256": "eb6b2fcc70e8fd6751c7acf7842c63f9eb97abbcdd70337e9c50dd9ef6aee45f",
+      "rows": 887,
+      "source_overlap": 132,
+      "question_overlap": 0,
+      "excluded_union": 132,
+      "remaining": 755,
+      "output": "runs/eval_v3_audit/05-hpc10k_f5/clean.jsonl",
+      "output_sha256": "719e33e91a332e28cffb4a7028fa597744d815f3fec02655bf45085604439d25"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_b1/clean.jsonl",
+      "input_sha256": "9de2ed903f704b9a5cb9a8a9e1eed205f3c8688ec5272ac0b20962f7c73b2d6b",
+      "rows": 1075,
+      "source_overlap": 4,
+      "question_overlap": 0,
+      "excluded_union": 4,
+      "remaining": 1071,
+      "output": "runs/eval_v3_audit/06-hpc10k_b1/clean.jsonl",
+      "output_sha256": "2533499aba785e91395f3344394106a32b1e6d293cd77d70778d4362086f9d50"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_b2/clean.jsonl",
+      "input_sha256": "a0d812401bee3d1372566a8474fbf49a3bcda52e1c3a4312c503f933946ec53b",
+      "rows": 1091,
+      "source_overlap": 71,
+      "question_overlap": 0,
+      "excluded_union": 71,
+      "remaining": 1020,
+      "output": "runs/eval_v3_audit/07-hpc10k_b2/clean.jsonl",
+      "output_sha256": "6a1cd9412107a4047c5a590e816308d5b602ba3a015c96f4e404d520bc5c68e0"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/hpc10k_b3/clean.jsonl",
+      "input_sha256": "88212992ed867b5c25270b357cf4afc71b785f6ae2b5a33badbcaf079b4b90c4",
+      "rows": 1087,
+      "source_overlap": 0,
+      "question_overlap": 0,
+      "excluded_union": 0,
+      "remaining": 1087,
+      "output": "runs/eval_v3_audit/08-hpc10k_b3/clean.jsonl",
+      "output_sha256": "88212992ed867b5c25270b357cf4afc71b785f6ae2b5a33badbcaf079b4b90c4"
+    },
+    {
+      "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/verified.jsonl",
+      "input_sha256": "3742ab280c6308ba909272fd122b36b2745b0020bdd1550986333212e06d5734",
+      "rows": 12773,
+      "source_overlap": 910,
+      "question_overlap": 0,
+      "excluded_union": 910,
+      "remaining": 11863,
+      "output": "runs/eval_v3_audit/09-b6_hpc10k/clean.jsonl",
+      "output_sha256": "c64191d03121924164f1cdfe25e655d627f18c607079cb1e2222b1178821f5a0"
+    }
+  ]
+}
