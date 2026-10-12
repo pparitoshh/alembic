@@ -4,17 +4,39 @@ This implements PR #36's trained-topic **development** evaluation. It creates no
 new training dataset. The 66-question v2 release and paired-orders judge remain
 unchanged. The new release must contain 200 accepted, distinct normal QAs.
 
-## Status, 2026-10-11
+## Status, 2026-10-12
 
-- Source freeze: complete, before new candidate generation.
-- Build/review/release: job `60026161`, submitted and waiting for scheduler priority.
-- Base versus B6 seeds 42/1/2: array `60026318`, after successful build only.
-- Training-overlap audit: CPU job `60026319`, after successful build only.
-- Consolidated results: CPU job `60026845`, after comparison/audit termination;
-  it writes a complete report only when all required artifacts validate.
-- Accepted v3 release and comparison scores: **not yet available**.
-- Original submission `60025762` was cancelled while still pending to correct
-  the multi-constraint sampling plan; it produced no candidates.
+- Source freeze: complete; v2 is unchanged.
+- Initial build `60026161`: ran for 46m22s, generated 512/512 candidates;
+  144 passed source review, 23 were rejected and 345 stayed pending. The release
+  failed closed; dependent comparisons/audit were cancelled.
+- Root causes: the quality gate treated the literal uncertainty value `none` as
+  uncertainty, and many support reviews copied invalid evidence/unit IDs.
+- Corrected CPU replay of the preserved reviews: **134 quality-eligible candidates,
+  111 selected toward the fixed topic quotas; no 200-row release yet**.
+- Format-repair job **`60045425` is running**, reusing existing candidates in
+  `runs/eval_v3_repair_20261012`. It may retry 292 structurally invalid reviews;
+  53 pending reviews with negative/uncertain judgments remain excluded. Original
+  generation and review evidence stays in `runs/eval_v3_generation`.
+- Replacement base/B6 array `60045495` and audit `60045496` depend on repair/release
+  success. Report job `60045542` follows their termination. The original report
+  `60026845` correctly recorded an incomplete result rather than inventing scores.
+- Accepted v3 release and new model scores: **not yet available**.
+- Original submission `60025762` was cancelled while pending to correct sampling;
+  it produced no candidates.
+
+The quality-gate fix accepts only an empty uncertainty string or the exact `none`
+sentinel (ignoring case/outer whitespace). `uncertain`, qualifications such as
+`none except ...`, and unrecognized values still block acceptance. Fresh review
+responses use an enum for this field. The raw reviews are not edited or relabelled.
+
+The support retry constrains transport IDs to actual packet IDs, keeps the existing
+`source-support-v3` prompt/validator, and allows at most two attempts per candidate.
+It does not retry explicit unsupported/uncertain verdicts, even when those reports
+also contain structural errors. Every before/after report and validation result
+is retained in `support_retry_history.jsonl`. The packet, source, unit-coverage and
+chronology checks remain mandatory. Run `slurm/eval_v3_retry.sbatch` only against
+an isolated copy of the original run; it never regenerates questions or answers.
 
 The code and frozen inputs are in the isolated writable Leonardo directory:
 

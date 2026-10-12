@@ -27,6 +27,7 @@ from .verify import _jaccard, _shingles
 
 V2_SHA = "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4"
 PROTOCOL = "eval-v3-question-quality-v1"
+QUALITY_GATE_VERSION = "eval-v3-quality-gate-v2-none-sentinel"
 OBJECTIVES = {
     "dependencies": "Focus on dependencies, their success/failure conditions, or --parsable job chaining.",
     "accounting": "Focus on interpreting sacct job/step states, accounting fields, or exit codes.",
@@ -161,7 +162,7 @@ def quality_verdict(row, source, report, teacher):
     except (ValidationError, KeyError, TypeError):
         return None
     if not all((verdict.self_contained, verdict.sound_premises, verdict.assessable,
-                verdict.reference_complete)) or verdict.uncertainty.strip() or verdict.topic == "out_of_scope":
+                verdict.reference_complete)) or verdict.uncertainty.strip().casefold() not in {"", "none"} or verdict.topic == "out_of_scope":
         return None
     return verdict
 
@@ -189,10 +190,12 @@ def review(cfg, url, model):
                 and old.get("prompt_sha256") == sha(SYSTEM.encode()) and old.get("reviewer") == model
                 and old.get("finish_reason") == "stop" and old.get("review") is not None):
             return old
+        schema = QualityReview.model_json_schema()
+        schema["properties"]["uncertainty"]["enum"] = ["none", "uncertain"]
         response = reviewer.complete([{"role": "system", "content": SYSTEM},
                                       {"role": "user", "content": json.dumps(p)}], temperature=0,
             response_format={"type": "json_schema", "json_schema": {
-                "name": "QualityReview", "schema": QualityReview.model_json_schema()}})
+                "name": "QualityReview", "schema": schema}})
         try:
             parsed = QualityReview.model_validate_json(response.content).model_dump()
         except ValidationError:
@@ -200,6 +203,7 @@ def review(cfg, url, model):
         return {"id": row["id"], "protocol": PROTOCOL, "packet_sha256": digest(p),
             "prompt_sha256": sha(SYSTEM.encode()), "reviewer": model,
             "created_utc": datetime.now(timezone.utc).isoformat(), "raw_response": response.content,
+            "transport_schema_sha256": digest(schema),
             "review": parsed, "finish_reason": response.finish_reason,
             "unexpected_tool_calls": response.tool_calls}
 
@@ -276,7 +280,8 @@ def release(cfg):
     chosen, deficits = select(candidates, targets, held, cfg.verify.dedup_threshold)
     status = {"verified_candidates": len(rows), "quality_eligible": len(candidates),
               "selected": len(chosen), "deficits": deficits, "rejected": dict(rejected),
-              "topic_eligible": dict(Counter(t for _, t in candidates))}
+              "topic_eligible": dict(Counter(t for _, t in candidates)),
+              "quality_gate_version": QUALITY_GATE_VERSION}
     (cfg.run_dir / "release_status.json").write_text(json.dumps(status, indent=2) + "\n")
     print(json.dumps(status, indent=2), flush=True)
     if deficits:

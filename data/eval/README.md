@@ -51,7 +51,7 @@ Eight bundles in `v3_sources/` target 200 normal QAs across dependencies (30),
 accounting (30), job control (25), output/mail (25), resources (30), queue/cancel
 (20), multi-constraint scripts (20), and debugging (20).
 
-**Not released yet:** the planned 512 candidates are not 200 accepted questions.
+**Not released yet:** 512 candidates were generated. After correcting an uncertainty-sentinel bug, 134 pass both review gates and 111 fill the requested topic quotas. A bounded format-repair run is processing invalid support IDs; no 200-row release exists yet.
 The build requires independent source support review, deterministic verification,
 a separate question-completeness review, exact/normalized/lexical near deduplication,
 and all topic quotas. Selection never uses student scores. Review is automated;

@@ -1,6 +1,6 @@
 # Eval v3: a larger trained-topic eval set
 
-Status (2026-10-11): source freeze, generator, review/release gates and source decontamination are implemented. Build job `60026161` is queued; evaluation array `60026318` and audit job `60026319` depend on a successful release. No v3 evaluation questions or scores are released yet. See `research/eval_v3/README.md` for reproducible commands and live paths.
+Status (2026-10-12): initial build generated 512 candidates but failed release. A quality-gate `none` sentinel bug is fixed; preserved reports now yield 134 quality-eligible candidates and 111 toward topic quotas. Job `60045425` is retrying only structurally invalid support reviews. Replacement comparison `60045495`, audit `60045496` and report `60045542` are scheduled. No v3 release or new model scores exist yet. See `research/eval_v3/README.md` for evidence, safeguards and run paths.
 
 ## Why
 

@@ -50,6 +50,22 @@ def test_quality_requires_bound_independent_review(review_case):
     assert quality_verdict(row, source, None, "teacher") is None
 
 
+@pytest.mark.parametrize("uncertainty", ["none", " NONE ", ""])
+def test_explicit_no_uncertainty_sentinel_is_not_a_rejection(review_case, uncertainty):
+    row, source, report = review_case
+    report["review"]["uncertainty"] = uncertainty
+    report["raw_response"] = json.dumps(report["review"])
+    assert quality_verdict(row, source, report, "teacher")
+
+
+@pytest.mark.parametrize("uncertainty", ["uncertain", "none except missing context", "certain", "N/A"])
+def test_uncertainty_is_not_silently_normalized_to_acceptance(review_case, uncertainty):
+    row, source, report = review_case
+    report["review"]["uncertainty"] = uncertainty
+    report["raw_response"] = json.dumps(report["review"])
+    assert quality_verdict(row, source, report, "teacher") is None
+
+
 @pytest.mark.parametrize("change", [{"finish_reason":"length"}, {"protocol":"old"},
     {"unexpected_tool_calls":[{}]}, {"raw_response":"{}"}, {"reviewer":""}])
 def test_bad_quality_transport_is_not_acceptance(review_case, change):
