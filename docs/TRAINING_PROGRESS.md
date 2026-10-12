@@ -267,3 +267,28 @@ job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_bro
 ~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected.
 **Submitted 2026-10-11** (reviewer fix now the default in `slurm/generate_gated.sbatch`, 70c583e): focus f1-f5 =
 jobs 59996931-35, broad b1-b3 = 59996936, 59996939, 59996940.
+
+## Data: weak-area top-up + eval v3 source exclusion (2026-10-12)
+
+Top-up result (8 shards `runs/hpc10k_f1..f5`, `runs/hpc10k_b1..b3`): 18,988 generated → 10,248 clean.
+4,352 still in pending review (1,084 never got a reviewer reply); to check before generating more.
+
+Eval v3 (PR #36, draft into `dev`): `data/eval/eval_v3.jsonl` (200 questions on trained topics) reserves 65 source
+items (57 chunks, 8 whole docs) in `eval_v3.holdout.json`. `train.py` now refuses records that overlap them.
+The source audit removed 910 HPC10K and 1,300 top-up records. The audit resolves `data/eval` relative to the
+cwd and silently excludes 0 if the manifest is missing, so run it from the eval-v3 worktree (reported).
+
+## Batch 7: HPC10K + top-up, eval-v3 clean (2026-10-12, submitted)
+
+| Step | Records |
+|---|---|
+| HPC10K clean | 10,773 |
+| Top-up clean | 10,248 |
+| Eval v3 source audit | −910 HPC10K, −1,300 top-up |
+| Dedup (normalized question, Jaccard ≥ 0.8) | −339 |
+| Retained from verified_qwen_4775 | +2,000 |
+| **B7 total** (`runs/b7_hpc10k/verified.jsonl`) | **20,472** |
+
+Modes: prose 16,314, none 2,529, ask 1,156, call 473. 1,759 records reused a grid-cell id (1,725 with a different
+question); they were re-keyed to `id@<shard>` instead of dropped (the HPC10K merge had lost ~900 that way).
+Config `configs/qwen3_4b_qdora_b2.yaml` (as B2-B6), seeds 42/1/2: train 60165264_[0-2], eval 60165266_[0-2].
