@@ -28,7 +28,7 @@ def main():
     from distillkit import train
 
     cfg = Config.model_validate(json.loads(args.config.read_text()))
-    assert cfg.train.load_in_4bit and cfg.train.bf16 and not cfg.train.fp16, "sanity reload expects the reviewed BF16 QDoRA configuration"
+    assert cfg.train.bf16 and not cfg.train.fp16, "sanity reload expects a BF16 (Q)DoRA configuration"
     for name in ('training_evidence.json','adapter','checkpoints','loader_ready.jsonl'):
         assert not (cfg.run_dir/name).exists(), f'fresh run required: {name}'
     rows = read_jsonl(cfg.run_dir/'verified.jsonl')
@@ -106,8 +106,9 @@ def main():
         evidence['saved_tokenizer_matches_base_inference_template']=True
         with torch.inference_mode():before_logits=model(**encoded).logits[:,-1,:].float().cpu()
         expected={k:v.detach().cpu().clone() for k,v in get_peft_model_state_dict(model).items()}
+        # reload the base exactly as training loaded it: bf16, or NF4 for 4-bit (QDoRA) runs
         quant=BitsAndBytesConfig(load_in_4bit=True,bnb_4bit_quant_type='nf4',bnb_4bit_use_double_quant=True,
-                                bnb_4bit_compute_dtype=torch.bfloat16,bnb_4bit_quant_storage=torch.bfloat16)
+                                bnb_4bit_compute_dtype=torch.bfloat16,bnb_4bit_quant_storage=torch.bfloat16) if cfg.train.load_in_4bit else None
         base=AutoModelForCausalLM.from_pretrained(cfg.student.model,local_files_only=True,dtype=torch.bfloat16,
                                                 quantization_config=quant,device_map={'':0})
         reloaded=PeftModel.from_pretrained(base,adapter,is_trainable=False,autocast_adapter_dtype=False)

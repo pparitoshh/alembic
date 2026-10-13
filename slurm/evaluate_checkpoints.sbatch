@@ -2,17 +2,18 @@
 #SBATCH --job-name=dk-eval-ckpt
 #SBATCH --time=08:00:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks-per-node=4
+#SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --array=0-2
-#SBATCH --output=slurm/logs/%x-%A_%a.out
+#SBATCH --mem=480G
+#SBATCH --output=slurm/logs/%x-%j.out
 # Per seed: judge every kept checkpoint adapter (seed_<n>/adapters/step_<N>/) on the dataset_v1
 # DEVELOPMENT slice, then log the results into the training run's MLflow run (`distillkit track`).
 # Never point this at the final slice: choosing checkpoints on it would spend the final test.
-# Only some steps:  STEPS="300 600 897" sbatch --array=0 slurm/evaluate_checkpoints.sbatch
+# Only some steps or seeds:  STEPS="300 600 897" SEEDS=42 sbatch slurm/evaluate_checkpoints.sbatch
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"
+fan_out_seeds slurm/evaluate_checkpoints.sbatch   # one GPU task per seed; below runs once per seed
 
 SEED_DIR="$RUN_DIR/seed_$(seed_of_task)"
 DEV=(--set eval.file=data/eval/dataset_v1/development_normal.jsonl

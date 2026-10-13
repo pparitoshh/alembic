@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=120G
 #SBATCH --output=slurm/logs/%x-%j.out
 # Day-1 check (debug QOS, 30 min): the teacher serves on one A100, returns top-20 logprobs with token
 # ids that decode with the student's tokenizer, emits parseable tool calls, and how fast it is.

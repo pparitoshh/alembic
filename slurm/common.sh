@@ -14,10 +14,25 @@ mkdir -p slurm/logs
 
 distillkit() { "$VENV/bin/distillkit" "$@"; }
 
-# A port no other job on this shared node uses: derived from the job (and array task) id.
+# Index of this seed task: the srun task id in whole-node jobs (fan_out_seeds), or the array task id.
+task_index() { echo "${SLURM_ARRAY_TASK_ID:-${SLURM_PROCID:-0}}"; }
+
+# A port no other job or task on this node uses: derived from the job id and the task index.
 job_port() {
     local offset="${1:-0}"
-    echo $(( 20000 + (${SLURM_JOB_ID:-0} * 7 + ${SLURM_ARRAY_TASK_ID:-0} * 3 + offset) % 20000 ))
+    echo $(( 20000 + (${SLURM_JOB_ID:-0} * 7 + $(task_index) * 3 + offset) % 20000 ))
+}
+
+# fan_out_seeds <script>: whole-node jobs. In the batch step, start one srun task per seed in $SEEDS
+# (1 GPU, $SLURM_CPUS_PER_TASK cores each) that runs <script> again, then exit with srun's status.
+# Inside a task (or in a legacy array task) it returns, and the script continues for one seed.
+# Per-seed logs: slurm/logs/<job name>-<job id>_seed<task>.out
+fan_out_seeds() {
+    if [ -n "${DK_SEED_TASK:-}" ] || [ -n "${SLURM_ARRAY_TASK_ID:-}" ]; then return 0; fi
+    local n; n=$(wc -w <<< "$SEEDS")
+    DK_SEED_TASK=1 srun --ntasks="$n" --gpus-per-task=1 --cpus-per-task="${SLURM_CPUS_PER_TASK:-8}" --exact \
+        --output="slurm/logs/${SLURM_JOB_NAME:-dk}-${SLURM_JOB_ID:-0}_seed%t.out" bash "$REPO/$1"
+    exit $?
 }
 
 # start_vllm <model> <port> [extra vllm args...]: serve in the background, wait until healthy.
@@ -55,7 +70,7 @@ judge_args() {
     esac
 }
 
-seed_of_task() {  # SEEDS[$SLURM_ARRAY_TASK_ID]
+seed_of_task() {  # SEEDS[task index]
     local seeds=($SEEDS)
-    echo "${seeds[${SLURM_ARRAY_TASK_ID:-0}]}"
+    echo "${seeds[$(task_index)]}"
 }

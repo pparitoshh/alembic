@@ -2,17 +2,18 @@
 #SBATCH --job-name=dk-evaluate
 #SBATCH --time=04:00:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks-per-node=4
+#SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --array=0-2
-#SBATCH --output=slurm/logs/%x-%A_%a.out
+#SBATCH --mem=480G
+#SBATCH --output=slurm/logs/%x-%j.out
 # Per seed, on one GPU: 1) base + student answers (cached in seed_<n>/eval_answers.json),
 # 2) the judge served on the same GPU scores them, 3) `distillkit track` logs the scores into the
 # training run's MLflow run (fails if the seed was trained without train.report_to=[mlflow]).
 # Cross-check judge on the same answers:  JUDGE=cross sbatch slurm/evaluate.sbatch
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"
+fan_out_seeds slurm/evaluate.sbatch   # one GPU task per seed; below runs once per seed
 
 SEED=$(seed_of_task)
 SEED_DIR="$RUN_DIR/seed_$SEED"

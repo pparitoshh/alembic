@@ -2,14 +2,15 @@
 #SBATCH --job-name=dk-eval-v3-b6
 #SBATCH --time=04:00:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks-per-node=4
+#SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --array=0-2
-#SBATCH --output=slurm/logs/%x-%A_%a.out
+#SBATCH --mem=480G
+#SBATCH --output=slurm/logs/%x-%j.out
 # Submit afterok:<build job>. Existing B6 adapter bytes are only read.
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"
+fan_out_seeds slurm/eval_v3_compare.sbatch   # one GPU task per seed; below runs once per seed
 export PYTHONPATH="$REPO/src${PYTHONPATH:+:$PYTHONPATH}"
 "$VENV/bin/python" -m distillkit.eval_v3 check-release
 SEED=$(seed_of_task)
@@ -45,10 +46,10 @@ if [ ! -e "$SEED_DIR/adapter" ]; then ln -s "$ADAPTER" "$SEED_DIR/adapter"; fi
 test "$(readlink -f "$SEED_DIR/adapter")" = "$(readlink -f "$ADAPTER")"
 sha256sum "$ADAPTER/adapter_config.json" "$ADAPTER/adapter_model.safetensors" > "$SEED_DIR/adapter.before.sha256"
 SET=(--set run_dir="$SEED_DIR" --set eval.file=data/eval/eval_v3.jsonl --set eval.tool_file=null)
-distillkit answer -c configs/qwen3_4b_qdora.yaml "${SET[@]}"
+distillkit answer -c "$CONFIG" "${SET[@]}"
 PORT=$(job_port 1)
 start_vllm "$JUDGE_MODEL" "$PORT" $(judge_args "$JUDGE_MODEL")
-distillkit evaluate -c configs/qwen3_4b_qdora.yaml "${SET[@]}" \
+distillkit evaluate -c "$CONFIG" "${SET[@]}" \
     --set judge.base_url="http://127.0.0.1:$PORT/v1" --set judge.model="$JUDGE_MODEL" --set judge.temperature=0
 stop_vllm
 sha256sum --check "$SEED_DIR/adapter.before.sha256"

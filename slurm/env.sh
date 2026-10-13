@@ -4,7 +4,7 @@
 # --- Slurm: read by sbatch at submission (no hard-coded account in the scripts) ---
 export SBATCH_ACCOUNT="${SBATCH_ACCOUNT:-EUHPC_D30_031}"       # project account: `saldo -b`
 export SBATCH_PARTITION="${SBATCH_PARTITION:-boost_usr_prod}"   # Booster: 4x A100 64 GB per node
-# export SBATCH_RESERVATION="TODO_hackathon_reservation"        # if the hackathon node is a reservation
+# export SBATCH_RESERVATION=s_tra_ncc   # on-site days only (name announced that day); omit on other days
 
 # --- paths ($WORK is set by CINECA per project) ---
 export REPO="${REPO:-$WORK/alembic}"                 # this repository
@@ -26,6 +26,6 @@ export JUDGE_MODEL="openai/gpt-oss-20b"
 export CROSS_JUDGE_MODEL="google/gemma-4-26B-A4B-it"
 
 # --- experiment ---
-export CONFIG="${CONFIG:-configs/qwen3_4b_qdora.yaml}"
-export RUN_DIR="${RUN_DIR:-runs/qwen3_4b_qdora}"     # shared generated/verified data; seeds in $RUN_DIR/seed_<n>
+export CONFIG="${CONFIG:-configs/qwen3_4b_dora_bf16.yaml}"   # DoRA on bf16 base weights (no 4-bit)
+export RUN_DIR="${RUN_DIR:-runs/qwen3_4b_dora}"      # shared generated/verified data; seeds in $RUN_DIR/seed_<n>
 export SEEDS="${SEEDS:-42 1 2}"                       # >= 3 seeds per setting (GOAL.md §7)

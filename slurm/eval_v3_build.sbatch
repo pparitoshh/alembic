@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=120G
 #SBATCH --output=slurm/logs/%x-%j.out
 # Evaluation candidates only. No training, gold copying, or historical-run writes.
 source "${REPO:-$WORK/alembic}/slurm/env.sh"

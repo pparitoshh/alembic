@@ -4,9 +4,9 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:2
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=128G
+#SBATCH --mem=240G
 #SBATCH --output=slurm/logs/%x-%j.out
-# One QDoRA run over 2 GPUs with FSDP (configs/accelerate/fsdp.yaml, num_processes must match --gres).
+# One DoRA run over 2 GPUs with FSDP (configs/accelerate/fsdp.yaml, num_processes must match --gres).
 # Untested on Leonardo: try on boost_qos_dbg first. For seed variance, prefer train.sbatch (1 GPU per seed).
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"

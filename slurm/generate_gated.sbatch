@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=120G
 #SBATCH --output=slurm/logs/%x-%j.out
 # Quality-gated teacher data on one GPU (docs/plan/HPC10K_DATA.md). Each gate runs only if the previous
 # one succeeded:

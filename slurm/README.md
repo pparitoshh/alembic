@@ -7,7 +7,7 @@ teams sharing the node don't collide). No external API is used.
 | Role | Model | Disk | GPUs | License |
 |---|---|---|---|---|
 | Teacher | `Qwen/Qwen3-32B-AWQ` (vLLM) | ~19 GB | 1 | Apache 2.0 |
-| Student | `Qwen/Qwen3-4B-Instruct-2507`, QDoRA | ~8 GB | 1 per seed (2 with FSDP) | Apache 2.0 |
+| Student | `Qwen/Qwen3-4B-Instruct-2507`, DoRA (bf16 base weights) | ~8 GB | 1 per seed (2 with FSDP) | Apache 2.0 |
 | Judge | `openai/gpt-oss-20b` (vLLM) | ~14 GB | 1 (shared with the student's answers) | Apache 2.0 |
 | Cross-check judge | `google/gemma-4-26B-A4B-it` (vLLM) | ~52 GB | 1 (bf16 fills most of the 64 GB: short context, low concurrency) | Apache 2.0 |
 
@@ -32,7 +32,7 @@ JUDGE=cross sbatch slurm/calibrate.sbatch    # same for Gemma 4
 ```
 
 Read `slurm/logs/dk-smoke-teacher-<id>.out` (prints `SMOKE TEST: PASS`), and
-`runs/qwen3_4b_qdora/calibration_summary_{gpt-oss,gemma4}.json`. Use the tokens/s figure to size the
+`runs/qwen3_4b_dora/calibration_summary_{gpt-oss,gemma4}.json`. Use the tokens/s figure to size the
 10k generation and `teacher.concurrency`.
 
 ## 3. Pipeline
@@ -42,24 +42,27 @@ bash slurm/submit.sh            # generate -> train (one job per seed) -> evalua
 bash slurm/submit.sh train      # data already generated
 bash slurm/submit.sh evaluate   # adapters already trained
 JUDGE=cross sbatch slurm/evaluate.sbatch      # cross-check judge on the same cached answers
-python -m distillkit.aggregate runs/qwen3_4b_qdora              # mean ± std over seeds
-python -m distillkit.aggregate runs/qwen3_4b_qdora --tag gemma4
+python -m distillkit.aggregate runs/qwen3_4b_dora               # mean ± std over seeds
+python -m distillkit.aggregate runs/qwen3_4b_dora --tag gemma4
 ```
 
 | Job | Time | What it does |
 |---|---|---|
 | `generate.sbatch` | ≤ 24 h, 1 GPU | teacher on vLLM → `generate` (resumable: resubmit if killed) → `verify` |
-| `train.sbatch` | ≤ 8 h, array, 1 GPU each | QDoRA per seed in `runs/qwen3_4b_qdora/seed_<n>/` (shares `verified.jsonl`) |
+| `train.sbatch` | ≤ 8 h, 1 node (4 GPUs), 1 GPU task per seed | DoRA per seed in `runs/qwen3_4b_dora/seed_<n>/` (shares `verified.jsonl`) |
 | `train_fsdp.sbatch` | ≤ 8 h, 2 GPUs | one run with FSDP (untested on Leonardo yet: try it on the debug QOS first) |
-| `evaluate.sbatch` | ≤ 4 h, array, 1 GPU each | `answer` (base + student, cached) → judge on vLLM → `evaluate` |
+| `evaluate.sbatch` | ≤ 4 h, 1 node (4 GPUs), 1 GPU task per seed | `answer` (base + student, cached) → judge on vLLM → `evaluate` |
 | `export.sbatch` | ≤ 2 h | merge → GGUF → imatrix → quants for one seed; `ollama create` runs on the laptop |
 
-Seeds come from `SEEDS` in `env.sh`; the `--array` ranges in `train.sbatch`/`evaluate.sbatch` must
-match (a test checks this, and `submit.sh` sets `--array` from `SEEDS`).
+Seeds come from `SEEDS` in `env.sh` (at most 4: one node). Seed jobs (`train`, `evaluate`,
+`evaluate_checkpoints`, `eval_v3_compare`) take one whole node: `fan_out_seeds` in `common.sh` starts one
+`srun` task per seed with 1 GPU and 8 cores, and writes `slurm/logs/<job>-<id>_seed<task>.out`. One seed
+only: `SEEDS=42 sbatch slurm/train.sbatch`. Memory is 120 GB per GPU (site rule; a test checks it).
+On-site days, `export SBATCH_RESERVATION=s_tra_ncc` before `sbatch`.
 
 ## Rules on a shared node
 
-- Ask for 1 GPU per job unless a job needs more; arrays spread seeds over free GPUs.
+- Seed jobs take a whole node (1 GPU per seed); single-process jobs ask for 1 GPU. Run more of them in parallel to use more nodes.
 - Generation appends results as it goes; a job killed at its wall time loses nothing.
 - Heavy jobs off-peak where possible; check usage with `squeue --me` and storage with `cindata`.
 

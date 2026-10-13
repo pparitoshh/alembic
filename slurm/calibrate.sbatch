@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=120G
 #SBATCH --output=slurm/logs/%x-%j.out
 # Judge trust check on known-label pairs (eval.calibration_file), before using a judge for results.
 #   sbatch slurm/calibrate.sbatch               # gpt-oss-20b

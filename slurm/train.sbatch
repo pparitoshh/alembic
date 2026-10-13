@@ -2,16 +2,17 @@
 #SBATCH --job-name=dk-train
 #SBATCH --time=08:00:00
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks-per-node=4
+#SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --array=0-2
-#SBATCH --output=slurm/logs/%x-%A_%a.out
-# QDoRA student, one seed per array task and per GPU (seeds from $SEEDS; --array must match its length).
+#SBATCH --mem=480G
+#SBATCH --output=slurm/logs/%x-%j.out
+# Student training: one whole node, one GPU task per seed in $SEEDS (at most 4 seeds per node).
 # Each seed gets $RUN_DIR/seed_<n>/ sharing the verified data.
-# Killed at the wall time? Resubmit the same array task: it resumes from the newest checkpoint (train.save_steps).
+# Killed at the wall time? Resubmit the job: each seed resumes from its newest checkpoint (train.save_steps).
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"
+fan_out_seeds slurm/train.sbatch   # one GPU task per seed; below runs once per seed
 
 SEED=$(seed_of_task)
 SEED_DIR="$RUN_DIR/seed_$SEED"

@@ -163,6 +163,9 @@ def test_job_headers(path):
     assert 'source "${REPO:-$WORK/alembic}/slurm/env.sh"' in text and 'source "$REPO/slurm/common.sh"' in text
     if "--array=" in text:
         assert "seed_of_task" in text
+    gpus, mem = re.search(r"#SBATCH --gres=gpu:(\d+)", text), re.search(r"#SBATCH --mem=(\d+)G", text)
+    if gpus and mem:
+        assert int(mem.group(1)) >= 120 * int(gpus.group(1))  # site rule: 120 GB per GPU
 
 
 def _fields(model: type[BaseModel], path: list[str]) -> bool:
@@ -186,11 +189,25 @@ def test_env_models_match_the_leonardo_config():
     assert env["JUDGE_MODEL"] == cfg["judge"]["model"]
 
 
-def test_seed_arrays_match_seeds():
+def test_seed_jobs_use_whole_nodes():
     n = len(re.search(r'SEEDS="\$\{SEEDS:-([^}]*)\}"', (SLURM / "env.sh").read_text()).group(1).split())
-    for job in ("train.sbatch", "evaluate.sbatch"):
-        assert f"#SBATCH --array=0-{n - 1}" in (SLURM / job).read_text()
+    assert n <= 4  # one node (4 GPUs) per seed job
+    for job in ("train.sbatch", "evaluate.sbatch", "evaluate_checkpoints.sbatch", "eval_v3_compare.sbatch"):
+        text = (SLURM / job).read_text()
+        assert "--array" not in text
+        for opt in ("--gres=gpu:4", "--ntasks-per-node=4", "--mem=480G"):
+            assert f"#SBATCH {opt}" in text, (job, opt)
+        assert f"fan_out_seeds slurm/{job}" in text and "seed_of_task" in text
 
 
 def test_smoke_checker_compiles(tmp_path):
     py_compile.compile(str(SLURM / "smoke_teacher.py"), cfile=str(tmp_path / "x.pyc"), doraise=True)
+
+
+def test_generation_jobs_decontaminate_against_all_eval_files():
+    # verify only compares against eval.file; decontam covers every data/eval/ file and source holdouts
+    for job in ("generate.sbatch", "generate_gated.sbatch"):
+        text = (SLURM / job).read_text()
+        assert text.index("distillkit verify") < text.index("distillkit decontam"), job
+    text = (SLURM / "generate.sbatch").read_text()
+    assert 'cp "$RUN_DIR/clean.jsonl" "$RUN_DIR/verified.jsonl"' in text
