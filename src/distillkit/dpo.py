@@ -8,6 +8,7 @@ train: TRL DPOTrainer on the pairs. The reference model is the start model with 
 Usage:
   python -m distillkit.dpo mine  --url http://127.0.0.1:8000/v1 --model M --train verified.jsonl --out pairs.jsonl
   python -m distillkit.dpo train --model M --pairs pairs.jsonl --out runs/d5_dpo/seed_42 --seed 42
+  python -m distillkit.dpo answers --model M --out runs/scaled_eval/b7s42d5_answers.json
 """
 
 import argparse
@@ -128,6 +129,36 @@ def run_train(a) -> None:
     print(f"[dpo] {len(pairs)} pairs, adapter -> {a.out / 'adapter'}")
 
 
+def run_answers(a) -> None:
+    """Greedy v2 and v3 answers of a full model directory, in the runs/scaled_eval format of build_judge_dirs.py."""
+    import torch
+    import yaml
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    from .prompting import render_prompt
+
+    if a.out.exists():
+        raise FileExistsError(f"{a.out} exists; choose a new path")
+    cfg = yaml.safe_load(open(a.config))
+    sysp, cap = cfg["student"]["system_prompt"], cfg["eval"]["max_new_tokens"]
+    tok = AutoTokenizer.from_pretrained(a.model)
+    tok.padding_side = "left"
+    model = AutoModelForCausalLM.from_pretrained(a.model, dtype=torch.bfloat16, device_map="auto").eval()
+    res = {}
+    for name, f in (("v2", "data/eval/eval_all_v2.jsonl"), ("v3", "data/eval/eval_v3.jsonl")):
+        qs = [json.loads(l)["question"] for l in open(f)]
+        prompts, outs = [render_prompt(tok, sysp, q, None) for q in qs], []
+        for i in range(0, len(prompts), 8):
+            enc = tok(prompts[i:i + 8], return_tensors="pt", padding=True).to(model.device)
+            with torch.no_grad():
+                g = model.generate(**enc, max_new_tokens=cap, do_sample=False, pad_token_id=tok.pad_token_id)
+            outs += tok.batch_decode(g[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)
+        res[name] = {"questions": qs, "answers": [o.strip() for o in outs]}
+    a.out.parent.mkdir(parents=True, exist_ok=True)
+    json.dump({"1.0": res}, open(a.out, "w"), ensure_ascii=False)
+    print(f"[dpo] answers -> {a.out}")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="python -m distillkit.dpo", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -145,8 +176,12 @@ def main() -> None:
     t.add_argument("--seed", type=int, default=42)
     t.add_argument("--beta", type=float, default=0.1)
     t.add_argument("--lr", type=float, default=5e-6)
+    w = sub.add_parser("answers")
+    w.add_argument("--model", required=True)
+    w.add_argument("--out", type=Path, required=True)
+    w.add_argument("--config", default=SYSTEM_PROMPT_FROM)
     a = p.parse_args()
-    run_mine(a) if a.cmd == "mine" else run_train(a)
+    {"mine": run_mine, "train": run_train, "answers": run_answers}[a.cmd](a)
 
 
 if __name__ == "__main__":
