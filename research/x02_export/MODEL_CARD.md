@@ -36,7 +36,9 @@ Or download the files and run `ollama create hpc-assistant-x02 -f Modelfile`.
 This is a research model from a hackathon. It is not a supported product. Do not run its commands on a
 production cluster without a check.
 
-The `Modelfile` contains the system prompt and the Qwen3 tool-calling template that were used in the evaluation.
+The `Modelfile` (local use) and the files `template`, `system` and `params` (for `ollama run hf.co/...`) contain the
+Qwen3 tool-calling template of the evaluation. The system prompt adds the model name ("HPC Assistant"); the evaluation
+used the same prompt without the first sentence.
 The evaluation used greedy decoding (temperature 0). The Modelfile uses temperature 0.7.
 
 sha256 of `model-Q4_K_M.gguf`: `263c1204e421f27b0bbf7bf0d0ded04f6fa5dc2fba5d9b923e713f04490136d6`

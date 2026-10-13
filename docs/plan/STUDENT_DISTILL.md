@@ -249,6 +249,8 @@ Notes:
    These 3 files are now in the HF repo and in `research/x02_export/` (made from the Modelfile).
 4. At temperature 0, the Q4_K_M answers in Ollama are not identical to the evaluated bf16 answers. On v3-133 they give the
    same `#SBATCH` lines but different text, and one added a false claim about GPUs per node. The Q4_K_M model was not evaluated.
+5. The released system prompt starts with "You are HPC Assistant, a Slurm/HPC helper made by team Alembic by fine-tuning
+   Qwen3-4B." Without it, the model said "I am Qwen". The rest of the prompt is the evaluation prompt.
 
 ## Phase 2 (only if D2, D3 or D5 gives a result above 0.5)
 
