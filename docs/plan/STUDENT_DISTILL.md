@@ -123,8 +123,8 @@ number of seeds with a result (13 October 14:41).
 | x0.3 | 0.443 (3) | 0.510 (3) |
 | x0.4 | 0.424 (3) | 0.495 (3) |
 | D4: B7 step 300 | 0.374 (3) | 0.406 (3) |
-| D4: B7 step 500 | 0.396 (3) | 0.411 (2) |
-| D4: B7 step 700 | 0.403 (1) | – (1 invalid verdict; judged again in 60322599) |
+| D4: B7 step 500 | 0.396 (3) | 0.407 (3) |
+| D4: B7 step 700 | 0.384 (3) | 0.404 (2; 1 seed has 1 invalid verdict, judged again in 60322599) |
 | B8a | – | 0.347 (3) |
 | D0, D2, D3, D5 | evaluation running | evaluation running |
 
@@ -168,6 +168,48 @@ Decision rule:
 |---|---|---|
 | The score follows the length, and the coverage does not increase | The win comes from the length | Short training answers are the main problem. D2, D3 and D5 use the same answers, so they cannot fix it. Plan new data with full answers. |
 | The coverage increases with the score | The win comes from more facts | Continue with D2, D3 and D5. |
+
+### Length analysis results (13 October 14:55)
+
+Script: `$WORK/alembic/jobs/length_analysis.py` (not in git), on all judge dirs in `wt-eval-v3/runs`.
+Score of a question: the mean of the 2 judge orders (win 1, tie 0.5, loss 0). Key terms of a reference:
+backtick spans, options (`--x`), `ALL_CAPS_NAMES` and Slurm command names. Coverage: the fraction of these
+terms in the answer. rho: Spearman correlation over the questions of all seeds. Ratio: student length / base length.
+
+| Model | Set | Win | Median length S / B | Win by ratio < 0.5 / 0.5–1 / > 1 (n) | rho(ratio, score) | Coverage S / B | rho(coverage diff, score) | rho(coverage diff, score), length fixed |
+|---|---|---|---|---|---|---|---|---|
+| x0.1 | v2 | 0.481 | 1,278 / 1,382 | 0.40 (5) / 0.48 (124) / 0.49 (69) | 0.04 | 0.57 / 0.54 | 0.28 | 0.28 |
+| x0.2 | v2 | 0.481 | 1,024 / 1,382 | 0.51 (25) / 0.44 (126) / 0.58 (47) | 0.08 | 0.58 / 0.54 | 0.28 | 0.28 |
+| x0.3 | v2 | 0.443 | 621 / 1,382 | 0.46 (84) / 0.42 (96) / 0.49 (18) | 0.01 | 0.53 / 0.54 | 0.30 | 0.30 |
+| x0.4 | v2 | 0.424 | 530 / 1,382 | 0.45 (115) / 0.38 (71) / 0.44 (12) | 0.00 | 0.54 / 0.54 | 0.30 | 0.30 |
+| D4 step 300 | v2 | 0.374 | 310 / 1,382 | 0.37 (171) / 0.39 (16) / 0.48 (11) | 0.08 | 0.47 / 0.54 | 0.41 | 0.42 |
+| x0.1 | v3 | 0.522 | 1,526 / 1,619 | 0.59 (14) / 0.52 (381) / 0.51 (205) | -0.05 | 0.60 / 0.61 | 0.23 | 0.23 |
+| x0.2 | v3 | 0.528 | 1,220 / 1,619 | 0.50 (54) / 0.53 (438) / 0.55 (108) | 0.01 | 0.61 / 0.61 | 0.14 | 0.14 |
+| x0.3 | v3 | 0.510 | 886 / 1,619 | 0.55 (200) / 0.50 (366) / 0.46 (34) | -0.04 | 0.60 / 0.61 | 0.16 | 0.16 |
+| x0.4 | v3 | 0.495 | 774 / 1,619 | 0.52 (298) / 0.47 (280) / 0.42 (22) | -0.10 | 0.60 / 0.61 | 0.16 | 0.18 |
+| D4 step 300 | v3 | 0.406 | 378 / 1,619 | 0.41 (564) / 0.35 (26) / 0.55 (10) | 0.04 | 0.52 / 0.61 | 0.30 | 0.29 |
+| B7 (x1.0) | v3 | 0.438 | 365 / 1,619 | 0.43 (577) / 0.53 (16) / 0.75 (7) | 0.02 | 0.53 / 0.61 | 0.33 | 0.33 |
+
+Coverage by outcome (x0.1 to x0.7 together):
+
+| Set | Outcome | Questions | Coverage S | Coverage B | Median ratio |
+|---|---|---|---|---|---|
+| v2 | student loses both orders | 240 | 0.51 | 0.58 | 0.56 |
+| v2 | student wins both orders | 183 | 0.68 | 0.48 | 0.65 |
+| v3 | student loses both orders | 696 | 0.54 | 0.60 | 0.60 |
+| v3 | student wins both orders | 785 | 0.65 | 0.62 | 0.59 |
+
+Findings:
+
+1. In each model, the length does not predict the score (rho -0.10 to 0.08). In each ratio bin, the win rate is almost the same.
+2. The coverage difference predicts the score (rho 0.14 to 0.42). The value stays the same when the length is fixed.
+3. When the student wins both orders, its coverage is higher than the base coverage. When it loses both orders, its coverage is lower.
+4. Between the models, coverage and win increase together: B7 and D4 0.52–0.53, x0.1 to x0.4 0.60–0.61 (v3).
+5. On v3, the x0.2 coverage is equal to the base coverage (0.61). The win of x0.2 comes from the facts that it
+   keeps from the base model, not from more facts than the base model.
+
+Decision (rule above): the coverage increases with the score, and the length does not. The win comes from the facts.
+Continue with D2, D3 and D5. Full training (B7) loses base facts (coverage 0.61 → 0.53). Scaling keeps them.
 
 ## Phase 2 (only if D2, D3 or D5 gives a result above 0.5)
 

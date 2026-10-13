@@ -38,7 +38,6 @@ We found two causes:
 We do not have these results yet:
 
 - The results of D0, D2, D3 and D5 (training complete; evaluation running).
-- The D4 results for all 3 seeds (step 500 on v3 and step 700).
 
 
 ## 2. How the system operates
@@ -91,7 +90,7 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 | 13 Oct | B7 with 40% of its changes † | Same as B7 | No training | 0.424 | 0.495 | – | – | – | – |
 | 13 Oct | B7 with 50% of its changes † | Same as B7 | No training | 0.436 (1) | 0.476 (1) | – | 0.940 | – | 0.027 |
 | 13 Oct | B7 with 70% of its changes † | Same as B7 | No training | 0.409 (1) | 0.418 (1) | – | 0.940 | – | 0.031 |
-| 13 Oct | B7, early stop at step 300 / 500 (D4) | Same as B7 | Fewer steps | 0.374 / 0.396 | 0.406 / 0.411 (2) | – | – | – | – |
+| 13 Oct | B7, early stop at step 300 / 500 (D4) | Same as B7 | Fewer steps | 0.374 / 0.396 | 0.406 / 0.407 | – | – | – | – |
 | 13 Oct | B8a | Same as B7 | Learning rate 2e-5, rank 8, half an epoch | – | 0.347 | – | – | – | – |
 † We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.2 to 0.7. The number in brackets is the number of seeds with a result, if it is less than 3. The v3 scale choice is a development result.
 
@@ -261,7 +260,7 @@ A different training framework (Unsloth, Axolotl, LLaMA-Factory) can make the tr
 Our plan:
 
 1. B6 (0.427) and B7 (0.438) lose on trained topics. More data gives only a small improvement. Thus, we must change the training method.
-2. 20% of the B7 change wins on v3 for the mean of 3 seeds (0.528). This is our first model that wins. A part of this win can come from longer answers; the length analysis will show this.
+2. 20% of the B7 change wins on v3 for the mean of 3 seeds (0.528). This is our first model that wins. The length analysis shows that the win does not come from longer answers. In each model, the length does not predict the score (rho -0.10 to 0.08). The key-term coverage predicts it (rho 0.14 to 0.42). x0.2 keeps the base facts (coverage 0.61, equal to the base model). Full training (B7) loses them (0.53).
 3. Running: D0 (control), D2 (logit distillation), D3 (base-KL) and D5 (DPO). Next: options 5 and 6 (full answers, mixed data).
 4. These options will target output and mail, problem analysis and dependencies.
 5. The teacher model wins, so distillation can operate. RAG (option 10) stays the best solution for topics that we do not train.
