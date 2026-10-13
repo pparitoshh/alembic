@@ -14,6 +14,6 @@ source "$REPO/slurm/common.sh"
 fan_out_seeds slurm/check_fanout.sbatch   # one GPU task per seed; below runs once per seed
 
 echo "[check] host=$(hostname) task=$(task_index) seed=$(seed_of_task) port=$(job_port 1)" \
-     "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset} cores=$(nproc)" \
+     "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset} cores=$(nproc) cpus=$(taskset -cp $$ | cut -d: -f2)" \
      "gpu=$(nvidia-smi --query-gpu=index,uuid --format=csv,noheader | tr '\n' ' ')"
 "$VENV/bin/python" -c "import torch; print('[check] torch sees', torch.cuda.device_count(), 'GPU:', torch.cuda.get_device_name(0))"

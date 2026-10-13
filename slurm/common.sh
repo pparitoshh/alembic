@@ -30,7 +30,7 @@ job_port() {
 fan_out_seeds() {
     if [ -n "${DK_SEED_TASK:-}" ] || [ -n "${SLURM_ARRAY_TASK_ID:-}" ]; then return 0; fi
     local n; n=$(wc -w <<< "$SEEDS")
-    DK_SEED_TASK=1 srun --ntasks="$n" --gpus-per-task=1 --cpus-per-task="${SLURM_CPUS_PER_TASK:-8}" --exact \
+    DK_SEED_TASK=1 srun --ntasks="$n" --gpus-per-task=1 --cpus-per-task="${SLURM_CPUS_PER_TASK:-8}" --cpu-bind=cores --exact \
         --output="slurm/logs/${SLURM_JOB_NAME:-dk}-${SLURM_JOB_ID:-0}_seed%t.out" bash "$REPO/$1"
     exit $?
 }
