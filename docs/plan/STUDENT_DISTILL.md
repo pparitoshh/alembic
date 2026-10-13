@@ -167,7 +167,8 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | D4, seed 1 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294857 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s1ck<N>_1.0_answers.json` |
 | D4, seed 2 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294859 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s2ck<N>_1.0_answers.json` |
 | Judge for x0.1 and D4 | `judge_dirs.sbatch` (afterok on the 6 jobs above) | 60294860 | 13 Oct 12:38 | pending (dependency) | `$WORK/alembic/wt-eval-v3/runs/judge_b7s<n>_t0.1_<v2,v3>/`, `judge_b7s<n>ck<N>_t1.0_<v2,v3>/` |
-| D2, D3 GPU smoke test (~23 steps each, 1 GPU each) | `$WORK/alembic/jobs/smoke_kd.sbatch` | 60300003 | 13 Oct 13:03 | running | `runs/smoke_d2`, `runs/smoke_d3` (in the worktrees), logs `slurm/logs/smoke-*-60300003.log` |
+| D2, D3 GPU smoke test (~23 steps each, 1 GPU each) | `$WORK/alembic/jobs/smoke_kd.sbatch` | 60300003 | 13 Oct 13:03 | failed: D3 `logits=None` (TRL `chunked_nll`); D2 ran with no KD (assistant mask has `<|im_end|>` + newline). Fixed in a9b7ce7 | `runs/smoke_d2`, `runs/smoke_d3` (in the worktrees), logs `slurm/logs/smoke-*-60300003.log` |
+| D2, D3 GPU smoke test, try 2 | `$WORK/alembic/jobs/smoke_kd.sbatch` | 60301833 | 13 Oct 13:14 | running | try 1 outputs moved to `runs/smoke_*_try1_60300003` |
 | D0 | – | – | – | ready: `configs/qwen3_4b_d0_bf16.yaml` on `exp/d0-bf16` (aa785d0); waits for approval | `runs/d0_bf16` |
 | D2 | – | – | – | ready: `configs/qwen3_4b_d2_kd.yaml` on `exp/d2-kd` (e5d850e); waits for approval | `runs/d2_kd` |
 | D3 | – | – | – | ready: `configs/qwen3_4b_d3_basekl.yaml` on `exp/d3-basekl` (2bdc2fc); waits for approval | `runs/d3_basekl` |
