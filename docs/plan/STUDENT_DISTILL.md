@@ -171,7 +171,7 @@ Decision rule:
 
 ### Length analysis results (13 October 14:55)
 
-Script: `$WORK/alembic/jobs/length_analysis.py` (not in git), on all judge dirs in `wt-eval-v3/runs`.
+Script: `research/length_analysis/length_analysis.py <wt-eval-v3/runs>` (all judge dirs).
 Score of a question: the mean of the 2 judge orders (win 1, tie 0.5, loss 0). Key terms of a reference:
 backtick spans, options (`--x`), `ALL_CAPS_NAMES` and Slurm command names. Coverage: the fraction of these
 terms in the answer. rho: Spearman correlation over the questions of all seeds. Ratio: student length / base length.
