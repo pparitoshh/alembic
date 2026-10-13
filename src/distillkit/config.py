@@ -110,6 +110,17 @@ class TrainCfg(_Section):
     val_fraction: float = Field(0.0, ge=0, lt=0.5)
     # trainer metric sinks, e.g. [mlflow] (tracking URI/experiment from MLFLOW_* env vars); [] = none
     report_to: list[str] = []
+    # extra loss terms (src/distillkit/kd.py); 0 = plain SFT, so old configs do not change
+    kd_file: Path | None = None  # teacher top-k logprobs (teacher_logprobs.jsonl.gz) for logit KD
+    kd_alpha: float = Field(0.0, ge=0, le=1)  # loss = (1 - a) * CE + a * T^2 * KL(teacher top-k || student)
+    kd_temperature: float = Field(1.0, gt=0)
+    base_kl: float = Field(0.0, ge=0)  # + base_kl * KL(student || base model with the adapter off)
+
+    @model_validator(mode="after")
+    def _kd_needs_file(self):
+        if self.kd_alpha > 0 and self.kd_file is None:
+            raise ValueError("train.kd_alpha > 0 needs train.kd_file")
+        return self
 
     @model_validator(mode="after")
     def _one_precision(self):

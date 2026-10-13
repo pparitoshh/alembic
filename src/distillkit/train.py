@@ -111,6 +111,46 @@ def keep_adapter(checkpoint: Path, run_dir: Path, step: int) -> Path:
     return dst
 
 
+def distill_trainer(base_cls, tcfg, tok):
+    """SFTTrainer subclass that adds the logit-KD and base-KL terms of kd.py to the CE loss."""
+    import torch
+
+    from .kd import base_kl_loss, kd_targets, load_teacher_topk, sparse_kd_loss
+
+    stop = {tok.eos_token_id, tok.convert_tokens_to_ids("<|im_end|>")}
+    table = load_teacher_topk(tcfg.kd_file, stop) if tcfg.kd_alpha > 0 else {}
+    if tcfg.kd_alpha > 0:
+        print(f"[train] logit KD: {len(table)} teacher rows, alpha={tcfg.kd_alpha}, T={tcfg.kd_temperature}")
+
+    class DistillSFTTrainer(base_cls):
+        def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+            labels = inputs["labels"]
+            loss, out = super().compute_loss(model, inputs, return_outputs=True, num_items_in_batch=num_items_in_batch)
+            logits = out.logits
+            mode = "train" if model.training else "eval"
+            if tcfg.kd_alpha > 0:
+                tgt = kd_targets(labels, table, stop)
+                if tgt is not None:
+                    rows, cols, ids, lps = tgt
+                    s = logits[torch.tensor(rows, device=logits.device), torch.tensor(cols, device=logits.device)]
+                    kd = sparse_kd_loss(s, torch.from_numpy(ids).to(s.device), torch.from_numpy(lps).to(s.device),
+                                        tcfg.kd_temperature)
+                    loss = (1 - tcfg.kd_alpha) * loss + tcfg.kd_alpha * kd
+                    self._metrics[mode].setdefault("kd_loss", []).append(kd.item())
+            if tcfg.base_kl > 0:
+                mask = labels[:, 1:] != -100  # logits at p-1 predict the label at p
+                if mask.any():
+                    with torch.no_grad(), model.disable_adapter():
+                        base = model(input_ids=inputs["input_ids"], attention_mask=inputs.get("attention_mask"),
+                                     use_cache=False).logits
+                    kl = base_kl_loss(logits[:, :-1][mask], base[:, :-1][mask])
+                    loss = loss + tcfg.base_kl * kl
+                    self._metrics[mode].setdefault("base_kl", []).append(kl.item())
+            return (loss, out) if return_outputs else loss
+
+    return DistillSFTTrainer
+
+
 def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
     """Train through the production path, optionally inspecting it before optimization.
 
@@ -190,7 +230,10 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         target_modules="all-linear",
         task_type="CAUSAL_LM",
     )
-    trainer = SFTTrainer(
+    trainer_cls = SFTTrainer
+    if tcfg.kd_alpha > 0 or tcfg.base_kl > 0:
+        trainer_cls = distill_trainer(SFTTrainer, tcfg, tok)
+    trainer = trainer_cls(
         model=scfg.model,
         args=args,
         train_dataset=ds,

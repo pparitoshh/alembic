@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995"
+      "sha256": "89e1568605ecde90daa8a0051da4c22fdc391dcf7d0ac936b2345f56a9a3f892"
     },
     {
       "root": "repository",
@@ -793,6 +793,29 @@
       "source_evidence_changed": false,
       "reason": "Add opt-in train.val_fraction and train.report_to for validation loss and MLflow tracking. Only the config.py code binding changes; retain previous hash and all existing history.",
       "compatibility": "Only TrainCfg gains two optional fields. EvalCfg, evaluation answering inputs/schemas/scorers, tool definitions and judge verdict schema/protocol remain unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified.",
+      "pre_binding_validation": {
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused prior config.py hash."
+      },
+      "validation_scope": "Metadata-only binding update is followed by the full suite."
+    },
+    {
+      "version": "train-kd-binding-v1",
+      "created_utc": "2026-10-13T10:46:52.876116+00:00",
+      "base_revision": "2ba62085f6ee1afb95e91d27cbfc8b5583150eb3",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "e7b05db1cc29b5c5d2f737c22a013dcdada7a88dda6f1aac9f3247d841065860",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995",
+          "after": "89e1568605ecde90daa8a0051da4c22fdc391dcf7d0ac936b2345f56a9a3f892"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add opt-in train.kd_file, train.kd_alpha, train.kd_temperature and train.base_kl for logit KD and a base-KL penalty (docs/plan/STUDENT_DISTILL.md D2, D3). Only the config.py code binding changes; retain previous hash and all existing history.",
+      "compatibility": "Only TrainCfg gains four optional fields with defaults that keep plain SFT. EvalCfg, evaluation inputs/schemas/scorers, tool definitions and judge protocol remain unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified.",
       "pre_binding_validation": {
         "full_failed": 1,
         "full_failure": "Strict151 release validation refused prior config.py hash."

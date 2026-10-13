@@ -113,9 +113,9 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | Scale x0.1, seed 42 | `scaled_answers.sbatch` (SCALES=0.1) | 60294836 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s42_0.1_answers.json` |
 | Scale x0.1, seed 1 | `scaled_answers.sbatch` (SCALES=0.1) | 60294842 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s1_0.1_answers.json` |
 | Scale x0.1, seed 2 | `scaled_answers.sbatch` (SCALES=0.1) | 60294850 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s2_0.1_answers.json` |
-| D4, seed 42 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294853 | 13 Oct 12:38 | pending | `runs/scaled_eval/b7s42ck<N>_1.0_answers.json` |
-| D4, seed 1 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294857 | 13 Oct 12:38 | pending | `runs/scaled_eval/b7s1ck<N>_1.0_answers.json` |
-| D4, seed 2 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294859 | 13 Oct 12:38 | pending | `runs/scaled_eval/b7s2ck<N>_1.0_answers.json` |
+| D4, seed 42 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294853 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s42ck<N>_1.0_answers.json` |
+| D4, seed 1 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294857 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s1ck<N>_1.0_answers.json` |
+| D4, seed 2 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294859 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s2ck<N>_1.0_answers.json` |
 | Judge for x0.1 and D4 | `judge_dirs.sbatch` (afterok on the 6 jobs above) | 60294860 | 13 Oct 12:38 | pending (dependency) | `$WORK/alembic/wt-eval-v3/runs/judge_b7s<n>_t0.1_<v2,v3>/`, `judge_b7s<n>ck<N>_t1.0_<v2,v3>/` |
 | D0 | – | – | – | needs `runs/b7_good` | `runs/d0_bf16` |
 | D2 | – | – | – | needs `runs/b7_good` and code | `runs/d2_kd` |
