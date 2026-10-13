@@ -110,6 +110,27 @@ binding in `data/eval/dataset_v1/manifest.json` do not change again.
 
 Compare 3 models for each seed: base model, B7 x0.2 and B7 x0.2 + DPO.
 
+## Results
+
+Paired-order judge (gpt-oss-20b) against the base model. Means of the seeds; the number in brackets is the
+number of seeds with a result (13 October 14:37).
+
+| Model | v2 | v3 |
+|---|---|---|
+| B7 (x1.0) | 0.398 (3) | 0.438 (3) |
+| x0.1 | 0.481 (3) | 0.526 (2) |
+| x0.2 | 0.481 (3) | 0.528 (3) |
+| x0.3 | 0.443 (3) | 0.510 (3) |
+| x0.4 | 0.424 (3) | 0.495 (3) |
+| D4: B7 step 300 | 0.364 (2) | 0.403 (2) |
+| D4: B7 step 500 | 0.413 (2) | 0.411 (2) |
+| D4: B7 step 700 | 0.403 (1) | – (1 invalid verdict; judged again in 60322599) |
+| B8a | – | 0.347 (3) |
+| D0, D2, D3, D5 | evaluation running | evaluation running |
+
+1. D4: the early checkpoints lose more than the full B7 run. A shorter run does not help.
+2. x0.1 and x0.2 give almost the same result. The x0.1 answers are almost as long as the base answers.
+
 ## Length analysis
 
 Measured on 13 October 13:10 (`runs/scaled_eval/*_answers.json`). Median answer length in characters:
@@ -166,21 +187,26 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | Scale x0.1, seed 42 | `scaled_answers.sbatch` (SCALES=0.1) | 60294836 | 13 Oct 12:38 | answers complete | `runs/scaled_eval/b7s42_0.1_answers.json` |
 | Scale x0.1, seed 1 | `scaled_answers.sbatch` (SCALES=0.1) | 60294842 | 13 Oct 12:38 | answers complete | `runs/scaled_eval/b7s1_0.1_answers.json` |
 | Scale x0.1, seed 2 | `scaled_answers.sbatch` (SCALES=0.1) | 60294850 | 13 Oct 12:38 | answers complete | `runs/scaled_eval/b7s2_0.1_answers.json` |
-| D4, seed 42 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294853 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s42ck<N>_1.0_answers.json` |
-| D4, seed 1 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294857 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s1ck<N>_1.0_answers.json` |
-| D4, seed 2 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294859 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s2ck<N>_1.0_answers.json` |
-| Judge for x0.1 and D4 | `judge_dirs.sbatch` (afterok on the 6 jobs above) | 60294860 | 13 Oct 12:38 | pending (dependency) | `$WORK/alembic/wt-eval-v3/runs/judge_b7s<n>_t0.1_<v2,v3>/`, `judge_b7s<n>ck<N>_t1.0_<v2,v3>/` |
+| D4, seed 42 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294853 | 13 Oct 12:38 | complete | `runs/scaled_eval/b7s42ck<N>_1.0_answers.json` |
+| D4, seed 1 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294857 | 13 Oct 12:38 | complete | `runs/scaled_eval/b7s1ck<N>_1.0_answers.json` |
+| D4, seed 2 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294859 | 13 Oct 12:38 | complete | `runs/scaled_eval/b7s2ck<N>_1.0_answers.json` |
+| Judge for x0.1 and D4 | `judge_dirs.sbatch` (afterok on the 6 jobs above) | 60294860 | 13 Oct 12:38 | failed in 3 s: `REPO` was the shared checkout, so `common.sh` changed to the wrong `runs` dir. Replaced by 60318026 | `$WORK/alembic/wt-eval-v3/runs/judge_b7s<n>_t0.1_<v2,v3>/`, `judge_b7s<n>ck<N>_t1.0_<v2,v3>/` |
 | D2, D3 GPU smoke test (~23 steps each, 1 GPU each) | `$WORK/alembic/jobs/smoke_kd.sbatch` | 60300003 | 13 Oct 13:03 | failed: D3 `logits=None` (TRL `chunked_nll`); D2 ran with no KD (assistant mask has `<|im_end|>` + newline). Fixed in a9b7ce7 | `runs/smoke_d2`, `runs/smoke_d3` (in the worktrees), logs `slurm/logs/smoke-*-60300003.log` |
 | D2, D3 GPU smoke test, try 2 | `$WORK/alembic/jobs/smoke_kd.sbatch` | 60301833 | 13 Oct 13:14 | passed: D2 `kd_loss` 0.71–0.82, D3 `base_kl` 0.42–0.47 | try 1 outputs moved to `runs/smoke_*_try1_60300003` |
-| D0 train (3 seeds) | `slurm/train.sbatch` in `wt-d0-bf16` | 60302556 | 13 Oct 13:20 | running | `runs/d0_bf16/seed_<n>/` |
-| D2 train (3 seeds) | `slurm/train.sbatch` in `wt-d2-kd` | 60302558 | 13 Oct 13:20 | running | `runs/d2_kd/seed_<n>/` |
-| D3 train (3 seeds) | `slurm/train.sbatch` in `wt-d3-basekl` | 60302559 | 13 Oct 13:20 | running | `runs/d3_basekl/seed_<n>/` |
-| D5 prepare (merge x0.2, mine pairs) | `slurm/d5_prepare.sbatch` in `wt-d5-dpo` | 60302560 | 13 Oct 13:20 | running | `runs/d5_dpo/seed_<n>/start`, `pairs.jsonl` |
-| D5 train | `slurm/d5_train.sbatch` (afterok 60302560) | 60302579 | 13 Oct 13:20 | pending (dependency) | `runs/d5_dpo/seed_<n>/adapter` |
-| D5 eval (answers) | `slurm/d5_eval.sbatch` (afterok 60302579) | 60302582 | 13 Oct 13:20 | pending (dependency) | `runs/scaled_eval/b7s<n>d5_answers.json` |
-| D5 judge | `judge_dirs.sbatch` (afterok 60302582) | 60302589 | 13 Oct 13:20 | pending (dependency) | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
+| D0 train (3 seeds) | `slurm/train.sbatch` in `wt-d0-bf16` | 60302556 | 13 Oct 13:12 | complete (58 min) | `runs/d0_bf16/seed_<n>/` |
+| D2 train (3 seeds) | `slurm/train.sbatch` in `wt-d2-kd` | 60302558 | 13 Oct 13:12 | complete (59 min) | `runs/d2_kd/seed_<n>/` |
+| D3 train (3 seeds) | `slurm/train.sbatch` in `wt-d3-basekl` | 60302559 | 13 Oct 13:12 | complete (67 min) | `runs/d3_basekl/seed_<n>/` |
+| D5 prepare (merge x0.2, mine pairs) | `slurm/d5_prepare.sbatch` in `wt-d5-dpo` | 60302560 | 13 Oct 13:12 | complete (32 min) | `runs/d5_dpo/seed_<n>/start`, `pairs.jsonl` |
+| D5 train | `slurm/d5_train.sbatch` (afterok 60302560) | 60302579 | 13 Oct 13:12 | complete (20 min) | `runs/d5_dpo/seed_<n>/adapter` |
+| D5 eval (answers) | `slurm/d5_eval.sbatch` (afterok 60302579) | 60302582 | 13 Oct 13:12 | complete (12 min) | `runs/scaled_eval/b7s<n>d5_answers.json` |
+| D5 judge | `judge_dirs.sbatch` (afterok 60302582) | 60302589 | 13 Oct 13:12 | failed in 2 s (same `REPO` bug). Replaced by 60322599 | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
+| Judge for x0.1 and D4, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` | 60318026 | 13 Oct 14:09 | running (17 of 24 dirs at 14:37) | same as 60294860 |
+| D5 judge, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` (afterany 60318026) | 60322599 | 13 Oct 14:35 | pending (dependency) | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
+| D0 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16` | 60322950 | 13 Oct 14:36 | running | `runs/d0_bf16/seed_<n>/eval_summary.json` |
+| D2 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd` | 60322954 | 13 Oct 14:36 | running | `runs/d2_kd/seed_<n>/eval_summary.json` |
+| D3 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl` | 60322957 | 13 Oct 14:36 | running | `runs/d3_basekl/seed_<n>/eval_summary.json` |
 
-Submission (approved 13 October; submitted 13:20 after smoke try 2 passed). Rule: both smoke runs exit 0, and `kd_loss` and `base_kl` are finite. Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
+Submission (approved 13 October; submitted 13:12 after smoke try 2 passed). Rule: both smoke runs exit 0, and `kd_loss` and `base_kl` are finite. Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
 each with `runs` linked to the shared `$WORK/alembic/alembic/runs`.
 
 ```bash
@@ -199,8 +225,10 @@ c=$(REPO=$W sbatch --parsable --dependency=afterok:$b slurm/d5_eval.sbatch)
 cd $WORK/alembic/wt-eval-v3 && sbatch --dependency=afterok:$c $WORK/alembic/jobs/judge_dirs.sbatch
 ```
 
-To do: the evaluation of D0, D2 and D3 is a separate job after the training (`slurm/evaluate.sbatch` with the same
-`REPO`, `CONFIG` and `RUN_DIR`).
+The evaluation of D0, D2 and D3 is a separate job after the training (`slurm/evaluate.sbatch` with the same
+`REPO`, `CONFIG` and `RUN_DIR`). `evaluate.sbatch` scores v3 only. To do: a v2 run in a new run dir, because
+`eval_answers.json` is cached in the seed dir.
+Judge jobs: set `REPO=$WORK/alembic/wt-eval-v3`. `common.sh` runs `cd "$REPO"`, so a different `REPO` gives no judge dirs.
 
 Monitor: `squeue -u $USER`; the result is `student_vs_base_win_rate` in each `eval_summary.json`.
 No job overwrites existing adapters, training data or evaluation data: each job writes only new files,

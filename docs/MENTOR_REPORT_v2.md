@@ -24,7 +24,7 @@ The student model does not win against the base model. Our target is a win rate 
 
 - On the v2 test set, B7 has a win rate of 0.398.
 - On the v3 test set, B7 has a win rate of 0.438.
-- With only 20% to 30% of the B7 changes, the student model wins on the v3 test set (0.526 and 0.533, 1 seed each). This is the first result above 0.5. Other seeds are not complete.
+- With only 20% of the B7 changes, the student model wins on the v3 test set: 0.528 (mean of 3 seeds). This is the first result above 0.5. On v2, it has 0.481, which is better than B7 (0.398) but less than 0.5.
 - The teacher model wins against the base model: 0.689 on v2 and 0.585 on v3.
 - Section 3 shows all results in one table. All values are means of the seeds.
 - From B1 to B7, the v2 win rate increased from 0.324 to 0.398.
@@ -37,8 +37,8 @@ We found two causes:
 
 We do not have these results yet:
 
-- The scaling results for all 3 seeds.
-- The B8a result on the v3 test set.
+- The results of D0, D2, D3 and D5 (training complete; evaluation running).
+- The x0.1 v3 result and the D4 results for all 3 seeds.
 
 
 ## 2. How the system operates
@@ -85,13 +85,15 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 | 11 Oct | B6 | 12,773 (HPC10K Slurm data and 2,000 old examples) | Same as B2 | 0.369 | 0.427 | 0.949 | 0.923 | 0.098 | – |
 | 12 Oct | B7 | 20,472 (B6 data and new data for weak topics; v3 source text removed) | Same as B2 | 0.398 | 0.438 | 0.939 | 0.958 | 0.085 | 0.027 |
 | 13 Oct | Teacher model (Qwen3-32B) | – | – | **0.689** | **0.585** | 0.985 | 0.945 | 0.006 | 0.015 |
-| 13 Oct | B7 with 20% of its changes † | Same as B7 | No training | 0.477 (1) | **0.533** (1) | – | – | – | – |
-| 13 Oct | B7 with 30% of its changes † | Same as B7 | No training | 0.439 (2) | **0.526** (1) | – | 0.940 | – | 0.020 |
-| 13 Oct | B7 with 50% of its changes † | Same as B7 | No training | 0.436 (1) | judge runs again | – | 0.940 | – | 0.027 |
+| 13 Oct | B7 with 10% of its changes † | Same as B7 | No training | 0.481 | **0.526** (2) | – | – | – | – |
+| 13 Oct | B7 with 20% of its changes † | Same as B7 | No training | 0.481 | **0.528** | – | – | – | – |
+| 13 Oct | B7 with 30% of its changes † | Same as B7 | No training | 0.443 | **0.510** | – | 0.940 | – | 0.020 |
+| 13 Oct | B7 with 40% of its changes † | Same as B7 | No training | 0.424 | 0.495 | – | – | – | – |
+| 13 Oct | B7 with 50% of its changes † | Same as B7 | No training | 0.436 (1) | 0.476 (1) | – | 0.940 | – | 0.027 |
 | 13 Oct | B7 with 70% of its changes † | Same as B7 | No training | 0.409 (1) | 0.418 (1) | – | 0.940 | – | 0.031 |
-| 13 Oct | B8a | Same as B7 | Learning rate 2e-5, rank 8, half an epoch | – | evaluation running | – | – | – | – |
-
-† We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.2 to 0.7. The number in brackets is the number of seeds with a result. Seeds 42 and 1 have results now. The judge for the other seeds is in progress.
+| 13 Oct | B7, early stop at step 300 / 500 (D4) | Same as B7 | Fewer steps | 0.364 / 0.413 (2) | 0.403 / 0.411 (2) | – | – | – | – |
+| 13 Oct | B8a | Same as B7 | Learning rate 2e-5, rank 8, half an epoch | – | 0.347 | – | – | – | – |
+† We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.2 to 0.7. The number in brackets is the number of seeds with a result, if it is less than 3. The v3 scale choice is a development result.
 
 - The v2 test set has 66 questions on topics that we do not train. The margin of error is ±0.12.
 - The v3 test set has 200 questions on topics that we train.
@@ -222,16 +224,19 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 
 ## 6. Jobs on the `s_tra_ncc` reservation (13 October)
 
-| Job | Question | Status at 11:30 |
+| Job | Question | Status at 14:37 |
 |---|---|---|
 | B7 on v3, 3 seeds (60276546, 60279954) | Does the larger B7 data win on trained topics? (B6: 0.427) | Complete: 0.438 |
 | B6 on v3, 3 seeds (60276547) | Does our run give the same result as the run of Vaibhav? | Complete: 0.421 (Vaibhav: 0.427) |
 | Teacher model answers (60276548) | Does the teacher model win against the base model? | Complete: yes (v2 0.689, v3 0.585) |
 | B7 with 30%, 50% and 70% of its changes (60276549) | Does a smaller change keep the gains and lose less base knowledge? | Answers complete |
 | Judge for the teacher model and the 30/50/70% answers (60278960) | Win rates on v2 and v3 for these 4 models | Complete |
-| 20%, 30% and 40% of the changes for seeds 1, 2 and 42 (60281969 to 60281971), judge (60281973) | Is the 0.526 result real for all seeds? | Answers complete; judge running |
+| 20%, 30% and 40% of the changes for seeds 1, 2 and 42 (60281969 to 60281971), judge (60281973) | Is the 0.526 result real for all seeds? | Complete: x0.2 0.528, x0.3 0.510, x0.4 0.495 on v3 |
 | DPO pair mining (60284208) | Pairs for preference training | Complete: 858 pairs (303 invented flags, 555 missing flags) from 6,000 questions |
-| B8a, 3 seeds (60276743, 60276744) | Learning rate 2e-5, rank 8, half an epoch, same data, scored on v3 | Training complete (1 h 9 min for each seed); evaluation running |
+| B8a, 3 seeds (60276743, 60276744) | Learning rate 2e-5, rank 8, half an epoch, same data, scored on v3 | Complete: 0.347 on v3. Gentle training loses more |
+| x0.1 answers (60294836/842/850), D4 early stop answers (60294853/857/859), judge (60318026) | Does a smaller change or an early stop help? | x0.1: 0.481 v2, 0.526 v3 (2 seeds). Early stop loses (0.36 to 0.44). Judge running |
+| D0 / D2 / D3 training (60302556/558/559), evaluation (60322950/954/957) | Control, logit distillation (KD) and base-KL training on the good-quality data | Training complete; v3 evaluation running |
+| D5: DPO on x0.2 (60302560, 579, 582), judge (60322599) | Does DPO remove invented flags and keep the win? | Training and answers complete; judge waits |
 
 ## 7. Options for the next steps
 
@@ -241,11 +246,11 @@ The table shows the options from the lowest cost to the highest cost. Options 1 
 |---|---|---|---|---|
 | 1 | Score on trained topics (v3) | Shows if the training method operates | 1 GPU hour | B6: 0.427; B7: 0.438. Both lose |
 | 2 | Teacher model against base model | Shows the best possible result | 1 GPU hour | Complete: the teacher model wins (0.689, 0.585) |
-| 3 | Use only 20% to 70% of the trained change | Loss of base knowledge | No training | 20% and 30% win on v3 (1 seed each); other seeds running |
-| 4 | Gentle training (low learning rate, rank 8, early stop) | Loss of base knowledge; invented facts | 1.5 hours | Running as B8a |
+| 3 | Use only 20% to 70% of the trained change | Loss of base knowledge | No training | 20% wins on v3 (0.528, 3 seeds); 30% 0.510 |
+| 4 | Gentle training (low learning rate, rank 8, early stop) | Loss of base knowledge; invented facts | 1.5 hours | B8a: 0.347 on v3; early stop (D4): 0.40 to 0.41. Both lose |
 | 5 | Remove "concise"; the teacher model writes full answers | Short answers with only 1 method | New data run | Not started |
 | 6 | Add 20% to 50% general data or base model answers | Loss of base knowledge | Small | Standard method |
-| 7 | Preference training (DPO); rejected answers contain invented flags | Invented flags | 1 day | 858 pairs are ready; training not started; TRL `DPOTrainer` |
+| 7 | Preference training (DPO); rejected answers contain invented flags | Invented flags | 1 day | D5: trained on x0.2; judge waits |
 | 8 | On-policy distillation (GKD, reverse KL) | The student model is certain where the teacher model is not | 1 to 2 days | The teacher model must run during training; TRL `GKDTrainer` (experimental) |
 | 9 | Distillation from the teacher token probabilities | More information for each example | 1 day | arcee-ai DistillKit |
 | 10 | Search the Slurm documents during the answer (RAG) | Missing facts on all topics | 1 to 2 days | Best solution for topics that we do not train; runs on a laptop |
@@ -256,8 +261,8 @@ A different training framework (Unsloth, Axolotl, LLaMA-Factory) can make the tr
 Our plan:
 
 1. B6 (0.427) and B7 (0.438) lose on trained topics. More data gives only a small improvement. Thus, we must change the training method.
-2. A smaller part of the B7 change (20% to 30%) wins on v3 for 2 seeds. We will confirm this for all 3 seeds. If it is true, this is our first model that wins.
-3. Next, we will do option 7 (DPO, 858 pairs are ready) and options 5 and 6 (full answers, mixed data).
+2. 20% of the B7 change wins on v3 for the mean of 3 seeds (0.528). This is our first model that wins. A part of this win can come from longer answers; the length analysis will show this.
+3. Running: D0 (control), D2 (logit distillation), D3 (base-KL) and D5 (DPO). Next: options 5 and 6 (full answers, mixed data).
 4. These options will target output and mail, problem analysis and dependencies.
 5. The teacher model wins, so distillation can operate. RAG (option 10) stays the best solution for topics that we do not train.
 
