@@ -278,7 +278,7 @@ items (57 chunks, 8 whole docs) in `eval_v3.holdout.json`. `train.py` now refuse
 The source audit removed 910 HPC10K and 1,300 top-up records. The audit resolves `data/eval` relative to the
 cwd and silently excludes 0 if the manifest is missing, so run it from the eval-v3 worktree (reported).
 
-## Batch 7: HPC10K + top-up, eval-v3 clean (2026-10-12, submitted)
+## Batch 7: HPC10K + top-up, eval-v3 clean (2026-10-12, done)
 
 | Step | Records |
 |---|---|
@@ -292,3 +292,16 @@ cwd and silently excludes 0 if the manifest is missing, so run it from the eval-
 Modes: prose 16,314, none 2,529, ask 1,156, call 473. 1,759 records reused a grid-cell id (1,725 with a different
 question); they were re-keyed to `id@<shard>` instead of dropped (the HPC10K merge had lost ~900 that way).
 Config `configs/qwen3_4b_qdora_b2.yaml` (as B2-B6), seeds 42/1/2: train 60165264_[0-2], eval 60165266_[0-2].
+
+**B7 results** (`eval_all_v2`, 66 q, gpt-oss-20b, paired-orders-v2; base check pass 0.955, bad flags 0.025):
+
+| Seed | Win rate vs base | Check pass | Bad-flag rate (answers) |
+|---|---|---|---|
+| 42 | 0.420 | 0.924 | 0.097 (5) |
+| 1 | 0.383 | 0.924 | 0.141 (5) |
+| 2 | 0.390 | 0.970 | 0.018 (2) |
+| **Mean** | **0.398** | 0.939 | 0.085 |
+
+vs B6 (mean win 0.369, check pass 0.949, bad flags 0.098): +0.03 win rate, within the ±0.12 margin, so not a
+significant gain. Still below the 0.5 target. Tool metrics unchanged (decision acc 1.0, false calls 0 vs base 0.17).
+Train split varied by seed (val 1,038-2,867 records, whole held-out docs); runs took 2h23-2h46.
