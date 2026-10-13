@@ -266,6 +266,10 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | D0 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16`, `CONFIG=configs/qwen3_4b_d0_bf16_v2eval.yaml` | 60323699 | 13 Oct 14:45 | results complete (D0 v2 0.376); Slurm FAILED in `track` (no MLflow run) | `runs/d0_bf16_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d0_bf16/seed_<n>/adapter`) |
 | D2 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd`, `CONFIG=configs/qwen3_4b_d2_kd_v2eval.yaml` | 60323702 | 13 Oct 14:45 | results complete (D2 v2 0.361); Slurm FAILED in `track` (no MLflow run) | `runs/d2_kd_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d2_kd/seed_<n>/adapter`) |
 | D3 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl`, `CONFIG=configs/qwen3_4b_d3_basekl_v2eval.yaml` | 60323705 | 13 Oct 14:45 | results complete (D3 v2 0.442); Slurm FAILED in `track` (no MLflow run) | `runs/d3_basekl_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d3_basekl/seed_<n>/adapter`) |
+| D3 KL 0.05 train (3 seeds) | `slurm/train.sbatch` in `wt-d3-basekl`, `configs/qwen3_4b_d3_basekl005.yaml`, `--time=01:50:00` | 60337246 | 13 Oct 15:56 | running | `runs/d3_basekl005/seed_<n>/` |
+| D3 KL 0.05 eval v3 / v2 (normal queue, afterok 60337246) | `slurm/evaluate.sbatch` | 60337247 / 60337251 | 13 Oct 15:56 | pending (dependency) | `runs/d3_basekl005/seed_<n>/`, `runs/d3_basekl005_v2eval/seed_<n>/` |
+| D3 KL 0.2 train (3 seeds) | `slurm/train.sbatch` in `wt-d3-basekl`, `configs/qwen3_4b_d3_basekl02.yaml`, `--time=01:50:00` | 60337252 | 13 Oct 15:56 | running | `runs/d3_basekl02/seed_<n>/` |
+| D3 KL 0.2 eval v3 / v2 (normal queue, afterok 60337252) | `slurm/evaluate.sbatch` | 60337256 / 60337259 | 13 Oct 15:56 | pending (dependency) | `runs/d3_basekl02/seed_<n>/`, `runs/d3_basekl02_v2eval/seed_<n>/` |
 
 Submission (approved 13 October; submitted 13:12 after smoke try 2 passed). Rule: both smoke runs exit 0, and `kd_loss` and `base_kl` are finite. Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
 each with `runs` linked to the shared `$WORK/alembic/alembic/runs`.
