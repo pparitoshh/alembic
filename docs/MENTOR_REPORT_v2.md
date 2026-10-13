@@ -22,9 +22,9 @@ This version of the report uses ASD-STE100 Simplified Technical English. Version
 
 The student model does not win against the base model. Our target is a win rate of more than 0.5.
 
-- On the v2 test set, B7 has a win rate of 0.398 (mean of 3 seeds).
-- On the v3 test set, B6 has a win rate of 0.427 (seeds: 0.431, 0.434, 0.415).
-- On the v3 test set, B7 has a win rate of 0.450 (mean of 2 seeds: 0.4475 and 0.4525). Seed 2 is not complete.
+- On the v2 test set, B7 has a win rate of 0.398.
+- On the v3 test set, B7 has a win rate of 0.450.
+- Section 3 shows all results in one table. All values are means of the seeds.
 - From B1 to B7, the v2 win rate increased from 0.324 to 0.398.
 - The increase from B6 (0.369) to B7 (0.398) is less than the margin of error (±0.12).
 
@@ -35,7 +35,7 @@ We found two causes:
 
 We do not have these results yet:
 
-- The B7 seed 2 result on the v3 test set.
+- The complete B7 result on the v3 test set (1 of 3 seeds runs again).
 - The result of the teacher model against the base model. If the teacher model does not win, the student model cannot win by a copy of the teacher model.
 
 ## 2. How the system operates
@@ -68,21 +68,29 @@ How the judge scores:
 
 ## 3. What we did
 
-| Date | Round | Training data | Change | v2 win rate (mean) | Bad-flag rate |
-|---|---|---|---|---|---|
-| 10 Oct | B1 | 4,775 general HPC examples | Learning rate 1e-4, 3 epochs | 0.324 | 0.289 |
-| 10 Oct | B2 | Same as B1 | Learning rate 5e-5, 1 epoch | 0.326 | 0.220 |
-| 10 Oct | B3b | B2 data and 182 Slurm examples (3 copies each) | Same as B2 | 0.359 | 0.059 |
-| 10 Oct | B3b-r8 | Same as B3b | Rank 8 | 0.355 | 0.082 |
-| 11 Oct | B6 | 12,773 (HPC10K Slurm data and 2,000 old examples) | Same as B2 | 0.369 | 0.098 |
-| 12 Oct | B7 | 20,472 (B6 data and new data for weak topics; v3 source text removed) | Same as B2 | 0.398 | 0.085 |
-| – | Base model | – | – | 0.50 | 0.025 |
+### 3.1 All results
 
-B7 results for each seed:
+All values are means of the seeds. The base model has a win rate of 0.50 because it is the comparison point.
 
-- Win rate: 0.420, 0.383 and 0.390.
-- Check pass rate: 0.939 (mean).
-- Bad-flag rate: 0.097, 0.141 and 0.018.
+| Date | Round | Training data | Change | v2 win rate | v3 win rate | v2 check pass | v3 check pass | v2 bad-flag rate | v3 bad-flag rate |
+|---|---|---|---|---|---|---|---|---|---|
+| – | Base model | – | – | 0.50 | 0.50 | 0.955 | 0.885 | 0.025 | 0.021 |
+| 10 Oct | B1 | 4,775 general HPC examples | Learning rate 1e-4, 3 epochs | 0.324 | – | 0.864 | – | 0.289 | – |
+| 10 Oct | B2 | Same as B1 | Learning rate 5e-5, 1 epoch | 0.326 | – | 0.899 | – | 0.220 | – |
+| 10 Oct | B3b | B2 data and 182 Slurm examples (3 copies each) | Same as B2 | 0.359 | – | 0.924 | – | 0.059 | – |
+| 10 Oct | B3b-r8 | Same as B3b | Rank 8 | 0.355 | – | 0.919 | – | 0.082 | – |
+| 11 Oct | B6 | 12,773 (HPC10K Slurm data and 2,000 old examples) | Same as B2 | 0.369 | 0.427 | 0.949 | 0.923 | 0.098 | – |
+| 12 Oct | B7 | 20,472 (B6 data and new data for weak topics; v3 source text removed) | Same as B2 | 0.398 | 0.450 * | 0.939 | 0.945 * | 0.085 | 0.036 * |
+| 13 Oct | Teacher model | – | – | judge running | judge running | – | – | – | – |
+| 13 Oct | B7 with 30/50/70% of its changes | Same as B7 | No training | judge running | judge running | – | – | – | – |
+| 13 Oct | B8a | Same as B7 | Learning rate 2e-5, rank 8, half an epoch | – | training | – | – | – | – |
+
+\* 2 of 3 seeds. The judge step for the third seed runs again.
+
+- The v2 test set has 66 questions on topics that we do not train. The margin of error is ±0.12.
+- The v3 test set has 200 questions on topics that we train.
+- B1 to B3b-r8 have no v3 result, because the v3 test set did not exist then.
+- For B6, the v3 result is a development result: B6 trained on 910 examples from the v3 source text.
 
 Important data steps:
 
@@ -94,7 +102,7 @@ Important data steps:
 
 ## 4. Why the student model loses
 
-The student model loses because of missing facts and incorrect facts. The judge is not the cause. The data below is from B7 (3 seeds × 66 questions = 198 pairs).
+The student model loses because of missing facts and incorrect facts. The judge is not the cause. The data below is from B7 on the v2 test set.
 
 ### 4.1 The test facts are not in the training data
 
@@ -125,12 +133,12 @@ The first 5 rows have 0 or almost 0 examples. This is intentional. The `heldout_
 - Example (question arr-009, "Get the job ID from sbatch"): The student model gave `$SBATCH_JOB_ID` as the answer. This variable does not exist. The base model gave 3 correct methods and won.
 - A published study gives the same result. When you fine-tune a model on facts that it does not know, the model invents more facts (Gekhman et al. 2024).
 
-### 4.4 Results for each pair (number of questions of 66)
+### 4.4 Results for each pair (mean number of questions of 66)
 
-| Round and seed | Student model wins 2 times | Base model wins 2 times | Split or tie |
+| Round | Student model wins 2 times | Base model wins 2 times | Split or tie |
 |---|---|---|---|
-| B6 seed 42 / 1 / 2 | 17 / 16 / 14 | 30 / 31 / 35 | 19 / 19 / 17 |
-| B7 seed 42 / 1 / 2 | 18 / 18 / 16 | 28 / 33 / 31 | 20 / 15 / 19 |
+| B6 | 15.7 | 32.0 | 18.3 |
+| B7 | 17.3 | 30.7 | 18.0 |
 
 The weakest question types (B7 score; 0.5 is equal):
 
@@ -139,34 +147,15 @@ The weakest question types (B7 score; 0.5 is equal):
 - Requeue scripts: 0.31.
 - Concept questions: 0.49 to 0.50.
 
-### 4.5 The student model also loses on trained topics (v3, B6)
+### 4.5 The student model also loses on trained topics (v3)
 
-Vaibhav ran B6 on the v3 test set.
-
-| Test set | Seed 42 | Seed 1 | Seed 2 | Mean |
-|---|---|---|---|---|
-| v2: 66 questions, topics not trained | 0.394 | 0.386 | 0.326 | 0.369 |
-| v3: 200 questions, trained topics | 0.431 | 0.434 | 0.415 | **0.427** |
-
-### 4.6 B7 on the v3 test set
-
-| Round | Seed 42 | Seed 1 | Seed 2 | Mean |
-|---|---|---|---|---|
-| B6 | 0.431 | 0.434 | 0.415 | 0.427 |
-| B7 | 0.4475 | 0.4525 | Not complete | 0.450 (2 seeds) |
-
-| Model on v3 | Check pass rate | Bad-flag rate |
-|---|---|---|
-| Base model | 0.885 | 0.021 |
-| B7 seed 42 | 0.935 | 0.041 |
-| B7 seed 1 | 0.955 | 0.030 |
+Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.450. Both lose against the base model.
 
 - B7 is better than B6 by approximately 0.02. This difference is small.
-- B7 does not win against the base model on trained topics.
-- The B7 bad-flag rate on v3 (0.030 to 0.041) is lower than on v2 (0.085). It is still higher than the base model (0.021).
-- The B7 check pass rate is higher than the base model. But the judge prefers the base model answers more frequently.
+- The B7 bad-flag rate on v3 (0.036) is lower than on v2 (0.085). It is still higher than the base model (0.021).
+- The B7 check pass rate on v3 (0.945) is higher than the base model (0.885). But the judge prefers the base model answers more frequently.
 
-### 4.7 B6 topics on the v3 test set
+### 4.6 B6 topics on the v3 test set
 
 | v3 topic | Questions | Student model score (0.5 is equal) |
 |---|---|---|
@@ -191,7 +180,7 @@ Vaibhav ran B6 on the v3 test set.
 - Until 13 October, the main result was only about topics that we do not train. Thus, the result did not show if the student model learned the trained topics.
 - Now the v3 test set is the main result for training runs. The v2 test set is a check: the student model must not become worse on topics that we do not train.
 - 66 questions give a margin of ±0.12. The differences between rounds on v2 are less than this margin.
-- The v3 test set has 200 questions. The B6 seeds are in a range of ±0.01.
+- The v3 test set has 200 questions. The results of different seeds are in a range of approximately ±0.02.
 - We do not have a result of the teacher model against the base model.
 
 ### 5.2 Training method
@@ -219,8 +208,8 @@ Vaibhav ran B6 on the v3 test set.
 
 | Job | Question | Status at 11:30 |
 |---|---|---|
-| B7 on v3, 3 seeds (60276546) | Does the larger B7 data win on trained topics? (B6: 0.427) | Seeds 42 and 1 complete (0.4475, 0.4525); seed 2 running |
-| B6 on v3, 3 seeds (60276547) | Does our run give the same result as the run of Vaibhav? | Running |
+| B7 on v3, 3 seeds (60276546) | Does the larger B7 data win on trained topics? (B6: 0.427) | 2 of 3 seeds complete (mean 0.450); the third seed runs again (judge) |
+| B6 on v3, 3 seeds (60276547) | Does our run give the same result as the run of Vaibhav? | Complete: 0.421 (Vaibhav: 0.427) |
 | Teacher model answers (60276548) | Does the teacher model win against the base model? | Answers complete |
 | B7 with 30%, 50% and 70% of its changes (60276549) | Does a smaller change keep the gains and lose less base knowledge? | Answers complete |
 | Judge for the teacher model and the 30/50/70% answers (60278960) | Win rates on v2 and v3 for these 4 models | Running (8 comparisons) |
@@ -232,7 +221,7 @@ The table shows the options from the lowest cost to the highest cost. Options 1 
 
 | # | Option | Problem that it solves | Cost | Status or notes |
 |---|---|---|---|---|
-| 1 | Score on trained topics (v3) | Shows if the training method operates | 1 GPU hour | B6: 0.427; B7: 0.450 (2 seeds). Both lose |
+| 1 | Score on trained topics (v3) | Shows if the training method operates | 1 GPU hour | B6: 0.427; B7: 0.450. Both lose |
 | 2 | Teacher model against base model | Shows the best possible result | 1 GPU hour | Answers complete; judge running |
 | 3 | Use only 30% to 70% of the trained change | Loss of base knowledge | No training | Answers complete; judge running |
 | 4 | Gentle training (low learning rate, rank 8, early stop) | Loss of base knowledge; invented facts | 1.5 hours | Running as B8a |
