@@ -135,7 +135,29 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | D0 | – | – | – | ready: `configs/qwen3_4b_d0_bf16.yaml` on `exp/d0-bf16` (aa785d0); waits for approval | `runs/d0_bf16` |
 | D2 | – | – | – | ready: `configs/qwen3_4b_d2_kd.yaml` on `exp/d2-kd` (e5d850e); waits for approval | `runs/d2_kd` |
 | D3 | – | – | – | ready: `configs/qwen3_4b_d3_basekl.yaml` on `exp/d3-basekl` (2bdc2fc); waits for approval | `runs/d3_basekl` |
-| D5 | – | – | – | code ready on `exp/d5-dpo` (2e43ab3); needs sbatch scripts and approval | `runs/d5_dpo` |
+| D5 | – | – | – | ready on `exp/d5-dpo` (2b5dc53): code and 3 sbatch scripts; waits for approval | `runs/d5_dpo` |
+
+Proposed submission (not submitted; each line waits for approval). Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
+each with `runs` linked to the shared `$WORK/alembic/alembic/runs`.
+
+```bash
+source $WORK/alembic/me.env; export SBATCH_RESERVATION=s_tra_ncc   # on-site days only
+# D0, D2, D3: training data = the good-quality subset (a link, no copy)
+for x in d0-bf16:d0_bf16:qwen3_4b_d0_bf16 d2-kd:d2_kd:qwen3_4b_d2_kd d3-basekl:d3_basekl:qwen3_4b_d3_basekl; do
+  IFS=: read wt rd cf <<< "$x"; W=$WORK/alembic/wt-$wt
+  mkdir -p $W/runs/$rd && ln -sn ../b7_good/verified.jsonl $W/runs/$rd/verified.jsonl
+  (cd $W && REPO=$W PYTHONPATH=$W/src CONFIG=configs/$cf.yaml RUN_DIR=runs/$rd sbatch slurm/train.sbatch)
+done
+# D5: prepare -> train -> eval, then the judge
+W=$WORK/alembic/wt-d5-dpo; cd $W
+a=$(REPO=$W sbatch --parsable slurm/d5_prepare.sbatch)
+b=$(REPO=$W sbatch --parsable --dependency=afterok:$a slurm/d5_train.sbatch)
+c=$(REPO=$W sbatch --parsable --dependency=afterok:$b slurm/d5_eval.sbatch)
+cd $WORK/alembic/wt-eval-v3 && sbatch --dependency=afterok:$c $WORK/alembic/jobs/judge_dirs.sbatch
+```
+
+The evaluation of D0, D2 and D3 is a separate job after the training (`slurm/evaluate.sbatch` with the same
+`REPO`, `CONFIG` and `RUN_DIR`).
 
 Monitor: `squeue -u $USER`; the result is `student_vs_base_win_rate` in each `eval_summary.json`.
 No job overwrites existing adapters, training data or evaluation data: each job writes only new files,
