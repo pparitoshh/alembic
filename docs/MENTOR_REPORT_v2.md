@@ -99,6 +99,24 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 - B1 to B3b-r8 have no v3 result, because the v3 test set did not exist then.
 - For B6, the v3 result is a development result: B6 trained on 910 examples from the v3 source text.
 
+### 3.2 Head-to-head check: x0.2 against the base model (20 questions)
+
+One reviewer compared 20 random answer pairs (10 v3, 10 v2, seed 42) with the reference answers.
+Details for each question: [HEAD_TO_HEAD_x0.2.md](HEAD_TO_HEAD_x0.2.md).
+
+| Result | Base model | x0.2 |
+|---|---|---|
+| Correct | 6 | 5 |
+| Partly correct | 9 | 10 |
+| Wrong | 5 | 5 |
+| Better answer | 7 | 3 |
+| Same quality | 10 | 10 |
+| x0.2 win rate: manual check / judge | – | 0.40 / 0.43 |
+
+- Both models make the same types of errors. Neither model knows `--parsable` or `afternotok`.
+- x0.2 wins when the base model adds incorrect details. It loses when it explains a mechanism incorrectly.
+- 20 questions cannot confirm a difference as small as 0.528 against 0.5.
+
 Important data steps:
 
 1. **B1:** Only 0.8% of the B1 data was about Slurm. Thus, we made the HPC10K data. The teacher model generated 14,670 examples from 34 documents. We kept 10,773 examples.
