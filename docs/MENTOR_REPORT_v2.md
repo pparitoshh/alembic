@@ -38,7 +38,7 @@ We found two causes:
 We do not have these results yet:
 
 - The results of D0, D2, D3 and D5 (training complete; evaluation running).
-- The x0.1 v3 result and the D4 results for all 3 seeds.
+- The D4 results for all 3 seeds (step 500 on v3 and step 700).
 
 
 ## 2. How the system operates
@@ -85,13 +85,13 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 | 11 Oct | B6 | 12,773 (HPC10K Slurm data and 2,000 old examples) | Same as B2 | 0.369 | 0.427 | 0.949 | 0.923 | 0.098 | – |
 | 12 Oct | B7 | 20,472 (B6 data and new data for weak topics; v3 source text removed) | Same as B2 | 0.398 | 0.438 | 0.939 | 0.958 | 0.085 | 0.027 |
 | 13 Oct | Teacher model (Qwen3-32B) | – | – | **0.689** | **0.585** | 0.985 | 0.945 | 0.006 | 0.015 |
-| 13 Oct | B7 with 10% of its changes † | Same as B7 | No training | 0.481 | **0.526** (2) | – | – | – | – |
+| 13 Oct | B7 with 10% of its changes † | Same as B7 | No training | 0.481 | **0.522** | – | – | – | – |
 | 13 Oct | B7 with 20% of its changes † | Same as B7 | No training | 0.481 | **0.528** | – | – | – | – |
 | 13 Oct | B7 with 30% of its changes † | Same as B7 | No training | 0.443 | **0.510** | – | 0.940 | – | 0.020 |
 | 13 Oct | B7 with 40% of its changes † | Same as B7 | No training | 0.424 | 0.495 | – | – | – | – |
 | 13 Oct | B7 with 50% of its changes † | Same as B7 | No training | 0.436 (1) | 0.476 (1) | – | 0.940 | – | 0.027 |
 | 13 Oct | B7 with 70% of its changes † | Same as B7 | No training | 0.409 (1) | 0.418 (1) | – | 0.940 | – | 0.031 |
-| 13 Oct | B7, early stop at step 300 / 500 (D4) | Same as B7 | Fewer steps | 0.364 / 0.413 (2) | 0.403 / 0.411 (2) | – | – | – | – |
+| 13 Oct | B7, early stop at step 300 / 500 (D4) | Same as B7 | Fewer steps | 0.374 / 0.396 | 0.406 / 0.411 (2) | – | – | – | – |
 | 13 Oct | B8a | Same as B7 | Learning rate 2e-5, rank 8, half an epoch | – | 0.347 | – | – | – | – |
 † We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.2 to 0.7. The number in brackets is the number of seeds with a result, if it is less than 3. The v3 scale choice is a development result.
 
@@ -224,7 +224,7 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 
 ## 6. Jobs on the `s_tra_ncc` reservation (13 October)
 
-| Job | Question | Status at 14:37 |
+| Job | Question | Status at 14:41 |
 |---|---|---|
 | B7 on v3, 3 seeds (60276546, 60279954) | Does the larger B7 data win on trained topics? (B6: 0.427) | Complete: 0.438 |
 | B6 on v3, 3 seeds (60276547) | Does our run give the same result as the run of Vaibhav? | Complete: 0.421 (Vaibhav: 0.427) |
@@ -234,8 +234,8 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 | 20%, 30% and 40% of the changes for seeds 1, 2 and 42 (60281969 to 60281971), judge (60281973) | Is the 0.526 result real for all seeds? | Complete: x0.2 0.528, x0.3 0.510, x0.4 0.495 on v3 |
 | DPO pair mining (60284208) | Pairs for preference training | Complete: 858 pairs (303 invented flags, 555 missing flags) from 6,000 questions |
 | B8a, 3 seeds (60276743, 60276744) | Learning rate 2e-5, rank 8, half an epoch, same data, scored on v3 | Complete: 0.347 on v3. Gentle training loses more |
-| x0.1 answers (60294836/842/850), D4 early stop answers (60294853/857/859), judge (60318026) | Does a smaller change or an early stop help? | x0.1: 0.481 v2, 0.526 v3 (2 seeds). Early stop loses (0.36 to 0.44). Judge running |
-| D0 / D2 / D3 training (60302556/558/559), evaluation (60322950/954/957) | Control, logit distillation (KD) and base-KL training on the good-quality data | Training complete; v3 evaluation running |
+| x0.1 answers (60294836/842/850), D4 early stop answers (60294853/857/859), judge (60318026) | Does a smaller change or an early stop help? | x0.1: 0.481 v2, 0.522 v3. Early stop loses (0.37 to 0.41). Judge running |
+| D0 / D2 / D3 training (60302556/558/559), evaluation v3 (60322950/954/957) and v2 (60323699/702/705) | Control, logit distillation (KD) and base-KL training on the good-quality data | Training complete; v3 and v2 evaluation running |
 | D5: DPO on x0.2 (60302560, 579, 582), judge (60322599) | Does DPO remove invented flags and keep the win? | Training and answers complete; judge waits |
 
 ## 7. Options for the next steps

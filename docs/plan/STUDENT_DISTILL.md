@@ -113,17 +113,17 @@ Compare 3 models for each seed: base model, B7 x0.2 and B7 x0.2 + DPO.
 ## Results
 
 Paired-order judge (gpt-oss-20b) against the base model. Means of the seeds; the number in brackets is the
-number of seeds with a result (13 October 14:37).
+number of seeds with a result (13 October 14:41).
 
 | Model | v2 | v3 |
 |---|---|---|
 | B7 (x1.0) | 0.398 (3) | 0.438 (3) |
-| x0.1 | 0.481 (3) | 0.526 (2) |
+| x0.1 | 0.481 (3) | 0.522 (3) |
 | x0.2 | 0.481 (3) | 0.528 (3) |
 | x0.3 | 0.443 (3) | 0.510 (3) |
 | x0.4 | 0.424 (3) | 0.495 (3) |
-| D4: B7 step 300 | 0.364 (2) | 0.403 (2) |
-| D4: B7 step 500 | 0.413 (2) | 0.411 (2) |
+| D4: B7 step 300 | 0.374 (3) | 0.406 (3) |
+| D4: B7 step 500 | 0.396 (3) | 0.411 (2) |
 | D4: B7 step 700 | 0.403 (1) | – (1 invalid verdict; judged again in 60322599) |
 | B8a | – | 0.347 (3) |
 | D0, D2, D3, D5 | evaluation running | evaluation running |
@@ -200,7 +200,7 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | D5 train | `slurm/d5_train.sbatch` (afterok 60302560) | 60302579 | 13 Oct 13:12 | complete (20 min) | `runs/d5_dpo/seed_<n>/adapter` |
 | D5 eval (answers) | `slurm/d5_eval.sbatch` (afterok 60302579) | 60302582 | 13 Oct 13:12 | complete (12 min) | `runs/scaled_eval/b7s<n>d5_answers.json` |
 | D5 judge | `judge_dirs.sbatch` (afterok 60302582) | 60302589 | 13 Oct 13:12 | failed in 2 s (same `REPO` bug). Replaced by 60322599 | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
-| Judge for x0.1 and D4, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` | 60318026 | 13 Oct 14:09 | running (17 of 24 dirs at 14:37) | same as 60294860 |
+| Judge for x0.1 and D4, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` | 60318026 | 13 Oct 14:09 | running (21 of 24 dirs at 14:41) | same as 60294860 |
 | D5 judge, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` (afterany 60318026) | 60322599 | 13 Oct 14:35 | pending (dependency) | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
 | D0 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16` | 60322950 | 13 Oct 14:36 | running | `runs/d0_bf16/seed_<n>/eval_summary.json` |
 | D2 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd` | 60322954 | 13 Oct 14:36 | running | `runs/d2_kd/seed_<n>/eval_summary.json` |
