@@ -1,14 +1,14 @@
-# Shared settings for every Leonardo job. Fill in the TODO lines once.
+# Shared settings for every Leonardo job. Personal overrides go in a sourced env file (e.g. $WORK/alembic/me.env).
 # Sourced by the submitting shell (slurm/submit.sh) and by every job script.
 
 # --- Slurm: read by sbatch at submission (no hard-coded account in the scripts) ---
-export SBATCH_ACCOUNT="${SBATCH_ACCOUNT:-TODO_account}"        # project account: `saldo -b`
+export SBATCH_ACCOUNT="${SBATCH_ACCOUNT:-EUHPC_D30_031}"       # project account: `saldo -b`
 export SBATCH_PARTITION="${SBATCH_PARTITION:-boost_usr_prod}"   # Booster: 4x A100 64 GB per node
 # export SBATCH_RESERVATION="TODO_hackathon_reservation"        # if the hackathon node is a reservation
 
 # --- paths ($WORK is set by CINECA per project) ---
 export REPO="${REPO:-$WORK/alembic}"                 # this repository
-export VENV="$REPO/.venv"                            # distillkit (uv sync --extra train --extra export)
+export VENV="${VENV:-$REPO/.venv}"                   # distillkit (uv sync --extra train --extra export)
 export VLLM_VENV="${VLLM_VENV:-$WORK/venvs/vllm}"    # vLLM in its own venv: it pins its own torch
 export LLAMA_CPP="${LLAMA_CPP:-$WORK/tools/llama.cpp}"
 export LLAMA_CPP_TAG="b11392"
