@@ -26,6 +26,21 @@ The judge reads the question, the reference answer and 2 answers to the same que
 Each tested model has its own win rate. For example, the teacher row (0.585) compares teacher answers with base
 answers. The D3 row (0.525) compares D3 answers with the same base answers.
 
+The reference answer is a correct sample answer that is stored with each test question (field `reference` in
+`data/eval/*.jsonl`). The judge uses it as the correct facts. It does not compare the 2 answers with the reference
+answer for a score. It only decides which of the 2 answers agrees better with the reference answer.
+
+| Test set | Source of the reference answers |
+|---|---|
+| v3 | The teacher model wrote them from the Slurm 26.05.4 documents. Gemma-4-26B checked each answer against its source text, and automatic checks tested the flags. Each reference names its source part. No person checked them. |
+| v2 | Short answers with the key facts of the question. |
+
+Example (v3-001): "Start a job only after jobs 123 and 456 complete successfully." The reference answer is
+`sbatch --dependency=afterok:123:456 my_job_script.sh`. An answer that gives `afterok` with these 2 job IDs agrees
+with the reference answer. An answer that gives `afterany` does not agree.
+
+Models wrote the v3 reference answers. If a reference answer has an error, the judge can follow that error.
+
 The judge gives each question 2 times, with the answers in the 2 orders. This removes the effect of the position.
 In the tables below, "model" means the tested model.
 
