@@ -72,7 +72,7 @@ train:
   report_to: [mlflow]
 
 eval:
-  file: data/eval/eval_all_v2.jsonl
+  file: data/eval/eval_v3.jsonl   # headline metric: 200 trained-topic questions (eval_all_v2 = held-out-topic guardrail, frozen)
   tool_file: data/eval/eval_tools.jsonl   # tool-calling slice (draft; model review pending)
   calibration_file: data/eval/judge_calibration.jsonl   # known-label pairs for `calibrate`
   max_new_tokens: 512
