@@ -125,19 +125,20 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 
 | Experiment | Job | Job id | Submitted | Status | Output |
 |---|---|---|---|---|---|
-| Scale x0.1, seed 42 | `scaled_answers.sbatch` (SCALES=0.1) | 60294836 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s42_0.1_answers.json` |
-| Scale x0.1, seed 1 | `scaled_answers.sbatch` (SCALES=0.1) | 60294842 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s1_0.1_answers.json` |
+| Scale x0.1, seed 42 | `scaled_answers.sbatch` (SCALES=0.1) | 60294836 | 13 Oct 12:38 | answers complete | `runs/scaled_eval/b7s42_0.1_answers.json` |
+| Scale x0.1, seed 1 | `scaled_answers.sbatch` (SCALES=0.1) | 60294842 | 13 Oct 12:38 | answers complete | `runs/scaled_eval/b7s1_0.1_answers.json` |
 | Scale x0.1, seed 2 | `scaled_answers.sbatch` (SCALES=0.1) | 60294850 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s2_0.1_answers.json` |
 | D4, seed 42 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294853 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s42ck<N>_1.0_answers.json` |
 | D4, seed 1 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294857 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s1ck<N>_1.0_answers.json` |
 | D4, seed 2 (steps 300, 500, 700) | `ckpt_answers.sbatch` | 60294859 | 13 Oct 12:38 | running | `runs/scaled_eval/b7s2ck<N>_1.0_answers.json` |
 | Judge for x0.1 and D4 | `judge_dirs.sbatch` (afterok on the 6 jobs above) | 60294860 | 13 Oct 12:38 | pending (dependency) | `$WORK/alembic/wt-eval-v3/runs/judge_b7s<n>_t0.1_<v2,v3>/`, `judge_b7s<n>ck<N>_t1.0_<v2,v3>/` |
+| D2, D3 GPU smoke test (~23 steps each, 1 GPU each) | `$WORK/alembic/jobs/smoke_kd.sbatch` | 60300003 | 13 Oct 13:03 | running | `runs/smoke_d2`, `runs/smoke_d3` (in the worktrees), logs `slurm/logs/smoke-*-60300003.log` |
 | D0 | – | – | – | ready: `configs/qwen3_4b_d0_bf16.yaml` on `exp/d0-bf16` (aa785d0); waits for approval | `runs/d0_bf16` |
 | D2 | – | – | – | ready: `configs/qwen3_4b_d2_kd.yaml` on `exp/d2-kd` (e5d850e); waits for approval | `runs/d2_kd` |
 | D3 | – | – | – | ready: `configs/qwen3_4b_d3_basekl.yaml` on `exp/d3-basekl` (2bdc2fc); waits for approval | `runs/d3_basekl` |
 | D5 | – | – | – | ready on `exp/d5-dpo` (2b5dc53): code and 3 sbatch scripts; waits for approval | `runs/d5_dpo` |
 
-Proposed submission (not submitted; each line waits for approval). Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
+Submission (approved 13 October: submit after a good smoke test). Rule: both smoke runs exit 0, and `kd_loss` and `base_kl` are finite. Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
 each with `runs` linked to the shared `$WORK/alembic/alembic/runs`.
 
 ```bash
