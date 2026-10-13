@@ -374,3 +374,19 @@ Evidence in `research/eval_v3/`:
 The release contains 200 model-reviewed normal QAs across eight Slurm topics.
 The original 66-question v2 is unchanged. Existing tool-use evaluation remains
 separate. Evaluation completion is not evidence that G2 (better than base) is met.
+
+## Eval v3 is the headline metric; B7 on v3 (2026-10-13)
+
+From 2026-10-13, training-run configs (`qwen3_4b_qdora_b2.yaml`, `qwen3_4b_qdora_b8a.yaml`) score on
+`data/eval/eval_v3.jsonl` (200 trained-topic questions) plus the tool slice. `eval_all_v2` stays frozen as the
+held-out-topic guardrail. The production config `qwen3_4b_qdora.yaml` keeps v2 (it also feeds verify's contamination check).
+
+| Round on v3 | Seed 42 | Seed 1 | Seed 2 | Mean |
+|---|---|---|---|---|
+| Base | – | – | – | 0.50 (check pass 0.885, bad flags 0.021) |
+| B6 (Vaibhav, 60213268) | 0.431 | 0.434 | 0.415 | 0.427 |
+| B7 (60276546) | 0.4475 | 0.4525 | running | 0.450 (2 seeds) |
+
+B7 v3 check pass 0.935 / 0.955, bad flags 0.041 / 0.030. B7 does not beat the base on trained topics either: the
+method, not only topic coverage, has to change. Teacher-vs-base and adapter scaling (30/50/70%) are being judged
+(job 60278960); B8a (lr 2e-5, rank 8, 0.5 epoch, 60276743) is training.
