@@ -1,6 +1,12 @@
 # Eval v3: a larger trained-topic eval set
 
-Status: open task, spec only. No code or data in this PR yet.
+Status (2026-10-12): **200 reviewed Slurm questions released and all three B6
+comparisons completed**. V2 is unchanged. V3 mean student-versus-base score is
+**42.67%**, with sample SD **1.02 percentage points** across seeds. The student
+remains below the 50% comparison baseline. The final merged B7 audit passed with
+20,472 rows and zero source/lexical-question matches. The cwd-dependent audit bug
+is fixed, including fail-closed release prerequisites. See
+`research/eval_v3/b6_v3_comparison.md` for complete results and limitations.
 
 ## Why
 
@@ -48,7 +54,7 @@ Task mix roughly like v2: script, concept, howto, debug. B6 is weakest on howto 
 2. **No overlap with training.** `distillkit decontam` drops training records that overlap anything under
    `data/eval/`. Run it against `runs/hpc10k/clean.jsonl` and the top-up runs once v3 lands, and report how many
    records it removes.
-3. **Source family (decision needed).** `data/eval/README.md` says fresh final testing needs separately
+3. **Source family (chosen: option b, development only).** `data/eval/README.md` says fresh final testing needs separately
    held-out source families. Our top-up generation already uses the sbatch, sacct, scontrol, squeue and scancel
    man pages, so options are:
    - (a) Hold out whole source docs (e.g. another site's user guide) and keep them out of training. Cleaner;
@@ -73,3 +79,9 @@ Task mix roughly like v2: script, concept, howto, debug. B6 is weakest on howto 
 - `eval_v3.jsonl` with ~200 reviewed items and its manifest is merged.
 - Decontam has run against the training data and its counts are in the README.
 - Base and B6 have v3 numbers in `docs/TRAINING_PROGRESS.md`.
+
+## Implementation evidence
+
+The source freeze contains 53 existing source chunks, 4 recovered option blocks from the same pinned upstream Slurm manuals, and 8 evaluation-only composite documents. The composite documents are also excluded from training. `research/eval_v3/decontamination_audit.json` records final source/question counts and input/output hashes. Historical B6 contains 910 source matches; the eight top-ups contain 1,300. All ten audited inputs have zero exact/normalized/lexical-near question matches. Source matches are not duplicate questions. B6 is not a clean holdout result on these sources; v3 is for development, and future merged inputs must exclude these chunks.
+
+Question-level sampling errors quoted above are rough independent-item approximations. Shared source chunks, repeated seeds on the same questions, and two judge orders are correlated; 400 verdicts do not count as 400 independent evaluation questions. Small changes must not be described as established improvements.

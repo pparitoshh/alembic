@@ -267,3 +267,73 @@ job_exit_code; 310 chunks x 40 = 12,400 q, 5 shards) and `configs/gen_hpc10k_bro
 ~700 chunks x 12 = ~8,400 q, 3 shards). ~20.8k questions → ~10k clean expected.
 **Submitted 2026-10-11** (reviewer fix now the default in `slurm/generate_gated.sbatch`, 70c583e): focus f1-f5 =
 jobs 59996931-35, broad b1-b3 = 59996936, 59996939, 59996940.
+
+
+## Eval v3: completed B6 development comparison (2026-10-12)
+
+All three B6 comparisons and the validation report completed successfully. Each
+seed answered the same frozen 200-question v3 release. The unchanged 66-question
+v2 results remain separate. **B6 still does not beat the base model overall.**
+
+| Evaluation | Seed 42 | Seed 1 | Seed 2 | Mean ± sample SD across seeds |
+|---|---:|---:|---:|---:|
+| v2, 66 held-out-topic questions | 39.39% | 38.64% | 32.58% | 36.87% ± 3.74 pp |
+| v3, 200 trained-topic questions | 43.125% | 43.375% | 41.500% | 42.67% ± 1.02 pp |
+
+These are paired-order student-versus-base scores, with ties receiving half credit.
+The comparison baseline is 50%. The spread is sample standard deviation across
+three training seeds, not a confidence interval. V2 and v3 cover different topic
+distributions, so their difference is not a measured improvement of the model.
+Historical B6 contains 910 training records from the reserved v3 source chunks;
+v3 is a development comparison, not a blind test of unseen source material.
+
+V3 deterministic check pass rates were 88.5% for the base and 91.5%, 91.0% and
+94.5% for student seeds 42, 1 and 2 (92.33% mean). These checks do not establish
+semantic correctness or successful Slurm execution. The higher checker pass rate
+did not translate into an overall pairwise quality win.
+
+| V3 topic | Questions per seed | Mean student-versus-base score |
+|---|---:|---:|
+| Accounting | 30 | 41.11% |
+| Debugging | 20 | 32.50% |
+| Dependencies | 30 | 35.83% |
+| Job control | 25 | 50.00% |
+| Multi-constraint scripts | 20 | 73.75% |
+| Output/mail | 25 | 16.33% |
+| Queue/cancel | 20 | 42.92% |
+| Resources | 30 | 52.78% |
+
+These topic scores are descriptive. They can guide investigation of failure
+categories, but eval questions and references must remain out of training.
+
+### Validation and execution
+
+Array `60213268` completed in 33m40s, 31m56s and 32m25s for seeds 42, 1 and 2.
+Report `60213647` completed in seven seconds and was independently rerun locally.
+All 600 question/seed pairs have both judge orders: 1,200 verdicts, zero invalid
+verdicts. The report checks question IDs, exact questions/references, completeness,
+judge protocol and recomputed aggregate scores. Base answers are identical across
+all three seeds. The judge remains gpt-oss-20b at temperature zero under
+`paired-orders-v2-invalid-incomplete`; decoding is greedy with 512 new tokens.
+
+The earlier access failure was resolved by the adapter owner. An intermediate
+rerun (`60211313`) exposed an incompatible shared CUDA 13 environment and was
+cancelled before writing answer caches. The successful array used a private
+locked CUDA 12.9 environment. No shared environment or historical adapter changed.
+
+The final merged B7 audit (`60211738`) checked **20,472 records**, finding zero
+frozen-source matches and zero exact/normalized/lexical-near question matches.
+The input hash stayed unchanged. B7 training had already started when this
+independent rerun completed. The audit deliberately ran from the older shared
+checkout using this PR's module, confirming the working-directory fix.
+
+Evidence in `research/eval_v3/`:
+
+- `b6_v3_comparison.md` and `.json`: per-seed and per-topic results.
+- `b6_v3_verdicts.jsonl`: all 600 paired-order question/seed scores.
+- `b6_v3_run_manifest.json`: artifact/adapter hashes, runtimes and full-answer paths.
+- `b7_final_audit.json` and `b7_final_audit_context.json`: final B7 counts and bindings.
+
+The release contains 200 model-reviewed normal QAs across eight Slurm topics.
+The original 66-question v2 is unchanged. Existing tool-use evaluation remains
+separate. Evaluation completion is not evidence that G2 (better than base) is met.
