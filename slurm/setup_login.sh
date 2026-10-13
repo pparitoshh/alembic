@@ -5,7 +5,6 @@
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
 export HF_HUB_OFFLINE=0                               # login node: downloads need the network
-export HF_HUB_OFFLINE=0                               # login node: downloads need the network
 cd "$REPO"
 
 # uv (user install, no modules needed)
