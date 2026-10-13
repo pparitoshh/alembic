@@ -99,6 +99,14 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 - B1 to B3b-r8 have no v3 result, because the v3 test set did not exist then.
 - For B6, the v3 result is a development result: B6 trained on 910 examples from the v3 source text.
 
+Important data steps:
+
+1. **B1:** Only 0.8% of the B1 data was about Slurm. Thus, we made the HPC10K data. The teacher model generated 14,670 examples from 34 documents. We kept 10,773 examples.
+2. **Reviewer problem:** 47% of the reviews were not valid. The reviewer wrote spaces until the token limit. We added a JSON format limit (xgrammar `disable_any_whitespace`). Now approximately 2.6% of the reviews are not valid.
+3. **Data for weak topics:** The teacher model generated 18,988 examples. We kept 10,248 examples. 4,352 examples wait for a review. 1,084 of these examples did not get a reply from the reviewer.
+4. **v3 test set:** Vaibhav made the v3 test set (PR #36). We removed the source text of the v3 questions from the training data. This removed 910 HPC10K examples and 1,300 new examples.
+5. **Tool use:** Since B3b, the tool-use results of the student model are correct. The decision accuracy is 1.0. The student model makes 0 incorrect tool calls. The base model makes incorrect tool calls in 17% of the cases.
+
 ### 3.2 Head-to-head check: x0.2 against the base model (20 questions)
 
 One reviewer compared 20 random answer pairs (10 v3, 10 v2, seed 42) with the reference answers.
@@ -116,14 +124,6 @@ Details for each question: [HEAD_TO_HEAD_x0.2.md](HEAD_TO_HEAD_x0.2.md).
 - Both models make the same types of errors. Neither model knows `--parsable` or `afternotok`.
 - x0.2 wins when the base model adds incorrect details. It loses when it explains a mechanism incorrectly.
 - 20 questions cannot confirm a difference as small as 0.528 against 0.5.
-
-Important data steps:
-
-1. **B1:** Only 0.8% of the B1 data was about Slurm. Thus, we made the HPC10K data. The teacher model generated 14,670 examples from 34 documents. We kept 10,773 examples.
-2. **Reviewer problem:** 47% of the reviews were not valid. The reviewer wrote spaces until the token limit. We added a JSON format limit (xgrammar `disable_any_whitespace`). Now approximately 2.6% of the reviews are not valid.
-3. **Data for weak topics:** The teacher model generated 18,988 examples. We kept 10,248 examples. 4,352 examples wait for a review. 1,084 of these examples did not get a reply from the reviewer.
-4. **v3 test set:** Vaibhav made the v3 test set (PR #36). We removed the source text of the v3 questions from the training data. This removed 910 HPC10K examples and 1,300 new examples.
-5. **Tool use:** Since B3b, the tool-use results of the student model are correct. The decision accuracy is 1.0. The student model makes 0 incorrect tool calls. The base model makes incorrect tool calls in 17% of the cases.
 
 ## 4. Why the student model loses
 
