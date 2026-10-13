@@ -221,6 +221,8 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         report_to=tcfg.report_to or "none",
         run_name=str(run_dir),  # the `track` stage finds this run by name
         model_init_kwargs=model_kwargs,
+        # the KD and base-KL terms need the full logits; TRL's default chunked_nll returns logits=None
+        **({"loss_type": "nll"} if tcfg.kd_alpha > 0 or tcfg.base_kl > 0 else {}),
     )
     peft_cfg = LoraConfig(
         r=tcfg.lora_r,
