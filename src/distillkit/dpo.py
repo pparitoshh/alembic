@@ -136,7 +136,7 @@ def main() -> None:
     m.add_argument("--model", required=True)
     m.add_argument("--train", type=Path, required=True)
     m.add_argument("--out", type=Path, required=True)
-    m.add_argument("--n", type=int, default=10867)
+    m.add_argument("--n", type=int, default=12892)
     m.add_argument("--config", default=SYSTEM_PROMPT_FROM)
     t = sub.add_parser("train")
     t.add_argument("--model", required=True)
