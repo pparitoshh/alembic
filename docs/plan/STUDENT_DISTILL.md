@@ -122,11 +122,14 @@ Measured on 13 October 13:10 (`runs/scaled_eval/*_answers.json`). Median answer 
 | x0.3 (seed 1) | 632 | 884 |
 | x0.4 (seed 1) | 530 | 786 |
 | B7 (x1.0) | 313 | – |
+| D4: B7 step 300 (seed 42 / 1 / 2) | 281 / 330 / 314 | 354 / 390 / 379 |
 
 1. The answers become longer when the scale becomes smaller. At x0.1 the length is almost the base length.
 2. The win rate also increases when the scale becomes smaller. Thus, a part of the x0.2 win can come from
    the longer answers, not from better facts.
-3. On B7, the length had no constant relation to the result (mentor report, section 4.2). We did not test
+3. The B7 step-300 answers (27% of the run) are as short as the full B7 answers. The model learns the short
+   style early. Thus, a shorter run does not make the answers longer; the weight scaling does.
+4. On B7, the length had no constant relation to the result (mentor report, section 4.2). We did not test
    this on the scaled models.
 
 Analysis to do when the judge results of x0.1 and D4 are complete:
