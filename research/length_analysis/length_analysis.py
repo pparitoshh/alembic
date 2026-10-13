@@ -54,9 +54,16 @@ def partial(x, y, z):  # Spearman partial corr of x,y given z
     return (rxy - rxz * ryz) / math.sqrt((1 - rxz ** 2) * (1 - ryz ** 2))
 
 
+# Extra args NAME=RUN_DIR: seed dirs of a training run (RUN_DIR/seed_*, scored on v3; RUN_DIR_v2eval on v2).
+EXTRA = dict(a.split("=", 1) for a in sys.argv[2:])
 groups = collections.defaultdict(list)
-for d in sorted(glob.glob(f"{ROOT}/judge_*") + glob.glob(f"{ROOT}/eval_v3_b7/seed_*")):
-    if "eval_v3_b7" in d:
+dirs = glob.glob(f"{ROOT}/judge_*") + glob.glob(f"{ROOT}/eval_v3_b7/seed_*")
+for name, rd in EXTRA.items():
+    dirs += [(name, "v3", d) for d in glob.glob(f"{rd}/seed_*")] + [(name, "v2", d) for d in glob.glob(f"{rd}_v2eval/seed_*")]
+for d in sorted(dirs, key=str):
+    if isinstance(d, tuple):
+        model, ts, d = d
+    elif "eval_v3_b7" in d:
         model, ts = "B7 (x1.0)", "v3"
     else:
         m = re.match(r"judge_b7s\d+(ck\d+|d5)?_t([\d.]+)_(v[23])$", d.rsplit("/", 1)[1])

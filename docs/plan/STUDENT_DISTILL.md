@@ -179,7 +179,7 @@ Decision rule:
 
 ### Length analysis results (13 October 14:55)
 
-Script: `research/length_analysis/length_analysis.py <wt-eval-v3/runs>` (all judge dirs).
+Script: `research/length_analysis/length_analysis.py <wt-eval-v3/runs> D0=<run dir> ...` (all judge dirs; D0, D2, D3 from `wt-d*/runs/<rd>/seed_*` and `<rd>_v2eval`).
 Score of a question: the mean of the 2 judge orders (win 1, tie 0.5, loss 0). Key terms of a reference:
 backtick spans, options (`--x`), `ALL_CAPS_NAMES` and Slurm command names. Coverage: the fraction of these
 terms in the answer. rho: Spearman correlation over the questions of all seeds. Ratio: student length / base length.
@@ -198,6 +198,12 @@ terms in the answer. rho: Spearman correlation over the questions of all seeds. 
 | D4 step 300 | v3 | 0.406 | 378 / 1,619 | 0.41 (564) / 0.35 (26) / 0.55 (10) | 0.04 | 0.52 / 0.61 | 0.30 | 0.29 |
 | D5 (DPO) | v2 | 0.442 | 402 / 1,382 | 0.43 (136) / 0.47 (51) / 0.45 (11) | 0.07 | 0.51 / 0.54 | 0.33 | 0.33 |
 | D5 (DPO) | v3 | 0.421 | 442 / 1,619 | 0.42 (499) / 0.41 (85) / 0.54 (14) | -0.04 | 0.53 / 0.61 | 0.15 | 0.16 |
+| D0 | v2 | 0.376 | 316 / 1,382 | 0.36 (170) / 0.41 (16) / 0.50 (12) | 0.07 | 0.48 / 0.54 | 0.41 | – |
+| D2 | v2 | 0.361 | 326 / 1,382 | 0.35 (171) / 0.38 (15) / 0.56 (12) | 0.05 | 0.48 / 0.54 | 0.41 | – |
+| D3 | v2 | 0.442 | 764 / 1,382 | 0.48 (65) / 0.46 (106) / 0.30 (27) | -0.14 | 0.55 / 0.54 | 0.44 | – |
+| D0 | v3 | 0.438 | 354 / 1,619 | 0.43 (580) / 0.40 (13) / 0.75 (7) | 0.08 | 0.55 / 0.61 | 0.33 | – |
+| D2 | v3 | 0.450 | 379 / 1,619 | 0.45 (577) / 0.34 (17) / 0.96 (6) | 0.04 | 0.55 / 0.61 | 0.34 | – |
+| D3 | v3 | 0.525 | 973 / 1,619 | 0.57 (125) / 0.51 (424) / 0.54 (51) | -0.03 | 0.62 / 0.61 | 0.25 | – |
 | B7 (x1.0) | v3 | 0.438 | 365 / 1,619 | 0.43 (577) / 0.53 (16) / 0.75 (7) | 0.02 | 0.53 / 0.61 | 0.33 | 0.33 |
 
 Coverage by outcome (x0.1 to x0.7 together):

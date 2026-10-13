@@ -195,18 +195,27 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 - This agrees with the diagnosis in sections 4.1 to 4.3. The full training removes too much knowledge of the base model. A small part of the change keeps the gains and keeps the base knowledge.
 - D3 gets a similar result with training: a KL penalty to the base model keeps the base knowledge (v3 0.525, v2 0.442).
 
-### 4.8 Answer length and key terms (all scaled models, D4 and D5)
+### 4.8 Answer length and key terms (v2 and v3, 3 seeds)
 
-| Model | v3 win rate | Median length, student / base | Key-term coverage, student / base |
-|---|---|---|---|
-| x0.1 | 0.522 | 1,526 / 1,619 | 0.60 / 0.61 |
-| x0.2 | 0.528 | 1,220 / 1,619 | 0.61 / 0.61 |
-| x0.3 | 0.510 | 886 / 1,619 | 0.60 / 0.61 |
-| B7 | 0.438 | 365 / 1,619 | 0.53 / 0.61 |
-| D4 step 300 | 0.406 | 378 / 1,619 | 0.52 / 0.61 |
-| D5 (DPO) | 0.421 | 442 / 1,619 | 0.53 / 0.61 |
+Base model: median length 1,382 (v2) and 1,619 (v3) characters; key-term coverage 0.54 (v2) and 0.61 (v3).
 
-- In each model, the length does not predict the score (Spearman rho -0.10 to 0.08).
+| Model | v2 win rate | v2 median length | v2 coverage | v3 win rate | v3 median length | v3 coverage |
+|---|---|---|---|---|---|---|
+| x0.1 | 0.481 | 1,278 | 0.57 | 0.522 | 1,526 | 0.60 |
+| x0.2 | 0.481 | 1,024 | 0.58 | 0.528 | 1,220 | 0.61 |
+| x0.3 | 0.443 | 621 | 0.53 | 0.510 | 886 | 0.60 |
+| x0.4 | 0.424 | 530 | 0.54 | 0.495 | 774 | 0.60 |
+| B7 | 0.398 | 313 | – | 0.438 | 365 | 0.53 |
+| D0 (control) | 0.376 | 316 | 0.48 | 0.438 | 354 | 0.55 |
+| D2 (logit KD) | 0.361 | 326 | 0.48 | 0.450 | 379 | 0.55 |
+| **D3 (KL to base)** | 0.442 | 764 | 0.55 | **0.525** | 973 | **0.62** |
+| D4 step 300 | 0.374 | 310 | 0.47 | 0.406 | 378 | 0.52 |
+| D5 (DPO) | 0.442 | 402 | 0.51 | 0.421 | 442 | 0.53 |
+
+B7 on v2 has no coverage value: its v2 judge outputs are not in the analysis directory.
+
+- In each model, the length does not predict the score (Spearman rho -0.14 to 0.08).
+- The models that win on v3 (x0.1 to x0.3, D3) keep the base coverage (0.60 to 0.62). The models that lose have 0.52 to 0.55.
 - The coverage difference predicts the score (rho 0.14 to 0.42), also when the length is fixed.
 - Script: `research/length_analysis/length_analysis.py`. Full tables: `docs/plan/STUDENT_DISTILL.md`.
 
@@ -300,7 +309,7 @@ A different training framework (Unsloth, Axolotl, LLaMA-Factory) can make the tr
 Our plan:
 
 1. B6 (0.427) and B7 (0.438) lose on trained topics. More data gives only a small improvement. Thus, we must change the training method.
-2. 20% of the B7 change wins on v3 for the mean of 3 seeds (0.528). This is our first model that wins. The length analysis shows that the win does not come from longer answers. In each model, the length does not predict the score (rho -0.10 to 0.08). The key-term coverage predicts it (rho 0.14 to 0.42). x0.2 keeps the base facts (coverage 0.61, equal to the base model). Full training (B7) loses them (0.53).
+2. 20% of the B7 change wins on v3 for the mean of 3 seeds (0.528). This is our first model that wins. The length analysis shows that the win does not come from longer answers. In each model, the length does not predict the score (rho -0.14 to 0.08). The key-term coverage predicts it (rho 0.14 to 0.42). x0.2 keeps the base facts (coverage 0.61, equal to the base model). Full training (B7) loses them (0.53).
 3. D3 (KL penalty to the base model) wins on v3 (0.525) and is the best trained model. D2 (logit distillation) and D5 (DPO) do not help. Next: a scaled merge of D3 (20% to 50%), and options 5 and 6 (full answers, mixed data).
 4. These options will target output and mail, problem analysis and dependencies.
 5. The teacher model wins, so distillation can operate. RAG (option 10) stays the best solution for topics that we do not train.
