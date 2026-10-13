@@ -1,6 +1,6 @@
 # DistillKit: Status Report for the Mentor (Version 2)
 
-Date: 13 October 2026, 14:00. Team: Alembic. Mentor: Simeon Harrison.
+Date: 13 October 2026, 15:40. Team: Alembic. Mentor: Simeon Harrison.
 
 This version of the report uses ASD-STE100 Simplified Technical English.
 
@@ -20,7 +20,7 @@ This version of the report uses ASD-STE100 Simplified Technical English.
 
 ## 1. Current status
 
-The student model does not win against the base model. Our target is a win rate of more than 0.5.
+Our target is a win rate of more than 0.5 against the base model. On 13 October, 2 student models won on the v3 test set (trained topics) for the mean of 3 seeds. No student model wins on the v2 test set (topics that we do not train).
 
 - On the v2 test set, B7 has a win rate of 0.398.
 - On the v3 test set, B7 has a win rate of 0.438.
@@ -35,7 +35,8 @@ The student model does not win against the base model. Our target is a win rate 
 We found two causes:
 
 1. The v2 test set measures topics that we do not train. The student model cannot learn these topics from our data.
-2. The student model also loses on the v3 test set, which has topics that we train. Thus, the training method also has a problem.
+2. Full fine-tuning (B7) removes facts that the base model knows. The key-term coverage on v3 drops from 0.61 (base) to 0.53 (B7). The models that win (x0.2 and D3) keep the base coverage.
+3. The win does not come from longer answers. In each model, the answer length does not predict the judge score. The key-term coverage predicts it.
 
 We do not have these results yet:
 
@@ -98,7 +99,8 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 | 13 Oct | D2 | Same as D0 | 0.5 × CE + 0.5 × KL to the teacher top-20 tokens | 0.361 | 0.450 | – | – | – | – |
 | 13 Oct | **D3** | Same as D0 | CE + 0.1 × KL to the base model | 0.442 | **0.525** | – | – | – | – |
 | 13 Oct | D5 | DPO pairs (teacher vs student) | DPO on x0.2, beta 0.1 | 0.442 | 0.42 (1) | – | – | – | – |
-† We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.2 to 0.7. The number in brackets is the number of seeds with a result, if it is less than 3. The v3 scale choice is a development result.
+
+† We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.1 to 0.7. The number in brackets is the number of seeds with a result, if it is less than 3. The v3 scale choice is a development result.
 
 - The v2 test set has 66 questions on topics that we do not train. The margin of error is ±0.12.
 - The v3 test set has 200 questions on topics that we train.
@@ -189,9 +191,24 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 ### 4.6 A smaller change wins, and the teacher model wins
 
 - The teacher model wins against the base model on both test sets (0.689 and 0.585). Thus, a better model from distillation is possible.
-- When we use less of the B7 change, the result improves. On v3: 70% gives 0.418, 30% gives 0.526 and 20% gives 0.533.
+- When we use less of the B7 change, the result improves. On v3 (3 seeds): 40% gives 0.495, 30% gives 0.510, 20% gives 0.528 and 10% gives 0.522.
 - This agrees with the diagnosis in sections 4.1 to 4.3. The full training removes too much knowledge of the base model. A small part of the change keeps the gains and keeps the base knowledge.
-- The margin is approximately ±0.03 for 1 seed. Thus, we need the results of all 3 seeds before we can say that the student model wins.
+- D3 gets a similar result with training: a KL penalty to the base model keeps the base knowledge (v3 0.525, v2 0.442).
+
+### 4.8 Answer length and key terms (all scaled models, D4 and D5)
+
+| Model | v3 win rate | Median length, student / base | Key-term coverage, student / base |
+|---|---|---|---|
+| x0.1 | 0.522 | 1,526 / 1,619 | 0.60 / 0.61 |
+| x0.2 | 0.528 | 1,220 / 1,619 | 0.61 / 0.61 |
+| x0.3 | 0.510 | 886 / 1,619 | 0.60 / 0.61 |
+| B7 | 0.438 | 365 / 1,619 | 0.53 / 0.61 |
+| D4 step 300 | 0.406 | 378 / 1,619 | 0.52 / 0.61 |
+| D5 (DPO) | 0.421 | 442 / 1,619 | 0.53 / 0.61 |
+
+- In each model, the length does not predict the score (Spearman rho -0.10 to 0.08).
+- The coverage difference predicts the score (rho 0.14 to 0.42), also when the length is fixed.
+- Script: `research/length_analysis/length_analysis.py`. Full tables: `docs/plan/STUDENT_DISTILL.md`.
 
 ### 4.7 B6 topics on the v3 test set
 
@@ -223,9 +240,8 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 
 ### 5.2 Training method
 
-- We use only fine-tuning on the text of the teacher model.
-- We do not use preference training.
-- We do not use the token probabilities of the teacher model. The teacher model gives the top 20 token probabilities (`top_logprobs: 20`), but the training code does not use them.
+- Until 13 October, we used only fine-tuning on the text of the teacher model.
+- On 13 October, we tested 3 new methods. Logit distillation from the teacher top-20 token probabilities (D2) did not help. Preference training (DPO, D5) made the result worse. A KL penalty to the base model (D3) wins on v3.
 - The training and the evaluation use the same "concise" system prompt.
 - The validation loss stops decreasing at approximately half of the epoch (B6: at step 500).
 
@@ -240,7 +256,7 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 
 - Fixed on 13 October: `slurm/env.sh` now uses the account `EUHPC_D30_031`. It also accepts a personal `VENV` path. Before this fix, the first evaluation jobs of 13 October failed.
 - Fixed on 13 October: we merged the v3 test set (PR #36) into our branch. Before this merge, the scripts used 2 different source trees.
-- Changed on 13 October: training jobs for each seed now use 1 full node (4 GPUs, 480 GB) with 1 GPU for each seed. Other jobs use 120 GB for each GPU. This is not tested on the cluster yet.
+- Changed on 13 October: training jobs for each seed now use 1 full node (4 GPUs, 480 GB) with 1 GPU for each seed. Other jobs use 120 GB for each GPU. This operated correctly for D0, D2 and D3 on 13 October (58 to 67 minutes for 12,892 examples).
 - Changed on 13 October: new training runs use DoRA with bf16 base weights, not 4-bit weights (`configs/qwen3_4b_dora_bf16.yaml`). The A100 GPU has enough memory. 4-bit weights make each step slower, and the adapter trains on weights that are different from the weights that it uses at evaluation.
 - Fixed on 13 October: `generate.sbatch` now removes questions of all test files from new training data, not only the questions of the config test file.
 - The v3 source check used the current directory to find `data/eval`. From an incorrect directory, it removed 0 examples and gave no error. PR #36 has the fix.
@@ -257,13 +273,13 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 | 20%, 30% and 40% of the changes for seeds 1, 2 and 42 (60281969 to 60281971), judge (60281973) | Is the 0.526 result real for all seeds? | Complete: x0.2 0.528, x0.3 0.510, x0.4 0.495 on v3 |
 | DPO pair mining (60284208) | Pairs for preference training | Complete: 858 pairs (303 invented flags, 555 missing flags) from 6,000 questions |
 | B8a, 3 seeds (60276743, 60276744) | Learning rate 2e-5, rank 8, half an epoch, same data, scored on v3 | Complete: 0.347 on v3. Gentle training loses more |
-| x0.1 answers (60294836/842/850), D4 early stop answers (60294853/857/859), judge (60318026) | Does a smaller change or an early stop help? | x0.1: 0.481 v2, 0.522 v3. Early stop loses (0.37 to 0.41). Judge running |
+| x0.1 answers (60294836/842/850), D4 early stop answers (60294853/857/859), judge (60318026) | Does a smaller change or an early stop help? | x0.1: 0.481 v2, 0.522 v3. Early stop loses (0.37 to 0.41). Complete |
 | D0 / D2 / D3 training (60302556/558/559), evaluation v3 (60322950/954/957) and v2 (60323699/702/705) | Control, logit distillation (KD) and base-KL training on the good-quality data | Complete: D0 0.376 / 0.438, D2 0.361 / 0.450, D3 0.442 / **0.525** (v2 / v3) |
 | D5: DPO on x0.2 (60302560, 579, 582), judge (60322599) | Does DPO remove invented flags and keep the win? | Complete: v2 0.442, v3 0.42 (1 seed). Worse than x0.2 |
 
 ## 7. Options for the next steps
 
-The table shows the options from the lowest cost to the highest cost. Options 1 to 4 are in progress.
+The table shows the options from the lowest cost to the highest cost. Options 1 to 4, 7 and 9 are complete.
 
 | # | Option | Problem that it solves | Cost | Status or notes |
 |---|---|---|---|---|
@@ -272,10 +288,10 @@ The table shows the options from the lowest cost to the highest cost. Options 1 
 | 3 | Use only 20% to 70% of the trained change | Loss of base knowledge | No training | 20% wins on v3 (0.528, 3 seeds); 30% 0.510 |
 | 4 | Gentle training (low learning rate, rank 8, early stop) | Loss of base knowledge; invented facts | 1.5 hours | B8a: 0.347 on v3; early stop (D4): 0.40 to 0.41. Both lose |
 | 5 | Remove "concise"; the teacher model writes full answers | Short answers with only 1 method | New data run | Not started |
-| 6 | Add 20% to 50% general data or base model answers | Loss of base knowledge | Small | Standard method |
+| 6 | Add 20% to 50% general data or base model answers | Loss of base knowledge | Small | Standard method. D3 (KL to the base model) solves the same problem and wins on v3 (0.525) |
 | 7 | Preference training (DPO); rejected answers contain invented flags | Invented flags | 1 day | D5: worse than x0.2 (v2 0.442, v3 0.42). Stop |
 | 8 | On-policy distillation (GKD, reverse KL) | The student model is certain where the teacher model is not | 1 to 2 days | The teacher model must run during training; TRL `GKDTrainer` (experimental) |
-| 9 | Distillation from the teacher token probabilities | More information for each example | 1 day | arcee-ai DistillKit |
+| 9 | Distillation from the teacher token probabilities | More information for each example | 1 day | D2: v2 0.361, v3 0.450. Almost equal to the control (D0). Does not help |
 | 10 | Search the Slurm documents during the answer (RAG) | Missing facts on all topics | 1 to 2 days | Best solution for topics that we do not train; runs on a laptop |
 | 11 | Larger student model (Qwen3-8B) | More knowledge before training | New training | Approximately 16 GB with bf16 weights; fits on 1 A100 |
 
@@ -293,10 +309,10 @@ Our plan:
 
 1. Our new goal: the student model must win on trained topics (v3) and must not become worse on topics that we do not train (v2). The old goal was a win on topics that we do not train. Do you agree with the new goal?
 2. Can we use RAG on the Slurm documents in the hackathon? Or must the improvement come only from the model?
-3. We have few days. Which method do you recommend: DPO against invented flags, or on-policy distillation?
+3. DPO made the result worse, and D3 (KL to the base model) wins on v3. Must we continue with D3 (for example a scaled D3), or test on-policy distillation?
 4. The v2 test set has 66 questions and a margin of ±0.12. Must we make it larger before we compare rounds?
 5. We changed to DoRA with bf16 weights and 1 GPU for each seed. Is data parallel training on 4 GPUs for each seed a better use of the nodes? Is DoRA better than LoRA for our task?
-6. Is a scaled model (20% to 30% of the trained change) an acceptable final model, or must the improvement come from the training?
+6. Is a scaled model (x0.2, v3 0.528) an acceptable final model, or must the improvement come from the training (D3, v3 0.525)?
 
 ## Sources
 
