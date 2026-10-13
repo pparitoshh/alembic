@@ -16,6 +16,39 @@ that win against the base model, and the teacher model for comparison.
 | v3 test set | 200 questions on topics that are in the training data. The source text of these questions is not in the training data. |
 | Coverage | The fraction of the key terms of the reference answer (commands, options, variable names) that the answer contains. |
 
+## How to read a win rate
+
+The judge reads the question, the reference answer and 2 answers: one from the model and one from the base model.
+The judge gives each question 2 times, with the answers in the 2 orders. This removes the effect of the position.
+
+Each judge verdict gives points to the model:
+
+| Verdict | Points |
+|---|---|
+| The model answer is better | 1 |
+| Tie | 0.5 |
+| The base model answer is better | 0 |
+
+The question score is the mean of its 2 verdicts. The win rate is the mean of all question scores.
+
+Example with 4 dummy questions:
+
+| Question | Verdict, order 1 | Verdict, order 2 | Question score |
+|---|---|---|---|
+| Q1 | Model better (1) | Model better (1) | 1.0 |
+| Q2 | Base better (0) | Base better (0) | 0.0 |
+| Q3 | Model better (1) | Base better (0) | 0.5 |
+| Q4 | Model better (1) | Tie (0.5) | 0.75 |
+| **Win rate** | | | (1.0 + 0.0 + 0.5 + 0.75) / 4 = **0.5625** |
+
+How to read the values:
+
+- 0.50: the model is equal to the base model. This is the reference point.
+- More than 0.50: the model is better. Less than 0.50: the base model is better.
+- Teacher model on v3, 0.585: the teacher model gets 117 of 200 points (0.585 × 200). The base model gets the other 83 points.
+  If no question has a tie, the teacher model wins 117 questions and loses 83. That is 34 more wins than losses.
+- x0.2 on v3, 0.528: 105.6 of 200 points. If no question has a tie, x0.2 wins approximately 11 more questions than it loses.
+
 ## Results
 
 All values are means of 3 seeds (42, 1 and 2). A model is in this table if its v3 win rate is more than 0.5.
