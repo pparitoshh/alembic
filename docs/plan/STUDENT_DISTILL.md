@@ -113,7 +113,7 @@ Compare 3 models for each seed: base model, B7 x0.2 and B7 x0.2 + DPO.
 ## Results
 
 Paired-order judge (gpt-oss-20b) against the base model. Means of the seeds; the number in brackets is the
-number of seeds with a result (13 October 14:41).
+number of seeds with a result (13 October 15:32).
 
 | Model | v2 | v3 |
 |---|---|---|
@@ -124,12 +124,20 @@ number of seeds with a result (13 October 14:41).
 | x0.4 | 0.424 (3) | 0.495 (3) |
 | D4: B7 step 300 | 0.374 (3) | 0.406 (3) |
 | D4: B7 step 500 | 0.396 (3) | 0.407 (3) |
-| D4: B7 step 700 | 0.384 (3) | 0.404 (2; 1 seed has 1 invalid verdict, judged again in 60322599) |
+| D4: B7 step 700 | 0.384 (3) | 0.409 (3) |
 | B8a | – | 0.347 (3) |
-| D0, D2, D3, D5 | evaluation running | evaluation running |
+| D0 (bf16 control) | 0.376 (3) | 0.438 (3) |
+| D2 (logit KD) | 0.361 (3) | 0.450 (3) |
+| **D3 (base-KL)** | **0.442** (3) | **0.525** (3; seeds 0.499 / 0.525 / 0.550) |
+| D5 (DPO on x0.2) | 0.442 (3) | 0.420 (1; 2 seeds have invalid verdicts. All 598 valid questions of 3 seeds: 0.421) |
 
 1. D4: the early checkpoints lose more than the full B7 run. A shorter run does not help.
 2. x0.1 and x0.2 give almost the same result. The x0.1 answers are almost as long as the base answers.
+3. D3 (base-KL) is the first trained model that wins on v3 (0.525). On v2 it is 0.066 better than D0, so it passes the guardrail.
+4. D2 (logit KD) is almost equal to D0. Teacher logits alone do not help.
+5. D5 (DPO) is worse than its start model x0.2 (v2 0.442 vs 0.481, v3 0.42 vs 0.528). DPO removes the x0.2 gain.
+6. The D0, D2 and D3 evaluation jobs show FAILED in Slurm. Only the last step (`distillkit track`) failed:
+   there is no MLflow run. All 18 `eval_summary.json` files are complete with 0 invalid verdicts.
 
 ## Length analysis
 
@@ -188,6 +196,8 @@ terms in the answer. rho: Spearman correlation over the questions of all seeds. 
 | x0.3 | v3 | 0.510 | 886 / 1,619 | 0.55 (200) / 0.50 (366) / 0.46 (34) | -0.04 | 0.60 / 0.61 | 0.16 | 0.16 |
 | x0.4 | v3 | 0.495 | 774 / 1,619 | 0.52 (298) / 0.47 (280) / 0.42 (22) | -0.10 | 0.60 / 0.61 | 0.16 | 0.18 |
 | D4 step 300 | v3 | 0.406 | 378 / 1,619 | 0.41 (564) / 0.35 (26) / 0.55 (10) | 0.04 | 0.52 / 0.61 | 0.30 | 0.29 |
+| D5 (DPO) | v2 | 0.442 | 402 / 1,382 | 0.43 (136) / 0.47 (51) / 0.45 (11) | 0.07 | 0.51 / 0.54 | 0.33 | 0.33 |
+| D5 (DPO) | v3 | 0.421 | 442 / 1,619 | 0.42 (499) / 0.41 (85) / 0.54 (14) | -0.04 | 0.53 / 0.61 | 0.15 | 0.16 |
 | B7 (x1.0) | v3 | 0.438 | 365 / 1,619 | 0.43 (577) / 0.53 (16) / 0.75 (7) | 0.02 | 0.53 / 0.61 | 0.33 | 0.33 |
 
 Coverage by outcome (x0.1 to x0.7 together):
@@ -243,13 +253,13 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | D5 eval (answers) | `slurm/d5_eval.sbatch` (afterok 60302579) | 60302582 | 13 Oct 13:12 | complete (12 min) | `runs/scaled_eval/b7s<n>d5_answers.json` |
 | D5 judge | `judge_dirs.sbatch` (afterok 60302582) | 60302589 | 13 Oct 13:12 | failed in 2 s (same `REPO` bug). Replaced by 60322599 | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
 | Judge for x0.1 and D4, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` | 60318026 | 13 Oct 14:09 | running (21 of 24 dirs at 14:41) | same as 60294860 |
-| D5 judge, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` (afterany 60318026) | 60322599 | 13 Oct 14:35 | pending (dependency) | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
-| D0 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16` | 60322950 | 13 Oct 14:36 | running | `runs/d0_bf16/seed_<n>/eval_summary.json` |
-| D2 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd` | 60322954 | 13 Oct 14:36 | running | `runs/d2_kd/seed_<n>/eval_summary.json` |
-| D3 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl` | 60322957 | 13 Oct 14:36 | running | `runs/d3_basekl/seed_<n>/eval_summary.json` |
-| D0 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16`, `CONFIG=configs/qwen3_4b_d0_bf16_v2eval.yaml` | 60323699 | 13 Oct 14:45 | running | `runs/d0_bf16_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d0_bf16/seed_<n>/adapter`) |
-| D2 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd`, `CONFIG=configs/qwen3_4b_d2_kd_v2eval.yaml` | 60323702 | 13 Oct 14:45 | running | `runs/d2_kd_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d2_kd/seed_<n>/adapter`) |
-| D3 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl`, `CONFIG=configs/qwen3_4b_d3_basekl_v2eval.yaml` | 60323705 | 13 Oct 14:45 | running | `runs/d3_basekl_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d3_basekl/seed_<n>/adapter`) |
+| D5 judge, try 2 | `judge_dirs.sbatch`, `REPO=$WORK/alembic/wt-eval-v3` (afterany 60318026) | 60322599 | 13 Oct 14:35 | complete (12 min). D5 v3 seeds 1 and 2: 1 invalid verdict each, no win rate | `judge_b7s<n>d5_t1.0_<v2,v3>/` |
+| D0 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16` | 60322950 | 13 Oct 14:36 | results complete (D0 v3 0.438); Slurm FAILED in `track` (no MLflow run) | `runs/d0_bf16/seed_<n>/eval_summary.json` |
+| D2 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd` | 60322954 | 13 Oct 14:36 | results complete (D2 v3 0.450); Slurm FAILED in `track` (no MLflow run) | `runs/d2_kd/seed_<n>/eval_summary.json` |
+| D3 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl` | 60322957 | 13 Oct 14:36 | results complete (D3 v3 0.525); Slurm FAILED in `track` (no MLflow run) | `runs/d3_basekl/seed_<n>/eval_summary.json` |
+| D0 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16`, `CONFIG=configs/qwen3_4b_d0_bf16_v2eval.yaml` | 60323699 | 13 Oct 14:45 | results complete (D0 v2 0.376); Slurm FAILED in `track` (no MLflow run) | `runs/d0_bf16_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d0_bf16/seed_<n>/adapter`) |
+| D2 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd`, `CONFIG=configs/qwen3_4b_d2_kd_v2eval.yaml` | 60323702 | 13 Oct 14:45 | results complete (D2 v2 0.361); Slurm FAILED in `track` (no MLflow run) | `runs/d2_kd_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d2_kd/seed_<n>/adapter`) |
+| D3 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl`, `CONFIG=configs/qwen3_4b_d3_basekl_v2eval.yaml` | 60323705 | 13 Oct 14:45 | results complete (D3 v2 0.442); Slurm FAILED in `track` (no MLflow run) | `runs/d3_basekl_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d3_basekl/seed_<n>/adapter`) |
 
 Submission (approved 13 October; submitted 13:12 after smoke try 2 passed). Rule: both smoke runs exit 0, and `kd_loss` and `base_kl` are finite. Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
 each with `runs` linked to the shared `$WORK/alembic/alembic/runs`.

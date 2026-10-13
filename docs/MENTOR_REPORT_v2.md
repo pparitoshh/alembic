@@ -25,6 +25,8 @@ The student model does not win against the base model. Our target is a win rate 
 - On the v2 test set, B7 has a win rate of 0.398.
 - On the v3 test set, B7 has a win rate of 0.438.
 - With only 20% of the B7 changes, the student model wins on the v3 test set: 0.528 (mean of 3 seeds). This is the first result above 0.5. On v2, it has 0.481, which is better than B7 (0.398) but less than 0.5.
+- D3 (training with a KL penalty to the base model) is the first trained model that wins on v3: 0.525 (3 seeds). On v2 it has 0.442.
+- DPO on x0.2 (D5) makes the result worse: 0.442 on v2 and 0.42 on v3.
 - The teacher model wins against the base model: 0.689 on v2 and 0.585 on v3.
 - Section 3 shows all results in one table. All values are means of the seeds.
 - From B1 to B7, the v2 win rate increased from 0.324 to 0.398.
@@ -37,7 +39,7 @@ We found two causes:
 
 We do not have these results yet:
 
-- The results of D0, D2, D3 and D5 (training complete; evaluation running).
+- The D5 v3 result for seeds 1 and 2 (1 invalid judge verdict in each).
 
 
 ## 2. How the system operates
@@ -92,6 +94,10 @@ All values are means of the seeds. The base model has a win rate of 0.50 because
 | 13 Oct | B7 with 70% of its changes † | Same as B7 | No training | 0.409 (1) | 0.418 (1) | – | 0.940 | – | 0.031 |
 | 13 Oct | B7, early stop at step 300 / 500 (D4) | Same as B7 | Fewer steps | 0.374 / 0.396 | 0.406 / 0.407 | – | – | – | – |
 | 13 Oct | B8a | Same as B7 | Learning rate 2e-5, rank 8, half an epoch | – | 0.347 | – | – | – | – |
+| 13 Oct | D0 | 12,892 good-quality B7 examples | bf16 weights (control) | 0.376 | 0.438 | – | – | – | – |
+| 13 Oct | D2 | Same as D0 | 0.5 × CE + 0.5 × KL to the teacher top-20 tokens | 0.361 | 0.450 | – | – | – | – |
+| 13 Oct | **D3** | Same as D0 | CE + 0.1 × KL to the base model | 0.442 | **0.525** | – | – | – | – |
+| 13 Oct | D5 | DPO pairs (teacher vs student) | DPO on x0.2, beta 0.1 | 0.442 | 0.42 (1) | – | – | – | – |
 † We did not train again. We used the weights W = base + s × (B7 − base), for s = 0.2 to 0.7. The number in brackets is the number of seeds with a result, if it is less than 3. The v3 scale choice is a development result.
 
 - The v2 test set has 66 questions on topics that we do not train. The margin of error is ±0.12.
@@ -241,7 +247,7 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 
 ## 6. Jobs on the `s_tra_ncc` reservation (13 October)
 
-| Job | Question | Status at 14:41 |
+| Job | Question | Status at 15:32 |
 |---|---|---|
 | B7 on v3, 3 seeds (60276546, 60279954) | Does the larger B7 data win on trained topics? (B6: 0.427) | Complete: 0.438 |
 | B6 on v3, 3 seeds (60276547) | Does our run give the same result as the run of Vaibhav? | Complete: 0.421 (Vaibhav: 0.427) |
@@ -252,8 +258,8 @@ Section 3.1 gives the v3 results. B6 has 0.427 and B7 has 0.438. Both lose again
 | DPO pair mining (60284208) | Pairs for preference training | Complete: 858 pairs (303 invented flags, 555 missing flags) from 6,000 questions |
 | B8a, 3 seeds (60276743, 60276744) | Learning rate 2e-5, rank 8, half an epoch, same data, scored on v3 | Complete: 0.347 on v3. Gentle training loses more |
 | x0.1 answers (60294836/842/850), D4 early stop answers (60294853/857/859), judge (60318026) | Does a smaller change or an early stop help? | x0.1: 0.481 v2, 0.522 v3. Early stop loses (0.37 to 0.41). Judge running |
-| D0 / D2 / D3 training (60302556/558/559), evaluation v3 (60322950/954/957) and v2 (60323699/702/705) | Control, logit distillation (KD) and base-KL training on the good-quality data | Training complete; v3 and v2 evaluation running |
-| D5: DPO on x0.2 (60302560, 579, 582), judge (60322599) | Does DPO remove invented flags and keep the win? | Training and answers complete; judge waits |
+| D0 / D2 / D3 training (60302556/558/559), evaluation v3 (60322950/954/957) and v2 (60323699/702/705) | Control, logit distillation (KD) and base-KL training on the good-quality data | Complete: D0 0.376 / 0.438, D2 0.361 / 0.450, D3 0.442 / **0.525** (v2 / v3) |
+| D5: DPO on x0.2 (60302560, 579, 582), judge (60322599) | Does DPO remove invented flags and keep the win? | Complete: v2 0.442, v3 0.42 (1 seed). Worse than x0.2 |
 
 ## 7. Options for the next steps
 
@@ -267,7 +273,7 @@ The table shows the options from the lowest cost to the highest cost. Options 1 
 | 4 | Gentle training (low learning rate, rank 8, early stop) | Loss of base knowledge; invented facts | 1.5 hours | B8a: 0.347 on v3; early stop (D4): 0.40 to 0.41. Both lose |
 | 5 | Remove "concise"; the teacher model writes full answers | Short answers with only 1 method | New data run | Not started |
 | 6 | Add 20% to 50% general data or base model answers | Loss of base knowledge | Small | Standard method |
-| 7 | Preference training (DPO); rejected answers contain invented flags | Invented flags | 1 day | D5: trained on x0.2; judge waits |
+| 7 | Preference training (DPO); rejected answers contain invented flags | Invented flags | 1 day | D5: worse than x0.2 (v2 0.442, v3 0.42). Stop |
 | 8 | On-policy distillation (GKD, reverse KL) | The student model is certain where the teacher model is not | 1 to 2 days | The teacher model must run during training; TRL `GKDTrainer` (experimental) |
 | 9 | Distillation from the teacher token probabilities | More information for each example | 1 day | arcee-ai DistillKit |
 | 10 | Search the Slurm documents during the answer (RAG) | Missing facts on all topics | 1 to 2 days | Best solution for topics that we do not train; runs on a laptop |
@@ -279,7 +285,7 @@ Our plan:
 
 1. B6 (0.427) and B7 (0.438) lose on trained topics. More data gives only a small improvement. Thus, we must change the training method.
 2. 20% of the B7 change wins on v3 for the mean of 3 seeds (0.528). This is our first model that wins. The length analysis shows that the win does not come from longer answers. In each model, the length does not predict the score (rho -0.10 to 0.08). The key-term coverage predicts it (rho 0.14 to 0.42). x0.2 keeps the base facts (coverage 0.61, equal to the base model). Full training (B7) loses them (0.53).
-3. Running: D0 (control), D2 (logit distillation), D3 (base-KL) and D5 (DPO). Next: options 5 and 6 (full answers, mixed data).
+3. D3 (KL penalty to the base model) wins on v3 (0.525) and is the best trained model. D2 (logit distillation) and D5 (DPO) do not help. Next: a scaled merge of D3 (20% to 50%), and options 5 and 6 (full answers, mixed data).
 4. These options will target output and mail, problem analysis and dependencies.
 5. The teacher model wins, so distillation can operate. RAG (option 10) stays the best solution for topics that we do not train.
 
