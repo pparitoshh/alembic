@@ -14,6 +14,7 @@ export LLAMA_CPP="${LLAMA_CPP:-$WORK/tools/llama.cpp}"
 export LLAMA_CPP_TAG="b11392"
 export HF_HOME="${HF_HOME:-$WORK/hf_cache}"          # model weights, downloaded on a login node
 export HF_HUB_OFFLINE=1                               # compute nodes have no network
+export HF_HUB_OFFLINE=1                               # compute nodes have no network
 export MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-file://$REPO/mlruns}"   # local store; view: mlflow ui over ssh -L
 export MLFLOW_EXPERIMENT_NAME="${MLFLOW_EXPERIMENT_NAME:-distillkit}"
 # file store (one directory per run) instead of SQLite: concurrent seeds writing one SQLite file on
