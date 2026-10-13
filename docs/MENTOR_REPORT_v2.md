@@ -1,6 +1,6 @@
 # DistillKit: Status Report for the Mentor (Version 2)
 
-Date: 13 October 2026, 11:30. Team: Alembic. Mentor: Simeon Harrison.
+Date: 13 October 2026, 12:10. Team: Alembic. Mentor: Simeon Harrison.
 
 This version of the report uses ASD-STE100 Simplified Technical English. Version 1 is `docs/MENTOR_REPORT.md`.
 
@@ -24,6 +24,7 @@ The student model does not win against the base model. Our target is a win rate 
 
 - On the v2 test set, B7 has a win rate of 0.398 (mean of 3 seeds).
 - On the v3 test set, B6 has a win rate of 0.427 (seeds: 0.431, 0.434, 0.415).
+- On the v3 test set, B7 has a win rate of 0.450 (mean of 2 seeds: 0.4475 and 0.4525). Seed 2 is not complete.
 - From B1 to B7, the v2 win rate increased from 0.324 to 0.398.
 - The increase from B6 (0.369) to B7 (0.398) is less than the margin of error (±0.12).
 
@@ -34,7 +35,7 @@ We found two causes:
 
 We do not have these results yet:
 
-- The B7 result on the v3 test set.
+- The B7 seed 2 result on the v3 test set.
 - The result of the teacher model against the base model. If the teacher model does not win, the student model cannot win by a copy of the teacher model.
 
 ## 2. How the system operates
@@ -147,6 +148,26 @@ Vaibhav ran B6 on the v3 test set.
 | v2: 66 questions, topics not trained | 0.394 | 0.386 | 0.326 | 0.369 |
 | v3: 200 questions, trained topics | 0.431 | 0.434 | 0.415 | **0.427** |
 
+### 4.6 B7 on the v3 test set
+
+| Round | Seed 42 | Seed 1 | Seed 2 | Mean |
+|---|---|---|---|---|
+| B6 | 0.431 | 0.434 | 0.415 | 0.427 |
+| B7 | 0.4475 | 0.4525 | Not complete | 0.450 (2 seeds) |
+
+| Model on v3 | Check pass rate | Bad-flag rate |
+|---|---|---|
+| Base model | 0.885 | 0.021 |
+| B7 seed 42 | 0.935 | 0.041 |
+| B7 seed 1 | 0.955 | 0.030 |
+
+- B7 is better than B6 by approximately 0.02. This difference is small.
+- B7 does not win against the base model on trained topics.
+- The B7 bad-flag rate on v3 (0.030 to 0.041) is lower than on v2 (0.085). It is still higher than the base model (0.021).
+- The B7 check pass rate is higher than the base model. But the judge prefers the base model answers more frequently.
+
+### 4.7 B6 topics on the v3 test set
+
 | v3 topic | Questions | Student model score (0.5 is equal) |
 |---|---|---|
 | Scripts with many limits | 20 | 0.74 |
@@ -198,10 +219,11 @@ Vaibhav ran B6 on the v3 test set.
 
 | Job | Question | Status at 11:30 |
 |---|---|---|
-| B7 on v3, 3 seeds (60276546) | Does the larger B7 data win on trained topics? (B6: 0.427) | Running |
+| B7 on v3, 3 seeds (60276546) | Does the larger B7 data win on trained topics? (B6: 0.427) | Seeds 42 and 1 complete (0.4475, 0.4525); seed 2 running |
 | B6 on v3, 3 seeds (60276547) | Does our run give the same result as the run of Vaibhav? | Running |
-| Teacher model answers (60276548) | Does the teacher model win against the base model? | Answers complete; the judge step follows |
-| B7 with 30%, 50% and 70% of its changes (60276549) | Does a smaller change keep the gains and lose less base knowledge? | Running |
+| Teacher model answers (60276548) | Does the teacher model win against the base model? | Answers complete |
+| B7 with 30%, 50% and 70% of its changes (60276549) | Does a smaller change keep the gains and lose less base knowledge? | Answers complete |
+| Judge for the teacher model and the 30/50/70% answers (60278960) | Win rates on v2 and v3 for these 4 models | Running (8 comparisons) |
 | B8a, 3 seeds (60276743) | Learning rate 2e-5, rank 8, half an epoch, same data, scored on v3 | Training; evaluation waits |
 
 ## 7. Options for the next steps
@@ -210,9 +232,9 @@ The table shows the options from the lowest cost to the highest cost. Options 1 
 
 | # | Option | Problem that it solves | Cost | Status or notes |
 |---|---|---|---|---|
-| 1 | Score on trained topics (v3) | Shows if the training method operates | 1 GPU hour | B6 complete (0.427, loses); B7 running |
-| 2 | Teacher model against base model | Shows the best possible result | 1 GPU hour | Running |
-| 3 | Use only 30% to 70% of the trained change | Loss of base knowledge | No training | Running |
+| 1 | Score on trained topics (v3) | Shows if the training method operates | 1 GPU hour | B6: 0.427; B7: 0.450 (2 seeds). Both lose |
+| 2 | Teacher model against base model | Shows the best possible result | 1 GPU hour | Answers complete; judge running |
+| 3 | Use only 30% to 70% of the trained change | Loss of base knowledge | No training | Answers complete; judge running |
 | 4 | Gentle training (low learning rate, rank 8, early stop) | Loss of base knowledge; invented facts | 1.5 hours | Running as B8a |
 | 5 | Remove "concise"; the teacher model writes full answers | Short answers with only 1 method | New data run | Not started |
 | 6 | Add 20% to 50% general data or base model answers | Loss of base knowledge | Small | Standard method |
@@ -226,7 +248,7 @@ A different training framework (Unsloth, Axolotl, LLaMA-Factory) can make the tr
 
 Our plan:
 
-1. B6 loses on trained topics (0.427). Thus, we must change the training method.
+1. B6 (0.427) and B7 (0.450) lose on trained topics. More data gives only a small improvement. Thus, we must change the training method.
 2. Next, we will do option 7 (DPO) and options 5 and 6 (full answers, mixed data).
 3. These options will target output and mail, problem analysis and dependencies.
 4. If the teacher model does not win against the base model, we will change our main work to option 10 (RAG).
