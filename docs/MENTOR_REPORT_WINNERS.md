@@ -18,8 +18,16 @@ that win against the base model, and the teacher model for comparison.
 
 ## How to read a win rate
 
-The judge reads the question, the reference answer and 2 answers: one from the model and one from the base model.
+The judge reads the question, the reference answer and 2 answers to the same question:
+
+- one answer from the **tested model**: a row of the results table (x0.1, x0.2, x0.3, D3 or the teacher model);
+- one answer from the **base model** (Qwen3-4B-Instruct-2507, without changes).
+
+Each tested model has its own win rate. For example, the teacher row (0.585) compares teacher answers with base
+answers. The D3 row (0.525) compares D3 answers with the same base answers.
+
 The judge gives each question 2 times, with the answers in the 2 orders. This removes the effect of the position.
+In the tables below, "model" means the tested model.
 
 Each judge verdict gives points to the model:
 
