@@ -205,6 +205,9 @@ Ad-hoc job scripts are in `$WORK/alembic/jobs/` (not in git). All jobs use the `
 | D0 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16` | 60322950 | 13 Oct 14:36 | running | `runs/d0_bf16/seed_<n>/eval_summary.json` |
 | D2 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd` | 60322954 | 13 Oct 14:36 | running | `runs/d2_kd/seed_<n>/eval_summary.json` |
 | D3 eval v3 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl` | 60322957 | 13 Oct 14:36 | running | `runs/d3_basekl/seed_<n>/eval_summary.json` |
+| D0 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d0-bf16`, `CONFIG=configs/qwen3_4b_d0_bf16_v2eval.yaml` | 60323699 | 13 Oct 14:45 | running | `runs/d0_bf16_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d0_bf16/seed_<n>/adapter`) |
+| D2 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d2-kd`, `CONFIG=configs/qwen3_4b_d2_kd_v2eval.yaml` | 60323702 | 13 Oct 14:45 | running | `runs/d2_kd_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d2_kd/seed_<n>/adapter`) |
+| D3 eval v2 (3 seeds) | `slurm/evaluate.sbatch` in `wt-d3-basekl`, `CONFIG=configs/qwen3_4b_d3_basekl_v2eval.yaml` | 60323705 | 13 Oct 14:45 | running | `runs/d3_basekl_v2eval/seed_<n>/eval_summary.json` (`adapter` is a link to `runs/d3_basekl/seed_<n>/adapter`) |
 
 Submission (approved 13 October; submitted 13:12 after smoke try 2 passed). Rule: both smoke runs exit 0, and `kd_loss` and `base_kl` are finite. Leonardo worktrees: `$WORK/alembic/wt-<branch>`,
 each with `runs` linked to the shared `$WORK/alembic/alembic/runs`.
@@ -226,8 +229,9 @@ cd $WORK/alembic/wt-eval-v3 && sbatch --dependency=afterok:$c $WORK/alembic/jobs
 ```
 
 The evaluation of D0, D2 and D3 is a separate job after the training (`slurm/evaluate.sbatch` with the same
-`REPO`, `CONFIG` and `RUN_DIR`). `evaluate.sbatch` scores v3 only. To do: a v2 run in a new run dir, because
-`eval_answers.json` is cached in the seed dir.
+`REPO`, `CONFIG` and `RUN_DIR`). `evaluate.sbatch` scores v3 only. The v2 runs use a new run dir `runs/<rd>_v2eval`, because
+`eval_answers.json` is cached in the seed dir. The v2 config copies (`*_v2eval.yaml`, not in git) change only `eval.file`.
+The last step (`distillkit track`) fails for the v2 dirs (no MLflow run); `eval_summary.json` is written before it.
 Judge jobs: set `REPO=$WORK/alembic/wt-eval-v3`. `common.sh` runs `cd "$REPO"`, so a different `REPO` gives no judge dirs.
 
 Monitor: `squeue -u $USER`; the result is `student_vs_base_win_rate` in each `eval_summary.json`.
