@@ -1,7 +1,42 @@
 # Plan: student distillation experiments on the existing B7 data
 
-Status: plan, 2026-10-13. Nothing in this plan is submitted. Branch `feat/data-hpc10k`.
+Status (13 October, 17:00): D0 to D5 complete (see "Results"). D3 KL variants running. Branch `feat/data-hpc10k`.
 Results go to `docs/TRAINING_PROGRESS.md` and `docs/MENTOR_REPORT_v2.md` (means of 3 seeds only).
+
+## Open jobs (check these first)
+
+Submitted 13 October 15:56. Training in the `s_tra_ncc` reservation; evaluations in the normal queue (`afterok` on the training).
+
+| Variant | Config (branch `exp/d3-basekl`) | Training | v3 eval | v2 eval | State at 16:56 |
+|---|---|---|---|---|---|
+| D3 KL 0.05 | `configs/qwen3_4b_d3_basekl005.yaml` | 60337246 | 60337247 | 60337251 | training running (61 min) |
+| D3 KL 0.2 | `configs/qwen3_4b_d3_basekl02.yaml` | 60337252 | 60337256 | 60337259 | training running (61 min) |
+
+Compare with D3 (KL 0.1): v2 0.442, v3 0.525.
+
+Check (on Leonardo):
+
+```bash
+sacct -X -o JobID,JobName,State,Elapsed -j 60337246,60337247,60337251,60337252,60337256,60337259
+cd $WORK/alembic/wt-d3-basekl
+for d in runs/d3_basekl{005,02}{,_v2eval}/seed_*; do
+  echo "$d $(python3 -c "import json;print(json.load(open('$d/eval_summary.json'))['student_vs_base_win_rate'])" 2>/dev/null)"
+done
+```
+
+1. The evaluation jobs show FAILED in Slurm because of the `track` step (no MLflow run). This is expected. A seed is
+   complete when its `eval_summary.json` has a number, not `None`.
+2. If a training job fails, its evaluations do not start (`afterok`). Submit them again from `wt-d3-basekl`:
+
+```bash
+source $WORK/alembic/me.env; W=$WORK/alembic/wt-d3-basekl; cd $W; A="-A euhpc_d30_031 -p boost_usr_prod"
+rd=d3_basekl005   # or d3_basekl02
+REPO=$W PYTHONPATH=$W/src CONFIG=configs/qwen3_4b_$rd.yaml RUN_DIR=runs/$rd sbatch $A slurm/evaluate.sbatch
+REPO=$W PYTHONPATH=$W/src CONFIG=configs/qwen3_4b_${rd}_v2eval.yaml RUN_DIR=runs/${rd}_v2eval sbatch $A slurm/evaluate.sbatch
+```
+
+3. When the results are complete: add them to "Results", run `research/length_analysis/length_analysis.py` with
+   `D3KL005=wt-d3-basekl/runs/d3_basekl005 D3KL02=wt-d3-basekl/runs/d3_basekl02`, and update the mentor reports.
 
 ## Goal
 
