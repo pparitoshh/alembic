@@ -1,0 +1,47 @@
+{
+  "base": {
+    "check_pass_rate": 0.9433962264150944,
+    "bad_flag_rate": 0.029069767441860465,
+    "answers_with_bad_flags": 3,
+    "tool_decision_acc": 0.9565217391304348,
+    "tool_false_call_rate": 0.1111111111111111,
+    "tool_valid_rate": 1.0,
+    "tool_ast_acc": 1.0,
+    "tool_exec_ok_rate": 1.0,
+    "tool_grounded_rate": 1.0,
+    "tool_protocol": "tool-first-response-v2",
+    "tool_first_response_pass_rate": 0.9565217391304348,
+    "tool_raw_call_rate": 0.6521739130434783,
+    "tool_task_completion": "not assessed",
+    "tool_response_quality": "not assessed"
+  },
+  "student": {
+    "check_pass_rate": 0.9056603773584906,
+    "bad_flag_rate": 0.36363636363636365,
+    "answers_with_bad_flags": 9,
+    "tool_decision_acc": 0.9130434782608695,
+    "tool_false_call_rate": 0.2222222222222222,
+    "tool_valid_rate": 1.0,
+    "tool_ast_acc": 1.0,
+    "tool_exec_ok_rate": 1.0,
+    "tool_grounded_rate": 0.9375,
+    "tool_protocol": "tool-first-response-v2",
+    "tool_first_response_pass_rate": 0.9130434782608695,
+    "tool_raw_call_rate": 0.6956521739130435,
+    "tool_task_completion": "not assessed",
+    "tool_response_quality": "not assessed"
+  },
+  "judge_protocol": "paired-orders-v2-invalid-incomplete",
+  "judge_comparisons": {
+    "student_vs_base": {
+      "status": "complete",
+      "questions": 106,
+      "expected_verdicts": 212,
+      "invalid_verdicts": 0,
+      "complete_pairs": 106
+    }
+  },
+  "student_vs_base_win_rate": 0.32547169811320753,
+  "judge_unparsed": 0,
+  "judge": "google/gemma-4-26B-A4B-it"
+}

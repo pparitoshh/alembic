@@ -152,7 +152,12 @@ def test_scripts_parse(path):
 @pytest.mark.parametrize("path", JOBS, ids=lambda p: p.name)
 def test_job_headers(path):
     text = path.read_text()
-    for opt in ("--job-name=dk-", "--time=", "--gres=gpu:", "--output=slurm/logs/"):
+    opts = ["--job-name=dk-", "--time=", "--output=slurm/logs/"]
+    if path.name == "eval_v3_audit.sbatch":
+        assert "#SBATCH --gres=gpu:" not in text  # JSONL filtering is a CPU-only job
+    else:
+        opts.append("--gres=gpu:")
+    for opt in opts:
         assert f"#SBATCH {opt}" in text, opt
     assert "--account" not in text  # comes from SBATCH_ACCOUNT in env.sh
     assert 'source "${REPO:-$WORK/alembic}/slurm/env.sh"' in text and 'source "$REPO/slurm/common.sh"' in text

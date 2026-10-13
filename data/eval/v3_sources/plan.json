@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "created_utc": "2026-10-11T19:02:38.497848+00:00",
+  "target_rows": 200,
+  "candidate_questions": 512,
+  "chunk_chars": 50000,
+  "holdout_sha256": "441079fdae29f843e7d9b177bf7d50fb5b0119b21ded649435ef6c1f85c01c0b",
+  "topics": [
+    {
+      "topic": "dependencies",
+      "target": 30,
+      "doc_id": "eval_v3_dependencies",
+      "path": "data/eval/v3_sources/eval_v3_dependencies.md",
+      "sha256": "23ef8a26362734323136025e0995f2484aab7573cc76e2b3ca648f25db49894c",
+      "source_chunks": [
+        "slurm_man_sbatch#0",
+        "slurm_man_sbatch#17",
+        "slurm_man_sbatch#18",
+        "slurm_man_sbatch#19",
+        "slurm_man_sbatch#37",
+        "slurm_man_sbatch#57"
+      ]
+    },
+    {
+      "topic": "accounting",
+      "target": 30,
+      "doc_id": "eval_v3_accounting",
+      "path": "data/eval/v3_sources/eval_v3_accounting.md",
+      "sha256": "e97b936f3f7414f5a45d54f50c91d36d68047912840bd95e7983bc9caa89b873",
+      "source_chunks": [
+        "slurm_man_sacct#0",
+        "slurm_man_sacct#2",
+        "slurm_man_sacct#5",
+        "slurm_man_sacct#6",
+        "slurm_man_sacct#11",
+        "slurm_man_sacct#23",
+        "slurm_man_sacct#24",
+        "slurm_man_sacct#27",
+        "slurm_guide_job_exit_code#0",
+        "slurm_guide_job_exit_code#1",
+        "slurm_guide_job_exit_code#2"
+      ]
+    },
+    {
+      "topic": "job_control",
+      "target": 25,
+      "doc_id": "eval_v3_job_control",
+      "path": "data/eval/v3_sources/eval_v3_job_control.md",
+      "sha256": "3b390d5a2e0ff80f9f06eec60f8303949db5e0d1d8a02e1dee2e459955bb7288",
+      "source_chunks": [
+        "slurm_man_scontrol#9",
+        "slurm_man_scontrol#18",
+        "slurm_man_scontrol#21",
+        "slurm_man_scontrol#32",
+        "slurm_man_scontrol#37",
+        "slurm_man_sbatch#65",
+        "upstream_scontrol_2f1db40fc86d"
+      ]
+    },
+    {
+      "topic": "output_mail",
+      "target": 25,
+      "doc_id": "eval_v3_output_mail",
+      "path": "data/eval/v3_sources/eval_v3_output_mail.md",
+      "sha256": "c496996021d18a3c104b2c7316fb130ef3b5c5434f27293c51b12ce8b7b53382",
+      "source_chunks": [
+        "slurm_man_sbatch#1",
+        "slurm_man_sbatch#37",
+        "slurm_man_sbatch#39",
+        "slurm_man_sbatch#55",
+        "slurm_man_sbatch#71",
+        "slurm_man_sbatch#72",
+        "upstream_sbatch_0b1faedc2d24",
+        "upstream_sbatch_069aadf2d7e5",
+        "upstream_sbatch_811dd5512820"
+      ]
+    },
+    {
+      "topic": "resources",
+      "target": 30,
+      "doc_id": "eval_v3_resources",
+      "path": "data/eval/v3_sources/eval_v3_resources.md",
+      "sha256": "49847489ae5414e3c3a3673ddd47ef2fcc26802fff173fae2a976f727e242c40",
+      "source_chunks": [
+        "slurm_man_sbatch#16",
+        "slurm_man_sbatch#32",
+        "slurm_man_sbatch#33",
+        "slurm_man_sbatch#34",
+        "slurm_man_sbatch#40",
+        "slurm_man_sbatch#44",
+        "slurm_man_sbatch#46",
+        "slurm_man_sbatch#51",
+        "slurm_man_sbatch#52",
+        "slurm_man_sbatch#54"
+      ]
+    },
+    {
+      "topic": "queue_cancel",
+      "target": 20,
+      "doc_id": "eval_v3_queue_cancel",
+      "path": "data/eval/v3_sources/eval_v3_queue_cancel.md",
+      "sha256": "ebd958fa99a378d1ab885b99692d27632f6c18feb310abcecafa0578a6fc92e8",
+      "source_chunks": [
+        "slurm_man_squeue#0",
+        "slurm_man_squeue#1",
+        "slurm_man_squeue#17",
+        "slurm_man_squeue#21",
+        "slurm_man_squeue#23",
+        "slurm_man_squeue#25",
+        "slurm_man_scancel#0",
+        "slurm_man_scancel#1"
+      ]
+    },
+    {
+      "topic": "multi_constraint",
+      "target": 20,
+      "doc_id": "eval_v3_multi_constraint",
+      "path": "data/eval/v3_sources/eval_v3_multi_constraint.md",
+      "sha256": "764ffff3aa7f64393fa7909c4bb71fb70814bed25509e20c0c22c038e3059dff",
+      "source_chunks": [
+        "slurm_man_sbatch#0",
+        "slurm_man_sbatch#2",
+        "slurm_man_sbatch#16",
+        "slurm_man_sbatch#40",
+        "slurm_man_sbatch#51",
+        "slurm_man_sbatch#52",
+        "slurm_man_sbatch#54",
+        "slurm_man_sbatch#64",
+        "slurm_man_sbatch#65"
+      ]
+    },
+    {
+      "topic": "debug",
+      "target": 20,
+      "doc_id": "eval_v3_debug",
+      "path": "data/eval/v3_sources/eval_v3_debug.md",
+      "sha256": "4b15a1cf7a66bb03a87de64520d4298d8302c7ee78d1eca0f32cfdfa1f5c005b",
+      "source_chunks": [
+        "slurm_guide_faq#19",
+        "slurm_guide_faq#20",
+        "slurm_guide_faq#21",
+        "slurm_guide_faq#25",
+        "slurm_guide_faq#26",
+        "slurm_man_sacct#11",
+        "slurm_man_sacct#23",
+        "slurm_man_sacct#24",
+        "slurm_guide_job_exit_code#0",
+        "slurm_guide_job_exit_code#1"
+      ]
+    }
+  ]
+}

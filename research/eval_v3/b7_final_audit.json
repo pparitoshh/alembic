@@ -1,0 +1,13 @@
+[
+  {
+    "input": "/leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b7_hpc10k/verified.jsonl",
+    "input_sha256": "8c20deb5c05b68c7bc9e855182d8adb00bab6381b5ccff1c2816b9b6575c86ad",
+    "rows": 20472,
+    "source_overlap": 0,
+    "question_overlap": 0,
+    "excluded_union": 0,
+    "remaining": 20472,
+    "output": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code/runs/eval_v3_b7_final_20261012/00-b7_hpc10k/clean.jsonl",
+    "output_sha256": "a04011cc112ea79acafb1e0a491902b628ce9e2d466f8c67563c5559455f68ed"
+  }
+]

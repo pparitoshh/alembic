@@ -1,0 +1,21 @@
+{
+  "status": "TRAINING_COMPLETED_EVALUATION_PENDING",
+  "records": 11167,
+  "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+  "job_id": "59924945",
+  "optimizer_steps": 2094,
+  "adapter_sha256": "e373649f13644101a68e9a409e87f248c8a5866576a072252493c821f405cbe6",
+  "dataset_sha256": "454a9498377b344d5e6a85d4ac769fe5eb3e7d11bbf4c3fe5af52b9ef81b75aa",
+  "archive_sha256": "dbd715c116767607e066a8b206c1a1d24ae55267f7ee5af7ddddbdd037924631",
+  "archive_bytes": 55293245,
+  "download_url": "https://github.com/pparitoshh/alembic/releases/download/student-11167-20261011/student-11167-qdora.tar.gz",
+  "files": {
+    "run/adapter/README.md": "84b72e5ee5b24c5b33d35ac32c264033da9794fcb79da53273b5b6e09ad95afb",
+    "run/adapter/adapter_config.json": "5a3fd9fb0ca6a07c592f0a7a0ca1de0b67df8bbfe7a64a3d3380e70ac79d2b9a",
+    "run/adapter/adapter_model.safetensors": "e373649f13644101a68e9a409e87f248c8a5866576a072252493c821f405cbe6",
+    "run/adapter/chat_template.jinja": "64f85b198065d0fba2a81f37e10ed68161ce2c19a754c7100e67e0ca2ee9c326",
+    "run/adapter/tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "run/adapter/tokenizer_config.json": "ab6bf168ef9bf5117d62a45011a97b78f0f2e25af6901225508fcc55f6fcdade",
+    "run/adapter/training_args.bin": "e3068ab97ca4c5ab186c465ed7cbee7dc75dd5d3606285bb5b3bbf9e7e77a6d1"
+  }
+}

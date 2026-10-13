@@ -1,0 +1,56 @@
+{
+  "version": "eval-v3-release-v1",
+  "split": "development",
+  "rows": 200,
+  "sha256": "e86bcd5aff7bfcd0000a43c03f092d77e5721467679371d9c935aedf094e87fc",
+  "v2_sha256": "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4",
+  "created_utc": "2026-10-11T23:27:54.364696+00:00",
+  "counts": {
+    "verified_candidates": 368,
+    "quality_eligible": 353,
+    "selected": 200,
+    "deficits": {},
+    "rejected": {
+      "question_quality": 15
+    },
+    "topic_eligible": {
+      "accounting": 34,
+      "debug": 54,
+      "dependencies": 42,
+      "job_control": 27,
+      "multi_constraint": 51,
+      "resources": 47,
+      "output_mail": 55,
+      "queue_cancel": 43
+    },
+    "quality_gate_version": "eval-v3-quality-gate-v2-none-sentinel"
+  },
+  "topics": {
+    "dependencies": 30,
+    "accounting": 30,
+    "job_control": 25,
+    "output_mail": 25,
+    "resources": 30,
+    "queue_cancel": 20,
+    "multi_constraint": 20,
+    "debug": 20
+  },
+  "tasks": {
+    "howto": 63,
+    "debug": 46,
+    "script": 57,
+    "concept": 34
+  },
+  "source_holdout_sha256": "441079fdae29f843e7d9b177bf7d50fb5b0119b21ded649435ef6c1f85c01c0b",
+  "evidence_path": "research/eval_v3/release_evidence.json",
+  "evidence_sha256": "be7fad7cb661d76215830ae63b498c1368f7249d16f32045d93cac1924a1b1fb",
+  "human_review": false,
+  "selection": "fixed topic quotas and deterministic task cycling; no model scores consulted",
+  "judge_protocol": "paired-orders-v2-invalid-incomplete",
+  "limitations": [
+    "Historical B6 source exposure is audited, not reversed.",
+    "Question and reference reviews are fallible model judgments.",
+    "Shared sources induce correlation; 200 items do not imply 200 independent trials.",
+    "This is normal QA evaluation; the existing tool evaluation remains separate."
+  ]
+}

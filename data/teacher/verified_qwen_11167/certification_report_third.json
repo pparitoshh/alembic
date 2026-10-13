@@ -1,0 +1,32 @@
+{
+  "version": "automated-newdocs-qna-certificate-v2",
+  "utc": "2026-10-10T20:03:51.971405+00:00",
+  "status": "AUTOMATED_GATE_CERTIFIED",
+  "supersedes_report_sha256": "6859ea666248e7ae4954779d14b0b8a2039704c06e76d8f836db357d2b69ea20",
+  "secondary_audit_report_sha256": "c4eeebea58eeeadddfc1462647dcb10f56a470099ebfdb79695b88109e8afbb1",
+  "input_questions": 2097,
+  "base_accepted": 8450,
+  "new_verified_under_automated_gate": 1286,
+  "combined": 9736,
+  "withheld": 811,
+  "new_withheld_by_secondary_or_spotcheck": {
+    "independent_high_risk_review_not_passed": 181
+  },
+  "accepted_new_sha256": "7bb2c2dc9a7cc0e5e9707252bcff7997b78bf02c99a80eccbe953d4c1bdfe79d",
+  "combined_sha256": "6289f0df605416e280c12123033a2d59d9a7ee0aa0754c2132c28e255333756a",
+  "lineage_sha256": "509531747a23f122cdd7a1b44084e5fe0a9b405c84192c0c00924222b671f7fd",
+  "decisions_sha256": "e12c941ef8e14ff5e00c8ae33ac2dd4e491aa73146e7b7c915e0e7562f361eea",
+  "teacher": "Qwen/Qwen3-32B-AWQ",
+  "independent_llm_gate": "google/gemma-4-26B-A4B-it",
+  "high_risk_second_llm_gate": "openai/gpt-oss-20b",
+  "real_trl_loader_checked": 1286,
+  "all_padding_masked": true,
+  "limitations": [
+    "LLM reviewers can miss factual errors; this is not exhaustive human review.",
+    "License-file preflight and pinned acquisition hashes are inherited; original source files are not recopied into this CPU job.",
+    "Lexical retrieval plus two model novelty judgments do not prove absence of all semantic duplicates.",
+    "No student-improvement result or live cluster command execution is implied.",
+    "Higher-risk code, API and quantitative answers received a second model check; both models can still err.",
+    "Known Dask scheduling-overhead and RAJA kernel-policy capabilities were quarantined after sampled false approvals."
+  ]
+}
