@@ -1,6 +1,6 @@
 # DistillKit: status report for the mentor
 
-As of 13 October 2026, 11:00. Team Alembic. Mentor: Simeon Harrison.
+As of 13 October 2026, 11:30. Team Alembic. Mentor: Simeon Harrison.
 
 ## 1. Where we stand
 
@@ -14,10 +14,12 @@ Our main diagnosis comes from how the test was designed. All 66 test questions a
 deliberately kept out of training: job arrays and requeue/signals. Fine-tuning made the student shorter and more
 confident. On topics it was never taught, that confidence shows up as invented `sbatch` flags and wrong facts.
 
-Two things we have never measured, both running today (section 6):
+**New (13 Oct): the student also loses on topics it was trained on.** On eval v3 (200 questions on trained topics,
+source chunks locked out of training), B6 scores **0.427** (seeds 0.431 / 0.434 / 0.415). The held-out design explains
+part of the gap, but not all of it: the training method itself is not yet producing a better model.
 
-- whether the student beats the base on topics it **was** trained on (eval v3, 200 questions);
-- whether the teacher itself beats the base. If it doesn't, copying the teacher cannot get the student above 0.5.
+Still unmeasured, running today (section 6): B7 on eval v3, and whether the teacher itself beats the base. If the
+teacher doesn't, copying it cannot get the student above 0.5.
 
 ## 2. How the system works
 
@@ -112,12 +114,37 @@ every block about arrays, requeue, signals and preemption.
 Weakest question types (B7 score, where 0.5 means even): array how-to 0.21, requeue debug 0.26, requeue script 0.31.
 Concept questions are about even, at 0.49–0.50.
 
+**5. Trained topics too (eval v3, B6, Vaibhav's run).** On 200 questions from topics in our training data:
+
+| Evaluation | Seed 42 | Seed 1 | Seed 2 | Mean |
+|---|---|---|---|---|
+| v2: 66 questions, held-out topics | 0.394 | 0.386 | 0.326 | 0.369 |
+| v3: 200 questions, trained topics | 0.431 | 0.434 | 0.415 | **0.427** |
+
+| v3 topic | Questions | Student score (0.5 = even) |
+|---|---|---|
+| Multi-constraint scripts | 20 | 0.74 |
+| Resources | 30 | 0.53 |
+| Job control | 25 | 0.50 |
+| Queue/cancel | 20 | 0.43 |
+| Accounting | 30 | 0.41 |
+| Dependencies | 30 | 0.36 |
+| Debugging | 20 | 0.33 |
+| Output/mail | 25 | 0.16 |
+
+The student wins clearly on writing multi-constraint job scripts, but loses on output/mail options, debugging
+and dependencies. Those are the same areas where it invents flags. Its deterministic check pass rate is higher than
+the base's (0.923 vs 0.885), but that did not turn into wins with the judge. B6 saw 910 records from v3's source chunks
+before the guard existed, so for B6 this is a development comparison, not a blind test. B7 is clean.
+
 ## 5. Bottlenecks
 
-**Evaluation (the biggest one)**
-- The only headline metric is about unseen topics. It mixes "didn't learn it" with "was never taught it".
-- 66 questions give a ±0.12 margin, so the steps between rounds are within noise.
-- We have no trained-topic score and no teacher-vs-base score yet.
+**Evaluation**
+- Until 13 Oct the only headline metric was about unseen topics. It mixed "didn't learn it" with "was never taught
+  it". Eval v3 (trained topics) is now the headline metric for training runs; v2 stays as the unseen-topics guardrail.
+- 66 questions give a ±0.12 margin, so the steps between rounds on v2 are within noise. v3's 200 questions are tighter
+  (B6 seed spread ±0.01).
+- We have no teacher-vs-base score yet.
 
 **Method**
 - Training is plain fine-tuning on teacher text only. There is no preference training and no distillation of the
@@ -144,8 +171,8 @@ Concept questions are about even, at 0.49–0.50.
 
 | Job | What it answers | Status (11:00) |
 |---|---|---|
-| B7 on eval v3, 3 seeds (60276546) | Does the student beat the base on topics it was trained on? | running |
-| B6 on eval v3, 3 seeds (60276547) | Same, for the previous round | running |
+| B7 on eval v3, 3 seeds (60276546) | Does the larger, clean B7 data beat the base on trained topics? (B6: 0.427) | running |
+| B6 on eval v3, 3 seeds (60276547) | Re-check of Vaibhav's B6 v3 run | running |
 | Teacher answers on both test sets (60276548) | Does the 32B teacher even beat the 4B base? (judging follows) | running |
 | B7 with its learned changes at 30 / 50 / 70% (60276549) | Does a weaker adapter keep the gains but lose less of what the base knew? | running |
 | B8a gentle retrain, 3 seeds (60276743) | lr 2e-5, rank 8, half an epoch, same data | training, eval queued |
@@ -156,7 +183,7 @@ Ordered cheapest first. The first three are already running.
 
 | # | Option | What it fixes | Cost | Notes |
 |---|---|---|---|---|
-| 1 | Score on trained topics (eval v3) | Tells us whether distillation works at all | 1 h GPU | running |
+| 1 | Score on trained topics (eval v3) | Tells us whether distillation works at all | 1 h GPU | B6 done (0.427, loses); B7 running |
 | 2 | Teacher vs base | Tells us the best result we can hope for | 1 h GPU | running |
 | 3 | Scale the adapter down to 0.3–0.7 (WiSE-FT style) | Forgetting of the base model's knowledge | no training | running |
 | 4 | Gentler training (low lr, rank 8, early stop) | Forgetting, overconfidence | 1.5 h | running as B8a |
@@ -171,13 +198,14 @@ Ordered cheapest first. The first three are already running.
 Changing the training framework itself (Unsloth, Axolotl, LLaMA-Factory) would make runs faster or simpler, but by
 itself it wouldn't change the win rate. The levers that matter are the evaluation, the data and the training method.
 
-**Our current plan:** read results 1–4 today. If the student also loses on trained topics, go to 7 (DPO) and 5/6. If
-the teacher doesn't beat the base, switch the main effort to 10 (RAG).
+**Our current plan:** B6 already loses on trained topics (0.427), so the method has to change, not only the topic
+coverage. Next: 7 (DPO against invented flags) and 5/6 (fuller answers, data mixing), targeted at output/mail,
+debugging and dependencies. If the teacher doesn't beat the base, switch the main effort to 10 (RAG).
 
 ## 8. Questions for the mentor
 
-1. Is "beat the base on held-out topics" the right goal? Should we instead aim to win on trained topics (eval v3)
-   without getting worse on held-out ones?
+1. We now use "beat the base on trained topics (v3) without getting worse on held-out ones (v2)" as the goal, instead
+   of "beat the base on held-out topics". Do you agree?
 2. Is adding RAG over the Slurm docs acceptable within the hackathon scope, or must the gain come from the model alone?
 3. With the remaining days, which method would you put effort into: DPO against invented flags, or on-policy
    distillation?
