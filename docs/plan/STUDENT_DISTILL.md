@@ -110,6 +110,41 @@ binding in `data/eval/dataset_v1/manifest.json` do not change again.
 
 Compare 3 models for each seed: base model, B7 x0.2 and B7 x0.2 + DPO.
 
+## Length analysis
+
+Measured on 13 October 13:10 (`runs/scaled_eval/*_answers.json`). Median answer length in characters:
+
+| Model | v2 | v3 |
+|---|---|---|
+| Base model | 1,381 | – |
+| x0.1 (seed 42 / seed 1) | 1,287 / 1,226 | 1,542 / 1,526 |
+| x0.2 (seed 1) | 1,048 | 1,272 |
+| x0.3 (seed 1) | 632 | 884 |
+| x0.4 (seed 1) | 530 | 786 |
+| B7 (x1.0) | 313 | – |
+
+1. The answers become longer when the scale becomes smaller. At x0.1 the length is almost the base length.
+2. The win rate also increases when the scale becomes smaller. Thus, a part of the x0.2 win can come from
+   the longer answers, not from better facts.
+3. On B7, the length had no constant relation to the result (mentor report, section 4.2). We did not test
+   this on the scaled models.
+
+Analysis to do when the judge results of x0.1 and D4 are complete:
+
+1. For each model and question, record the student length, the base length and the judge score.
+2. Calculate the win rate in length bins (student length / base length: < 0.5, 0.5–1, > 1).
+3. Calculate the correlation between the length ratio and the score.
+4. Calculate the key-term coverage (fraction of the reference answer key terms), as in section 4.2 of the
+   mentor report.
+5. Record the median length for all experiments (D0 to D5) in the results table.
+
+Decision rule:
+
+| Result | Conclusion | Action |
+|---|---|---|
+| The score follows the length, and the coverage does not increase | The win comes from the length | Short training answers are the main problem. D2, D3 and D5 use the same answers, so they cannot fix it. Plan new data with full answers. |
+| The coverage increases with the score | The win comes from more facts | Continue with D2, D3 and D5. |
+
 ## Phase 2 (only if D2, D3 or D5 gives a result above 0.5)
 
 | # | Name | Change | Note |
