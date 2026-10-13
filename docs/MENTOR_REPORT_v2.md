@@ -2,7 +2,7 @@
 
 Date: 13 October 2026, 12:10. Team: Alembic. Mentor: Simeon Harrison.
 
-This version of the report uses ASD-STE100 Simplified Technical English. Version 1 is `docs/MENTOR_REPORT.md`.
+This version of the report uses ASD-STE100 Simplified Technical English.
 
 ## Terms
 
