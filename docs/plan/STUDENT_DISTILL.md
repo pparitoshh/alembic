@@ -227,6 +227,24 @@ Findings:
 Decision (rule above): the coverage increases with the score, and the length does not. The win comes from the facts.
 Continue with D2, D3 and D5. Full training (B7) loses base facts (coverage 0.61 → 0.53). Scaling keeps them.
 
+## Release: x0.2 on Hugging Face (13 October)
+
+Public model: https://huggingface.co/gparitosh007/hpc-assistant-x0.2-gguf
+
+| Item | Value |
+|---|---|
+| Model | x0.2 = B7 seed 42 at 20%: `W_base + 0.2 × (W_B7 − W_base)` |
+| File | `model-Q4_K_M.gguf`, 2.50 GB, sha256 `263c1204e421f27b0bbf7bf0d0ded04f6fa5dc2fba5d9b923e713f04490136d6` |
+| Build | `research/x02_export/x02_export.sbatch` (job 60340010): `scaled_merge.py`, then `distillkit export` with Q4_K_M only |
+| Quantization | llama.cpp b11392, no importance matrix (the Leonardo llama.cpp build is CPU-only; the imatrix over all training text takes days) |
+| Model card | `research/x02_export/MODEL_CARD.md` (the same file as `README.md` on Hugging Face) |
+| Run | `ollama run hf.co/gparitosh007/hpc-assistant-x0.2-gguf:Q4_K_M` |
+
+Notes:
+
+1. `me.env` sets `LLAMA_CPP` to `$WORK/alembic/tools/llama.cpp`, which does not exist. Set `LLAMA_CPP=$WORK/tools/llama.cpp`.
+2. Local Ollama test (temperature 0.7): the model runs. In the test answer, it invented `scontrol cancel`.
+
 ## Phase 2 (only if D2, D3 or D5 gives a result above 0.5)
 
 | # | Name | Change | Note |
