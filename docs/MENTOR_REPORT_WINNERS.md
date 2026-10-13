@@ -20,21 +20,21 @@ that win against the base model, and the teacher model for comparison.
 
 All values are means of 3 seeds (42, 1 and 2). A model is in this table if its v3 win rate is more than 0.5.
 
-| Model | Method | v2 win rate | v3 win rate | v3 seeds | v3 median length (characters) | v3 coverage |
-|---|---|---|---|---|---|---|
-| Base model | No training | 0.50 | 0.50 | – | 1,619 | 0.61 |
-| **Teacher model** | Qwen3-32B-AWQ (the source of the training data) | **0.689** | **0.585** | – | – | – |
-| **x0.2** | B7 adapter at 20%: W = base + 0.2 × (B7 − base). No new training | 0.481 | **0.528** | 0.533 / 0.511 / 0.541 | 1,220 | 0.61 |
-| **D3** | Training with a KL penalty to the base model: CE + 0.1 × KL(student ‖ base), 12,892 good-quality examples | 0.442 | **0.525** | 0.499 / 0.525 / 0.550 | 973 | 0.62 |
-| x0.1 | B7 adapter at 10% | 0.481 | 0.522 | – | 1,526 | 0.60 |
-| x0.3 | B7 adapter at 30% | 0.443 | 0.510 | – | 886 | 0.60 |
+| Model | Method | v2 win rate | v3 win rate | v3 median length (characters) | v3 coverage |
+|---|---|---|---|---|---|
+| Base model | No training | 0.50 | 0.50 | 1,619 | 0.61 |
+| **Teacher model** | Qwen3-32B-AWQ (the source of the training data) | **0.689** | **0.585** | – | – |
+| **x0.2** | B7 adapter at 20%: W = base + 0.2 × (B7 − base). No new training | 0.481 | **0.528** | 1,220 | 0.61 |
+| **D3** | Training with a KL penalty to the base model: CE + 0.1 × KL(student ‖ base), 12,892 good-quality examples | 0.442 | **0.525** | 973 | 0.62 |
+| x0.1 | B7 adapter at 10% | 0.481 | 0.522 | 1,526 | 0.60 |
+| x0.3 | B7 adapter at 30% | 0.443 | 0.510 | 886 | 0.60 |
 
 For comparison, full training (B7) has v2 0.398, v3 0.438 and v3 coverage 0.53.
 
 ## Findings
 
 1. No student model wins on v2. On these topics, the training data has no facts, so the best possible result is near 0.5.
-2. x0.2 and D3 win on v3 by approximately 0.03. The seed range of D3 is 0.499 to 0.550, so this win is small.
+2. x0.2 and D3 win on v3 by approximately 0.03. This win is small.
 3. Both winners keep the key terms of the base model (coverage 0.61 to 0.62). Full training (B7) loses them (0.53).
 4. The win does not come from longer answers. In each model, the answer length does not predict the judge score
    (Spearman rho -0.14 to 0.08). The coverage predicts it (rho 0.14 to 0.44).
