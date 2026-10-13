@@ -49,6 +49,14 @@ def test_kd_targets_shift_by_one_and_skip_unmatched():
     assert ids.tolist() == [[5, 105], [6, 106]]
 
 
+def test_kd_targets_cut_at_stop_token_with_trailing_newline():
+    # TRL's assistant mask: answer tokens, <|im_end|> (9 here), then the newline token (198)
+    table = {(5, 6): (np.array([[5, 105], [6, 106]]), np.zeros((2, 2), np.float32))}
+    labels = torch.tensor([[-100, -100, 5, 6, 9, 198]])
+    rows, cols, _, _ = kd_targets(labels, table, STOP)
+    assert rows == [0, 0] and cols == [1, 2]
+
+
 def test_kd_targets_none_when_nothing_matches():
     labels = torch.tensor([[-100, 8, 8, 9]])
     assert kd_targets(labels, {}, STOP) is None

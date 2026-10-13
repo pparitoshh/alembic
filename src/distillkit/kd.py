@@ -53,14 +53,15 @@ def kd_targets(labels, table, stop_ids: set[int]):
     """Positions of the logits that predict matched teacher tokens, with their teacher top-k.
 
     Returns (rows, cols, top ids [N, k], top logprobs [N, k]) or None. The logit at position p-1 predicts
-    the token at p. Trailing stop tokens of a segment (`<|im_end|>`) are not in the teacher row.
+    the token at p. A segment ends at its first stop token (`<|im_end|>`); the teacher row has no stop tokens.
     """
     rows, cols, ids, lps = [], [], [], []
     lab = labels.tolist()
     for b, s, e in assistant_segments(labels):
         seg = lab[b][s:e]
-        while seg and seg[-1] in stop_ids:
-            seg = seg[:-1]
+        # TRL's assistant mask covers `<|im_end|>` and the newline after it: cut at the first stop token
+        cut = next((i for i, t in enumerate(seg) if t in stop_ids), len(seg))
+        seg = seg[:cut]
         hit = table.get(tuple(seg))
         if hit is None or s == 0:
             continue
