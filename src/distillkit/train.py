@@ -33,6 +33,8 @@ def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> 
     if excluded:
         raise ValueError(f'{len(excluded)} training records overlap frozen evaluation sources '
                          f'(examples: {excluded[:5]}). Rerun decontam and build new filtered training inputs.')
+    from .training_quality import require_training_target_quality
+    require_training_target_quality(rows, evidence_dir)
     return rows
 
 
@@ -78,10 +80,17 @@ def resume_checkpoint(ckpt_dir: Path, fingerprint: str) -> str | None:
 
 
 def split_by_document(rows: list[dict], examples: list[dict], fraction: float, seed: int) -> tuple[list[dict], list[dict]]:
-    """(train, validation) examples; whole source documents go to validation until it holds >= fraction."""
+    """Split whole source families, including connected multi-source records.
+
+    With no family metadata, preserve the original document-level split.
+    """
+    if len(rows) != len(examples):
+        raise ValueError('Rows and rendered examples must align')
     if not fraction:
         return examples, []
-    doc = [r.get("doc_id") or r["id"] for r in rows]
+    if not 0 < fraction < 1:
+        raise ValueError('val_fraction must be between zero and one')
+    doc = validation_groups(rows)
     order = sorted(set(doc))
     random.Random(seed).shuffle(order)
     held, n = set(), 0
@@ -95,6 +104,39 @@ def split_by_document(rows: list[dict], examples: list[dict], fraction: float, s
     if not train:
         raise ValueError("val_fraction leaves no training examples")
     return train, val
+
+
+def validation_groups(rows: list[dict]) -> list[str]:
+    """Connected provenance groups; no GPU dependencies or evaluation content."""
+    parent = {}
+
+    def root(key):
+        parent.setdefault(key, key)
+        while parent[key] != key:
+            parent[key] = parent[parent[key]]
+            key = parent[key]
+        return key
+
+    documents = []
+    for row in rows:
+        document = row.get('doc_id') or row['id']
+        documents.append(document)
+        families = row.get('source_families', [])
+        if not isinstance(families, list) or any(not isinstance(f, str) or not f.strip() for f in families):
+            raise ValueError('source_families must be a list of nonempty strings')
+        families = list(families)
+        if row.get('source_family') is not None:
+            family = row['source_family']
+            if not isinstance(family, str) or not family.strip():
+                raise ValueError('source_family must be a nonempty string')
+            families.append(family)
+        for family in families:
+            a, b = root(('document', document)), root(('family', family))
+            if a != b:
+                parent[max(a, b)] = min(a, b)
+    # Document roots sort before family roots, giving a stable representative
+    # independent of row order and retaining legacy grouping when unannotated.
+    return [root(('document', d))[1] for d in documents]
 
 
 ADAPTER_FILES_SKIPPED = {"optimizer.pt", "scheduler.pt", "rng_state.pth", "training_args.bin"}
