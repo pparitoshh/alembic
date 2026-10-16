@@ -86,8 +86,28 @@ class TrainingInputManifestCfg(_Section):
     sha256: str = Field(pattern=r'^[0-9a-f]{64}$')
 
 
+class TrainingDataRequirementsCfg(_Section):
+    """Opt-in task suitability gate, in addition to provenance/quality admission.
+
+    Domain review is a pinned review of the exact selected records. It can be
+    LLM-generated; this schema does not claim that reviewer judgments are true.
+    """
+    domain_review: TrainingInputManifestCfg
+    min_tool_fraction: float = Field(0.25, ge=0, le=1)
+    max_tool_fraction: float = Field(0.35, ge=0, le=1)
+    required_modes: list[Literal['call', 'ask', 'none']] = ['call', 'ask', 'none']
+    required_tasks: list[str] = ['concept', 'howto', 'script', 'debug']
+
+    @model_validator(mode='after')
+    def _ordered_fractions(self):
+        if self.min_tool_fraction > self.max_tool_fraction:
+            raise ValueError('min_tool_fraction must not exceed max_tool_fraction')
+        return self
+
+
 class TrainCfg(_Section):
     input_manifest: TrainingInputManifestCfg | None = None
+    data_requirements: TrainingDataRequirementsCfg | None = None
     method: Literal["lora", "dora"] = "lora"
     load_in_4bit: bool = False  # QLoRA / QDoRA: bitsandbytes NF4 base weights
     lora_r: int = 16

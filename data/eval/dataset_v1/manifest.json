@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995"
+      "sha256": "9d02bd8eb487d7afc72f58c5a31b6d901b8e4005a46109f3c74b40d1d8ba64f5"
     },
     {
       "root": "repository",
@@ -798,6 +798,30 @@
         "full_failure": "Strict151 release validation refused prior config.py hash."
       },
       "validation_scope": "Metadata-only binding update is followed by the full suite."
+    },
+    {
+      "version": "optional-training-suitability-binding-v1",
+      "created_utc": "2026-10-16T21:23:27.033968+00:00",
+      "base_revision": "514821aabc725270eeb6a5c6ab566aee1df394c4",
+      "previous_manifest_sha256": "e7b05db1cc29b5c5d2f737c22a013dcdada7a88dda6f1aac9f3247d841065860",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995",
+          "after": "9d02bd8eb487d7afc72f58c5a31b6d901b8e4005a46109f3c74b40d1d8ba64f5"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add an optional exact-record training suitability review and coverage policy; retain the previous config binding and full history.",
+      "compatibility": "EvalCfg, evaluation scripts, tool schemas, questions, references, calibration and scoring fixtures are unchanged. The new Slurm option-value checks default off for evaluation and on for training verification. Absent data_requirements preserves historical training fingerprints.",
+      "pre_binding_validation": {
+        "passed": 1020,
+        "skipped": 9,
+        "failed": 1,
+        "failure": "Exact release validator detected the expected config.py binding change."
+      },
+      "validation_scope": "The full CPU suite is rerun after this binding update; no model quality or GPU result is claimed."
     }
   ]
 }

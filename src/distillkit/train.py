@@ -33,6 +33,9 @@ def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> 
     if excluded:
         raise ValueError(f'{len(excluded)} training records overlap frozen evaluation sources '
                          f'(examples: {excluded[:5]}). Rerun decontam and build new filtered training inputs.')
+    if cfg.train.data_requirements is not None:
+        from .data_profile import enforce_requirements
+        enforce_requirements(rows, cfg.train.data_requirements, evidence_dir=evidence_dir)
     return rows
 
 
@@ -57,6 +60,8 @@ def length_report(lengths: list[int], max_length: int) -> str:
 def inputs_fingerprint(cfg: Config, examples: list[dict]) -> str:
     """What a checkpoint was trained on; resuming with other data or settings would mix two runs."""
     train = cfg.train.model_dump(mode="json", exclude={"save_steps", "save_total_limit", "report_to"})
+    if train.get('data_requirements') is None:
+        train.pop('data_requirements', None)  # preserve fingerprints of historical runs
     blob = json.dumps({"examples": examples, "student": cfg.student.model, "train": train},
                       sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode()).hexdigest()
