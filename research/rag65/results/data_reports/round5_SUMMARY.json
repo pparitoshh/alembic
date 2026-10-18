@@ -1,0 +1,31 @@
+{
+  "rows": 58537,
+  "base_set": "runs/rag65v4/data/verified.jsonl",
+  "by_origin": {
+    "b7": 17579,
+    "ccby_v1": 1016,
+    "ccby_v2": 816,
+    "factory_v1": 22695,
+    "factory_v2": 16431
+  },
+  "by_licence": {
+    "b7/ccby-existing": 19411,
+    "unspecified": 23659,
+    "CC-BY-4.0": 9126,
+    "AGPL-3.0": 34,
+    "GPL-3.0": 709,
+    "CC-BY-NC-SA-4.0": 2642,
+    "Apache-2.0": 537,
+    "MIT": 1123,
+    "BSD-3-Clause": 478,
+    "CC0-1.0": 815,
+    "LGPL-3.0": 3
+  },
+  "closed_book_factory_rows": {
+    "factory_v1": 3258,
+    "factory_v2": 2480
+  },
+  "closed_share_percent": 35,
+  "tool_fraction": 0.202,
+  "sha256": "08fb02c67a3933a177332bd29358a7f32a36cf170198cd8a084029fea6a832f2"
+}
