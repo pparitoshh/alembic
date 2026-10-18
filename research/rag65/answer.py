@@ -30,7 +30,16 @@ for label, path in [('v2', 'data/eval/eval_all_v2.jsonl'), ('v3', 'data/eval/eva
         client = Teacher(cfg.teacher)
         for variant in ['closed', 'rag']:
             dest = out / f'{label}__{name}_{variant}.jsonl'
-            done = {json.loads(x)['id'] for x in dest.read_text().splitlines()} if dest.exists() else set()
+            done = set()
+            if dest.exists():  # a job killed at its time limit can leave a partial last line
+                good = []
+                for x in dest.read_text().splitlines():
+                    try:
+                        done.add(json.loads(x)['id'])
+                        good.append(x)
+                    except (ValueError, KeyError):
+                        pass
+                dest.write_text(''.join(g + '\n' for g in good))
             todo = [r for r in rows if r['id'] not in done]
 
             def one(r):
@@ -42,4 +51,5 @@ for label, path in [('v2', 'data/eval/eval_all_v2.jsonl'), ('v3', 'data/eval/eva
             with dest.open('a') as f:
                 for result in client.map(one, todo):
                     f.write(json.dumps(result) + '\n')
+                    f.flush()
             print(label, name, variant, 'answers', len(rows), flush=True)
