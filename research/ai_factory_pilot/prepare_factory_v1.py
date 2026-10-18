@@ -5,6 +5,10 @@ Every European AI Factory (and EuroHPC JU, CINECA) page plus HPC example reposit
 Each source document carries a licence tag (CC-BY-4.0, CC-BY-NC-SA-4.0, a repository licence, or
 'unspecified'); the merge copies it into every row so a public release can keep only permissive rows.
 Development and evaluation sources (EXCLUDE_URLS, slurm.schedmd.com) never enter.
+FINAL=1 (BATCH=ai_factory_all_v4) asks two more questions about every relevant chunk from a third, disjoint
+angle set, prose and ask-back only: those modes verify best (28% and 49% vs 9-22% for tool calls).
+COVERAGE=1 (BATCH=ai_factory_all_v3) covers what batches 1-2 left out: only chunks they never used, with
+a looser relevance bar (score >= 2: still HPC terms or code), so no source chunk is asked about twice.
 TOPUP=1 builds the second batch (BATCH=ai_factory_all_v2): same chunks, new question angles and variant
 numbers, and an ask-heavy tool mix, since batch 1 showed ask rows verify best and no-tool rows worst.
 """
@@ -27,6 +31,8 @@ ARCHIVE, EXCLUDE = Path(sys.argv[1]), Path(sys.argv[2])
 TARGET, SHARDS = int(sys.argv[3]), int(sys.argv[4])
 BATCH = os.environ.get('BATCH', 'ai_factory_all_v1')
 TOPUP = os.environ.get('TOPUP') == '1'
+COVERAGE = os.environ.get('COVERAGE') == '1'
+FINAL = os.environ.get('FINAL') == '1'
 OUT = REPO / 'runs' / BATCH
 ROUND = os.environ.get('ROUND', 'ai-factory-all-1')
 if OUT.exists():
@@ -142,7 +148,11 @@ if TOPUP:  # disjoint from batch 1 so the two batches do not ask the same thing
     ANGLES = ['interpreting an error message or unexpected output', 'choosing between two documented options',
               'estimating or requesting the right resources', 'a first-time user setting this up from scratch',
               'moving an existing workflow onto this system', 'performance or efficiency of the setup']
-VARIANT_BASE = 3 if TOPUP else 0
+if FINAL:  # disjoint from batch 1 and the top-up
+    ANGLES = ['troubleshooting a job that fails, hangs or is killed', 'permissions, security and shared access',
+              'moving data in and out and staying within storage limits', 'how compute time is accounted and budgeted',
+              'the practice the site recommends and why', 'adapting a laptop or workstation workflow to the cluster']
+VARIANT_BASE = 6 if FINAL else 3 if TOPUP else 0
 chunks = []
 for d in documents:
     for i, text in enumerate(chunk_text(d['text'], 2200)):
@@ -155,7 +165,7 @@ for d in documents:
         score = tech + 3 * code
         if services:
             score = max(score, len({m.lower() for m in ACCESS.findall(text)}))
-        if score < (4 if not services else 3):
+        if score < (2 if COVERAGE or FINAL else 4 if not services else 3):
             continue
         chunks.append((score, d, i, text, code, services))
 chunks.sort(key=lambda c: (-c[0], c[1]['url'], c[2]))
@@ -166,6 +176,18 @@ for c in chunks:
     if key not in seen_chunk:
         seen_chunk.add(key)
         unique.append(c)
+if COVERAGE:  # drop every chunk an earlier batch planned (same chunking, same doc ids, same text keys)
+    used_ids, used_text = set(), set()
+    for plan in (REPO / 'runs').glob('ai_factory_all_v[12]/shard_*/scenario_plan.json'):
+        for e in json.loads(plan.read_text())['entries']:
+            used_ids.add(e['chunk_id'])
+    for c in unique:
+        host = urlparse(c[1]['url']).netloc.split(':')[0].replace('.', '-')
+        if 'fac_%s_%s#%d' % (host[:40], c[1]['sha'][:16], c[2]) in used_ids:
+            used_text.add(re.sub(r'\s+', ' ', c[3].lower())[:1500])
+    before = len(unique)
+    unique = [c for c in unique if re.sub(r'\s+', ' ', c[3].lower())[:1500] not in used_text]
+    print('coverage: %d relevant chunks, %d already used by batches 1-2, %d new' % (before, before - len(unique), len(unique)))
 tool_sources = [c for c in unique if SLURM.search(c[3]) and not c[5]]
 prose_budget = round(TARGET * 0.7)
 variants = max(1, min(3, -(-prose_budget // max(1, len(unique)))))
@@ -217,12 +239,15 @@ for n, (score, d, i, text, code, services) in enumerate(c for c in selected for 
 
 MODES = ['call', 'none', 'call', 'ask', 'none', 'call', 'ask', 'none', 'call', 'none']
 tool_count = min(round(len(entries) * 3 / 7), len(tool_sources) * 6)
-if TOPUP:
+if FINAL:
+    MODES = ['ask'] * 10
+    tool_count = min(round(len(entries) * 0.1), len(tool_sources) * 3)
+elif TOPUP or COVERAGE:
     MODES = ['ask', 'call', 'ask', 'call', 'ask', 'none', 'ask', 'call', 'ask', 'call']
     tool_count = min(round(len(entries) * 0.25), len(tool_sources) * 3)
 for n in range(tool_count):
     _, d, i, text, _, _ = tool_sources[n % len(tool_sources)]
-    variant = n // len(tool_sources) + (40 if TOPUP else 30)
+    variant = n // len(tool_sources) + (60 if FINAL else 50 if COVERAGE else 40 if TOPUP else 30)
     mode = MODES[(n + variant) % 10]
     task = ['howto', 'debug'][variant % 2]
     doc_id = doc_by_id[d['sha']]

@@ -24,6 +24,9 @@ train = [
     "bitsandbytes>=0.45",
     "mlflow-skinny>=3.0",   # report_to: [mlflow] and the `track` stage; `mlflow ui` needs full mlflow
 ]
+assistant = [
+    "pypdf>=4",   # hpc-assistant --add manual.pdf
+]
 export = [
     "protobuf>=7.36.2",
     "requests>=2.34.2",
@@ -33,6 +36,7 @@ export = [
 
 [project.scripts]
 distillkit = "distillkit.cli:main"
+hpc-assistant = "distillkit.assistant:main"
 
 [build-system]
 requires = ["hatchling"]
