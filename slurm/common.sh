@@ -24,7 +24,7 @@ job_port() {
 # The server is stopped when the job script exits.
 start_vllm() {
     local model="$1" port="$2"; shift 2
-    local log="slurm/logs/vllm-${SLURM_JOB_ID:-local}-${port}.log"
+    local log="slurm/logs/vllm-${SLURM_JOB_ID:-local}-$(hostname -s)-${port}.log"
     echo "[job] starting vLLM: $model on 127.0.0.1:$port (log: $log)"
     "$VLLM_VENV/bin/vllm" serve "$model" --host 127.0.0.1 --port "$port" "$@" >"$log" 2>&1 &
     VLLM_PIDS="${VLLM_PIDS:-} $!"

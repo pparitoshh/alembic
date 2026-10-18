@@ -131,11 +131,16 @@ def source_for_records(cfg, rows):
     return sources
 
 
-def request_review(reviewer, row, source, *, protocol=PROTOCOL):
-    """One explicit review request; raw response retained, no silent semantic retries."""
+def request_review(reviewer, row, source, *, protocol=PROTOCOL, **retry):
+    """One explicit review request; raw response retained, no silent semantic retries.
+
+    v3 only: `retry` (temperature, attempt) marks the single, recorded redo of a review that broke the
+    protocol by calling a unit supported without citing evidence (see review.run)."""
     if protocol == 'source-support-v3':
         from .support_v3 import request_review as request_v3
-        return request_v3(reviewer, row, source)
+        return request_v3(reviewer, row, source, **retry)
+    if retry:
+        raise ValueError('review retries are only defined for source-support-v3')
     if protocol == 'source-support-v2':
         from .support_v2 import request_review as request_v2
         return request_v2(reviewer, row, source)

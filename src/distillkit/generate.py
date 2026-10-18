@@ -28,8 +28,8 @@ from .job_status_guard import (WORKFLOW_RULES, WORKFLOW_VERSION, JobStatusPolicy
                                clarification_response, guard_result, target_error)
 from .tools import MOCK_VERSION, PARTITIONS, SCHEMAS, ToolError, execute, mock_session, parse_arguments, set_valid_flags
 
-PROMPT_VERSION = "source-grounded-v9-scoped-prose-complete-question"
-CONTEXT_PROMPT_VERSION = "source-grounded-v10-bound-input-context"
+PROMPT_VERSION = "ai-factory-pilot-v1-complete-supported-answer"
+CONTEXT_PROMPT_VERSION = "ai-factory-pilot-v1-bound-source-context"
 QUESTION_CHECK_VERSION = "question-code-fence-v1"
 CONTEXT_QUESTION_CHECK_VERSION = "question-code-fence-v2-raw-and-composed"
 
@@ -109,8 +109,9 @@ without identifying it, so clarification is necessary. A general conceptual ques
 an optional filter is insufficient if an unfiltered lookup answers the question. Relate the request to the source.""",
 }
 
-A_SYSTEM = f"""You are an expert HPC assistant. Answer concisely and correctly. Prompt version: {PROMPT_VERSION}.
-- Keep it short and direct: a few sentences, plus at most one script or command block.
+A_SYSTEM = f"""You are an expert HPC assistant. Answer clearly and correctly. Prompt version: {PROMPT_VERSION}.
+- Answer the complete requested scope. Include supported prerequisites, commands, explanations and checks when needed; do not impose a sentence count or pad the answer.
+- Keep site-specific facts attributed to the named cluster. If the cluster is missing and the answer depends on it, ask which cluster. Do not transfer LUMI settings to Leonardo or another site.
 - Put scripts and commands in fenced code blocks.
 - Use the supplied source for general technical facts, commands and syntax. Use current tool schemas and actual results for tool capabilities and observed cluster facts.
 - User values specify requirements, not proof of a diagnosis. Do not supplement the evidence with remembered commands, cluster defaults or unsupported assumptions.
