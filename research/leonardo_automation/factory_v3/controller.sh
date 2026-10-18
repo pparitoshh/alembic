@@ -54,21 +54,26 @@ while true; do
     njobs=$(grep -c . <<< "$jobs")
     used=$(awk '{s += $2} END {print s + 0}' <<< "$jobs")
     rag_pending=$(remote "squeue --me -h -t PD -o %j" | grep -c 'rag65')
-    nodes=$(( 8 - used ))
+    # At most 5 nodes: the round controller's 3-node training job must always fit in the 8-node QoS limit,
+    # including in the gap between two training pieces.
+    nodes=$(( 8 - used )); [ $nodes -gt 5 ] && nodes=5
     # While batch 1 is unmerged, take only the second slot: never the one batch 1 (and round 4) needs.
     v1_done=0; grep -q ' MERGED: ' "$HERE/../factory_v1/controller.log" && v1_done=1
     v1_jobs=$(ls "$HERE/../factory_v1/inflight" 2>/dev/null | wc -l)
     # The top-up owns the second slot until it has nothing left in flight or pending.
     v2_busy=1
     grep -q 'all shards finished or exhausted' "$HERE/../factory_v2/controller.log" 2>/dev/null && v2_busy=0
-    if [ -z "$(ls "$HERE"/inflight)" ] && [ "$njobs" -lt 2 ] && [ "$rag_pending" -eq 0 ] && [ $nodes -ge 2 ] \
+    # ctl/PRIORITY (ctl/priority_submit.sh) reserves the next free debug slot for a one-off job.
+    # Both debug slots when no round job is queued or running (e.g. overnight between round 4 and round 5).
+    max_own=1  # never two: a second factory job could take the slot a round controller needs between its jobs
+    if [ ! -e "$HERE/../PRIORITY" ] && [ "$(ls "$HERE"/inflight | wc -l)" -lt $max_own ] && [ "$njobs" -lt 2 ] && [ "$rag_pending" -eq 0 ] && [ $nodes -ge 2 ] \
             && [ $v2_busy = 0 ] && { [ $v1_done = 1 ] || [ "$v1_jobs" -ge 1 ]; }; then
         if [ "$(grep -c . <<< "$rev")" -ge $(( nodes * 4 )) ] || [ -z "$gen" ]; then phase=review; list=$rev; else phase=generate; list=$gen; fi
         list=$(head -n $(( nodes * 4 )) <<< "$list" | grep . | tr '\n' ' ')
         n=$(wc -w <<< "$list")
         if [ "$n" -gt 0 ]; then
             nodes=$(( (n + 3) / 4 ))
-            j=$(remote "cd $C && export REPO=$C BATCH=$BATCH SHARD_LIST='$list' && sbatch --parsable --nodes=$nodes --export=ALL,PHASE=$phase research/ai_factory_pilot/factory_dbg.sbatch" | tail -1)
+            j=$(remote "cd $C && export REPO=$C BATCH=$BATCH SHARD_LIST='$list' && sbatch --parsable --nodes=$nodes --export=ALL,PHASE=$phase,REVIEW_TP=2 research/ai_factory_pilot/factory_dbg.sbatch" | tail -1)
             if [[ "$j" =~ ^[0-9]+$ ]]; then
                 echo "$list" > "$HERE/inflight/$j"
                 for k in $list; do p=${phase:0:1}; echo $(( $(cat "$HERE/attempts/$p$k" 2>/dev/null || echo 0) + 1 )) > "$HERE/attempts/$p$k"; done
@@ -78,10 +83,16 @@ while true; do
             fi
         fi
     fi
-    sleep 120
+    sleep 45  # short gaps between 30-min jobs leave GPUs idle
 done
 
 until test -f $C/runs/ai_factory_all_v2/release/verified.jsonl; do heartbeat; sleep 120; done
+start_merge=$(date +%s)
 remote "cd $C && export BATCH=$BATCH && PYTHONPATH=src HF_HOME=/leonardo_work/EUHPC_D30_031/hf_cache HF_HUB_OFFLINE=1 srun -A EUHPC_D30_031 -p lrd_all_serial -c 4 --mem=30G -t 01:30:00 $VPY research/ai_factory_pilot/merge_factory_v1.py $SHARDS $B7 runs/ai_factory_ccby_v1/release/verified.jsonl runs/ai_factory_ccby_v2/release/verified.jsonl runs/ai_factory_all_v1/release/verified.jsonl runs/ai_factory_all_v2/release/verified.jsonl" > "$HERE/merge.out"
+# MERGED only for a release written by this merge: later stages start from it.
+rel=$C/runs/$BATCH/release/verified.jsonl
+if [ ! -s "$rel" ] || [ "$(stat -c %Y "$rel")" -lt "$start_merge" ]; then
+    log "STOP: merge did not produce a new release: $(tail -5 "$HERE/merge.out" | tr '\n' ' ')"; exit 1
+fi
 cp $C/runs/$BATCH/release/REPORT.json "$HERE/REPORT.json"
 log "MERGED: $(tr -d '\n' < "$HERE/REPORT.json" | head -c 900)"
