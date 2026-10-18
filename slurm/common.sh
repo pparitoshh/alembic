@@ -41,8 +41,14 @@ start_vllm() {
 }
 
 stop_vllm() {
+    # Wait for the servers only (a bare `wait` would also wait for unrelated background jobs), and SIGKILL
+    # any that ignore SIGTERM for 60 s, so a job never hangs until its wall time here.
     for pid in ${VLLM_PIDS:-}; do kill "$pid" 2>/dev/null || true; done
-    wait 2>/dev/null || true
+    for pid in ${VLLM_PIDS:-}; do
+        for _ in $(seq 60); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+        kill -9 "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+    done
     VLLM_PIDS=""
 }
 
