@@ -1,3 +1,3 @@
 #!/bin/bash
-# Started by the round-4 controller after its scores.
-exec "$(cd "$(dirname "$0")" && pwd)/../rag65v5/controller.sh"
+# Round 5 now runs standalone (started when the top-up merged), so round 4 ends here.
+exit 0
