@@ -1,0 +1,17 @@
+{
+  "rows": 19411,
+  "kept_b7_none": 2529,
+  "kept_b7_ask": 1156,
+  "prose_regenerated": 13421,
+  "kept_b7_call": 473,
+  "prose_truncated_or_short": 1879,
+  "prose_failed_checks": 1014,
+  "kept_ccby_v1_prose": 865,
+  "kept_ccby_v1_call": 59,
+  "kept_ccby_v1_ask": 59,
+  "kept_ccby_v1_none": 33,
+  "ccby_v2_rows": 816,
+  "regenerated_median_chars": 2419,
+  "replaced_answers_mean_chars_before": 446,
+  "sha256": "f2195c1d00e1e65223718730f6cce8313ad8eba30844421f01f0e24a39c34a9d"
+}
