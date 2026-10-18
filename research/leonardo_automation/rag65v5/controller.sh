@@ -1,5 +1,5 @@
 #!/bin/bash
-# Round 5: round-4 set + top-up factory release (ai_factory_all_v2) -> train 3 seeds -> scale -> answer -> judge -> aggregate.
+# Round 5: round-4 set + top-up (ai_factory_all_v2) and coverage (ai_factory_all_v3) releases -> train 3 seeds -> scale -> answer -> judge -> aggregate.
 set -uo pipefail
 R=/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017
 C=$R/code
@@ -15,10 +15,11 @@ ENV="cd $C && export PYTHONPATH=src:research/rag65 HF_HOME=/leonardo_work/EUHPC_
 D=runs/rag65v5
 PROSE=16314
 
-log "round 5: waiting for the round-4 scores and the top-up merge"
-until grep -q ' DONE: ' "$HERE/../rag65v4/controller.log" 2>/dev/null && grep -q ' MERGED: ' "$HERE/../factory_v2/controller.log" 2>/dev/null; do heartbeat; sleep 120; done
+log "round 5: waiting for the round-4 scores and the top-up and coverage merges"
+until grep -q ' DONE: ' "$HERE/../rag65v4/controller.log" 2>/dev/null && grep -q ' MERGED: ' "$HERE/../factory_v2/controller.log" 2>/dev/null \
+        && grep -q ' MERGED: ' "$HERE/../factory_v3/controller.log" 2>/dev/null; do heartbeat; sleep 120; done
 if ! remote "test -f $C/$D/data/verified.jsonl && echo ok" | grep -q ok; then
-    remote "$ENV $VPY research/rag65/build_v5.py runs/rag65v4/data/verified.jsonl runs/ai_factory_all_v2/release/verified.jsonl $D/data" > "$HERE/data.out"
+    remote "$ENV $VPY research/rag65/build_v5.py runs/rag65v4/data/verified.jsonl $D/data runs/ai_factory_all_v2/release/verified.jsonl:factory_v2 runs/ai_factory_all_v3/release/verified.jsonl:factory_v3" > "$HERE/data.out"
 fi
 log "DATA: $(tr -d '\n ' < "$HERE/data.out" | head -c 700)"
 remote "cd $C && for s in 42 43 44; do mkdir -p $D/train/seed\$s && cp -n $D/data/verified.jsonl $D/train/seed\$s/; done
@@ -48,10 +49,12 @@ done_n=$(remote "ls $C/$D/train/seed*/TRAINING_DONE.json 2>/dev/null | wc -l" | 
 
 log "scaling adapters"
 remote "$ENV for s in 42 43 44; do for x in 0.5 0.2; do $VPY research/rag65/make_scaled.py $D/train/seed\$s/adapter \$x; done; done && ls $D/train/seed42"
+# Seed soup (exact mean of the three seeds' updates, rank 48), served from seed 42's directory only.
+remote "$ENV for x in 1.0 0.5; do $VPY research/rag65/make_soup.py $D/train/seed42/adapter_soup\$([ \$x = 0.5 ] && echo 05) \$x $D/train/seed42/adapter $D/train/seed43/adapter $D/train/seed44/adapter; done && ls $D/train/seed42"
 
 for round in 1 2 3; do
     n=$(remote "cd $C/$D/answers 2>/dev/null && cat *__s4*.jsonl | wc -l" | tail -1)
-    [ "${n:-0}" -ge $((18 * 372)) ] && break
+    [ "${n:-0}" -ge $((20 * 372)) ] && break  # 3 seeds x 3 strengths x 2 modes + 2 soup arms
     j=$(remote "squeue --me -h -n dk-rag65 -o %i" | head -1)
     if [ -n "$j" ]; then log "answer round $round: adopting running job $j"; else
     j=$(submit --nodes=1 --export=ALL,STAGE=answer research/rag65/stage.sbatch); log "answer round $round: job $j (have ${n:-0} answers)"; fi
@@ -80,6 +83,7 @@ done
 remote "$ENV $VPY research/rag65/aggregate.py $D/judged $D/answers $D/RESULT.json" > "$HERE/aggregate.out"
 pairs=""
 for x in 42 43 44; do pairs="$pairs s${x}_rag:base_rag s${x}_rag:r4s${x}_rag s${x}_x05_rag:base_rag s${x}_x05_rag:r4s${x}_x05_rag s${x}_x05_rag:r3s${x}_x05_rag s${x}_x02_rag:base_rag s${x}_x02_rag:r4s${x}_x02_rag s${x}_closed:r4s${x}_closed s${x}_x02_closed:r4s${x}_x02_closed"; done
+pairs="$pairs s42_soup05_rag:base_rag s42_soup05_rag:s42_x05_rag s42_soup_rag:s42_rag s42_soup05_closed:s42_x05_closed"
 remote "$ENV $VPY research/rag65/paired.py $D/judged $D/PAIRED.json $pairs" > "$HERE/paired.out"
 grep -q '"v3/student_rag"' "$HERE/aggregate.out" || { log "STOP: aggregate failed: $(tail -5 "$HERE/aggregate.out")"; exit 1; }
 log "DONE: $(tr -d '\n' < "$HERE/aggregate.out" | head -c 900)"

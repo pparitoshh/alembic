@@ -48,10 +48,12 @@ done_n=$(remote "ls $C/$D/train/seed*/TRAINING_DONE.json 2>/dev/null | wc -l" | 
 
 log "scaling adapters"
 remote "$ENV for s in 42 43 44; do for x in 0.5 0.2; do $VPY research/rag65/make_scaled.py $D/train/seed\$s/adapter \$x; done; done && ls $D/train/seed42"
+# Seed soup (exact mean of the three seeds' updates, rank 48), served from seed 42's directory only.
+remote "$ENV for x in 1.0 0.5; do $VPY research/rag65/make_soup.py $D/train/seed42/adapter_soup\$([ \$x = 0.5 ] && echo 05) \$x $D/train/seed42/adapter $D/train/seed43/adapter $D/train/seed44/adapter; done && ls $D/train/seed42"
 
 for round in 1 2 3; do
     n=$(remote "cd $C/$D/answers 2>/dev/null && cat *__s4*.jsonl | wc -l" | tail -1)
-    [ "${n:-0}" -ge $((18 * 372)) ] && break
+    [ "${n:-0}" -ge $((20 * 372)) ] && break  # 3 seeds x 3 strengths x 2 modes + 2 soup arms
     j=$(remote "squeue --me -h -n dk-rag65 -o %i" | head -1)
     if [ -n "$j" ]; then log "answer round $round: adopting running job $j"; else
     j=$(submit --nodes=1 --export=ALL,STAGE=answer research/rag65/stage.sbatch); log "answer round $round: job $j (have ${n:-0} answers)"; fi
@@ -80,6 +82,7 @@ done
 remote "$ENV $VPY research/rag65/aggregate.py $D/judged $D/answers $D/RESULT.json" > "$HERE/aggregate.out"
 pairs=""
 for x in 42 43 44; do pairs="$pairs s${x}_rag:base_rag s${x}_rag:r3s${x}_rag s${x}_rag:r2s${x}_x02_rag s${x}_x02_rag:r2s${x}_x02_rag s${x}_x02_closed:r1s${x}_x02_closed s${x}_closed:r3s${x}_closed s${x}_x05_rag:base_rag s${x}_x05_rag:r3s${x}_x05_rag s${x}_x02_rag:base_rag"; done
+pairs="$pairs s42_soup05_rag:base_rag s42_soup05_rag:s42_x05_rag s42_soup_rag:s42_rag s42_soup05_closed:s42_x05_closed"
 remote "$ENV $VPY research/rag65/paired.py $D/judged $D/PAIRED.json $pairs" > "$HERE/paired.out"
 grep -q '"v3/student_rag"' "$HERE/aggregate.out" || { log "STOP: aggregate failed: $(tail -5 "$HERE/aggregate.out")"; exit 1; }
 log "DONE: $(tr -d '\n' < "$HERE/aggregate.out" | head -c 900)"
