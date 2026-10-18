@@ -158,12 +158,12 @@ def _parse(raw):
     return SupportReview.model_validate(json.loads(raw, object_pairs_hook=_unique_keys))
 
 
-def request_review(reviewer, row, source):
+def request_review(reviewer, row, source, *, temperature=0, attempt=1):
     packet = evidence_packet(row, source)
     fmt = {'type':'json_schema', 'json_schema':{'name':'SupportReviewV3', 'schema':SupportReview.model_json_schema()}}
     response = reviewer.complete([{'role':'system', 'content':REVIEW_SYSTEM},
                                   {'role':'user', 'content':json.dumps(packet, ensure_ascii=False)}],
-                                 temperature=0, response_format=fmt)
+                                 temperature=temperature, response_format=fmt)
     try:
         review = _parse(response.content).model_dump()
     except (ValueError, TypeError):
@@ -176,7 +176,8 @@ def request_review(reviewer, row, source):
             'raw_response':response.content, 'unexpected_tool_calls':response.tool_calls, 'review':review,
             # why decoding ended (vLLM stop_reason = the stop token id): tells truncation from early stop
             'finish_reason':getattr(response, 'finish_reason', None),
-            'stop_reason':getattr(response, 'stop_reason', None)}
+            'stop_reason':getattr(response, 'stop_reason', None),
+            'review_attempt':attempt, 'review_temperature':temperature}
 
 
 def check_support(row, source, report):

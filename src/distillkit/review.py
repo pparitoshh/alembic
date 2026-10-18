@@ -9,12 +9,22 @@ skipped and malformed reviews (e.g. truncated JSON) redone, so a rerun resumes a
 not reviewed; verify holds them as pending.
 """
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from .config import Config
 from .io import read_jsonl, write_jsonl
 from .support import request_review, source_for_record
+
+
+REDO_TEMPERATURE = 0.7  # greedy decoding would repeat the same slip
+
+
+def evidence_gap(report: dict) -> bool:
+    """A unit judged supported with no cited evidence: a protocol violation that verify can only hold as pending."""
+    units = (report.get("review") or {}).get("units") or []
+    return any(u.get("verdict") == "supported" and not u.get("evidence_ids") for u in units)
 
 
 def reviews_path(cfg: Config) -> Path:
@@ -29,6 +39,21 @@ def run(cfg: Config, reviewer=None) -> Path:
     if len(parsed) < len(existing):  # malformed (e.g. truncated) reviews are redone, not kept as final
         write_jsonl(out, parsed)
         print(f"[review] dropped {len(existing) - len(parsed)} malformed reviews to redo them")
+    # Evidence-gap reviews get exactly one recorded redo; the first attempt is archived, never discarded.
+    archive = out.with_name(out.stem + "_attempt1.jsonl")
+    # Opt-in: on the 2026-10-18 factory batch only 15% of redos came back with evidence, 80% repeated the gap.
+    redo = os.environ.get("DISTILLKIT_REDO_EVIDENCE_GAPS") == "1"
+    gaps = [r for r in parsed if redo and evidence_gap(r) and r.get("review_attempt", 1) < 2]
+    if gaps:
+        with archive.open("a") as f:
+            for r in gaps:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        dropped = {r["id"] for r in gaps}
+        parsed = [r for r in parsed if r["id"] not in dropped]
+        write_jsonl(out, parsed)
+        print(f"[review] redoing {len(gaps)} reviews that marked a unit supported without evidence (archived to {archive.name})")
+    # Archived ids still lacking their redo (e.g. the previous job timed out) stay on attempt 2.
+    gap_ids = {r["id"] for r in read_jsonl(archive)} if redo and archive.exists() else set()
     done = {r["id"] for r in parsed}
     todo, unresolved = [], 0
     resolver = None
@@ -51,7 +76,9 @@ def run(cfg: Config, reviewer=None) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     failed = 0
     with ThreadPoolExecutor(cfg.judge.concurrency) as pool, out.open("a") as f:
-        futures = [pool.submit(request_review, reviewer, r, src, protocol=protocol) for r, src in todo]
+        futures = [pool.submit(request_review, reviewer, r, src, protocol=protocol,
+                               **({"temperature": REDO_TEMPERATURE, "attempt": 2} if r["id"] in gap_ids else {}))
+                   for r, src in todo]
         for fut in as_completed(futures):
             try:
                 report = fut.result()
