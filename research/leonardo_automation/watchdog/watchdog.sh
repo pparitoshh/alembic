@@ -7,7 +7,7 @@
 R=/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017
 CTL=$R/ctl
 log() { echo "$(date -u +%FT%TZ) $*" >> "$CTL/watchdog/watchdog.log"; }
-alive() { pgrep -f "bash $CTL/$1/controller.sh" > /dev/null; }  # also matches /bin/bash after an exec
+alive() { pgrep -f "/$1/controller.sh" > /dev/null; }  # by name: also matches .../factory_v1/../rag65v4/ after an exec
 start() {  # $1 = controller dir
     setsid nohup bash "$CTL/$1/controller.sh" >> "$CTL/$1/nohup.out" 2>&1 < /dev/null &
     log "restarted $1 (pid $!)"
@@ -23,14 +23,25 @@ while true; do
             && ! alive factory_v3 && ! stopped factory_v3; then
         start factory_v3
     fi
+    if [ -f "$CTL/factory_v4/controller.sh" ] && ! grep -q ' MERGED: ' "$CTL/factory_v4/controller.log" 2>/dev/null \
+            && ! alive factory_v4 && ! stopped factory_v4; then
+        start factory_v4
+    fi
+    # Round 5 runs standalone alongside round 4's scoring; restart it on its own when it dies.
+    if [ -f "$CTL/rag65v5/controller.sh" ] && ! grep -q ' DONE: ' "$CTL/rag65v5/controller.log" 2>/dev/null \
+            && ! alive rag65v5 && ! stopped rag65v5 && alive rag65v4; then
+        start rag65v5
+    fi
     # Main chain.
-    if ! alive factory_v1 && ! alive rag65v4 && ! alive rag65v5; then
+    if ! alive factory_v1 && ! alive rag65v4 && ! alive rag65v5 && ! alive rag65v6; then
         if ! grep -q ' MERGED: ' "$CTL/factory_v1/controller.log"; then
             stopped factory_v1 || start factory_v1
         elif ! grep -q ' DONE: ' "$CTL/rag65v4/controller.log" 2>/dev/null; then
             stopped rag65v4 || grep -q 'dk-rag65' <<< "$queue" || start rag65v4
         elif ! grep -q ' DONE: ' "$CTL/rag65v5/controller.log" 2>/dev/null; then
             stopped rag65v5 || grep -q 'dk-rag65' <<< "$queue" || start rag65v5
+        elif ! grep -q ' DONE: ' "$CTL/rag65v6/controller.log" 2>/dev/null; then
+            stopped rag65v6 || grep -q 'dk-rag65' <<< "$queue" || start rag65v6
         fi
     fi
     sleep 300
