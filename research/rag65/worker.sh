@@ -15,7 +15,8 @@ answer)
     if (( W < 3 )); then
         S=(42 43 44); s=${S[$W]}
         # Seed soups (rank 48) live in one seed's directory only; each worker serves the variants it has.
-        VARIANTS=$(IFS=,; for v in ${VARIANTS:-,_x05,_x02,_soup,_soup05}; do [ -d "$T/seed$s/adapter$v" ] && echo -n "$v,"; done)
+        # `if`, not `[ ] &&`: under set -e a false test as the loop's last command fails the substitution.
+        VARIANTS=$(IFS=,; for v in ${VARIANTS:-,_x05,_x02,_soup,_soup05}; do if [ -d "$T/seed$s/adapter$v" ]; then echo -n "$v,"; fi; done)
         export VARIANTS=${VARIANTS%,}
         start_vllm Qwen/Qwen3-4B-Instruct-2507 "$PORT" --dtype bfloat16 --max-model-len 16384 --gpu-memory-utilization 0.85 \
             --enable-lora --max-lora-rank 64 --max-loras 5 \
