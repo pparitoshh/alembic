@@ -130,3 +130,13 @@ def test_generic_question_falls_back_to_any_site(tmp_path):
     p, f = tmp_path / 'documents.sqlite', tmp_path / 'factory_docs.sqlite'
     q = 'Set a time limit with sbatch'
     assert bot.search(q, k=1) == assistant.retrieve(q, p, f, 1)
+
+
+def test_setup_explains_missing_ollama(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
+    try:
+        assistant.setup(tmp_path)
+    except SystemExit as e:
+        assert 'ollama.com' in str(e)
+    else:
+        raise AssertionError('setup must stop when Ollama is missing')

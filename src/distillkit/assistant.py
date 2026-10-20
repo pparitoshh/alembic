@@ -6,8 +6,9 @@ rag arm of the eval). No separate RAG service: retrieval is SQLite FTS5/BM25 ove
 ~6 ms per question on one CPU core. Without the index files the assistant answers closed-book.
 
 Users can add their own manuals (PDF, Markdown, text, HTML) to a local user index; their excerpts are
-searched alongside the built-in documentation. The chat keeps its history, and the model can also call the
-retriever itself through a `search_docs` tool for follow-up lookups.
+searched alongside the built-in documentation. The chat keeps its history. With `--tools`, the model can also
+call the retriever itself through a `search_docs` tool for follow-up lookups; this is off by default because the
+current release (round 11) was trained on single-turn prose answers without tool calls.
 
 The model runs locally behind Ollama (default, `ollama create hpc-assistant -f Modelfile` from the
 export stage) or any OpenAI-compatible server such as llama-server (`--openai http://127.0.0.1:8080/v1`).
@@ -16,6 +17,11 @@ export stage) or any OpenAI-compatible server such as llama-server (`--openai ht
     hpc-assistant                          # chat; /add FILE, /docs on|off, /reset, /quit
     hpc-assistant --add cluster-manual.pdf # index a manual, then chat
     hpc-assistant --no-docs "..."          # closed-book
+    hpc-assistant --setup                  # one-time: model from Hugging Face into Ollama, plus the docs index
+
+`--setup` downloads the GGUF and Modelfile from the Hugging Face release and runs `ollama create`; the built-in
+documentation index is downloaded from HPC_ASSISTANT_INDEX_URL (a directory URL holding documents.sqlite and
+factory_docs.sqlite) when that is set, since the index is distributed separately from the model.
 """
 import argparse
 from datetime import date
@@ -35,6 +41,8 @@ SYSTEM_PROMPT = ("You are an HPC assistant. Use supplied source excerpts for sit
                  "for live state. Name the applicable cluster and ask for missing required details. Give a complete, "
                  "clear answer without inventing commands, flags or cluster defaults. Put scripts in fenced code blocks.")
 DEFAULT_INDEX = Path(os.environ.get('HPC_ASSISTANT_INDEX', Path.home() / '.local/share/hpc-assistant'))
+HF_RELEASE = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/gguf/'
+GGUF_FILE = 'hpc-assistant-qwen3-4b-Q4_K_M.gguf'
 
 # Retrieval: kept identical to research/rag65/retrieve.py (tests/test_assistant.py checks they agree).
 STOP = {'the', 'and', 'for', 'this', 'that', 'with', 'from', 'does', 'what', 'how', 'can', 'are', 'you', 'your',
@@ -167,7 +175,7 @@ SEARCH_TOOL = {'type': 'function', 'function': {
 
 class Assistant:
     def __init__(self, index_dir=DEFAULT_INDEX, docs=True, k=3, model='hpc-assistant', openai=None,
-                 ollama='http://localhost:11434', tools=True):
+                 ollama='http://localhost:11434', tools=False):
         index_dir = Path(index_dir)
         self.pilot, self.factory = index_dir / 'documents.sqlite', index_dir / 'factory_docs.sqlite'
         self.user_db = index_dir / 'user_docs.sqlite'
@@ -175,6 +183,7 @@ class Assistant:
         self.docs = docs
         self.k, self.model, self.openai, self.ollama, self.tools = k, model, openai, ollama, tools
         self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+        self.titles = {}  # source url -> page title, for the Sources list
 
     # --- documents -----------------------------------------------------------------------------
     def add(self, path):
@@ -222,6 +231,7 @@ class Assistant:
     def prompt(self, question):
         """The user turn the model sees, and the sources behind it."""
         docs = self.search(question) if self.docs else []
+        self.titles.update({d['url']: d['title'] for d in docs if d.get('title')})
         return with_context(question, docs), [d['url'] for d in docs]
 
     # --- model ---------------------------------------------------------------------------------
@@ -282,11 +292,49 @@ class Assistant:
                 self.history.append({'role': 'tool', 'content': with_context('Results:', docs) if docs else 'No results.'})
         self.history.append({'role': 'assistant', 'content': ''.join(answer)})
         if sources:
-            out.write('\n\nSources:\n' + '\n'.join('- ' + u for u in dict.fromkeys(sources)) + '\n')
+            out.write('\n\nSources:\n' + '\n'.join('- ' + u + (f' ({self.titles[u]})' if self.titles.get(u) else '')
+                                                for u in dict.fromkeys(sources)) + '\n')
         return ''.join(answer), sources
 
     def reset(self):
         self.history = self.history[:1]
+
+
+def _download(url, dest):
+    tmp = Path(str(dest) + '.part')
+    with urllib.request.urlopen(url, timeout=60) as resp, open(tmp, 'wb') as f:
+        shutil.copyfileobj(resp, f, length=1 << 20)
+    tmp.rename(dest)
+
+
+def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
+    """One-time install: the model from the Hugging Face release into Ollama, and the docs index if a URL is set."""
+    if not shutil.which('ollama'):
+        raise SystemExit('Ollama is not installed: get it from https://ollama.com, then run hpc-assistant --setup again')
+    listed = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
+    if listed.returncode != 0:
+        raise SystemExit('Ollama is installed but not running: start it (`ollama serve` or the Ollama app) and retry')
+    if not re.search(r'^' + re.escape(model) + r'(:\S+)?\s', listed.stdout, re.M):
+        cache = index_dir / 'model'
+        cache.mkdir(parents=True, exist_ok=True)
+        for name in (GGUF_FILE, 'Modelfile'):
+            if not (cache / name).exists():
+                print(f'[hpc-assistant] downloading {name} (the model is about 2.5 GB)', file=sys.stderr)
+                _download(HF_RELEASE + name, cache / name)
+        subprocess.run(['ollama', 'create', model, '-f', 'Modelfile'], cwd=cache, check=True)
+    print(f'[hpc-assistant] model ready in Ollama: {model}', file=sys.stderr)
+    url = os.environ.get('HPC_ASSISTANT_INDEX_URL')
+    for name in ('documents.sqlite', 'factory_docs.sqlite'):
+        if (index_dir / name).exists():
+            continue
+        if not url:
+            print(f'[hpc-assistant] no built-in docs index in {index_dir}: set HPC_ASSISTANT_INDEX_URL and rerun --setup, '
+                  'or add your own manuals with --add', file=sys.stderr)
+            break
+        print(f'[hpc-assistant] downloading {name}', file=sys.stderr)
+        index_dir.mkdir(parents=True, exist_ok=True)
+        _download(url.rstrip('/') + '/' + name, index_dir / name)
+    print('[hpc-assistant] ready: hpc-assistant "your question"', file=sys.stderr)
 
 
 def main(argv=None):
@@ -298,10 +346,15 @@ def main(argv=None):
     ap.add_argument('--openai', help='OpenAI-compatible base URL (e.g. llama-server) instead of Ollama')
     ap.add_argument('--k', type=int, default=3, help='excerpts per question (the model was trained with 3)')
     ap.add_argument('--add', action='append', default=[], metavar='FILE', help='index a manual (PDF, md, txt, html)')
-    ap.add_argument('--no-tools', action='store_true', help='do not offer the search_docs tool to the model')
+    ap.add_argument('--tools', action='store_true',
+                    help='offer the model a search_docs tool (only for releases trained with tool calls)')
+    ap.add_argument('--setup', action='store_true', help='one-time install of the model (and docs index), then exit')
     args = ap.parse_args(argv)
+    if args.setup:
+        setup(Path(args.index), args.model)
+        return
     bot = Assistant(args.index, docs=not args.no_docs, k=args.k, model=args.model, openai=args.openai,
-                    tools=not args.no_tools)
+                    tools=args.tools)
     for f in args.add:
         print(f'[hpc-assistant] indexed {f}: {bot.add(f)} excerpts', file=sys.stderr)
     if not args.no_docs and not bot.builtin:
