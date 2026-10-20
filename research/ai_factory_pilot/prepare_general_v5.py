@@ -10,8 +10,9 @@ that verify best), so factory_worker.sh, factory_dbg.sbatch and merge_factory_v1
 - licence per document from the manifest 'license' field, normalised to an SPDX id when the field is one
   (optionally followed by a parenthetical note); otherwise the stated string, or 'unspecified' when none is stated;
   licences.json also carries topic and a licence_class for annotate_general_v5.py;
-- no chunk asked about in batches v1-v4 (or the CC-BY batches): dropped by exact chunk sha (their scenario plans)
-  and by the normalised chunk key (their seeds, re-chunked the same way);
+- no chunk asked about in batches v1-v4, the CC-BY batches or (for later batches, e.g. v6 from the 2026-10-20 gaps
+  archive) v5: dropped by exact chunk sha (their scenario plans) and by the normalised chunk key (their seeds);
+- legal boilerplate chunks (vendor notices and disclaimers, e.g. on every Intel documentation page) are dropped;
 - at most 3 variants per chunk; large documents are split over several shards so no shard exceeds SHARD_SIZE.
 """
 from collections import Counter
@@ -37,6 +38,7 @@ ROUND = os.environ.get('ROUND', 'general-hpc-5')
 OUT = REPO / 'runs' / BATCH
 EARLIER = ['ai_factory_all_v1', 'ai_factory_all_v2', 'ai_factory_all_v3', 'ai_factory_all_v4',
            'ai_factory_ccby_v1', 'ai_factory_ccby_v2']
+EARLIER += [b for b in ['ai_factory_all_v5'] if b != BATCH and (REPO / 'runs' / b).exists()]
 if OUT.exists():
     raise SystemExit('Preparation exists; use a new version instead of overwriting')
 (OUT / 'seeds').mkdir(parents=True)
@@ -206,6 +208,10 @@ TECH = re.compile(r'\b(sbatch|srun|salloc|squeue|sacct|scancel|sinfo|#SBATCH|mod
                   r'environment variable|LD_LIBRARY_PATH|DeepSpeed|Accelerate|torchrun|Horovod|'
                   r'Snakemake|Nextflow|Parsl|Dask|HTCondor|Flux|PBS|Globus|BeeGFS|DAOS)\b', re.I)
 SLURM = re.compile(r'\b(sbatch|squeue|sacct|srun|salloc|scancel|Slurm)\b')
+BOILER = re.compile(r'Notices and Disclaimers|Intel technologies may require enabled hardware|Performance varies by use, '
+                    r'configuration and other factors|No product or component can be absolutely secure|'
+                    r'Intel Corporation\. Intel, the Intel logo|NVIDIA Corporation \(.NVIDIA.\) makes no representations|'
+                    r'Information in this document is provided in connection with|All rights reserved\. No part of', re.I)
 TASKS = ['howto', 'debug', 'concept', 'script']
 # Disjoint from the v1-v4 angle sets, same style as v4's FINAL set.
 ANGLES = ['troubleshooting a program or job that fails, hangs or gives wrong results',
@@ -231,6 +237,9 @@ for d in documents:
     for i, text in enumerate(chunk_text(d['text'], CHUNK_CHARS)):
         if not 650 <= len(text) <= 4500 or _question_issue(text, line_openings=True):
             dropped['length_or_unmatched_fence'] += 1
+            continue
+        if BOILER.search(text):
+            dropped['legal_boilerplate'] += 1
             continue
         tech = len({m.lower() for m in TECH.findall(text)})
         code = '```' in text or bool(re.search(r'^\s*[$#] \w', text, re.M))
