@@ -1,9 +1,10 @@
-"""gpt-oss-20b paired judging (both orders) of every arm against closed-book base answers.
+"""gpt-oss-20b (or JUDGE_MODEL) paired judging (both orders) of every arm against closed-book base answers.
 
 usage: judge.py WORKER WORKERS ENDPOINT ANSWERS_DIR OUT_DIR
 Work = (slice, arm, chunk of 34 questions), dealt round-robin to workers. Resumable per unit.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -17,6 +18,8 @@ out.mkdir(parents=True, exist_ok=True)
 cfg = load_config('configs/rag65_seed42.json')
 cfg.judge.model, cfg.judge.base_url = 'openai/gpt-oss-20b', endpoint
 cfg.judge.max_tokens, cfg.judge.extra_body, cfg.judge.concurrency = 8192, {'reasoning_effort': 'medium'}, 16
+if os.environ.get('JUDGE_MODEL'):  # cross-check judge from another family (e.g. Gemma), same prompt and scoring
+    cfg.judge.model, cfg.judge.extra_body, cfg.judge.concurrency = os.environ['JUDGE_MODEL'], {}, 64
 judge = Teacher(cfg.judge)
 units = []
 for label, path in [('v2', 'data/eval/eval_all_v2.jsonl'), ('v3', 'data/eval/eval_v3.jsonl'), ('d1', 'data/eval/dataset_v1/development_normal.jsonl')]:

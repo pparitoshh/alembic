@@ -1,0 +1,1638 @@
+[
+ {
+  "id": "llnl_hpc_tutorials",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "unstated on site; see license_links",
+  "seeds": [
+   "https://hpc-tutorials.llnl.gov/"
+  ],
+  "prefixes": [
+   "https://hpc-tutorials.llnl.gov/"
+  ],
+  "max_pages": 300,
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review"
+ },
+ {
+  "id": "cornell_cvw",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "Cornell University copyright (see license_links)",
+  "seeds": [
+   "https://cvw.cac.cornell.edu/topics"
+  ],
+  "prefixes": [
+   "https://cvw.cac.cornell.edu/"
+  ],
+  "max_pages": 600,
+  "exclude": "/(login|account|search|quiz|exercise-answers)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review"
+ },
+ {
+  "id": "spack_tutorial",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "Apache-2.0 OR MIT",
+  "seeds": [
+   "https://spack-tutorial.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://spack-tutorial.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 60,
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review"
+ },
+ {
+  "id": "easybuild_tutorial",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "unstated on site; see license_links",
+  "seeds": [
+   "https://tutorial.easybuild.io/"
+  ],
+  "prefixes": [
+   "https://tutorial.easybuild.io/"
+  ],
+  "max_pages": 100,
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review"
+ },
+ {
+  "id": "ulhpc_tutorials",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "unstated on site; see license_links",
+  "seeds": [
+   "https://ulhpc-tutorials.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://ulhpc-tutorials.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 300,
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review"
+ },
+ {
+  "id": "hpc_carpentry_shell_python",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.hpc-carpentry.org/hpc-shell/",
+   "https://www.hpc-carpentry.org/hpc-python/",
+   "https://www.hpc-carpentry.org/hpc-chapel/",
+   "https://www.hpc-carpentry.org/hpc-parallel-novice/"
+  ],
+  "prefixes": [
+   "https://www.hpc-carpentry.org/hpc-"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "hpc_carpentry_incubator",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://carpentries-incubator.github.io/hpc-intro/",
+   "https://carpentries-incubator.github.io/hpc-workflows/",
+   "https://carpentries-incubator.github.io/lesson-parallel/",
+   "https://carpentries-incubator.github.io/hpc-cloud-intro/"
+  ],
+  "prefixes": [
+   "https://carpentries-incubator.github.io/hpc-",
+   "https://carpentries-incubator.github.io/lesson-parallel/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "swc_shell_git",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://swcarpentry.github.io/shell-novice/",
+   "https://swcarpentry.github.io/git-novice/"
+  ],
+  "prefixes": [
+   "https://swcarpentry.github.io/shell-novice/",
+   "https://swcarpentry.github.io/git-novice/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "enccs_lessons",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://enccs.github.io/gpu-programming/",
+   "https://enccs.github.io/openmp-gpu/",
+   "https://enccs.github.io/intermediate-mpi/",
+   "https://enccs.github.io/intro-to-mpi/",
+   "https://enccs.github.io/julia-for-hpc/",
+   "https://enccs.github.io/sycl-workshop/",
+   "https://enccs.github.io/cmake-workshop/",
+   "https://enccs.github.io/OpenACC-CUDA-beginners/",
+   "https://enccs.github.io/hip/",
+   "https://enccs.github.io/openmp/",
+   "https://enccs.github.io/mpi-intro/",
+   "https://enccs.github.io/ai-for-hpc/",
+   "https://enccs.github.io/upscalingAIcontainer/",
+   "https://enccs.github.io/pytorch-distributed/",
+   "https://enccs.github.io/hpda-python/",
+   "https://enccs.github.io/workflows/",
+   "https://enccs.github.io/developing-cpp/",
+   "https://enccs.github.io/veloxchem-hpc/",
+   "https://enccs.github.io/gromacs-gpu-performance/",
+   "https://enccs.github.io/omniverse/"
+  ],
+  "prefixes": [
+   "https://enccs.github.io/"
+  ],
+  "max_pages": 800
+ },
+ {
+  "id": "coderefinery_lessons",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://coderefinery.github.io/TTT4HPC_Interactive/",
+   "https://coderefinery.github.io/TTT4HPC_parallel_workflows/",
+   "https://coderefinery.github.io/TTT4HPC_resource_management/",
+   "https://coderefinery.github.io/hpc-containers/",
+   "https://coderefinery.github.io/cmake-workshop/",
+   "https://coderefinery.github.io/git-intro/",
+   "https://coderefinery.github.io/git-collaborative/",
+   "https://coderefinery.github.io/reproducible-research/",
+   "https://coderefinery.github.io/testing/",
+   "https://coderefinery.github.io/documentation/",
+   "https://coderefinery.github.io/jupyter/",
+   "https://coderefinery.github.io/reproducible-python/",
+   "https://coderefinery.github.io/installation/"
+  ],
+  "prefixes": [
+   "https://coderefinery.github.io/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "aalto_python_for_scicomp",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://aaltoscicomp.github.io/python-for-scicomp/"
+  ],
+  "prefixes": [
+   "https://aaltoscicomp.github.io/python-for-scicomp/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "aalto_scicomp",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://scicomp.aalto.fi/triton/",
+   "https://scicomp.aalto.fi/triton/tut/",
+   "https://scicomp.aalto.fi/scicomp/"
+  ],
+  "prefixes": [
+   "https://scicomp.aalto.fi/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "hpc_wiki",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpc-wiki.info/hpc/HPC_Wiki",
+   "https://hpc-wiki.info/hpc/Category:Basic",
+   "https://hpc-wiki.info/hpc/Category:Pages"
+  ],
+  "prefixes": [
+   "https://hpc-wiki.info/hpc/"
+  ],
+  "max_pages": 800,
+  "exclude": "/hpc/(User|Talk|User_talk|File|Template|MediaWiki|HPC_Wiki_talk|Help)[:_]"
+ },
+ {
+  "id": "fortran_lang_learn",
+  "topic": "teaching",
+  "kind": "training_materials",
+  "license": "MIT (fortran-lang.org website repo)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://fortran-lang.org/learn/"
+  ],
+  "prefixes": [
+   "https://fortran-lang.org/learn/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "nersc_docs",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/"
+  ],
+  "max_pages": 800
+ },
+ {
+  "id": "olcf_docs",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.olcf.ornl.gov/",
+   "https://docs.olcf.ornl.gov/software/python/index.html",
+   "https://docs.olcf.ornl.gov/software/containers_on_frontier.html"
+  ],
+  "prefixes": [
+   "https://docs.olcf.ornl.gov/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "tacc_docs",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.tacc.utexas.edu/",
+   "https://docs.tacc.utexas.edu/tutorials/"
+  ],
+  "prefixes": [
+   "https://docs.tacc.utexas.edu/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "princeton_rc_kb",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://researchcomputing.princeton.edu/support/knowledge-base"
+  ],
+  "prefixes": [
+   "https://researchcomputing.princeton.edu/support/knowledge-base"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "openmpi_docs",
+  "topic": "mpi",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Open MPI licence)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.open-mpi.org/en/v5.0.x/"
+  ],
+  "prefixes": [
+   "https://docs.open-mpi.org/en/v5.0.x/"
+  ],
+  "max_pages": 800
+ },
+ {
+  "id": "mpich_docs",
+  "topic": "mpi",
+  "kind": "technical_documentation",
+  "license": "MPICH COPYRIGHT (permissive BSD-style)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.mpich.org/static/docs/latest/",
+   "https://www.mpich.org/documentation/guides/"
+  ],
+  "prefixes": [
+   "https://www.mpich.org/static/docs/latest/",
+   "https://www.mpich.org/static/downloads/"
+  ],
+  "max_pages": 600,
+  "pdf": true,
+  "include": "static/docs/latest/|userguide\\.pdf|installguide\\.pdf|/documentation/guides"
+ },
+ {
+  "id": "mpi4py_docs",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://mpi4py.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://mpi4py.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 300,
+  "exclude": "/reference/"
+ },
+ {
+  "id": "intel_mpi_docs",
+  "topic": "mpi",
+  "kind": "technical_documentation",
+  "license": "Intel proprietary documentation terms",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.intel.com/content/www/us/en/docs/mpi-library/developer-guide-linux/2021-16/overview.html"
+  ],
+  "prefixes": [
+   "https://www.intel.com/content/www/us/en/docs/mpi-library/",
+   "https://www.intel.com/content/www/us/en/docs/oneapi/",
+   "https://www.intel.com/content/www/us/en/docs/vtune-profiler/",
+   "https://www.intel.com/content/www/us/en/docs/advisor/",
+   "https://www.intel.com/content/www/us/en/docs/onemkl/",
+   "https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/",
+   "https://www.intel.com/content/www/us/en/docs/fortran-compiler/"
+  ],
+  "max_pages": 600
+ },
+ {
+  "id": "nvidia_cuda_docs",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/cuda/cuda-programming-guide/index.html",
+   "https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html",
+   "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html",
+   "https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html",
+   "https://docs.nvidia.com/cuda/cuda-gdb/index.html",
+   "https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html",
+   "https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html",
+   "https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html",
+   "https://docs.nvidia.com/deploy/mps/index.html",
+   "https://docs.nvidia.com/cuda/cuda-runtime-api/modules.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/cuda/cuda-programming-guide/",
+   "https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/",
+   "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/",
+   "https://docs.nvidia.com/cuda/cuda-installation-guide-linux/",
+   "https://docs.nvidia.com/cuda/cuda-gdb/",
+   "https://docs.nvidia.com/compute-sanitizer/",
+   "https://docs.nvidia.com/cuda/cuda-binary-utilities/",
+   "https://docs.nvidia.com/cuda/cuda-c-std/",
+   "https://docs.nvidia.com/cuda/ptx-compiler-api/",
+   "https://docs.nvidia.com/cuda/hopper-tuning-guide/",
+   "https://docs.nvidia.com/cuda/ampere-tuning-guide/",
+   "https://docs.nvidia.com/cuda/blackwell-tuning-guide/",
+   "https://docs.nvidia.com/cuda/cuda-runtime-api/",
+   "https://docs.nvidia.com/deploy/mps/"
+  ],
+  "max_pages": 500,
+  "exclude": "cuda-runtime-api/(cuda_runtime_api/)?(group__|struct|class|union|namespace)"
+ },
+ {
+  "id": "nvidia_nccl",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "nvidia_nsight",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/nsight-systems/UserGuide/index.html",
+   "https://docs.nvidia.com/nsight-compute/NsightCompute/index.html",
+   "https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html",
+   "https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/nsight-systems/UserGuide/",
+   "https://docs.nvidia.com/nsight-compute/"
+  ],
+  "max_pages": 150,
+  "exclude": "nsight-compute/(\\d|NvRules|CustomizationGuide|Notices|ReleaseNotes|Training|CopyrightAndLicenses)"
+ },
+ {
+  "id": "nvidia_hpc_sdk",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/hpc-sdk/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/hpc-sdk/"
+  ],
+  "max_pages": 150,
+  "exclude": "/archive/|/\\d\\d\\.\\d+/|/pgi-compilers/|/archive"
+ },
+ {
+  "id": "nvidia_nemo_megatron",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "NVIDIA documentation (NeMo/Megatron repos Apache-2.0/BSD-3; verify)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html",
+   "https://docs.nvidia.com/megatron-core/developer-guide/latest/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/nemo-framework/user-guide/latest/",
+   "https://docs.nvidia.com/megatron-core/developer-guide/latest/"
+  ],
+  "max_pages": 300,
+  "exclude": "/apidocs/|/api-guide/.*\\.(core|models)\\."
+ },
+ {
+  "id": "rocm_hip_docs",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "MIT (HIP project licence; AMD copyright notice on site)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://rocm.docs.amd.com/projects/HIP/en/latest/"
+  ],
+  "prefixes": [
+   "https://rocm.docs.amd.com/projects/HIP/en/latest/"
+  ],
+  "max_pages": 600,
+  "exclude": "/doxygen/|/reference/hip_runtime_api/modules/|/html/group__|/_doxygen/"
+ },
+ {
+  "id": "rocm_docs",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "MIT (ROCm documentation; AMD copyright notice on site)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://rocm.docs.amd.com/en/latest/",
+   "https://rocm.docs.amd.com/projects/rccl/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/",
+   "https://rocm.docs.amd.com/projects/omniperf/en/latest/"
+  ],
+  "prefixes": [
+   "https://rocm.docs.amd.com/en/latest/",
+   "https://rocm.docs.amd.com/projects/rccl/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/",
+   "https://rocm.docs.amd.com/projects/omniperf/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-compute/en/latest/"
+  ],
+  "max_pages": 500,
+  "exclude": "/doxygen/|/api/|/release/|/_doxygen/"
+ },
+ {
+  "id": "openacc_best_practices",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://openacc-best-practices-guide.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://openacc-best-practices-guide.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "openacc_org",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "OpenACC-standard.org copyright (spec/guide PDFs)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.openacc.org/resources",
+   "https://www.openacc.org/sites/default/files/inline-files/OpenACC_Programming_Guide_0_0.pdf",
+   "https://www.openacc.org/sites/default/files/inline-images/Specification/OpenACC-3.3-final.pdf"
+  ],
+  "prefixes": [
+   "https://www.openacc.org/sites/default/files/",
+   "https://www.openacc.org/resources"
+  ],
+  "max_pages": 30,
+  "pdf": true,
+  "max_depth": 1
+ },
+ {
+  "id": "openmp_org",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "OpenMP ARB copyright (copying permitted with notice)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.openmp.org/spec-html/5.2/openmp.html",
+   "https://www.openmp.org/wp-content/uploads/openmp-examples-6.0.pdf",
+   "https://www.openmp.org/wp-content/uploads/OpenMPRefCard-5-2-web.pdf"
+  ],
+  "prefixes": [
+   "https://www.openmp.org/spec-html/5.2/"
+  ],
+  "max_pages": 500,
+  "pdf": true
+ },
+ {
+  "id": "numba_cuda",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://numba.readthedocs.io/en/stable/cuda/index.html"
+  ],
+  "prefixes": [
+   "https://numba.readthedocs.io/en/stable/cuda/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "cupy_user_guide",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.cupy.dev/en/stable/user_guide/index.html"
+  ],
+  "prefixes": [
+   "https://docs.cupy.dev/en/stable/user_guide/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "pytorch_distributed_docs",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (PyTorch)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.pytorch.org/docs/2.14/distributed.html",
+   "https://docs.pytorch.org/docs/2.14/notes/ddp.html",
+   "https://docs.pytorch.org/docs/2.14/fsdp.html",
+   "https://docs.pytorch.org/docs/2.14/distributed.fsdp.fully_shard.html",
+   "https://docs.pytorch.org/docs/2.14/elastic/run.html",
+   "https://docs.pytorch.org/docs/2.14/elastic/quickstart.html",
+   "https://docs.pytorch.org/docs/2.14/distributed.checkpoint.html",
+   "https://docs.pytorch.org/docs/2.14/distributed.tensor.html",
+   "https://docs.pytorch.org/docs/2.14/distributed.tensor.parallel.html",
+   "https://docs.pytorch.org/docs/2.14/distributed.pipelining.html",
+   "https://docs.pytorch.org/docs/2.14/notes/cuda.html",
+   "https://docs.pytorch.org/docs/2.14/notes/multiprocessing.html",
+   "https://docs.pytorch.org/docs/2.14/generated/torch.nn.parallel.DistributedDataParallel.html",
+   "https://docs.pytorch.org/docs/2.14/ddp_comm_hooks.html",
+   "https://docs.pytorch.org/docs/2.14/rpc.html",
+   "https://docs.pytorch.org/docs/2.14/cuda.html"
+  ],
+  "prefixes": [
+   "https://docs.pytorch.org/docs/2.14/"
+  ],
+  "max_pages": 300,
+  "include": "distribut|elastic|fsdp|ddp|parallel|rpc|torchrun|notes/cuda|multiprocessing|/cuda\\.html|nccl|checkpoint"
+ },
+ {
+  "id": "pytorch_distributed_tutorials",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (PyTorch tutorials)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.pytorch.org/tutorials/beginner/dist_overview.html",
+   "https://docs.pytorch.org/tutorials/intermediate/ddp_tutorial.html",
+   "https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html",
+   "https://docs.pytorch.org/tutorials/intermediate/dist_tuto.html",
+   "https://docs.pytorch.org/tutorials/beginner/ddp_series_intro.html",
+   "https://docs.pytorch.org/tutorials/intermediate/TP_tutorial.html"
+  ],
+  "prefixes": [
+   "https://docs.pytorch.org/tutorials/"
+  ],
+  "max_pages": 120,
+  "include": "dist|ddp|fsdp|parallel|rpc|torchrun|pipeline|TP_tutorial|process_group|elastic|multinode|fault"
+ },
+ {
+  "id": "deepspeed_docs",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.deepspeed.ai/"
+  ],
+  "prefixes": [
+   "https://www.deepspeed.ai/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "hf_accelerate",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://huggingface.co/docs/accelerate/index"
+  ],
+  "prefixes": [
+   "https://huggingface.co/docs/accelerate/"
+  ],
+  "max_pages": 200,
+  "exclude": "/docs/accelerate/(v\\d|main|ko|zh|ja|es|fr|de|pt)/|/package_reference/"
+ },
+ {
+  "id": "jax_multihost",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.jax.dev/en/latest/multi_process.html",
+   "https://docs.jax.dev/en/latest/sharded-computation.html",
+   "https://docs.jax.dev/en/latest/gpu_performance_tips.html",
+   "https://docs.jax.dev/en/latest/installation.html",
+   "https://docs.jax.dev/en/latest/distributed_data_loading.html"
+  ],
+  "prefixes": [
+   "https://docs.jax.dev/en/latest/"
+  ],
+  "max_pages": 60,
+  "include": "multi_process|shard|distributed|parallel|gpu|installation|memory|profiling|persistent_compilation",
+  "exclude": "/_autosummary/|/jax\\."
+ },
+ {
+  "id": "tensorflow_distributed",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 (content), Apache-2.0 (code samples)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.tensorflow.org/guide/distributed_training",
+   "https://www.tensorflow.org/tutorials/distribute/multi_worker_with_keras",
+   "https://www.tensorflow.org/guide/gpu"
+  ],
+  "prefixes": [
+   "https://www.tensorflow.org/guide/distributed",
+   "https://www.tensorflow.org/tutorials/distribute/",
+   "https://www.tensorflow.org/guide/gpu"
+  ],
+  "max_pages": 30,
+  "exclude": "\\?hl="
+ },
+ {
+  "id": "vllm_docs",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.vllm.ai/en/latest/",
+   "https://docs.vllm.ai/en/latest/serving/parallelism_scaling.html"
+  ],
+  "prefixes": [
+   "https://docs.vllm.ai/en/latest/"
+  ],
+  "max_pages": 250,
+  "include": "getting_started|deployment|serving|distributed|parallel|configuration|usage|quantization|installation|/en/latest/$|features",
+  "exclude": "/api/|/examples/"
+ },
+ {
+  "id": "horovod_docs",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://horovod.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://horovod.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 80,
+  "exclude": "/api\\.html|/_modules"
+ },
+ {
+  "id": "ray_cluster_slurm",
+  "topic": "ai",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.ray.io/en/latest/cluster/vms/user-guides/community/slurm.html",
+   "https://docs.ray.io/en/latest/cluster/getting-started.html",
+   "https://docs.ray.io/en/latest/train/getting-started-pytorch.html"
+  ],
+  "prefixes": [
+   "https://docs.ray.io/en/latest/cluster/",
+   "https://docs.ray.io/en/latest/train/"
+  ],
+  "max_pages": 80,
+  "exclude": "/api/|/examples/"
+ },
+ {
+  "id": "apptainer_user_guide",
+  "topic": "containers",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Apptainer userdocs)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apptainer.org/docs/user/latest/"
+  ],
+  "prefixes": [
+   "https://apptainer.org/docs/user/latest/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "apptainer_admin_guide",
+  "topic": "containers",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Apptainer admindocs)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apptainer.org/docs/admin/latest/"
+  ],
+  "prefixes": [
+   "https://apptainer.org/docs/admin/latest/"
+  ],
+  "max_pages": 100
+ },
+ {
+  "id": "spack_docs",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 OR MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://spack.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://spack.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 400,
+  "exclude": "/spack\\.[\\w.]+\\.html|/llnl\\.|/_modules/|/command_index"
+ },
+ {
+  "id": "easybuild_docs",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.easybuild.io/"
+  ],
+  "prefixes": [
+   "https://docs.easybuild.io/"
+  ],
+  "max_pages": 600,
+  "exclude": "/version-specific/|/api/|/release-notes"
+ },
+ {
+  "id": "lmod_docs",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "MIT (Lmod)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://lmod.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://lmod.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "conda_docs",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.conda.io/projects/conda/en/stable/user-guide/index.html"
+  ],
+  "prefixes": [
+   "https://docs.conda.io/projects/conda/en/stable/user-guide/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "mamba_docs",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://mamba.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://mamba.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 80,
+  "exclude": "/api/"
+ },
+ {
+  "id": "gcc_docs",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "GFDL-1.3",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/C-Dialect-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html",
+   "https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html",
+   "https://gcc.gnu.org/onlinedocs/libgomp/index.html"
+  ],
+  "prefixes": [
+   "https://gcc.gnu.org/onlinedocs/libgomp/",
+   "https://gcc.gnu.org/onlinedocs/gcc/"
+  ],
+  "max_pages": 400,
+  "include": "libgomp|-Options\\.html|Option-Summary|gfortran"
+ },
+ {
+  "id": "gfortran_docs",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "GFDL-1.3",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://gcc.gnu.org/onlinedocs/gfortran/index.html"
+  ],
+  "prefixes": [
+   "https://gcc.gnu.org/onlinedocs/gfortran/"
+  ],
+  "max_pages": 250,
+  "include": "Option|Invok|Coarray|OpenMP|OpenACC|Environment|Runtime|index\\.html"
+ },
+ {
+  "id": "hpe_cray_pe",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "HPE proprietary documentation",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://cpe.ext.hpe.com/docs/latest/",
+   "https://cpe.ext.hpe.com/docs/latest/getting_started/CPE-General-User-Guides.html"
+  ],
+  "prefixes": [
+   "https://cpe.ext.hpe.com/docs/latest/"
+  ],
+  "max_pages": 400,
+  "exclude": "/release_announcements/"
+ },
+ {
+  "id": "julia_mpi_jl",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://juliaparallel.org/MPI.jl/stable/"
+  ],
+  "prefixes": [
+   "https://juliaparallel.org/MPI.jl/stable/"
+  ],
+  "max_pages": 80,
+  "exclude": "/reference/"
+ },
+ {
+  "id": "julia_cuda_jl",
+  "topic": "gpu",
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://cuda.juliagpu.org/stable/"
+  ],
+  "prefixes": [
+   "https://cuda.juliagpu.org/stable/"
+  ],
+  "max_pages": 100,
+  "exclude": "/api/|/lib/"
+ },
+ {
+  "id": "julia_hpc_guide",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "MIT/CC-BY (JuliaHPC; see license_links)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://juliahpc.github.io/"
+  ],
+  "prefixes": [
+   "https://juliahpc.github.io/"
+  ],
+  "max_pages": 100
+ },
+ {
+  "id": "lapack_users_guide",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "SIAM copyright (LAPACK Users' Guide, 3rd ed., HTML on netlib)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://netlib.org/lapack/lug/"
+  ],
+  "prefixes": [
+   "https://netlib.org/lapack/lug/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "scalapack_users_guide",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "SIAM copyright (ScaLAPACK Users' Guide, HTML on netlib)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://netlib.org/scalapack/slug/"
+  ],
+  "prefixes": [
+   "https://netlib.org/scalapack/slug/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "fftw_manual",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "FFTW manual permission notice (verbatim copying permitted)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.fftw.org/fftw3_doc/"
+  ],
+  "prefixes": [
+   "https://www.fftw.org/fftw3_doc/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "petsc_manual",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://petsc.org/release/manual/",
+   "https://petsc.org/release/install/",
+   "https://petsc.org/release/faq/"
+  ],
+  "prefixes": [
+   "https://petsc.org/release/manual/",
+   "https://petsc.org/release/install/",
+   "https://petsc.org/release/faq/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "hdf5_docs",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause-style HDF5 licence",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://support.hdfgroup.org/documentation/hdf5/latest/_u_g.html",
+   "https://support.hdfgroup.org/documentation/hdf5/latest/_learn_basics.html",
+   "https://support.hdfgroup.org/documentation/hdf5/latest/_getting_started.html",
+   "https://support.hdfgroup.org/documentation/hdf5/latest/_par_h_d_f5.html"
+  ],
+  "prefixes": [
+   "https://support.hdfgroup.org/documentation/hdf5/latest/"
+  ],
+  "max_pages": 250,
+  "exclude": "/group__|/struct|/class|/union|/files?\\.html|/globals|/H5[A-Z]*__|_8h|/dir_|/functions|_8[a-z]|__gen_"
+ },
+ {
+  "id": "netcdf_c_docs",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause-style (UCAR/Unidata)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.unidata.ucar.edu/netcdf-c/current/",
+   "https://docs.unidata.ucar.edu/netcdf-c/current/parallel_io.html"
+  ],
+  "prefixes": [
+   "https://docs.unidata.ucar.edu/netcdf-c/current/"
+  ],
+  "max_pages": 150,
+  "exclude": "/group__|/struct|_8[ch]|/dir_|/globals|/files\\.html"
+ },
+ {
+  "id": "adios2_docs",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://adios2.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://adios2.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 200,
+  "exclude": "/api_full/"
+ },
+ {
+  "id": "lustre_manual",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-3.0-US (Lustre Operations Manual)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://doc.lustre.org/lustre_manual.xhtml"
+  ],
+  "prefixes": [
+   "https://doc.lustre.org/"
+  ],
+  "max_pages": 3,
+  "max_depth": 0
+ },
+ {
+  "id": "lustre_wiki",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://wiki.lustre.org/Configuring_Lustre_File_Striping",
+   "https://wiki.lustre.org/Lustre_Best_Practices",
+   "https://wiki.lustre.org/Main_Page"
+  ],
+  "prefixes": [
+   "https://wiki.lustre.org/"
+  ],
+  "max_pages": 60,
+  "max_depth": 1,
+  "exclude": "index\\.php|Special:|File:|Category:|User:|Talk:"
+ },
+ {
+  "id": "beegfs_docs",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://doc.beegfs.io/latest/"
+  ],
+  "prefixes": [
+   "https://doc.beegfs.io/latest/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "daos_docs",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause-Patent (DAOS)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.daos.io/v2.6/"
+  ],
+  "prefixes": [
+   "https://docs.daos.io/v2.6/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "globus_docs",
+  "topic": "filesystems",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.globus.org/",
+   "https://docs.globus.org/guides/",
+   "https://docs.globus.org/cli/"
+  ],
+  "prefixes": [
+   "https://docs.globus.org/"
+  ],
+  "max_pages": 300,
+  "exclude": "/api/|/cli/reference/"
+ },
+ {
+  "id": "scorep_user_guide",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Score-P)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://perftools.pages.jsc.fz-juelich.de/cicd/scorep/tags/latest/html/",
+   "https://perftools.pages.jsc.fz-juelich.de/cicd/scorep/tags/latest/pdf/scorep.pdf"
+  ],
+  "prefixes": [
+   "https://perftools.pages.jsc.fz-juelich.de/cicd/scorep/tags/latest/html/"
+  ],
+  "max_pages": 300,
+  "exclude": "/group__|/struct|_8h|/dir_|/globals|/files\\.html",
+  "pdf": true
+ },
+ {
+  "id": "scalasca_user_guide",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Scalasca)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apps.fz-juelich.de/scalasca/releases/scalasca/2.6/docs/manual/"
+  ],
+  "prefixes": [
+   "https://apps.fz-juelich.de/scalasca/releases/scalasca/2.6/docs/manual/"
+  ],
+  "max_pages": 100
+ },
+ {
+  "id": "linaro_forge",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "Linaro proprietary documentation",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.linaroforge.com/26.0.3/html/forge/index.html"
+  ],
+  "prefixes": [
+   "https://docs.linaroforge.com/26.0.3/html/forge/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "gdb_manual",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "GFDL-1.3",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://sourceware.org/gdb/current/onlinedocs/gdb.html/"
+  ],
+  "prefixes": [
+   "https://sourceware.org/gdb/current/onlinedocs/gdb.html/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "valgrind_manual",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "GFDL-1.2 (Valgrind manual)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://valgrind.org/docs/manual/"
+  ],
+  "prefixes": [
+   "https://valgrind.org/docs/manual/"
+  ],
+  "max_pages": 100,
+  "exclude": "/dist\\.|/FAQ"
+ },
+ {
+  "id": "perf_wiki",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://perfwiki.github.io/main/"
+  ],
+  "prefixes": [
+   "https://perfwiki.github.io/main/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "likwid_docs",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://rrze-hpc.github.io/likwid/Doxygen/"
+  ],
+  "prefixes": [
+   "https://rrze-hpc.github.io/likwid/"
+  ],
+  "max_pages": 100
+ },
+ {
+  "id": "tau_guide",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.cs.uoregon.edu/research/tau/docs/newguide/"
+  ],
+  "prefixes": [
+   "https://www.cs.uoregon.edu/research/tau/docs/newguide/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "hpctoolkit_docs",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (HPCToolkit)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpctoolkit.gitlab.io/hpctoolkit/"
+  ],
+  "prefixes": [
+   "https://hpctoolkit.gitlab.io/hpctoolkit/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "darshan_docs",
+  "topic": "profiling",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.mcs.anl.gov/research/projects/darshan/docs/darshan-runtime.html",
+   "https://www.mcs.anl.gov/research/projects/darshan/docs/darshan-util.html",
+   "https://www.mcs.anl.gov/research/projects/darshan/documentation/"
+  ],
+  "prefixes": [
+   "https://www.mcs.anl.gov/research/projects/darshan/"
+  ],
+  "max_pages": 40
+ },
+ {
+  "id": "snakemake_docs",
+  "topic": "workflows",
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://snakemake.readthedocs.io/en/stable/",
+   "https://snakemake.readthedocs.io/en/stable/executing/cluster.html"
+  ],
+  "prefixes": [
+   "https://snakemake.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 200,
+  "exclude": "/api_reference/"
+ },
+ {
+  "id": "snakemake_slurm_plugin",
+  "topic": "workflows",
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html"
+  ],
+  "prefixes": [
+   "https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/"
+  ],
+  "max_pages": 20,
+  "max_depth": 1
+ },
+ {
+  "id": "nextflow_docs",
+  "topic": "workflows",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links (Nextflow repo Apache-2.0)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.seqera.io/nextflow/",
+   "https://docs.seqera.io/nextflow/executor"
+  ],
+  "prefixes": [
+   "https://docs.seqera.io/nextflow/"
+  ],
+  "max_pages": 250,
+  "exclude": "/reference/stdlib|/migrations/|/nextflow/\\d"
+ },
+ {
+  "id": "parsl_docs",
+  "topic": "workflows",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://parsl.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://parsl.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 200,
+  "exclude": "/stubs/|/reference\\.html"
+ },
+ {
+  "id": "dask_jobqueue",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://jobqueue.dask.org/en/latest/"
+  ],
+  "prefixes": [
+   "https://jobqueue.dask.org/en/latest/"
+  ],
+  "max_pages": 80,
+  "exclude": "/generated/"
+ },
+ {
+  "id": "jupyterhub_docs",
+  "topic": "python",
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://jupyterhub.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://jupyterhub.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 150,
+  "exclude": "/reference/api/|/_static/|/changelog"
+ },
+ {
+  "id": "fireworks_docs",
+  "topic": "workflows",
+  "kind": "technical_documentation",
+  "license": "BSD-style (FireWorks licence)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://materialsproject.github.io/fireworks/"
+  ],
+  "prefixes": [
+   "https://materialsproject.github.io/fireworks/"
+  ],
+  "max_pages": 100,
+  "exclude": "/fireworks\\.[\\w.]+\\.html|/_modules/"
+ },
+ {
+  "id": "htcondor_docs",
+  "topic": "schedulers",
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://htcondor.readthedocs.io/en/latest/",
+   "https://htcondor.readthedocs.io/en/latest/users-manual/quick-start-guide.html"
+  ],
+  "prefixes": [
+   "https://htcondor.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 200,
+  "include": "users-manual|getting-htcondor|/en/latest/$|overview|faq",
+  "exclude": "/man-pages/|/classad|/version-history/"
+ },
+ {
+  "id": "flux_docs",
+  "topic": "schedulers",
+  "kind": "technical_documentation",
+  "license": "LGPL-3.0 / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://flux-framework.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://flux-framework.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "openpbs_docs",
+  "topic": "schedulers",
+  "kind": "technical_documentation",
+  "license": "Altair proprietary documentation",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://help.altair.com/2024.1.0/PBS%20Professional/PBSUserGuide2024.1.pdf"
+  ],
+  "prefixes": [
+   "https://help.altair.com/2024.1.0/PBS%20Professional/"
+  ],
+  "max_pages": 3,
+  "pdf": true,
+  "max_depth": 0
+ },
+ {
+  "id": "openssh_manuals",
+  "topic": "access",
+  "kind": "technical_documentation",
+  "license": "BSD/ISC (OpenBSD manual pages)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://man.openbsd.org/ssh",
+   "https://man.openbsd.org/ssh_config",
+   "https://man.openbsd.org/ssh-keygen",
+   "https://man.openbsd.org/ssh-agent",
+   "https://man.openbsd.org/ssh-add",
+   "https://man.openbsd.org/scp",
+   "https://man.openbsd.org/sftp",
+   "https://man.openbsd.org/ssh-copy-id",
+   "https://man.openbsd.org/sshd_config"
+  ],
+  "prefixes": [
+   "https://man.openbsd.org/"
+  ],
+  "max_pages": 12,
+  "max_depth": 0
+ },
+ {
+  "id": "rsync_manual",
+  "topic": "access",
+  "kind": "technical_documentation",
+  "license": "GPL-3.0 (rsync man page)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://download.samba.org/pub/rsync/rsync.1"
+  ],
+  "prefixes": [
+   "https://download.samba.org/pub/rsync/"
+  ],
+  "max_pages": 2,
+  "max_depth": 0
+ },
+ {
+  "id": "jsc_juwels",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apps.fz-juelich.de/jsc/hps/juwels/"
+  ],
+  "prefixes": [
+   "https://apps.fz-juelich.de/jsc/hps/juwels/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "jsc_jureca",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apps.fz-juelich.de/jsc/hps/jureca/"
+  ],
+  "prefixes": [
+   "https://apps.fz-juelich.de/jsc/hps/jureca/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "jsc_jupiter",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apps.fz-juelich.de/jsc/hps/jupiter/"
+  ],
+  "prefixes": [
+   "https://apps.fz-juelich.de/jsc/hps/jupiter/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "jsc_jusuf",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apps.fz-juelich.de/jsc/hps/jusuf/"
+  ],
+  "prefixes": [
+   "https://apps.fz-juelich.de/jsc/hps/jusuf/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "bsc_supportkc",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.bsc.es/supportkc/docs/MareNostrum5/intro/",
+   "https://www.bsc.es/supportkc/docs/"
+  ],
+  "prefixes": [
+   "https://www.bsc.es/supportkc/docs/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "cineca_leonardo_gaps",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.hpc.cineca.it/",
+   "https://docs.hpc.cineca.it/hpc/leonardo.html"
+  ],
+  "prefixes": [
+   "https://docs.hpc.cineca.it/"
+  ],
+  "max_pages": 800
+ },
+ {
+  "id": "lxp_meluxina_gaps",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lxp.lu/"
+  ],
+  "prefixes": [
+   "https://docs.lxp.lu/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "it4i_karolina_gaps",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.it4i.cz/"
+  ],
+  "prefixes": [
+   "https://docs.it4i.cz/"
+  ],
+  "max_pages": 800,
+  "exclude": "/cs/|/changelog"
+ },
+ {
+  "id": "vega_docs",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://vegadocs.vega.izum.si/"
+  ],
+  "prefixes": [
+   "https://vegadocs.vega.izum.si/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "deucalion_docs",
+  "topic": "site",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.macc.fccn.pt/"
+  ],
+  "prefixes": [
+   "https://docs.macc.fccn.pt/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "cran_hpc_task_view",
+  "topic": "software",
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "seeds": [
+   "https://cran.r-project.org/web/views/HighPerformanceComputing.html"
+  ],
+  "prefixes": [
+   "https://cran.r-project.org/web/views/"
+  ],
+  "max_pages": 2,
+  "max_depth": 0,
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review"
+ }
+]

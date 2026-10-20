@@ -28,7 +28,7 @@ for label, path in [('v2', 'data/eval/eval_all_v2.jsonl'), ('v3', 'data/eval/eva
         cfg.teacher.temperature, cfg.teacher.max_tokens, cfg.teacher.top_logprobs = 0, cfg.eval.max_new_tokens, 0
         cfg.teacher.extra_body = {'chat_template_kwargs': {'enable_thinking': False}}
         client = Teacher(cfg.teacher)
-        for variant in ['closed', 'rag']:
+        for variant in os.environ.get('ANSWER_MODES', 'closed,rag').split(','):  # split across nodes when set
             dest = out / f'{label}__{name}_{variant}.jsonl'
             done = set()
             if dest.exists():  # a job killed at its time limit can leave a partial last line
