@@ -38,6 +38,38 @@ if [ "$PHASE" = review ] && [ "${REVIEW_TP:-1}" = 2 ]; then
     done
     exit 0
 fi
+if [ "$PHASE" = generate ] && [ "${GEN_TP:-1}" = 4 ]; then
+    # Qwen3-Next teacher (user decision, Oct 19: it beat Qwen3-32B by 8.9 points on v3 in one judge run): one
+    # TP4 server per node, one task per node, four shards generating against it at once (factory_dbg.sbatch).
+    MINE=()
+    for i in $(( 4 * SLURM_PROCID )) $(( 4 * SLURM_PROCID + 1 )) $(( 4 * SLURM_PROCID + 2 )) $(( 4 * SLURM_PROCID + 3 )); do
+        (( i < ${#LIST[@]} )) && MINE+=("${LIST[$i]}")
+    done
+    (( ${#MINE[@]} )) || exit 0
+    TNEXT=cyankiwi/Qwen3-Next-80B-A3B-Instruct-AWQ-4bit
+    # Stage the 46 GB checkpoint in node RAM first: ten parallel sequential copies take well under a minute, while
+    # vLLM's four TP ranks prefetching from Lustre with 8 threads each took 764 s (Oct 19, job 61459978).
+    SNAP=$(ls -d "$HF_HOME"/hub/models--cyankiwi--Qwen3-Next-80B-A3B-Instruct-AWQ-4bit/snapshots/* | head -1)
+    STAGE=/dev/shm/tnext-$SLURM_JOB_ID
+    mkdir -p $STAGE && trap 'rm -rf "$STAGE"' EXIT
+    t0=$SECONDS
+    for f in "$SNAP"/*; do cp -L "$f" $STAGE/ & done
+    wait
+    echo "[job] staged $(du -sh $STAGE | cut -f1) in node RAM in $(( SECONDS - t0 )) s"
+    # Same flags as the 32B teacher (logprobs, hermes tool calls); served under the hub name the configs use.
+    start_vllm $STAGE "$PORT" $(teacher_args) --tensor-parallel-size 4 --served-model-name $TNEXT
+    trap 'stop_vllm; rm -rf "$STAGE"' EXIT  # start_vllm replaced the trap: free the node RAM too
+    GENS=()
+    for K in "${MINE[@]}"; do
+        ( export CONFIG="$REPO/configs/${BATCH}_shard_${K}.json" RUN_DIR="$REPO/runs/$BATCH/shard_${K}"
+          phase teacher_generation
+          distillkit generate -c "$CONFIG" --set teacher.base_url="http://127.0.0.1:$PORT/v1" --set teacher.model=$TNEXT \
+              && touch "$RUN_DIR/GENERATE_DONE" && phase generation_complete ) &
+        GENS+=($!)
+    done
+    wait "${GENS[@]}" || true
+    exit 0
+fi
 (( SLURM_PROCID < ${#LIST[@]} )) || exit 0
 K=${LIST[$SLURM_PROCID]}
 export CONFIG="$REPO/configs/${BATCH}_shard_${K}.json"

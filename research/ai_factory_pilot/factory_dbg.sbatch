@@ -13,6 +13,8 @@
 L="${REPO:?}/../logs"
 # Review with REVIEW_TP=2: two tasks per node, two GPUs each (see factory_worker.sh); otherwise one GPU per task.
 if [ "$PHASE" = review ] && [ "${REVIEW_TP:-1}" = 2 ]; then GPUS="--ntasks=$(( SLURM_JOB_NUM_NODES * 2 )) --ntasks-per-node=2 --gpu-bind=none"  # each task picks its GPU pair; --ntasks overrides the allocation's 4 per node
+# Generate with GEN_TP=4: one task per node, all four GPUs (Qwen3-Next TP4 serving four shards).
+elif [ "$PHASE" = generate ] && [ "${GEN_TP:-1}" = 4 ]; then GPUS="--ntasks=$SLURM_JOB_NUM_NODES --ntasks-per-node=1 --gpu-bind=none"
 else GPUS="--gpu-bind=single:1 --gpus-per-task=1"; fi
 srun --kill-on-bad-exit=0 $GPUS \
     --output="$L/factory-${PHASE:?}-%j-%t.out" --error="$L/factory-${PHASE}-%j-%t.err" \
