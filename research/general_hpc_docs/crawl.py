@@ -1,11 +1,11 @@
 """Polite crawler for general HPC documentation (raw archive for later synthetic Q&A). CPU, login node.
 
-usage: crawl.py SOURCES_JSON OUT_DIR [--old-manifest M] [--hours H] [--max-total N] [--only id,id] [--check]
+usage: crawl.py SOURCES_JSON OUT_DIR [--old-manifest M [--old-manifest M2 ...]] [--hours H] [--max-total N] [--only id,id] [--check]
 
 Per source (see sources.json): BFS from `seeds`, staying inside `prefixes`, honouring robots.txt and
 <= 1 request/s per host (one thread per host), at most `max_pages` fetches. HTML is converted with
 distillkit.fetch_sources.html_to_markdown, PDFs with pypdf (OUT_DIR/tools/pylib). URLs already in the
-old archive manifest are skipped; identical raw/text sha256 are recorded as duplicate_content.
+old archive manifest(s) (--old-manifest may be repeated) are skipped; identical raw/text sha256 are recorded as duplicate_content.
 manifest.jsonl uses the old archive's field names (+ topic, license, license_basis) and is appended
 row by row, so the run is resumable and partial results are usable. SOURCES.csv/TOPICS.csv/STATUS.json
 are rewritten periodically. --check fetches only the seeds and prints their status.
@@ -84,7 +84,17 @@ class Host:
 def links(base: str, text: str) -> list[str]:
     out = [q or a or u for q, a, u in re.findall(r'href\s*=\s*(?:"([^"#\s]*)|\'([^\'#\s]*)|([^\s>"\'#]+))', text, re.I)]
     out += re.findall(r'http-equiv=["\']refresh["\'][^>]*url=([^"\'>\s]+)', text, re.I)
-    return [urljoin(base, h) for h in out if not h.startswith(("mailto:", "javascript:", "tel:"))]
+    res = []
+    for h in out:
+        if h.startswith(("mailto:", "javascript:", "tel:")):
+            continue
+        try:
+            u = urljoin(base, h)
+            urlparse(u).netloc  # malformed links (e.g. "Invalid IPv6 URL") are dropped, not fatal
+        except ValueError:
+            continue
+        res.append(u)
+    return res
 
 
 def pdf_text(raw: bytes, pylib: Path) -> str:
@@ -101,9 +111,9 @@ class Crawler:
         self.manifest = self.out / "manifest.jsonl"
         self.deadline = time.time() + a.hours * 3600
         self.old_urls, self.old_orig, self.seen_sha = set(), {}, {}
-        if a.old_manifest:
-            old_dir = Path(a.old_manifest).parent
-            for line in open(a.old_manifest):
+        for old_manifest in a.old_manifest or []:
+            old_dir = Path(old_manifest).parent
+            for line in open(old_manifest):
                 r = json.loads(line)
                 self.old_urls |= {norm(r["url"]), norm(r.get("resolved_url") or r["url"])}
                 if r.get("original_path", "").endswith(".html"):  # old pages are not refetched, only re-read for links
@@ -302,7 +312,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("sources")
     p.add_argument("out")
-    p.add_argument("--old-manifest")
+    p.add_argument("--old-manifest", action="append", help="repeatable: dedupe against several archives")
     p.add_argument("--hours", type=float, default=6.0)
     p.add_argument("--max-total", type=int, default=25000)
     p.add_argument("--only", default="")
