@@ -15,4 +15,4 @@ L="${REPO:?}/../logs"
 srun --kill-on-bad-exit=0 --output="$L/train-%j-%t.out" --error="$L/train-%j-%t.err" \
     bash -c 'source "$REPO/research/rag65/env.sh"; cd "$REPO"; export PYTHONPATH=src; S=(42 43 44)
         exec "$VENV/bin/python" -m torch.distributed.run --standalone --nproc-per-node=4 research/kd/train_kd.py \
-            "configs/${CFG:-rag65kd}_seed${S[$SLURM_NODEID]}.json" "${KD_DIR:?}"'
+            "configs/${CFG:-rag65kd}_seed${S[$SLURM_NODEID]}.json" "${KD_DIR:?}" "${ALPHA:-0.5}"'
