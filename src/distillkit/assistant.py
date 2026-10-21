@@ -127,8 +127,24 @@ class _Text(HTMLParser):
             self.parts.append(data)
 
 
+def _ocr_page(path, page):
+    """Text of one scanned PDF page: rendered with pdftoppm, read with tesseract ('' when either is missing)."""
+    if not (shutil.which('pdftoppm') and shutil.which('tesseract')):
+        return ''
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        subprocess.run(['pdftoppm', '-r', '200', '-f', str(page), '-l', str(page), '-png', str(path), f'{tmp}/p'],
+                       capture_output=True, check=False)
+        images = sorted(Path(tmp).glob('p*.png'))
+        if not images:
+            return ''
+        return subprocess.run(['tesseract', str(images[0]), '-'], capture_output=True, text=True, check=False).stdout
+
+
 def read_document(path):
-    """[(location, text)] for a user manual: one entry per PDF page, or the whole text file."""
+    """[(location, text)] for a user manual: one entry per PDF page, or the whole text file.
+
+    PDF pages without a text layer (scans) are OCRed with tesseract when it and pdftoppm are installed."""
     path = Path(path)
     if path.suffix.lower() == '.pdf':
         try:
@@ -140,6 +156,10 @@ def read_document(path):
                                    check=True).stdout.split('\f')
         else:
             pages = [page.extract_text() or '' for page in PdfReader(str(path)).pages]
+        pages = [t if len(t.strip()) >= 20 else _ocr_page(path, i) for i, t in enumerate(pages, 1)]
+        if not any(t.strip() for t in pages):
+            print(f'[hpc-assistant] {path.name}: no text found; for scanned PDFs install tesseract and poppler',
+                  file=sys.stderr)
         return [(f'{path.name}#page={i}', t) for i, t in enumerate(pages, 1) if t.strip()]
     text = path.read_text(errors='replace')
     if path.suffix.lower() in ('.html', '.htm'):

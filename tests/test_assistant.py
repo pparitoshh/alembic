@@ -140,3 +140,8 @@ def test_setup_explains_missing_ollama(tmp_path, monkeypatch):
         assert 'ollama.com' in str(e)
     else:
         raise AssertionError('setup must stop when Ollama is missing')
+
+
+def test_scanned_pdf_page_without_ocr_tools_is_skipped(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
+    assert assistant._ocr_page(tmp_path / 'scan.pdf', 1) == ''
