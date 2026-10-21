@@ -13,6 +13,8 @@ that verify best), so factory_worker.sh, factory_dbg.sbatch and merge_factory_v1
 - no chunk asked about in batches v1-v4, the CC-BY batches or (for later batches, e.g. v6 from the 2026-10-20 gaps
   archive) v5: dropped by exact chunk sha (their scenario plans) and by the normalised chunk key (their seeds);
 - legal boilerplate chunks (vendor notices and disclaimers, e.g. on every Intel documentation page) are dropped;
+- ANGLE_SET=2 REUSE_CHUNKS=1 VARIANT_BASE=12 (v7): new questions on chunks earlier batches already used, from a
+  second, disjoint set of angles (variants 13-15); merge_factory_v1.py still drops questions close to any bank;
 - at most 3 variants per chunk; large documents are split over several shards so no shard exceeds SHARD_SIZE.
 """
 from collections import Counter
@@ -218,7 +220,11 @@ ANGLES = ['troubleshooting a program or job that fails, hangs or gives wrong res
           'choosing between two documented options or settings', 'how to verify that it worked as intended',
           'performance, scaling or efficiency of the setup', 'what to check or configure before starting',
           'adapting a laptop or workstation workflow to a cluster']
-VARIANT_BASE = 9  # v1 used variants 1-3, v2 4-6, v4 7-9
+if os.environ.get('ANGLE_SET') == '2':  # disjoint from every earlier angle set
+    ANGLES = ['a common mistake and how to avoid it', 'what a specific output, log line or error message means',
+              'a minimal working example a new cluster user can run', 'comparing it with an alternative tool or approach',
+              'limits, quotas or fair-share effects to be aware of', 'automating or scripting it for many runs']
+VARIANT_BASE = int(os.environ.get('VARIANT_BASE', '9'))  # v1 used variants 1-3, v2 4-6, v4 7-9, v5/v6 10-12
 
 # Every chunk an earlier batch could have asked about: exact chunk sha from their plans, normalised key from their seeds.
 used_sha, used_key = set(), set()
@@ -247,7 +253,7 @@ for d in documents:
         if score < 2:  # v3/v4 bar: still HPC terms or code
             dropped['low_relevance'] += 1
             continue
-        if sha(text) in used_sha or text_key(text) in used_key:
+        if not os.environ.get('REUSE_CHUNKS') and (sha(text) in used_sha or text_key(text) in used_key):
             dropped['used_in_earlier_batch'] += 1
             continue
         chunks.append((score, d, i, text, code))
