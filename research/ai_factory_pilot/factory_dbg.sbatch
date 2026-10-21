@@ -5,7 +5,7 @@
 #SBATCH --qos=boost_qos_dbg
 #SBATCH --ntasks-per-node=4
 #SBATCH --gres=gpu:4
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=6  # 5 nodes x 24 + a 4-node score job (128) stay under the 256-CPU user limit
 #SBATCH --mem=480G
 #SBATCH --time=00:30:00
 #SBATCH --exclude=lrdn0812,lrdn1020,lrdn2071,lrdn2747,lrdn3050,lrdn3075
