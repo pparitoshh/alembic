@@ -149,10 +149,10 @@ PAGE = r'''<!doctype html>
 <title>HPC Assistant</title>
 <style>
 :root { --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #e3e2dc; --accent: #2457c5;
-        --accent-soft: #e8eefb; --code: #f1f0ec; --user: #eef1f6; }
+        --accent-soft: #e8eefb; --code: #f1f0ec; --user: #eef1f6; --on-accent: #ffffff; }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #161615; --panel: #1f1f1d; --text: #ecebe6; --muted: #9b9a93; --line: #34332f; --accent: #7aa2ff;
-          --accent-soft: #23304d; --code: #2a2a27; --user: #262a32; }
+          --accent-soft: #23304d; --code: #2a2a27; --user: #262a32; --on-accent: #0f1626; }
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -188,7 +188,7 @@ textarea { flex: 1; resize: none; min-height: 48px; max-height: 160px; padding: 
            border: 1px solid var(--line); background: var(--panel); color: var(--text); font: inherit; }
 textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 button { border: 0; border-radius: 12px; padding: 0 18px; font: inherit; font-weight: 600; cursor: pointer;
-         background: var(--accent); color: #fff; }
+         background: var(--accent); color: var(--on-accent); }
 button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); font-weight: 500; }
 button:disabled { opacity: .5; cursor: default; }
 </style>
@@ -217,6 +217,7 @@ button:disabled { opacity: .5; cursor: default; }
 </form>
 <script>
 const $ = id => document.getElementById(id);
+const excerpts = n => n + (n === 1 ? ' excerpt' : ' excerpts');
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function inline(s) {
   return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -273,13 +274,13 @@ async function upload(file) {
   $('files').appendChild(chip);
   const r = await fetch('/api/upload', {method: 'POST', headers: {'X-Filename': encodeURIComponent(file.name)}, body: file});
   const j = await r.json();
-  if (r.ok) { chip.className = 'chip'; chip.textContent = `${j.file} · ${j.excerpts} excerpts`; }
+  if (r.ok) { chip.className = 'chip'; chip.textContent = `${j.file} · ${excerpts(j.excerpts)}`; }
   else { chip.className = 'chip err'; chip.textContent = `${file.name}: ${j.error}`; }
 }
 async function loadDocs() {
   const j = await (await fetch('/api/docs')).json();
   $('meta').textContent = `Runs locally · model ${j.model}` + (j.builtin ? ' · built-in HPC docs on' : ' · no built-in docs index');
-  for (const d of j.documents) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = `${d.file} · ${d.excerpts} excerpts`; $('files').appendChild(c); }
+  for (const d of j.documents) { const c = document.createElement('span'); c.className = 'chip'; c.textContent = `${d.file} · ${excerpts(d.excerpts)}`; $('files').appendChild(c); }
 }
 $('drop').onclick = () => $('file').click();
 $('drop').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') $('file').click(); };
