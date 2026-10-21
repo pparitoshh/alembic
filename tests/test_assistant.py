@@ -145,3 +145,22 @@ def test_setup_explains_missing_ollama(tmp_path, monkeypatch):
 def test_scanned_pdf_page_without_ocr_tools_is_skipped(tmp_path, monkeypatch):
     monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
     assert assistant._ocr_page(tmp_path / 'scan.pdf', 1) == ''
+
+
+def test_web_upload_names_are_safe_and_indexed(tmp_path):
+    from distillkit import assistant_web as web
+    assert web.safe_name('../../etc/passwd.md') == 'passwd.md'
+    assert web.safe_name('C:\\Users\\me\\Cluster Guide (v2).pdf') == 'Cluster Guide _v2_.pdf'
+    for bad in ['script.sh', 'archive.tar.gz', 'noext']:
+        try:
+            web.safe_name(bad)
+        except ValueError:
+            continue
+        raise AssertionError(f'{bad} must be rejected')
+    bot = assistant.Assistant(_indexes(tmp_path))
+    text = ('# MyCluster\n\nSubmit GPU jobs to the partition gpu-long with --gres=gpu:a100:2 and a maximum wall time of '
+            '48 hours on MyCluster.').encode()
+    name, n = web.save_upload(bot, '../guide.md', text)
+    assert name == 'guide.md' and n == 1 and (tmp_path / 'uploads' / 'guide.md').read_bytes() == text
+    assert web.user_documents(bot) == [('guide.md', 1)]
+    assert bot.search('GPU partition on MyCluster')[0]['url'] == 'guide.md'

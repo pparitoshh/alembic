@@ -18,6 +18,7 @@ export stage) or any OpenAI-compatible server such as llama-server (`--openai ht
     hpc-assistant --add cluster-manual.pdf # index a manual, then chat
     hpc-assistant --no-docs "..."          # closed-book
     hpc-assistant --setup                  # one-time: model from Hugging Face into Ollama, plus the docs index
+    hpc-assistant --web                    # upload-and-chat page on http://127.0.0.1:8765
 
 `--setup` downloads the GGUF and Modelfile from the Hugging Face release and runs `ollama create`; the built-in
 documentation index is downloaded from HPC_ASSISTANT_INDEX_URL (a directory URL holding documents.sqlite and
@@ -369,6 +370,8 @@ def main(argv=None):
     ap.add_argument('--tools', action='store_true',
                     help='offer the model a search_docs tool (only for releases trained with tool calls)')
     ap.add_argument('--setup', action='store_true', help='one-time install of the model (and docs index), then exit')
+    ap.add_argument('--web', action='store_true', help='open the upload-and-chat page on http://127.0.0.1:PORT')
+    ap.add_argument('--port', type=int, default=8765)
     args = ap.parse_args(argv)
     if args.setup:
         setup(Path(args.index), args.model)
@@ -379,6 +382,10 @@ def main(argv=None):
         print(f'[hpc-assistant] indexed {f}: {bot.add(f)} excerpts', file=sys.stderr)
     if not args.no_docs and not bot.builtin:
         print(f'[hpc-assistant] no built-in index in {args.index}; only your own documents are searched', file=sys.stderr)
+    if args.web:
+        from distillkit.assistant_web import serve
+        serve(bot, port=args.port)
+        return
     if args.question:
         bot.ask(' '.join(args.question))
         print()
