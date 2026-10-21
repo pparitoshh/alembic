@@ -27,8 +27,8 @@ if (run_dir / 'adapter' / 'adapter_config.json').exists():
     sys.exit(0)
 tok = AutoTokenizer.from_pretrained(cfg.student.model)
 
-teacher = {}  # row id -> (top-20 ids, log-probs) per answer token
-for f in sorted(kd_dir.glob('kd_*.npz')):
+teacher = {}  # row id -> (top-20 ids, log-probs) per answer token; ALPHA 0 = plain fine-tuning, no teacher scores
+for f in sorted(kd_dir.glob('kd_*.npz')) if alpha > 0 else []:
     z = np.load(f)
     # Read each array once: z['ids'] re-reads the whole array on every access (per row, that OOM-killed the job).
     ids, lps, offsets, row_ids = z['ids'], z['lps'], z['offsets'], z['row_ids']
@@ -41,7 +41,7 @@ class KDData(torch.utils.data.Dataset):
         self.rows = []
         for line in open(path):
             row = json.loads(line)
-            if row['id'] in teacher:
+            if alpha == 0 or row['id'] in teacher:
                 self.rows.append(row)
 
     def __len__(self):
@@ -55,9 +55,12 @@ class KDData(torch.utils.data.Dataset):
         prompt = tok(prompt, add_special_tokens=False)['input_ids']
         answer = tok(msgs[-1]['content'] + '<|im_end|>', add_special_tokens=False)['input_ids']
         full = prompt + answer
-        ids, lps = teacher[row['id']]
-        n = len(ids)  # answer tokens, the tail of the sequence
-        assert n == len(answer), row['id']
+        n = len(answer)  # answer tokens, the tail of the sequence
+        if alpha == 0:
+            ids, lps = np.zeros((n, 1), np.int64), np.zeros((n, 1), np.float32)
+        else:
+            ids, lps = teacher[row['id']]
+            assert len(ids) == n, row['id']
         return {'input_ids': torch.tensor(full), 'n_answer': n,
                 't_ids': torch.from_numpy(ids.astype(np.int64)), 't_lps': torch.from_numpy(lps.astype(np.float32))}
 
@@ -77,9 +80,12 @@ class KDTrainer(Trainer):
         logp = F.log_softmax(logits, dim=-1)
         target = ids[0, -n:]
         ce = F.nll_loss(logp, target)
-        t_prob = F.softmax(inputs['t_lps'], dim=-1)  # renormalised over the teacher's top-20
-        soft = -(t_prob * logp.gather(1, inputs['t_ids'])).sum(-1).mean()
-        loss = (1 - alpha) * ce + alpha * soft
+        if alpha == 0:
+            loss = ce
+        else:
+            t_prob = F.softmax(inputs['t_lps'], dim=-1)  # renormalised over the teacher's top-20
+            soft = -(t_prob * logp.gather(1, inputs['t_ids'])).sum(-1).mean()
+            loss = (1 - alpha) * ce + alpha * soft
         return (loss, out) if return_outputs else loss
 
 
