@@ -164,3 +164,27 @@ def test_web_upload_names_are_safe_and_indexed(tmp_path):
     assert name == 'guide.md' and n == 1 and (tmp_path / 'uploads' / 'guide.md').read_bytes() == text
     assert web.user_documents(bot) == [('guide.md', 1)]
     assert bot.search('GPU partition on MyCluster')[0]['url'] == 'guide.md'
+
+
+def test_web_failed_question_leaves_history_clean(tmp_path, monkeypatch):
+    from distillkit import assistant_web as web
+
+    def down(self, messages):
+        raise OSError('connection refused')
+        yield  # pragma: no cover
+
+    monkeypatch.setattr(assistant.Assistant, '_stream', down)
+    bot = assistant.Assistant(_indexes(tmp_path))
+    handler = web.make_handler(bot)
+
+    class Fake(handler):
+        def __init__(self, body):
+            from io import BytesIO
+            self.path, self.rfile, self.wfile = '/api/ask', BytesIO(body), BytesIO()
+            self.headers = {'Content-Length': str(len(body))}
+            self.request_version, self.requestline, self.command = 'HTTP/1.1', 'POST /api/ask HTTP/1.1', 'POST'
+
+    req = Fake(b'{"question": "How do I request GPUs on LUMI?"}')
+    req.do_POST()
+    assert b'not reachable' in req.wfile.getvalue()
+    assert [m['role'] for m in bot.history] == ['system']

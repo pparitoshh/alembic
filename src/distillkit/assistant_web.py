@@ -120,6 +120,8 @@ def make_handler(bot):
                         try:
                             bot.ask(question, out)
                         except OSError as e:  # model server not reachable
+                            if len(bot.history) > 1 and bot.history[-1]['role'] == 'user':
+                                bot.history.pop()  # keep the conversation consistent for the next question
                             out.write(f'\n\n[The model is not reachable: {e}. Is Ollama running?]')
                     self.wfile.write(b'0\r\n\r\n')
                 else:
@@ -157,8 +159,8 @@ PAGE = r'''<!doctype html>
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
 .app { max-width: 920px; margin: 0 auto; padding: 20px 16px 120px; }
-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 16px; }
+h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; white-space: nowrap; }
 .meta { color: var(--muted); font-size: 13px; }
 .docs { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 18px; }
 .drop { border: 1.5px dashed var(--line); border-radius: 10px; padding: 16px; text-align: center; color: var(--muted);
@@ -179,6 +181,7 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
 .msg.bot h3, .msg.bot h4 { margin: 12px 0 6px; font-size: 15px; }
 .msg.bot p { margin: 6px 0; }
 .msg.bot ul { margin: 6px 0; padding-left: 20px; }
+.msg.bot blockquote { margin: 8px 0; padding: 6px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
 .sources { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
 .sources a { color: var(--accent); text-decoration: none; }
 .empty { color: var(--muted); text-align: center; padding: 30px 10px; }
@@ -220,7 +223,8 @@ const $ = id => document.getElementById(id);
 const excerpts = n => n + (n === 1 ? ' excerpt' : ' excerpts');
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function inline(s) {
-  return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+               .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, '$1<em>$2</em>');
 }
 function render(md) {
   const out = []; let list = false;
@@ -228,10 +232,11 @@ function render(md) {
   parts.forEach((part, i) => {
     if (i % 2) { out.push('<pre><code>' + esc(part.replace(/\n$/, '')) + '</code></pre>'); return; }
     for (const line of part.split('\n')) {
-      const h = line.match(/^#{1,4}\s+(.*)/), li = line.match(/^\s*[-*]\s+(.*)/);
+      const h = line.match(/^#{1,4}\s+(.*)/), li = line.match(/^\s*[-*]\s+(.*)/), q = line.match(/^\s*>\s?(.*)/);
       if (li) { if (!list) { out.push('<ul>'); list = true; } out.push('<li>' + inline(li[1]) + '</li>'); continue; }
       if (list) { out.push('</ul>'); list = false; }
       if (h) out.push('<h4>' + inline(h[1]) + '</h4>');
+      else if (q) out.push('<blockquote>' + inline(q[1]) + '</blockquote>');
       else if (/^\s*-{3,}\s*$/.test(line)) continue;
       else if (line.trim()) out.push('<p>' + inline(line) + '</p>');
     }
@@ -250,9 +255,10 @@ function showAnswer(el, text) {
   let html = render(body);
   if (src.trim()) {
     const items = src.trim().split('\n').map(l => l.replace(/^- /, '')).map(l => {
-      const m = l.match(/^(\S+)(?: \((.*)\))?$/); const url = m ? m[1] : l, title = m && m[2] ? m[2] : url;
+      const k = l.endsWith(')') ? l.lastIndexOf(' (') : -1;  // "url (title)"; file names may contain spaces
+      const url = k < 0 ? l : l.slice(0, k), title = k < 0 ? url : l.slice(k + 2, -1);
       return /^https?:/.test(url) ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(title)}</a>`
-                                  : esc(url.replace('#page=', ', page '));
+                                  : esc(url.replace('#page=', ', page '));  // own files: the name is the title
     });
     html += '<div class="sources">Sources: ' + items.join(' · ') + '</div>';
   }
