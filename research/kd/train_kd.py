@@ -98,7 +98,9 @@ args = TrainingArguments(
     logging_steps=1, save_strategy='steps', save_steps=50, save_total_limit=2, seed=tcfg.seed,
     report_to='none', remove_unused_columns=False, dataloader_num_workers=2, ddp_find_unused_parameters=False)
 trainer = KDTrainer(model=model, args=args, train_dataset=ds, data_collator=collate)
-ckpts = sorted((run_dir / 'checkpoints').glob('checkpoint-*'), key=lambda d: int(d.name.split('-')[-1]))
+# Only complete checkpoints: a piece cut off by the time limit while saving leaves one without trainer_state.json.
+ckpts = sorted((d for d in (run_dir / 'checkpoints').glob('checkpoint-*') if (d / 'trainer_state.json').exists()),
+               key=lambda d: int(d.name.split('-')[-1]))
 trainer.train(resume_from_checkpoint=str(ckpts[-1]) if ckpts else None)
 if trainer.is_world_process_zero():
     trainer.model.save_pretrained(run_dir / 'adapter')
