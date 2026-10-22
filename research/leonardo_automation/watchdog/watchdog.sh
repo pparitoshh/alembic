@@ -27,13 +27,44 @@ while true; do
             && ! alive factory_v4 && ! stopped factory_v4; then
         start factory_v4
     fi
+    if [ -f "$CTL/factory_v5/controller.sh" ] && ! grep -q ' MERGED: ' "$CTL/factory_v5/controller.log" 2>/dev/null \
+            && ! alive factory_v5 && ! stopped factory_v5; then
+        start factory_v5
+    fi
+    if [ -f "$CTL/factory_v6/controller.sh" ] && ! grep -q ' MERGED: ' "$CTL/factory_v6/controller.log" 2>/dev/null \
+            && ! alive factory_v6 && ! stopped factory_v6; then
+        start factory_v6
+    fi
+    if [ -f "$CTL/factory_v7/controller.sh" ] && ! grep -q ' MERGED: ' "$CTL/factory_v7/controller.log" 2>/dev/null \
+            && ! alive factory_v7 && ! stopped factory_v7; then
+        start factory_v7
+    fi
+    if [ -f "$CTL/factory_v8/controller.sh" ] && ! grep -q ' MERGED: ' "$CTL/factory_v8/controller.log" 2>/dev/null \
+            && ! alive factory_v8 && ! stopped factory_v8; then
+        start factory_v8
+    fi
+    if [ -f "$CTL/bestofn/controller.sh" ] && ! grep -q ' BUILT: ' "$CTL/bestofn/controller.log" 2>/dev/null \
+            && ! alive bestofn && ! stopped bestofn; then
+        start bestofn
+    fi
+    for c in bestofn2 rag65v8 dpo rag65s17 rag65v9 rag65kd rag65kd2 rag65kd3 rag65kd4 rag65kd5 rag65kd6 rag65kd7 rag65kd8 rag65kd9 rag65kd10 rag65kd11 rft1 t120a gguf_r12c gguf_eval gguf_imat goals $(cat "$CTL/auto_rounds.txt" 2>/dev/null); do  # + auto-chained rounds  # standalone: best-of-n #2, round 8, DPO, 1.7B student, GGUF evals, goals chain
+        if [ -f "$CTL/$c/controller.sh" ] && ! grep -q ' BUILT: \| DONE: ' "$CTL/$c/controller.log" 2>/dev/null \
+                && ! alive $c && ! stopped $c; then
+            start $c
+        fi
+    done
+    # Round 7 runs standalone from the best-of-n build, alongside round 6.
+    if [ -f "$CTL/rag65v7/controller.sh" ] && ! grep -q ' DONE: ' "$CTL/rag65v7/controller.log" 2>/dev/null \
+            && ! alive rag65v7 && ! stopped rag65v7; then
+        start rag65v7
+    fi
     # Round 5 runs standalone alongside round 4's scoring; restart it on its own when it dies.
     if [ -f "$CTL/rag65v5/controller.sh" ] && ! grep -q ' DONE: ' "$CTL/rag65v5/controller.log" 2>/dev/null \
             && ! alive rag65v5 && ! stopped rag65v5 && alive rag65v4; then
         start rag65v5
     fi
     # Main chain.
-    if ! alive factory_v1 && ! alive rag65v4 && ! alive rag65v5 && ! alive rag65v6; then
+    if ! alive factory_v1 && ! alive rag65v4 && ! alive rag65v5 && ! alive rag65v6 && ! alive rag65v7; then
         if ! grep -q ' MERGED: ' "$CTL/factory_v1/controller.log"; then
             stopped factory_v1 || start factory_v1
         elif ! grep -q ' DONE: ' "$CTL/rag65v4/controller.log" 2>/dev/null; then
@@ -44,5 +75,5 @@ while true; do
             stopped rag65v6 || grep -q 'dk-rag65' <<< "$queue" || start rag65v6
         fi
     fi
-    sleep 300
+    sleep 60  # a dead controller costs at most a minute (user, Oct 20: no idle second)
 done
