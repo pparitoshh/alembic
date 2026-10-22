@@ -293,6 +293,18 @@ def test_successor_chain_survives_one_failed_cluster_start(service, monkeypatch)
     assert service.state['service']['standby_job_ids'] == ['104', '105']
 
 
+def test_initial_service_can_be_held_until_its_recovery_chain_exists(service, monkeypatch):
+    script = service.config_path.parent / 'service.sh'
+    script.write_text('#!/bin/bash\ntrue\n')
+    monkeypatch.setattr(service.slurm, 'queue', lambda: [])
+    def submit(args, **kwargs):
+        assert '--hold' in args
+        assert '--mem=2G' in args
+        return subprocess.CompletedProcess(args, 0, stdout='123\n', stderr='')
+    monkeypatch.setattr(subprocess, 'run', submit)
+    assert service.slurm.submit('service-held', script, hold=True) == '123'
+
+
 def test_nested_controller_does_not_inherit_slurm_allocation(tmp_path, monkeypatch):
     spec = tmp_path / "spec.json"
     put(spec, {"command": ["true"], "cwd": str(tmp_path), "receipt": str(tmp_path / "result.json")})

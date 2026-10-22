@@ -110,7 +110,7 @@ class Slurm:
             raise EvidenceError("More than one job matches a unique submission receipt")
         return next(iter(matches), None)
 
-    def submit(self, key, script, *, dependency=None, controller=False, gpu_args=None, environment=None):
+    def submit(self, key, script, *, dependency=None, controller=False, gpu_args=None, environment=None, hold=False):
         path = self.directory / "submissions" / f"{key}.json"
         if path.exists():
             receipt = read_json(path)
@@ -138,6 +138,8 @@ class Slurm:
             "--output=" + str(log) + ".out", "--error=" + str(log) + ".err"]
         if dependency:
             args.append("--dependency=afterany:" + str(dependency))
+        if hold:
+            args.append('--hold')
         args.append(str(script))
         if gpu_args is not None:
             args = ["sbatch", "--parsable", *gpu_args[:-1], "--job-name=" + name,
