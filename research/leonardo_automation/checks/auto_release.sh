@@ -1,7 +1,8 @@
 #!/bin/bash
 # Automatic release decision and build after vs_release.sh RD: a seed of round RD becomes the release candidate when,
-# against the current release (12e), v3 improves under BOTH judges, significantly (p < 0.05) under at least one, and
-# the mean over v3/v2/d1 is not worse under either judge. The best such arm is merged, exported (bf16 / Q8_0 / Q4_K_M),
+# against the current release (12e), v3 improves significantly (p < 0.05) under the 2-of-3 majority vote of three judges
+# and its mean over v3/v2/d1 is not worse (no single judge worse by more than 0.01); without the third judge, the
+# earlier rule: v3 better under both judges, significant under one, mean not worse under either. The best such arm is merged, exported (bf16 / Q8_0 / Q4_K_M),
 # given an imatrix Q4_K_M, its quantized files are evaluated against it, and runs/hf_<RD>/ is staged with READY.
 # The Hugging Face push itself is done from the laptop (the token never sits on the cluster).
 # usage: auto_release.sh ROUND_DIR    log: ctl/auto_release_<RD>.log
@@ -15,6 +16,8 @@ V=runs/vs_release_$RD
 decision=$(python3 - <<PY
 import json
 g = json.load(open('$V/PAIRED.json')); m = json.load(open('$V/PAIRED_gemma.json'))
+import os
+maj = json.load(open('$V/PAIRED_majority.json')) if os.path.exists('$V/PAIRED_majority.json') else None
 arms = sorted({k.split('/', 1)[1].split('-vs-')[0] for k in g if k.endswith('-vs-rel12e_rag')})
 best = None
 for a in arms:
@@ -25,6 +28,10 @@ for a in arms:
     mg = sum(d(g, l)['diff'] for l in ('v3', 'v2', 'd1')) / 3
     mm = sum(d(m, l)['diff'] for l in ('v3', 'v2', 'd1')) / 3
     win = v3g['diff'] > 0 and v3m['diff'] > 0 and min(v3g['p_a_not_better'], v3m['p_a_not_better']) < 0.05 and mg >= 0 and mm >= 0
+    if maj and d(maj, 'v3'):  # majority vote of three judges decides when available (Paritosh, Oct 22: judges may favour length)
+        v3j = d(maj, 'v3'); mj = sum(d(maj, l)['diff'] for l in ('v3', 'v2', 'd1')) / 3
+        win = v3j['diff'] > 0 and v3j['p_a_not_better'] < 0.05 and mj >= 0 and mg >= -0.01 and mm >= -0.01
+        print(f'#   majority: v3 {v3j["diff"]:+.3f} p {v3j["p_a_not_better"]:.3f} mean {mj:+.3f}')
     print(f'# {a}: v3 {v3g["diff"]:+.3f}/{v3m["diff"]:+.3f} p {v3g["p_a_not_better"]:.3f}/{v3m["p_a_not_better"]:.3f} mean {mg:+.3f}/{mm:+.3f} win={win}')
     if win and (best is None or mg + mm > best[1]):
         best = (a, mg + mm)

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Upload check: a finished round's seeds head to head with the current Hugging Face release (12e = runs/rag65kd9
-# seed 44, full strength) in ONE judge run, with both judges (gpt-oss-20b, then Gemma 4 26B), plus base+RAG.
+# seed 44, full strength) in ONE judge run, with three judges (gpt-oss-20b, Gemma 4 26B, Qwen3-235B) and their 2-of-3
+# majority vote, plus base+RAG.
 # usage: vs_release.sh ROUND_DIR (e.g. rft1)   log: ctl/vs_release_<ROUND>.log; results runs/vs_release_<ROUND>/
 set -uo pipefail
 RD=$1
@@ -35,14 +36,22 @@ for attempt in 1 2 3 4; do
     log "gemma judge attempt $attempt ($(left judged_gemma) units left)"
     REPO=$C RUN=$OUT bash $R/ctl/priority_submit.sh --nodes=3 --export=ALL,RUN=$OUT research/teacher_probe/judge_gemma.sbatch
 done
+for attempt in 1 2 3 4; do
+    [ "$(left judged_qwen)" = 0 ] && break
+    log "qwen3-235b judge attempt $attempt ($(left judged_qwen) units left)"
+    REPO=$C RUN=$OUT bash $R/ctl/priority_submit.sh --nodes=4 --export=ALL,RUN=$OUT research/teacher_probe/judge_qwen235.sbatch
+done
+$VPY research/rag65/majority.py runs/$OUT >> $LOG 2>&1  # 2-of-3 vote of gpt-oss-20b, Gemma 4 and Qwen3-235B (Oct 22)
 pairs=""; for f in $A/v3__s4?_rag.jsonl $A/v3__s4?_x05_rag.jsonl; do [ -s $f ] || continue; a=$(basename $f .jsonl); a=${a#v3__}; pairs="$pairs $a:rel12e_rag"; done
 pairs="$pairs rel12e_rag:base_rag"
 export PYTHONPATH=src:research/rag65
 $VPY research/rag65/paired.py runs/$OUT/judged runs/$OUT/PAIRED.json $pairs > runs/$OUT/paired.out 2>&1
 $VPY research/rag65/paired.py runs/$OUT/judged_gemma runs/$OUT/PAIRED_gemma.json $pairs > runs/$OUT/paired_gemma.out 2>&1
+$VPY research/rag65/paired.py runs/$OUT/judged_qwen runs/$OUT/PAIRED_qwen.json $pairs > runs/$OUT/paired_qwen.out 2>&1
+$VPY research/rag65/paired.py runs/$OUT/judged_majority runs/$OUT/PAIRED_majority.json $pairs > runs/$OUT/paired_majority.out 2>&1
 log "DONE: $(python3 -c "
 import json
-for name in ['PAIRED', 'PAIRED_gemma']:
+for name in ['PAIRED', 'PAIRED_gemma', 'PAIRED_qwen', 'PAIRED_majority']:
     d = json.load(open('runs/$OUT/' + name + '.json'))
     print(name, '; '.join(f\"{k} {v['diff']:+.3f}\" for k, v in d.items() if 'rel12e_rag' in k.split('-vs-')[1]))
 ")"
