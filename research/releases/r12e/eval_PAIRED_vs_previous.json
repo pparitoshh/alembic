@@ -1,0 +1,134 @@
+{
+  "v2/s44_rag-vs-k3s44_x05_rag": {
+    "questions": 66,
+    "a": 0.7083,
+    "b": 0.7083,
+    "diff": 0.0,
+    "paired_95": [
+      -0.0909,
+      0.0947
+    ],
+    "p_a_not_better": 0.5042
+  },
+  "v3/s44_rag-vs-k3s44_x05_rag": {
+    "questions": 199,
+    "a": 0.7965,
+    "b": 0.7337,
+    "diff": 0.0628,
+    "paired_95": [
+      0.0075,
+      0.1193
+    ],
+    "p_a_not_better": 0.0145
+  },
+  "d1/s44_rag-vs-k3s44_x05_rag": {
+    "questions": 106,
+    "a": 0.6439,
+    "b": 0.6156,
+    "diff": 0.0283,
+    "paired_95": [
+      -0.0377,
+      0.0943
+    ],
+    "p_a_not_better": 0.2118
+  },
+  "v2/s42_rag-vs-k3s44_x05_rag": {
+    "questions": 66,
+    "a": 0.7462,
+    "b": 0.7083,
+    "diff": 0.0379,
+    "paired_95": [
+      -0.0568,
+      0.1288
+    ],
+    "p_a_not_better": 0.2158
+  },
+  "v3/s42_rag-vs-k3s44_x05_rag": {
+    "questions": 198,
+    "a": 0.7715,
+    "b": 0.7348,
+    "diff": 0.0366,
+    "paired_95": [
+      -0.0139,
+      0.0884
+    ],
+    "p_a_not_better": 0.0834
+  },
+  "d1/s42_rag-vs-k3s44_x05_rag": {
+    "questions": 106,
+    "a": 0.6816,
+    "b": 0.6156,
+    "diff": 0.066,
+    "paired_95": [
+      -0.0047,
+      0.1392
+    ],
+    "p_a_not_better": 0.0374
+  },
+  "v2/s43_rag-vs-k3s44_x05_rag": {
+    "questions": 66,
+    "a": 0.7311,
+    "b": 0.7083,
+    "diff": 0.0227,
+    "paired_95": [
+      -0.0682,
+      0.1136
+    ],
+    "p_a_not_better": 0.3211
+  },
+  "v3/s43_rag-vs-k3s44_x05_rag": {
+    "questions": 199,
+    "a": 0.7764,
+    "b": 0.7337,
+    "diff": 0.0427,
+    "paired_95": [
+      -0.0101,
+      0.0955
+    ],
+    "p_a_not_better": 0.058
+  },
+  "d1/s43_rag-vs-k3s44_x05_rag": {
+    "questions": 106,
+    "a": 0.6934,
+    "b": 0.6156,
+    "diff": 0.0778,
+    "paired_95": [
+      0.0118,
+      0.1462
+    ],
+    "p_a_not_better": 0.0114
+  },
+  "v2/s44_rag-vs-base_rag": {
+    "questions": 66,
+    "a": 0.7083,
+    "b": 0.5379,
+    "diff": 0.1705,
+    "paired_95": [
+      0.0795,
+      0.2652
+    ],
+    "p_a_not_better": 0.0001
+  },
+  "v3/s44_rag-vs-base_rag": {
+    "questions": 200,
+    "a": 0.795,
+    "b": 0.6438,
+    "diff": 0.1512,
+    "paired_95": [
+      0.1,
+      0.205
+    ],
+    "p_a_not_better": 0.0
+  },
+  "d1/s44_rag-vs-base_rag": {
+    "questions": 106,
+    "a": 0.6439,
+    "b": 0.4976,
+    "diff": 0.1462,
+    "paired_95": [
+      0.0708,
+      0.2193
+    ],
+    "p_a_not_better": 0.0001
+  }
+}

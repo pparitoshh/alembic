@@ -1,0 +1,475 @@
+{
+  "judge": "openai/gpt-oss-20b, both orders, vs closed-book Qwen3-4B-Instruct-2507",
+  "document_assisted_arms_are_labelled_rag": true,
+  "arms": {
+    "d1/base_rag": {
+      "win_rate": 0.4646,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.3915,
+        0.5401
+      ],
+      "check_pass_rate": 0.8962,
+      "answers_with_invalid_flags": 3,
+      "truncated": 42
+    },
+    "d1/lb_gemma4_rag": {
+      "win_rate": 0.6887,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6132,
+        0.7618
+      ],
+      "check_pass_rate": 0.9906,
+      "answers_with_invalid_flags": 1,
+      "truncated": 2
+    },
+    "d1/lb_gptoss120_rag": {
+      "win_rate": 0.8019,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7382,
+        0.8608
+      ],
+      "check_pass_rate": 0.9717,
+      "answers_with_invalid_flags": 0,
+      "truncated": 1
+    },
+    "d1/lb_gptoss20_rag": {
+      "win_rate": 0.7665,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6981,
+        0.8302
+      ],
+      "check_pass_rate": 0.9528,
+      "answers_with_invalid_flags": 1,
+      "truncated": 2
+    },
+    "d1/lb_granite8b_rag": {
+      "win_rate": 0.3608,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.283,
+        0.4434
+      ],
+      "check_pass_rate": 0.9057,
+      "answers_with_invalid_flags": 10,
+      "truncated": 1
+    },
+    "d1/lb_phi4mini_rag": {
+      "win_rate": 0.3137,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.2358,
+        0.3962
+      ],
+      "check_pass_rate": 0.9057,
+      "answers_with_invalid_flags": 9,
+      "truncated": 3
+    },
+    "d1/lb_q14_rag": {
+      "win_rate": 0.6203,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.5448,
+        0.6934
+      ],
+      "check_pass_rate": 0.9717,
+      "answers_with_invalid_flags": 3,
+      "truncated": 5
+    },
+    "d1/lb_q8_rag": {
+      "win_rate": 0.5708,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.4953,
+        0.6486
+      ],
+      "check_pass_rate": 0.9623,
+      "answers_with_invalid_flags": 3,
+      "truncated": 11
+    },
+    "d1/lb_smol3b_rag": {
+      "win_rate": 0.2594,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.1887,
+        0.3325
+      ],
+      "check_pass_rate": 0.9151,
+      "answers_with_invalid_flags": 9,
+      "truncated": 15
+    },
+    "d1/rel12e_rag": {
+      "win_rate": 0.6415,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.5684,
+        0.7099
+      ],
+      "check_pass_rate": 0.934,
+      "answers_with_invalid_flags": 0,
+      "truncated": 54
+    },
+    "d1/t235_rag": {
+      "win_rate": 0.7335,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6651,
+        0.7972
+      ],
+      "check_pass_rate": 0.9623,
+      "answers_with_invalid_flags": 0,
+      "truncated": 16
+    },
+    "d1/t32_rag": {
+      "win_rate": 0.6816,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6061,
+        0.7571
+      ],
+      "check_pass_rate": 0.9906,
+      "answers_with_invalid_flags": 0,
+      "truncated": 7
+    },
+    "d1/tnext_rag": {
+      "win_rate": 0.7406,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6675,
+        0.809
+      ],
+      "check_pass_rate": 0.934,
+      "answers_with_invalid_flags": 0,
+      "truncated": 41
+    },
+    "v2/base_rag": {
+      "win_rate": 0.5379,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.4394,
+        0.6364
+      ],
+      "check_pass_rate": 0.9242,
+      "answers_with_invalid_flags": 2,
+      "truncated": 21
+    },
+    "v2/lb_gemma4_rag": {
+      "win_rate": 0.803,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7273,
+        0.875
+      ],
+      "check_pass_rate": 0.9848,
+      "answers_with_invalid_flags": 1,
+      "truncated": 0
+    },
+    "v2/lb_gptoss120_rag": {
+      "win_rate": 0.8462,
+      "complete": false,
+      "invalid": 1,
+      "question_bootstrap_95": [
+        0.7769,
+        0.9077
+      ],
+      "check_pass_rate": 0.9697,
+      "answers_with_invalid_flags": 1,
+      "truncated": 0
+    },
+    "v2/lb_gptoss20_rag": {
+      "win_rate": 0.7879,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7008,
+        0.8674
+      ],
+      "check_pass_rate": 1.0,
+      "answers_with_invalid_flags": 0,
+      "truncated": 4
+    },
+    "v2/lb_granite8b_rag": {
+      "win_rate": 0.4242,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.322,
+        0.5265
+      ],
+      "check_pass_rate": 0.8939,
+      "answers_with_invalid_flags": 6,
+      "truncated": 0
+    },
+    "v2/lb_phi4mini_rag": {
+      "win_rate": 0.3409,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.2424,
+        0.4432
+      ],
+      "check_pass_rate": 0.9091,
+      "answers_with_invalid_flags": 6,
+      "truncated": 3
+    },
+    "v2/lb_q14_rag": {
+      "win_rate": 0.6364,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.5379,
+        0.7311
+      ],
+      "check_pass_rate": 0.9545,
+      "answers_with_invalid_flags": 3,
+      "truncated": 4
+    },
+    "v2/lb_q8_rag": {
+      "win_rate": 0.6174,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.5152,
+        0.7159
+      ],
+      "check_pass_rate": 0.9697,
+      "answers_with_invalid_flags": 1,
+      "truncated": 2
+    },
+    "v2/lb_smol3b_rag": {
+      "win_rate": 0.2879,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.1932,
+        0.3864
+      ],
+      "check_pass_rate": 0.9545,
+      "answers_with_invalid_flags": 3,
+      "truncated": 11
+    },
+    "v2/rel12e_rag": {
+      "win_rate": 0.7311,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6439,
+        0.8106
+      ],
+      "check_pass_rate": 0.9394,
+      "answers_with_invalid_flags": 0,
+      "truncated": 32
+    },
+    "v2/t235_rag": {
+      "win_rate": 0.8295,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7614,
+        0.8902
+      ],
+      "check_pass_rate": 0.9394,
+      "answers_with_invalid_flags": 0,
+      "truncated": 12
+    },
+    "v2/t32_rag": {
+      "win_rate": 0.7538,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6705,
+        0.8333
+      ],
+      "check_pass_rate": 0.9848,
+      "answers_with_invalid_flags": 0,
+      "truncated": 5
+    },
+    "v2/tnext_rag": {
+      "win_rate": 0.7917,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7083,
+        0.8674
+      ],
+      "check_pass_rate": 0.8636,
+      "answers_with_invalid_flags": 0,
+      "truncated": 27
+    },
+    "v3/base_rag": {
+      "win_rate": 0.6613,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6038,
+        0.7163
+      ],
+      "check_pass_rate": 0.855,
+      "answers_with_invalid_flags": 12,
+      "truncated": 93
+    },
+    "v3/lb_gemma4_rag": {
+      "win_rate": 0.7388,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6875,
+        0.7887
+      ],
+      "check_pass_rate": 0.94,
+      "answers_with_invalid_flags": 12,
+      "truncated": 4
+    },
+    "v3/lb_gptoss120_rag": {
+      "win_rate": 0.8957,
+      "complete": false,
+      "invalid": 1,
+      "question_bootstrap_95": [
+        0.8593,
+        0.9271
+      ],
+      "check_pass_rate": 0.895,
+      "answers_with_invalid_flags": 6,
+      "truncated": 3
+    },
+    "v3/lb_gptoss20_rag": {
+      "win_rate": 0.8037,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7562,
+        0.8475
+      ],
+      "check_pass_rate": 0.885,
+      "answers_with_invalid_flags": 14,
+      "truncated": 8
+    },
+    "v3/lb_granite8b_rag": {
+      "win_rate": 0.4988,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.435,
+        0.56
+      ],
+      "check_pass_rate": 0.945,
+      "answers_with_invalid_flags": 9,
+      "truncated": 0
+    },
+    "v3/lb_phi4mini_rag": {
+      "win_rate": 0.3975,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.34,
+        0.4575
+      ],
+      "check_pass_rate": 0.88,
+      "answers_with_invalid_flags": 24,
+      "truncated": 4
+    },
+    "v3/lb_q14_rag": {
+      "win_rate": 0.7,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.645,
+        0.7538
+      ],
+      "check_pass_rate": 0.905,
+      "answers_with_invalid_flags": 17,
+      "truncated": 13
+    },
+    "v3/lb_q8_rag": {
+      "win_rate": 0.6275,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.5687,
+        0.6837
+      ],
+      "check_pass_rate": 0.915,
+      "answers_with_invalid_flags": 15,
+      "truncated": 21
+    },
+    "v3/lb_smol3b_rag": {
+      "win_rate": 0.3625,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.3025,
+        0.425
+      ],
+      "check_pass_rate": 0.835,
+      "answers_with_invalid_flags": 31,
+      "truncated": 25
+    },
+    "v3/rel12e_rag": {
+      "win_rate": 0.7738,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7275,
+        0.82
+      ],
+      "check_pass_rate": 0.82,
+      "answers_with_invalid_flags": 4,
+      "truncated": 136
+    },
+    "v3/t235_rag": {
+      "win_rate": 0.84,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7987,
+        0.8788
+      ],
+      "check_pass_rate": 0.83,
+      "answers_with_invalid_flags": 9,
+      "truncated": 87
+    },
+    "v3/t32_rag": {
+      "win_rate": 0.7312,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.6787,
+        0.78
+      ],
+      "check_pass_rate": 0.945,
+      "answers_with_invalid_flags": 9,
+      "truncated": 13
+    },
+    "v3/tnext_rag": {
+      "win_rate": 0.8125,
+      "complete": true,
+      "invalid": 0,
+      "question_bootstrap_95": [
+        0.7675,
+        0.855
+      ],
+      "check_pass_rate": 0.815,
+      "answers_with_invalid_flags": 15,
+      "truncated": 125
+    }
+  },
+  "seed_means": {}
+}
