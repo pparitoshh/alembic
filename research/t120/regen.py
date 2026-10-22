@@ -6,7 +6,8 @@ student already matches, so its answers raise the ceiling. It sees exactly the u
 plus quoted sources) and the student's system prompt, plus a teacher-only note asking for a complete answer that fits the
 768-token evaluation budget. Reasoning effort medium; only the final answer is kept. A new answer is kept only if it
 finished, has at most 550 words and passes the deterministic checks (shell syntax, known Slurm flags).
-Output: OUT_DIR/answers_<worker>.jsonl with {id, answer (null when rejected), words, reason}. Resumable.
+Output: OUT_DIR/answers_<worker>.jsonl with {id, answer (null when rejected), words, reason}. Resumable, also
+across a changed node count (rows answered by any worker are skipped; rejected rows are asked again).
 """
 import json
 import sys
@@ -18,8 +19,10 @@ from distillkit.teacher import Teacher
 
 worker, n_workers, endpoint, served, data, out = (int(sys.argv[1]), int(sys.argv[2]), sys.argv[3], sys.argv[4],
                                                    sys.argv[5], Path(sys.argv[6]))
-NOTE = ('\n\nGive a thorough, complete answer of about 300 to 500 words, including any script, with the reasoning, the '
-        'commands and how to check the result. Use the quoted sources only where they are relevant to the question.')
+# v1 asked for 300-500 words: gpt-oss-120b wrote 600+ and 81% were rejected for length. It overshoots by ~30%, so ask
+# for at most 350 words as a hard limit; the 550-word acceptance cap (the 768-token evaluation budget) is unchanged.
+NOTE = ('\n\nAnswer completely in AT MOST 350 words (hard limit), including any script: the reasoning, the commands and '
+        'how to check the result, without repetition. Use the quoted sources only where they are relevant to the question.')
 cfg = load_config('configs/rag65_seed42.json')
 SYSTEM = cfg.student.system_prompt
 cfg.teacher.model, cfg.teacher.base_url = served, endpoint
@@ -30,13 +33,15 @@ flags = load_flags()
 rows = [json.loads(line) for i, line in enumerate(open(data)) if i % n_workers == worker]
 out.mkdir(parents=True, exist_ok=True)
 dest = out / f'answers_{worker:03d}.jsonl'
-done = set()
-if dest.exists():
-    for x in dest.read_text().splitlines():
+done = set()  # answered by any worker: the node count may change between jobs without duplicates
+for f in out.glob('answers_*.jsonl'):
+    for x in f.read_text().splitlines():
         try:
-            done.add(json.loads(x)['id'])
-        except (ValueError, KeyError):
-            pass
+            r = json.loads(x)
+        except ValueError:
+            continue
+        if r.get('answer'):  # rejected rows are asked again
+            done.add(r['id'])
 todo = [r for r in rows if r['id'] not in done]
 print(f'worker {worker}: {len(rows)} rows, {len(todo)} to do', flush=True)
 
@@ -67,4 +72,4 @@ for start in range(0, len(todo), 384):
         for r in results:
             if r is not None:
                 f.write(json.dumps(r, ensure_ascii=False) + '\n')
-    print(f'worker {worker}: {len(done) + start + len(results)}/{len(rows)}', flush=True)
+    print(f'worker {worker}: {start + len(results)}/{len(todo)} new answers', flush=True)

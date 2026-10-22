@@ -26,10 +26,11 @@ cd $C
 test -s $MERGED/config.json || { log "STOP: merged 12e model missing"; exit 1; }
 mkdir -p $D/train $D/data $GEN
 want=$(wc -l < $SRC)
-have() { cat $GEN/answers_*.jsonl 2>/dev/null | wc -l; }
+# Accepted answers only: rejected rows (too long, unfinished, failed checks) are asked again by the next job.
+have() { cat $GEN/answers_*.jsonl 2>/dev/null | python3 -c "import sys,json; print(len({r['id'] for r in map(json.loads, sys.stdin) if r.get('answer')}))" 2>/dev/null || echo 0; }
 log "regenerating $want answers with gpt-oss-120b"
 for attempt in 1 2 3 4 5 6 7 8; do
-    [ "$(have)" -ge $(( want * 99 / 100 )) ] && break
+    [ "$(have)" -ge $(( want * 85 / 100 )) ] && break  # some questions never fit the length cap; 8 attempts at most
     j=$(adopt dk-t120a-regen); [ -n "$j" ] || j=$(cd $C && REPO=$C DATA=$SRC OUT=$GEN sbatch --parsable --nodes=4 --job-name=dk-t120a-regen research/t120/regen.sbatch 2>/dev/null | tail -1)
     [[ "$j" =~ ^[0-9]+$ ]] || { log "regen submission refused (QoS slots busy); retrying"; sleep 120; continue; }
     log "regen job $j ($(have)/$want)"; wait_job "$j"
