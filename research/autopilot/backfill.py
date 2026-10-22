@@ -136,7 +136,11 @@ class Backfill:
             statuses = {job: self.s.slurm.status(job) for job in jobs}
             status, exit_code = statuses[record['job_id']]
             record['scheduler_state'] = status
-            if any(st == 'CANCELLED' for st, _ in statuses.values()):
+            helper = record.get('helper_job_id')
+            if helper and statuses[helper][0] in ('PENDING', 'RUNNING', 'CONFIGURING'):
+                self.release_surplus_helper(active, record)
+            expected_cancel = lambda job: job == helper and record.get('helper_cancel_requested', False)
+            if any(st == 'CANCELLED' and not expected_cancel(job) for job, (st, _) in statuses.items()):
                 raise EvidenceError(f'Background job for {active} was cancelled; respecting cancellation')
             if any(st in ACTIVE or st == 'UNKNOWN' for st, _ in statuses.values()):
                 if status in ACTIVE:
@@ -147,7 +151,9 @@ class Backfill:
                 self.state['detail'] = f"{active}: {record['stage']}, jobs {names}, {len(list(run.glob(pattern)))} completed units"
                 self.save()
                 return
-            for st, code in statuses.values():
+            for job, (st, code) in statuses.items():
+                if st == 'CANCELLED' and expected_cancel(job):
+                    continue
                 if st not in RETRYABLE and not (st == 'COMPLETED' and code == '0:0'):
                     record['failures'] = record.get('failures', 0) + 1
             progress = unit_progress(self.code / 'runs' / active, record['stage'])
@@ -156,6 +162,7 @@ class Backfill:
             record['previous_job_id'] = record.pop('job_id')
             if record.get('helper_job_id'):
                 record['previous_helper_job_id'] = record.pop('helper_job_id')
+                record.pop('helper_cancel_requested', None)
             self.state['active'] = None
             self.save()
             if record.get('failures', 0) >= 3:
@@ -260,6 +267,23 @@ class Backfill:
                                                       args, role='background', environment=env)
         except CapacityPending:
             pass
+
+    def release_surplus_helper(self, run, record):
+        """Release only our optional sampler, and only after all samples are proved complete."""
+        if record['stage'] != 'sample':
+            return
+        directory = self.code / 'runs' / run
+        plan = read_json(directory / 'AUTOPILOT_PLAN.json')
+        if len(list((directory / 'gen').glob('cands_unit_*.jsonl'))) < (plan['questions'] + UNIT_SIZE - 1) // UNIT_SIZE:
+            return
+        samples = sample_proof(directory)
+        if samples['question_sha256'] != plan['question_sha256']:
+            raise EvidenceError('Prepared training questions changed')
+        # Persist the deliberate cancellation before contacting Slurm, so recovery distinguishes it
+        # from a user's cancellation. No foreground allocation or unrelated job is touched.
+        record['helper_cancel_requested'] = True
+        self.save()
+        self.s.slurm.command(['scancel', record['helper_job_id']])
 
     def build(self, directory, plan, samples, judged):
         if sha256(directory / 'data/questions.jsonl') != samples['question_sha256']:

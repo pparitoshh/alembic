@@ -301,3 +301,25 @@ def test_no_assistance_for_future_dataset_or_judging(shared):
     bg.state['runs']['auto_rft_0001']['stage'] = 'judge'
     bg.tick()
     assert len(shared.scheduler.submissions) == 1
+
+
+def test_redundant_helper_cannot_delay_completed_sampling(shared, monkeypatch):
+    bg = sampling_background(shared)
+    bg.tick()
+    directory = bg.code / 'runs/auto_rft_0001'
+    jsonl(directory / 'gen/cands_unit_00000.jsonl', [{'id': 'a', 'candidates': ['verified sample']}])
+    original = shared.scheduler.command
+    cancelled = []
+    def command(args):
+        if args[0] != 'scancel':
+            return original(args)
+        cancelled.append(args[1])
+        shared.scheduler.states[args[1]] = ('CANCELLED', '0:15')
+        shared.scheduler.jobs = [j for j in shared.scheduler.jobs if j['id'] != args[1]]
+        return ''
+    monkeypatch.setattr(shared.scheduler, 'command', command)
+    bg.tick()
+    assert cancelled == ['101']
+    assert bg.state['runs']['auto_rft_0001']['helper_cancel_requested']
+    bg.tick()  # Expected cancellation does not stop the coordinator or cancel the main allocation.
+    assert bg.state['active'] == 'auto_rft_0001'

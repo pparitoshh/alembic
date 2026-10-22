@@ -36,6 +36,8 @@ Generation uses stable 64-question units, partial journals and atomic completion
 
 If training is waiting for its own samples and a smaller sampling allocation is already running, a second sampling job uses the free nodes. Unit locks prevent duplicate writers, and judging waits for both allocations to finish. This assistance applies only to generation, whose units are locked; it never duplicates judge calls.
 
+If the complete sample audit passes before the optional helper finishes, the coordinator records and cancels only that redundant helper. A queued helper therefore cannot delay judging after its work is already done. Manual cancellations still stop automatic resubmission.
+
 The account currently exposes an eight-node debug allowance. No reservation for this account was visible at deployment preflight; a dedicated reservation must be identified before it can be targeted. The actual serial preflight started within two seconds despite a much later `sbatch --test-only` forecast.
 
 Every submission first writes an intent receipt. A lost `sbatch` response is reconciled with `squeue` and `sacct`; it is never blindly resubmitted. Failed scheduler reads never count as an empty queue. Timeouts and node failures resume from existing artifacts; three genuine task failures stop the service for inspection. Manual cancellation is respected. A filesystem lock prevents competing coordinators. Legacy `DONE` log messages are informational, never proof of completion.
