@@ -16,6 +16,9 @@ import sys
 import time
 import uuid
 
+if __name__ == '__main__':
+    sys.modules.setdefault('supervisor', sys.modules[__name__])
+
 from evidence import (ARMS, EvidenceError, answer_rows, audit_factory, audit_judgments,
     audit_round, expected_ids, objective_decision, promotion_decision, read_json, sha256)
 
@@ -107,7 +110,7 @@ class Slurm:
             raise EvidenceError("More than one job matches a unique submission receipt")
         return next(iter(matches), None)
 
-    def submit(self, key, script, *, dependency=None, controller=False, gpu_args=None):
+    def submit(self, key, script, *, dependency=None, controller=False, gpu_args=None, environment=None):
         path = self.directory / "submissions" / f"{key}.json"
         if path.exists():
             receipt = read_json(path)
@@ -130,7 +133,7 @@ class Slurm:
         log.parent.mkdir(parents=True, exist_ok=True)
         args = ["sbatch", "--parsable", "--account=" + self.config["account"],
             "--partition=" + self.config["cpu_partition"], "--qos=normal", "--nodes=1", "--ntasks=1",
-            "--cpus-per-task=" + ("4" if controller else "1"), "--mem=" + ("28G" if controller else "1G"),
+            "--cpus-per-task=" + ("4" if controller else "1"), "--mem=" + ("28G" if controller else "2G"),
             "--time=04:00:00", "--job-name=" + name, "--comment=distillkit-autopilot:" + key,
             "--output=" + str(log) + ".out", "--error=" + str(log) + ".err"]
         if dependency:
@@ -144,7 +147,9 @@ class Slurm:
                     "--partition=boost_usr_prod", gpu_args[-1]]
         try:
             # An interrupted response is ambiguous. The durable intent is reconciled on the next tick.
-            p = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=60)
+            env = {k: v for k, v in os.environ.items() if not k.startswith(('SLURM_', 'SBATCH_'))}
+            env.update(environment or {})
+            p = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=60, env=env)
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise SchedulerError(f"Submission response unknown for {key}: {exc}") from exc
         job = p.stdout.strip().split(";")[0]
@@ -187,6 +192,11 @@ class Supervisor:
             lines.append(f"Active task: `{task}`; CPU controller job `{record.get('job_id')}`; attempt {record.get('attempt')}.")
         if self.state.get("current_run"):
             lines.append(f"Current candidate: `{self.state['current_run']}`.")
+        if self.state.get('gpu_pool'):
+            pool = self.state['gpu_pool']
+            lines.append(f"GPU pool: {pool.get('running_nodes', '?')}/8 nodes running; {pool.get('running_gpus', '?')}/32 GPUs allocated; {pool.get('reserved_nodes', '?')} nodes reserved by queued/running jobs.")
+        if self.state.get('backfill'):
+            lines.append('Background preparation: ' + self.state['backfill'].get('detail', 'starting'))
         for decision in self.state["decisions"][-5:]:
             lines.append(f"Candidate `{decision['run']}`: {'met' if decision['goal_met'] else 'did not meet'} the 90% and first-place target under both judges.")
             if decision.get("best_observed"):
@@ -302,6 +312,21 @@ class Supervisor:
             return
         self.state.update(status="running", detail="")
         phase = self.state["phase"]
+        if self.config.get('pool', {}).get('enabled') and phase in ('prepare', 'train_evaluate'):
+            run = f"auto_rft_{self.state['round_index']:04d}"
+            rejected = self.code / 'runs' / run / 'DATA_REJECTED.json'
+            if rejected.exists():
+                record = self.state['tasks'].get('round-' + run, {})
+                if record.get('job_id'):
+                    state, _ = self.slurm.status(record['job_id'])
+                    if state in ACTIVE or state == 'UNKNOWN':
+                        return
+                    record['status'] = 'rejected'
+                self.state['decisions'].append({'run': run, 'goal_met': False, 'selected_arm': None,
+                    'reason': read_json(rejected)['reason'], 'at': now()})
+                self.state['round_index'] += 1
+                self.transition('prepare')
+                return
         if phase == "data":
             factory = self.config["factory"]
             if self.task("factory", ["bash", str(Path(self.config["root"]) / "ctl" / factory["controller"] / "controller.sh")],
@@ -328,7 +353,14 @@ class Supervisor:
                 if sha256(self.code / "runs" / run / "data/questions.jsonl") != plan["question_sha256"]:
                     raise EvidenceError("Prepared question hash changed")
                 return plan
-            if self.task("prepare-" + run, [self.config["python"], str(self.runtime / "prepare.py"), str(self.config_path), str(index)], proof):
+            if self.config.get('pool', {}).get('enabled'):
+                # The coordinator also owns backfill preparation; never race a second CPU writer.
+                if not (self.code / 'runs' / run / 'AUTOPILOT_PLAN.json').exists():
+                    from prepare import prepare
+                    prepare(self.config, index)
+                proof()
+                self.transition('train_evaluate')
+            elif self.task("prepare-" + run, [self.config["python"], str(self.runtime / "prepare.py"), str(self.config_path), str(index)], proof):
                 self.transition("train_evaluate")
         elif phase == "train_evaluate":
             run = self.state["current_run"]
@@ -359,6 +391,9 @@ class Supervisor:
                 atomic(self.directory / "GOAL_MET.json", {"at": now(), **self.state["winner"]})
         else:
             raise EvidenceError(f"Unknown phase: {phase}")
+        if self.config.get('pool', {}).get('enabled') and self.state['status'] not in TERMINAL and self.state.get('data'):
+            from backfill import Backfill
+            Backfill(self).tick()
 
     def export_proof(self, run, require_ready=True):
         directory = self.code / "runs" / f"hf_{run}"
@@ -415,9 +450,16 @@ class Supervisor:
                     self.tick()
                 except SchedulerError as exc:
                     self.state.update(detail=str(exc), scheduler_error_at=now())
-                except (EvidenceError, OSError, KeyError, TypeError, ValueError) as exc:
+                except (EvidenceError, OSError, KeyError, TypeError, ValueError, subprocess.CalledProcessError) as exc:
                     self.state.update(status="blocked", detail=f"Automation stopped for inspection: {exc}")
                 self.save()
+                if self.config.get('reports', {}).get('enabled'):
+                    try:
+                        from reports import write_report
+                        write_report(self.config, self.state, self.slurm)
+                    except (SchedulerError, EvidenceError, OSError, KeyError, TypeError, ValueError) as exc:
+                        # A reporting outage must not stop successful GPU work.
+                        atomic(self.directory / 'REPORT_ERROR.json', {'at': now(), 'error': str(exc)})
                 if once or self.state["status"] in TERMINAL or time.monotonic() >= deadline:
                     return
                 time.sleep(self.config.get("poll_seconds", 60))

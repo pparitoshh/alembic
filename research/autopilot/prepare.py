@@ -126,6 +126,16 @@ def prepare(config, index):
     template = template.replace('cd $C\ntest -s', guard + 'autopilot_wait\ncd $C\ntest -s')
     template = re.sub(r'^(for attempt in [^\n]+; do)$', r'\1\n    autopilot_wait', template, flags=re.M)
     template = template.replace('for round in $(seq 1 90); do', 'for round in $(seq 1 90); do\n    autopilot_wait')
+    pooled = config.get('pool', {}).get('enabled', False)
+    if pooled:
+        wait_data = ('log "waiting for background data preparation"\n'
+            'while [ ! -s "$D/DATA_READY.json" ]; do\n'
+            '    autopilot_wait\n'
+            '    [ ! -e "$D/DATA_REJECTED.json" ] || { log "STOP: dataset rejected; coordinator will select another round"; exit 2; }\n'
+            '    heartbeat; sleep 10\ndone\n'
+            + shlex.join([config['python'], str(runtime / 'backfill.py'), '--check-ready'])
+            + ' "$C/$D" || { log "STOP: prepared dataset audit failed"; exit 1; }\n')
+        template = template.replace('log "questions: $want;', wait_data + 'log "questions: $want;')
     write_identical(ctl / run / "controller.sh", template)
     subprocess.run(["bash", "-n", str(ctl / run / "controller.sh")], check=True)
     plan = {"run": run, "index": index, "teacher_bank": str(source), "teacher_bank_sha256": source_hash,
@@ -133,6 +143,7 @@ def prepare(config, index):
         "question_sha256": hashlib.sha256(serialized.encode()).hexdigest(),
         "sample_seed": 1000 + index * 16, "samples_per_question": 4,
         "sampling_nodes": 8, "judging_nodes": 8, "training_nodes": 3,
+        "generation_layout": 'fixed-units-v1' if pooled else 'fixed-workers-v1',
         "training_prompt_policy": policy, "training_only_note": note,
         "base": str(code / config["baseline_model"]), "training_seeds": [42, 43, 44],
         "acceptance_score_vs_teacher": .75, "minimum_training_rows": 500,

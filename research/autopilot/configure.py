@@ -92,7 +92,7 @@ def render(root, python):
         "    dest.write_text(''.join(line + '\\n' for line in good))\ntodo = [r for r in rows")
     write_identical(runtime / "candidates.py", candidates)
     batch = (code / "research/kd/onpolicy_gen.sbatch").read_text()
-    batch = batch.replace("research/bestofn/candidates.py", str(runtime / "candidates.py"))
+    batch = batch.replace("research/bestofn/candidates.py", str(runtime / "sample_units.py"))
     shell("onpolicy_gen.sbatch", batch)
     tool = (code / "research/rag65/tool_eval.sbatch").read_text()
     tool = tool.replace("Qwen/Qwen3-4B-Instruct-2507", '"${BASE_MODEL:?}"')
@@ -116,7 +116,9 @@ def render(root, python):
     config = {"version": 1, "root": str(root), "code": str(code), "python": python,
         "account": "EUHPC_D30_031", "cpu_partition": "lrd_all_serial", "alpha": .05,
         "gpu_node_limit": 8, "gpus_per_node": 4, "gpu_qos": "boost_qos_dbg",
-        "poll_seconds": 30, "service_seconds": 13800,
+        "poll_seconds": 10, "service_seconds": 13800,
+        "pool": {"enabled": True, "foreground_elastic_nodes": 4, "lookahead_rounds": 6},
+        "reports": {"enabled": True, "interval_seconds": 1800},
         "factory": {"batch": "ai_factory_all_v8", "controller": "factory_v8"},
         "existing_rounds": ["rft1", "rag65kd11"], "teacher_bank": bank,
         "teacher_bank_sha256": sha256(code / bank), "baseline_model": baseline_model,

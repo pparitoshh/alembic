@@ -8,6 +8,7 @@ import time
 
 from evidence import EvidenceError, read_json
 from supervisor import ACTIVE, Slurm, atomic, lock, now
+from pool import CapacityPending, Pool
 
 
 def submit(config_path, args):
@@ -39,7 +40,11 @@ def submit(config_path, args):
                 if status == "CANCELLED":
                     raise EvidenceError("GPU job was cancelled; automatic resubmission is disabled")
             attempt = state["attempt"] + 1
-            job = scheduler.submit(f"async-gpu-{key}-{attempt}", args[-1], gpu_args=args)
+            try:
+                job = Pool(config, scheduler).submit(f"async-gpu-{key}-{attempt}", args)
+            except CapacityPending:
+                time.sleep(10)
+                continue
             atomic(path, {"job_id": job, "attempt": attempt, "submitted_at": now()})
             return job
 

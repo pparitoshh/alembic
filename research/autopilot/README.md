@@ -26,9 +26,13 @@ Public upload is separate: the service holds no publishing credentials and does 
 
 ## Durability and resources
 
-The coordinator runs in a one-CPU, 1 GiB Slurm allocation on `lrd_all_serial`. It prequeues its successor with an `afterany` dependency and hands over before the four-hour CPU partition limit. This survives disconnection, coordinator death and normal allocation expiry without requiring a Mac or user cron. Slurm outages still delay work.
+The coordinator runs in a one-CPU, 2 GiB Slurm allocation on `lrd_all_serial`. It prequeues its successor with an `afterany` dependency and hands over before the four-hour CPU partition limit. This survives disconnection, coordinator death and normal allocation expiry without requiring a Mac or user cron. Slurm outages still delay work.
 
-Long-running controller scripts use independent four-CPU, 28 GiB allocations. Together with the coordinator, this stays below the serial partition's 30,800 MiB per-user limit. Merging and conversion run within that allocation, without requesting a nested CPU job. GPU jobs keep the existing `boost_qos_dbg` **30-minute** limit and cluster-enforced concurrency limits. New sampling and judging jobs use eight nodes (32 A100s); training uses three nodes, one per seed, and answer evaluation uses two nodes as required by its worker layout. GPU comparison wrappers serialize ownership of the shared priority marker. No other user's jobs are cancelled.
+Long-running controller scripts use independent four-CPU, 28 GiB allocations. Together with the coordinator, this uses 30,720 MiB, below the serial partition's 30,800 MiB per-user limit. Merging and conversion run within that allocation, without requesting a nested CPU job. GPU jobs keep the existing `boost_qos_dbg` **30-minute** limit.
+
+Two coordinated queues share eight nodes (32 A100s) and at most two GPU job slots. The foreground queue trains and evaluates; the background queue generates and judges data for up to six future experiments. Typical splits are 3+5 nodes for training, 2+6 for answering, and 4+4 for judging. Independent judging workers can shrink to fit the available share; training and answer layouts remain fixed. If the foreground is waiting for its own training data, preparation can use all eight nodes. Live allocations cannot grow mid-job, so phase transitions, Slurm scheduling and model loading can leave temporary gaps. Allocation is reported separately from actual GPU utilization.
+
+Generation uses stable 64-question units, partial journals and atomic completion files. A subsequent job can use a different node count without duplicating questions. Judgments retain invalid verdicts and bind to hashed samples. Only datasets with at least 500 rows at the unchanged 0.75 threshold become ready for training. Insufficient datasets are recorded as rejected and the loop advances. Three allocations without progress stop for inspection. GPU pool leases reserve nodes even when a submission reply or accounting result is uncertain. Existing jobs, including jobs outside the pool, count against the same limit. No other user's jobs are cancelled.
 
 The account currently exposes an eight-node debug allowance. No reservation for this account was visible at deployment preflight; a dedicated reservation must be identified before it can be targeted. The actual serial preflight started within two seconds despite a much later `sbatch --test-only` forecast.
 
@@ -45,11 +49,13 @@ python runtime/supervisor.py bootstrap /absolute/campaign/ctl/autopilot/config.j
 
 Configuration hashes the existing model, teacher bank, baseline answers, evaluation files and relevant code. It renders private controller copies without changing historical experiments or their logs. Existing files must match on repeated preparation. Configuration does not submit any jobs.
 
-Before starting, use `sbatch --test-only` to check the CPU resource request, run the read-only evidence audits, and syntax-check the rendered shell scripts. The local regression suite is `tests/test_autopilot.py`.
+Before starting, use `sbatch --test-only` to check the CPU resource request, run the read-only evidence audits, and syntax-check the rendered shell scripts. The local regression suites are `tests/test_autopilot.py` and `tests/test_autopilot_pool.py`. Existing installations can use `enable_pool.py CONFIG` before any automatic round has been prepared with the old worker layout. Upgrade the queued coordinator to 2 GiB and roll over that coordinator; its independent GPU jobs continue.
 
 ## Status and controls
 
 Read `<campaign>/ctl/autopilot/STATUS.md` for the current phase and job IDs. `STATE.json`, `decisions/`, `submissions/`, `gpu/` and `logs/` retain the detailed evidence. Each new candidate has an `AUTOPILOT_PLAN.json` with its data, sampling seed and controller digest.
+
+The coordinator writes `reports/LATEST.md` and timestamped JSON/Markdown reports every 30 minutes. Reports include active jobs, completed decisions, the published score table, the best minimum of the six scores, and its change since the previous report. An incomplete evaluation never becomes a reported improvement. `mirror_reports.py` can be run every 1,800 seconds by a local LaunchAgent to mirror these files into the project. Remote work and remote reports continue without the Mac; local copies refresh while it is awake and connected. `SYNC.json` records the last successful refresh and any connection failure. Chat notifications are not configured.
 
 ```bash
 python runtime/supervisor.py status /absolute/campaign/ctl/autopilot/config.json

@@ -8,6 +8,7 @@ import time
 
 from evidence import EvidenceError, read_json
 from supervisor import ACTIVE, RETRYABLE, SchedulerError, Slurm, atomic, lock, now
+from pool import Pool
 
 
 def main(config_path, args):
@@ -29,6 +30,8 @@ def main(config_path, args):
             state = read_json(state_path) if state_path.exists() else {"attempt": 0}
             if state.get("job_id"):
                 status, _ = scheduler.status(state["job_id"])
+                if status == 'CANCELLED':
+                    raise EvidenceError('GPU job was cancelled; automatic resubmission is disabled')
                 if status not in ACTIVE and status != "UNKNOWN":
                     state.pop("job_id")
             marker = Path(config["root"]) / "ctl/PRIORITY"
@@ -43,7 +46,7 @@ def main(config_path, args):
                         continue
                     try:
                         attempt = state["attempt"] + 1
-                        job = scheduler.submit(f"gpu-{key}-{attempt}", args[-1], gpu_args=args)
+                        job = Pool(config, scheduler).submit(f"gpu-{key}-{attempt}", args)
                         state.update(job_id=job, attempt=attempt, submitted_at=now())
                         atomic(state_path, state)
                     except SchedulerError as exc:
