@@ -6,6 +6,8 @@
 # line, so `pkill -f <controller>` once killed the server and every controller with it.
 R=/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017
 CTL=$R/ctl
+# A durable coordinator owns all new work after the explicit automation handover.
+[ ! -e "$CTL/autopilot/OWNS_PIPELINE" ] || exit 0
 log() { echo "$(date -u +%FT%TZ) $*" >> "$CTL/watchdog/watchdog.log"; }
 alive() { pgrep -f "/$1/controller.sh" > /dev/null; }  # by name: also matches .../factory_v1/../rag65v4/ after an exec
 start() {  # $1 = controller dir
@@ -14,6 +16,7 @@ start() {  # $1 = controller dir
 }
 stopped() { grep -q ' STOP: ' "$CTL/$1/controller.log" 2>/dev/null; }
 while true; do
+    [ ! -e "$CTL/autopilot/OWNS_PIPELINE" ] || exit 0
     touch "$CTL/watchdog/HEARTBEAT"
     queue=$(squeue --me -h -o '%j' 2>/dev/null) || { sleep 300; continue; }  # never act on a failed squeue
     if ! grep -q ' MERGED: ' "$CTL/factory_v2/controller.log" 2>/dev/null && ! alive factory_v2 && ! stopped factory_v2; then

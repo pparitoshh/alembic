@@ -1,0 +1,22 @@
+{
+  "rft_controller.sh": {
+    "source": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017/ctl/rft1/controller.sh",
+    "sha256": "3de230e01f181be5ba48ab4d860d070ca6f73297cd23c9a71db452801fd1a494"
+  },
+  "vs_release.sh": {
+    "source": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017/ctl/vs_release.sh",
+    "sha256": "682f2f6a5c7e8bcc79df1292dc6d32373c505ac490bfede9b2a2ae45fcfb2c7e"
+  },
+  "vs_teacher.sh": {
+    "source": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017/ctl/vs_teacher_auto.sh",
+    "sha256": "0e2c4c0828f8bf69df76961e229effa98567b25baf8f39e642be413fe5fa0f15"
+  },
+  "stage_release.sh": {
+    "source": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017/ctl/auto_release.sh",
+    "sha256": "5c97b071f5ecb01a48dba0449a856ecec631b0ad032750e3cc713da3d11aad90"
+  },
+  "priority_submit.sh": {
+    "source": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/ai-factory-ccby-v1-20261017/ctl/priority_submit.sh",
+    "sha256": "15fc60fc867734689c71435a7f7b4cf811159d475553b2b742d0c82b3fac8ead"
+  }
+}
