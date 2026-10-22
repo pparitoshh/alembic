@@ -72,6 +72,17 @@ def render(report):
             item = decision['best_observed']
             lines.append(f"Its strongest arm by minimum score is `{item['arm']}`: {item['minimum_score']:.2%} minimum; " +
                          '; '.join(f"{j} mean {v['mean']:.2%}, rank {v['rank']}" for j, v in item['judges'].items()) + '.')
+    latest = next((d for d in reversed(r['decisions']) if d.get('best_observed')), None)
+    if latest:
+        item = latest['best_observed']
+        lines += ['', f"Latest fully evaluated candidate: `{latest['run']}/{item['arm']}` (not automatically promoted).",
+                  '', '| Judge | v2 | v3 | d1 | Mean | Internal rank |', '|---|---:|---:|---:|---:|---:|']
+        for judge, values in item['judges'].items():
+            if values.get('scores'):
+                scores = ' | '.join(f"{values['scores'][label]:.2%}" for label in ('v2', 'v3', 'd1'))
+                lines.append(f"| {judge} | {scores} | {values['mean']:.2%} | {values['rank']} |")
+        if 'truncated_answers' in item:
+            lines += ['', f"Answers stopped by the token limit: {item['truncated_answers']}/372. These remain in the evaluation."]
     lines += ['', 'Target: at least 90% on each of v2, v3 and d1 under both judges, first place in the frozen internal comparison, and release checks passed.',
               r['scope'], '', 'Automation: ' + ('two coordinated GPU queues share eight nodes; future datasets prepared alongside evaluation.' if r['pool_enabled'] else 'sequential GPU pipeline; shared-pool upgrade not yet enabled.')]
     if r['detail']:
@@ -90,7 +101,17 @@ def write_report(config, state, scheduler, *, force=False, epoch=None):
         previous = read_json(latest) if latest.exists() else None
         if not force and previous and epoch - previous['epoch'] < 1800:
             return None
-        report = capture(config, state, Pool(config, scheduler).live(), previous)
+        enriched = {**state, 'decisions': json.loads(json.dumps(state.get('decisions', [])))}
+        for decision in enriched['decisions']:
+            path = directory.parent / 'decisions' / (decision['run'] + '.json')
+            observed = decision.get('best_observed')
+            if observed and path.exists():
+                full = read_json(path)
+                for judge, values in full['leaderboard'][observed['arm']]['judges'].items():
+                    observed['judges'][judge]['scores'] = values['scores']
+                metrics = full['candidates'][observed['arm']]['metrics']['gpt_oss']
+                observed['truncated_answers'] = sum(m['truncated'] for m in metrics.values())
+        report = capture(config, enriched, Pool(config, scheduler).live(), previous)
         report['epoch'] = epoch
         name = datetime.fromtimestamp(epoch, timezone.utc).strftime('%Y%m%dT%H%M%SZ')
         atomic(directory / (name + '.json'), report)

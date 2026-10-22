@@ -21,7 +21,7 @@ def main():
     remote = args.root + '/ctl/autopilot'
     ssh = ['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', args.host]
     try:
-        subprocess.run([*ssh, shlex.join([args.python, remote + '/runtime/reports.py', remote + '/config.json'])],
+        subprocess.run([*ssh, shlex.join([args.python, remote + '/runtime/reports.py', remote + '/config.json', '--force'])],
                        check=True, timeout=90)
         subprocess.run(['rsync', '-az', '--timeout=45', '-e', 'ssh -o BatchMode=yes -o ConnectTimeout=15',
                         args.host + ':' + remote + '/reports/', str(args.destination) + '/'], check=True, timeout=90)
