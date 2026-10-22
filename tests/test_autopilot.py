@@ -275,6 +275,24 @@ def test_pause_and_stop_do_not_submit(service, monkeypatch):
     assert service.state["status"] == "stopped"
 
 
+def test_successor_chain_survives_one_failed_cluster_start(service, monkeypatch):
+    service.config['python'] = sys.executable
+    receipts, submissions = {}, []
+    def submit(key, script, *, dependency):
+        if key not in receipts:
+            receipts[key] = str(101 + len(receipts))
+            submissions.append((key, dependency))
+        return receipts[key]
+    monkeypatch.setattr(service.slurm, 'submit', submit)
+    service.directory.mkdir(parents=True)
+    assert service.successors('100') == ['101', '102', '103']
+    assert submissions == [('service-after-100', '100'), ('service-after-101', '101'), ('service-after-102', '102')]
+    # 101 fails before Python starts; 102 already exists and only replenishes the tail.
+    assert service.successors('102') == ['103', '104', '105']
+    assert len(submissions) == 5
+    assert service.state['service']['standby_job_ids'] == ['104', '105']
+
+
 def test_nested_controller_does_not_inherit_slurm_allocation(tmp_path, monkeypatch):
     spec = tmp_path / "spec.json"
     put(spec, {"command": ["true"], "cwd": str(tmp_path), "receipt": str(tmp_path / "result.json")})

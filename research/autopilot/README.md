@@ -26,7 +26,7 @@ Public upload is separate: the service holds no publishing credentials and does 
 
 ## Durability and resources
 
-The coordinator runs in a one-CPU, 2 GiB Slurm allocation on `lrd_all_serial`. It prequeues its successor with an `afterany` dependency and hands over before the four-hour CPU partition limit. This survives disconnection, coordinator death and normal allocation expiry without requiring a Mac or user cron. Slurm outages still delay work.
+The coordinator runs in a one-CPU, 2 GiB Slurm allocation on `lrd_all_serial`. It prequeues a chain of three successors with `afterany` dependencies and hands over before the four-hour CPU partition limit. The extra links survive a successor's failure in the cluster startup procedure, before Python can run. A healthy successor replenishes the chain. This survives disconnection, coordinator death, isolated startup failures and normal allocation expiry without requiring a Mac or user cron. Slurm outages still delay work, and repeated startup failures can exhaust the queued chain.
 
 Long-running controller scripts use independent four-CPU, 28 GiB allocations. Together with the coordinator, this uses 30,720 MiB, below the serial partition's 30,800 MiB per-user limit. Merging and conversion run within that allocation, without requesting a nested CPU job. GPU jobs keep the existing `boost_qos_dbg` **30-minute** limit.
 

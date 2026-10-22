@@ -429,6 +429,17 @@ class Supervisor:
             "serve", str(self.config_path)]) + "\n")
         return p
 
+    def successors(self, current_job):
+        # Queue beyond the immediate successor: it may fail in the cluster prolog before Python
+        # can queue its own replacement. All links use durable, shared submission keys.
+        chain, parent = [], str(current_job)
+        script = self.service_script()
+        for _ in range(self.config.get('service_successor_depth', 3)):
+            parent = self.slurm.submit('service-after-' + parent, script, dependency=parent)
+            chain.append(parent)
+        self.state['service'] = {'job_id': str(current_job), 'successor_job_id': chain[0], 'standby_job_ids': chain[1:]}
+        return chain
+
     def serve(self, once=False):
         with lock(self.directory / "coordinator.lock") as acquired:
             if not acquired:
@@ -445,8 +456,7 @@ class Supervisor:
                 try:
                     # Prequeue a successor: it can recover even when this allocation/node dies.
                     if not once and self.state["status"] not in TERMINAL:
-                        successor = self.slurm.submit("service-after-" + current_job, self.service_script(), dependency=current_job)
-                        self.state["service"] = {"job_id": current_job, "successor_job_id": successor}
+                        self.successors(current_job)
                     self.tick()
                 except SchedulerError as exc:
                     self.state.update(detail=str(exc), scheduler_error_at=now())
