@@ -91,7 +91,9 @@ class Pool:
                 available = max(0, 8 - used)
                 if role == 'background':
                     available = max(0, available - reserve)
-                elif elastic:
+                elif elastic and slots == 0:
+                    # Leave a share for a future background job only when the pool is empty.
+                    # With another allocation present, use all remaining nodes in the last slot.
                     wanted = min(wanted, self.config['pool'].get('foreground_elastic_nodes', 4))
                 nodes = min(wanted, available) if elastic else wanted
                 minimum = 1 if elastic else wanted

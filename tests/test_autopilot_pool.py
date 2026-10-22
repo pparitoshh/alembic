@@ -80,6 +80,13 @@ def test_background_leaves_room_for_foreground(shared):
     assert [j['nodes'] for j in shared.scheduler.jobs] == [4, 4]
 
 
+def test_foreground_judge_fills_last_slot_after_background_allocation_shrinks(shared):
+    shared.submit('background', ['judge.sbatch'], role='background', reserve=5)
+    shared.submit('main', ['judge.sbatch'])
+    assert [j['nodes'] for j in shared.scheduler.jobs] == [3, 5]
+    assert shared.summary()['running_gpus'] == 32
+
+
 def test_unknown_job_absent_from_queue_keeps_its_reservation(shared):
     sup.atomic(shared.path, {'leases': {'lost': {'state': 'submitted', 'nodes': 8, 'job_id': '77'}}})
     shared.scheduler.states['77'] = ('UNKNOWN', None)

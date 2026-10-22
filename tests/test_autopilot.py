@@ -339,6 +339,7 @@ def test_preparation_is_repeatable_and_does_not_lower_threshold(tmp_path, monkey
     assert "STOP: aggregation failed" in script
     assert "autopilot_wait" in script
     assert "submit_gpu.py" in script and "sbatch --parsable" not in script
+    assert "wait_gpu.py" in script and 'squeue -h -j "$1"' not in script
     assert "--nodes=8 --job-name=dk-auto_rft_0001-gen" in script
     assert a["training_prompt_policy"] == "concise_completion"
     assert b["training_prompt_policy"] == "matched_prompt"

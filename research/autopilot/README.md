@@ -42,6 +42,8 @@ The account currently exposes an eight-node debug allowance. No reservation for 
 
 Every submission first writes an intent receipt. A lost `sbatch` response is reconciled with `squeue` and `sacct`; it is never blindly resubmitted. Failed scheduler reads never count as an empty queue. Timeouts and node failures resume from existing artifacts; three genuine task failures stop the service for inspection. Manual cancellation is respected. A filesystem lock prevents competing coordinators. Legacy `DONE` log messages are informational, never proof of completion.
 
+Round controllers wait for a terminal state in `sacct`, so a finished job being removed from the live `squeue` cache cannot leave a controller waiting indefinitely. Accounting delays and errors continue waiting, while cancellation stops the controller. An elastic foreground judge uses the remaining node capacity when the other GPU slot is already occupied; the four-node default applies only when starting in an empty pool.
+
 ## Deployment
 
 Copy this directory to `<campaign>/ctl/autopilot/runtime`, retaining `templates/`. The templates are snapshots of the previously running controllers, with provenance in `templates/SOURCES.json`.
@@ -54,6 +56,8 @@ python runtime/supervisor.py bootstrap /absolute/campaign/ctl/autopilot/config.j
 Configuration hashes the existing model, teacher bank, baseline answers, evaluation files and relevant code. It renders private controller copies without changing historical experiments or their logs. Existing files must match on repeated preparation. Configuration does not submit any jobs.
 
 Before starting, use `sbatch --test-only` to check the CPU resource request, run the read-only evidence audits, and syntax-check the rendered shell scripts. The local regression suites are `tests/test_autopilot.py` and `tests/test_autopilot_pool.py`. Existing installations can use `enable_pool.py CONFIG` before any automatic round has been prepared with the old worker layout. Upgrade the queued coordinator to 2 GiB and roll over that coordinator; its independent GPU jobs continue.
+
+For the accounting-wait repair, deploy `wait_gpu.py`, `upgrade_waiter.py` and the revised preparation/pool code. Pause new submissions, run `upgrade_waiter.py CONFIG`, and restart any controller still executing the old wait function. The upgrader verifies each prepared controller's digest, backs up its script and plan, changes only the wait function, and updates the recorded controller digest. Saved data, answers, judgments and experiment settings remain intact. It is safe to resume an interrupted upgrade. Regression coverage is in `tests/test_autopilot_wait.py`.
 
 ## Status and controls
 

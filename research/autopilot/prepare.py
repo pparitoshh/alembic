@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from evidence import SLICES, EvidenceError, read_json, sha256
+from wait_gpu import controller_block
 
 
 def write_identical(path, content):
@@ -104,15 +105,7 @@ def prepare(config, index):
     # The receipt-based submitter adopts live jobs itself, including lost sbatch replies.
     template = re.sub(r'^adopt\(\) \{.*$', 'adopt() { :; }', template, flags=re.M)
     start, end = template.index('wait_job() {'), template.index('submit() {')
-    template = template[:start] + '''wait_job() {
-    while true; do
-        if ! queue=$(squeue -h -j "$1" -o %i); then sleep 30; continue; fi
-        [ -n "$queue" ] || break
-        heartbeat; sleep 30
-    done
-    log "job $1: $(sacct -n -X -j "$1" --format=State,Elapsed | head -1 | xargs)"
-}
-''' + template[end:]
+    template = template[:start] + controller_block(config, runtime) + template[end:]
     policy = "concise_completion" if index % 2 else "matched_prompt"
     note = ("\n\nFinish the answer within about 220 to 320 words. Preserve all requirements, complete any code "
             "or script, state relevant assumptions, and include a concrete verification step. Use the quoted "
