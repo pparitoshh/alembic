@@ -254,3 +254,50 @@ def test_upgrade_preserves_frozen_protocol_and_rejects_existing_rounds(shared):
     with pytest.raises(ev.EvidenceError, match='Existing automatic round'):
         enable_pool.migrate(path)
     assert ev.read_json(path) == shared.config
+
+
+def sampling_background(shared):
+    shared.config['baseline_model'] = 'release'
+    runtime = shared.directory / 'runtime'
+    runtime.mkdir(parents=True)
+    (runtime / 'onpolicy_gen.sbatch').write_text('#!/bin/bash\n#SBATCH --nodes=8\n')
+    s = SimpleNamespace(config=shared.config, directory=shared.directory, runtime=runtime,
+        code=Path(shared.config['code']), slurm=shared.scheduler, state={'phase': 'train_evaluate', 'round_index': 1})
+    bg = bf.Backfill(s)
+    directory = s.code / 'runs/auto_rft_0001'
+    jsonl(directory / 'data/questions.jsonl', [{'id': 'a'}])
+    sup.atomic(directory / 'AUTOPILOT_PLAN.json', {'run': 'auto_rft_0001', 'questions': 1, 'sample_seed': 1016,
+        'training_only_note': '', 'question_sha256': ev.sha256(directory / 'data/questions.jsonl')})
+    job = bg.pool.submit('main', [str(runtime / 'onpolicy_gen.sbatch')], role='background', reserve=4)
+    bg.state = {'active': 'auto_rft_0001', 'runs': {'auto_rft_0001': {
+        'job_id': job, 'stage': 'sample', 'index': 1, 'attempt': 1, 'progress_before': 0}}}
+    return bg
+
+
+def test_idle_nodes_assist_current_training_data_without_duplicate_submissions(shared):
+    bg = sampling_background(shared)
+    bg.tick()
+    assert [j['nodes'] for j in shared.scheduler.jobs] == [4, 4]
+    assert bg.state['runs']['auto_rft_0001']['helper_job_id'] == '101'
+    bg.tick()
+    assert len(shared.scheduler.submissions) == 2
+
+
+def test_judging_waits_until_both_sampling_jobs_finish(shared, monkeypatch):
+    bg = sampling_background(shared)
+    bg.tick()
+    shared.scheduler.states['100'] = ('COMPLETED', '0:0')
+    monkeypatch.setattr(bf, 'sample_proof', lambda *a: pytest.fail('helper is still writing'))
+    bg.tick()
+    assert bg.state['active'] == 'auto_rft_0001'
+
+
+def test_no_assistance_for_future_dataset_or_judging(shared):
+    bg = sampling_background(shared)
+    bg.s.state['round_index'] = 2
+    bg.tick()
+    assert len(shared.scheduler.submissions) == 1
+    bg.s.state['round_index'] = 1
+    bg.state['runs']['auto_rft_0001']['stage'] = 'judge'
+    bg.tick()
+    assert len(shared.scheduler.submissions) == 1

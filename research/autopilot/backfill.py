@@ -132,22 +132,30 @@ class Backfill:
         active = self.state.get('active')
         if active:
             record = self.state['runs'][active]
-            status, exit_code = self.s.slurm.status(record['job_id'])
+            jobs = [record['job_id']] + ([record['helper_job_id']] if record.get('helper_job_id') else [])
+            statuses = {job: self.s.slurm.status(job) for job in jobs}
+            status, exit_code = statuses[record['job_id']]
             record['scheduler_state'] = status
-            if status in ACTIVE or status == 'UNKNOWN':
+            if any(st == 'CANCELLED' for st, _ in statuses.values()):
+                raise EvidenceError(f'Background job for {active} was cancelled; respecting cancellation')
+            if any(st in ACTIVE or st == 'UNKNOWN' for st, _ in statuses.values()):
+                if status in ACTIVE:
+                    self.help_sample(active, record)
                 run = self.code / 'runs' / active
                 pattern = 'gen/cands_unit_*.jsonl' if record['stage'] == 'sample' else 'judged_teacher/unit_*.jsonl'
-                self.state['detail'] = f"{active}: {record['stage']}, job {record['job_id']}, {len(list(run.glob(pattern)))} completed units"
+                names = record['job_id'] + (' + ' + record['helper_job_id'] if record.get('helper_job_id') else '')
+                self.state['detail'] = f"{active}: {record['stage']}, jobs {names}, {len(list(run.glob(pattern)))} completed units"
                 self.save()
                 return
-            if status == 'CANCELLED':
-                raise EvidenceError(f'Background job {record["job_id"]} was cancelled; respecting cancellation')
-            if status not in RETRYABLE and not (status == 'COMPLETED' and exit_code == '0:0'):
-                record['failures'] = record.get('failures', 0) + 1
+            for st, code in statuses.values():
+                if st not in RETRYABLE and not (st == 'COMPLETED' and code == '0:0'):
+                    record['failures'] = record.get('failures', 0) + 1
             progress = unit_progress(self.code / 'runs' / active, record['stage'])
             if status in ('COMPLETED', 'TIMEOUT'):
                 record['stalls'] = record.get('stalls', 0) + 1 if progress <= record.get('progress_before', -1) else 0
             record['previous_job_id'] = record.pop('job_id')
+            if record.get('helper_job_id'):
+                record['previous_helper_job_id'] = record.pop('helper_job_id')
             self.state['active'] = None
             self.save()
             if record.get('failures', 0) >= 3:
@@ -205,7 +213,21 @@ class Backfill:
             record['failures'] = 0
             record['stalls'] = 0
         record['stage'] = stage
-        env = {'REPO': str(self.code), 'RUN': run, 'MODEL': str(self.code / self.config['baseline_model']),
+        args, env = self.request(directory, plan, stage)
+        try:
+            reserve = self.reserve_foreground(self.pool.live())
+            attempt = record['attempt'] + 1
+            key = f'background-{run}-{stage}-{attempt}'
+            job = self.pool.submit(key, args, role='background', environment=env, reserve=reserve)
+        except CapacityPending as exc:
+            self.state['detail'] = str(exc)
+        else:
+            record.update(job_id=job, attempt=attempt, submitted_at=now(), progress_before=unit_progress(directory, stage))
+            self.state.update(active=run, detail=f'{run}: {stage}, job {job}')
+        self.save()
+
+    def request(self, directory, plan, stage):
+        env = {'REPO': str(self.code), 'RUN': plan['run'], 'MODEL': str(self.code / self.config['baseline_model']),
                'DATA': str(directory / 'data/questions.jsonl'), 'K': '4',
                'AUTOPILOT_SAMPLE_SEED': str(plan['sample_seed']),
                'AUTOPILOT_TRAINING_NOTE': plan['training_only_note']}
@@ -215,18 +237,29 @@ class Backfill:
         else:
             env.update(CANDS=str(directory / 'gen'), OUT=str(directory / 'judged_teacher'))
             script = self.code / 'research/rft/judge.sbatch'
+        return ['--nodes=8', '--export=ALL', str(script)], env
+
+    def help_sample(self, run, record):
+        # When training is blocked on this very dataset, use the second slot to help it.
+        # Unit locks make two samplers safe; judges must never use this path.
+        if record['stage'] != 'sample' or record.get('helper_job_id'):
+            return
+        if self.s.state['phase'] not in ('prepare', 'train_evaluate') or record['index'] != self.s.state['round_index']:
+            return
+        directory = self.code / 'runs' / run
+        if (directory / 'DATA_READY.json').exists():
+            return
+        plan = read_json(directory / 'AUTOPILOT_PLAN.json')
+        if sha256(directory / 'data/questions.jsonl') != plan['question_sha256']:
+            raise EvidenceError('Prepared training questions changed')
+        if len(list((directory / 'gen').glob('cands_unit_*.jsonl'))) >= (plan['questions'] + UNIT_SIZE - 1) // UNIT_SIZE:
+            return
+        args, env = self.request(directory, plan, 'sample')
         try:
-            reserve = self.reserve_foreground(self.pool.live())
-            attempt = record['attempt'] + 1
-            key = f'background-{run}-{stage}-{attempt}'
-            job = self.pool.submit(key, ['--nodes=8', '--export=ALL', str(script)], role='background',
-                                   environment=env, reserve=reserve)
-        except CapacityPending as exc:
-            self.state['detail'] = str(exc)
-        else:
-            record.update(job_id=job, attempt=attempt, submitted_at=now(), progress_before=unit_progress(directory, stage))
-            self.state.update(active=run, detail=f'{run}: {stage}, job {job}')
-        self.save()
+            record['helper_job_id'] = self.pool.submit(f"background-{run}-sample-helper-{record['attempt']}",
+                                                      args, role='background', environment=env)
+        except CapacityPending:
+            pass
 
     def build(self, directory, plan, samples, judged):
         if sha256(directory / 'data/questions.jsonl') != samples['question_sha256']:
