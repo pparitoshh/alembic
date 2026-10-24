@@ -1,0 +1,833 @@
+[
+ {
+  "id": "g3_apptainer_mpi",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://apptainer.org/docs/user/latest/mpi.html",
+   "https://apptainer.org/docs/user/latest/gpu.html",
+   "https://apptainer.org/docs/user/latest/bind_paths_and_mounts.html"
+  ],
+  "prefixes": [
+   "https://apptainer.org/docs/user/latest/mpi.html",
+   "https://apptainer.org/docs/user/latest/gpu.html",
+   "https://apptainer.org/docs/user/latest/bind_paths_and_mounts.html"
+  ],
+  "max_pages": 10
+ },
+ {
+  "id": "g3_permedcoe_mpi_container",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://permedcoe.github.io/mpi-in-container/"
+  ],
+  "prefixes": [
+   "https://permedcoe.github.io/mpi-in-container/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_lumi_containers_lumi-supercomputer",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/container-jobs/",
+   "https://docs.lumi-supercomputer.eu/software/containers/singularity/"
+  ],
+  "prefixes": [
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/container-jobs/",
+   "https://docs.lumi-supercomputer.eu/software/containers/singularity/"
+  ],
+  "max_pages": 8
+ },
+ {
+  "id": "g3_lumi_containers_github",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://lumi-supercomputer.github.io/LUMI-training-materials/2day-20251020/205-Containers/"
+  ],
+  "prefixes": [
+   "https://lumi-supercomputer.github.io/LUMI-training-materials/2day-20251020/205-Containers/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_archer2_containers",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.archer2.ac.uk/user-guide/containers/"
+  ],
+  "prefixes": [
+   "https://docs.archer2.ac.uk/user-guide/containers/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_nersc_containers",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/development/containers/podman-hpc/overview/",
+   "https://docs.nersc.gov/development/containers/shifter/how-to-use/",
+   "https://docs.nersc.gov/development/containers/shifter/faq-troubleshooting/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/development/containers/podman-hpc/overview/",
+   "https://docs.nersc.gov/development/containers/shifter/how-to-use/",
+   "https://docs.nersc.gov/development/containers/shifter/faq-troubleshooting/"
+  ],
+  "max_pages": 10
+ },
+ {
+  "id": "g3_sarus",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://sarus.readthedocs.io/en/stable/user/user_guide.html"
+  ],
+  "prefixes": [
+   "https://sarus.readthedocs.io/en/stable/user/user_guide.html"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_cscs_container_engine",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.cscs.ch/software/container-engine/",
+   "https://docs.cscs.ch/software/container-engine/known-issue/",
+   "https://docs.cscs.ch/software/communication/openmpi/",
+   "https://docs.cscs.ch/software/communication/cray-mpich/"
+  ],
+  "prefixes": [
+   "https://docs.cscs.ch/software/container-engine/",
+   "https://docs.cscs.ch/software/container-engine/known-issue/",
+   "https://docs.cscs.ch/software/communication/openmpi/",
+   "https://docs.cscs.ch/software/communication/cray-mpich/"
+  ],
+  "max_pages": 12
+ },
+ {
+  "id": "g3_slurm_containers",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers",
+   "slurm_hetjobs"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://slurm.schedmd.com/containers.html",
+   "https://slurm.schedmd.com/heterogeneous_jobs.html",
+   "https://slurm.schedmd.com/mpi_guide.html"
+  ],
+  "prefixes": [
+   "https://slurm.schedmd.com/containers.html",
+   "https://slurm.schedmd.com/heterogeneous_jobs.html",
+   "https://slurm.schedmd.com/mpi_guide.html"
+  ],
+  "max_pages": 5
+ },
+ {
+  "id": "g3_charliecloud",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://charliecloud.io/latest/best_practices.html"
+  ],
+  "prefixes": [
+   "https://charliecloud.io/latest/best_practices.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g3_openmpi_docs",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers",
+   "lsf",
+   "env_library_conflicts",
+   "segfaults_crashes"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause-Open-MPI",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.open-mpi.org/en/main/building-apps/abi-compatibility.html",
+   "https://docs.open-mpi.org/en/main/launching-apps/lsf.html",
+   "https://docs.open-mpi.org/en/main/launching-apps/troubleshooting.html",
+   "https://docs.open-mpi.org/en/main/launching-apps/slurm.html",
+   "https://docs.open-mpi.org/en/main/installing-open-mpi/configure-cli-options/rpath-and-runpath.html",
+   "https://docs.open-mpi.org/en/main/app-debug/serial-debug.html",
+   "https://docs.open-mpi.org/en/main/app-debug/parallel-debug.html",
+   "https://docs.open-mpi.org/en/main/app-debug/valgrind.html",
+   "https://docs.open-mpi.org/en/main/getting-help.html"
+  ],
+  "prefixes": [
+   "https://docs.open-mpi.org/en/main/building-apps/abi-compatibility.html",
+   "https://docs.open-mpi.org/en/main/launching-apps/lsf.html",
+   "https://docs.open-mpi.org/en/main/launching-apps/troubleshooting.html",
+   "https://docs.open-mpi.org/en/main/launching-apps/slurm.html",
+   "https://docs.open-mpi.org/en/main/installing-open-mpi/configure-cli-options/rpath-and-runpath.html",
+   "https://docs.open-mpi.org/en/main/app-debug/serial-debug.html",
+   "https://docs.open-mpi.org/en/main/app-debug/parallel-debug.html",
+   "https://docs.open-mpi.org/en/main/app-debug/valgrind.html",
+   "https://docs.open-mpi.org/en/main/getting-help.html"
+  ],
+  "max_pages": 12
+ },
+ {
+  "id": "g3_vsc_apptainer_troubleshooting",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers",
+   "segfaults_crashes",
+   "env_library_conflicts",
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.hpc.ugent.be/Linux/apptainer/",
+   "https://docs.hpc.ugent.be/Linux/troubleshooting/",
+   "https://docs.hpc.ugent.be/Linux/setting_up_python_virtual_environments/"
+  ],
+  "prefixes": [
+   "https://docs.hpc.ugent.be/Linux/apptainer/",
+   "https://docs.hpc.ugent.be/Linux/troubleshooting/",
+   "https://docs.hpc.ugent.be/Linux/setting_up_python_virtual_environments/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g3_ncar_containers",
+  "topic": "gap3",
+  "leaves": [
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/environment-and-software/user-environment/containers/working_with_containers/"
+  ],
+  "prefixes": [
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/environment-and-software/user-environment/containers/working_with_containers/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_openlava_man",
+  "topic": "gap3",
+  "leaves": [
+   "lsf"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bsub.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bjobs.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bkill.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bqueues.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man5/lsb.queues.5"
+  ],
+  "prefixes": [
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bsub.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bjobs.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bkill.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man1/bqueues.1",
+   "https://raw.githubusercontent.com/towel1980/openlava/master/lsbatch/man5/lsb.queues.5"
+  ],
+  "max_pages": 5
+ },
+ {
+  "id": "g3_lsf_tools_dask",
+  "topic": "gap3",
+  "leaves": [
+   "lsf"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / MIT / Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.LSFCluster.html"
+  ],
+  "prefixes": [
+   "https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.LSFCluster.html"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_lsf_tools_githubusercontent",
+  "topic": "gap3",
+  "leaves": [
+   "lsf"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / MIT / Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://raw.githubusercontent.com/Snakemake-Profiles/lsf/master/README.md"
+  ],
+  "prefixes": [
+   "https://raw.githubusercontent.com/Snakemake-Profiles/lsf/master/README.md"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_lsf_tools_readthedocs",
+  "topic": "gap3",
+  "leaves": [
+   "lsf"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / MIT / Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://cromwell.readthedocs.io/en/stable/backends/LSF/"
+  ],
+  "prefixes": [
+   "https://cromwell.readthedocs.io/en/stable/backends/LSF/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_lsf_tools_seqera",
+  "topic": "gap3",
+  "leaves": [
+   "lsf"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / MIT / Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.seqera.io/nextflow/executor"
+  ],
+  "prefixes": [
+   "https://docs.seqera.io/nextflow/executor"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_hetjobs_sites_nersc",
+  "topic": "gap3",
+  "leaves": [
+   "slurm_hetjobs"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/jobs/examples/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/jobs/examples/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_hetjobs_sites_lumi-supercomputer",
+  "topic": "gap3",
+  "leaves": [
+   "slurm_hetjobs"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/hetjobs/"
+  ],
+  "prefixes": [
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/hetjobs/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_hetjobs_sites_ac",
+  "topic": "gap3",
+  "leaves": [
+   "slurm_hetjobs"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.archer2.ac.uk/user-guide/scheduler/"
+  ],
+  "prefixes": [
+   "https://docs.archer2.ac.uk/user-guide/scheduler/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_hetjobs_sites_csc",
+  "topic": "gap3",
+  "leaves": [
+   "slurm_hetjobs"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.csc.fi/computing/running/creating-job-scripts-puhti/"
+  ],
+  "prefixes": [
+   "https://docs.csc.fi/computing/running/creating-job-scripts-puhti/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_nersc_debug",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes",
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/tools/debug/",
+   "https://docs.nersc.gov/tools/debug/gdb/",
+   "https://docs.nersc.gov/tools/debug/sanitizers/",
+   "https://docs.nersc.gov/tools/debug/compute-sanitizer/",
+   "https://docs.nersc.gov/tools/debug/cuda-gdb/",
+   "https://docs.nersc.gov/jobs/troubleshooting/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/tools/debug/",
+   "https://docs.nersc.gov/tools/debug/gdb/",
+   "https://docs.nersc.gov/tools/debug/sanitizers/",
+   "https://docs.nersc.gov/tools/debug/compute-sanitizer/",
+   "https://docs.nersc.gov/tools/debug/cuda-gdb/",
+   "https://docs.nersc.gov/jobs/troubleshooting/"
+  ],
+  "max_pages": 10
+ },
+ {
+  "id": "g3_archer2_lumi_debug_ac",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.archer2.ac.uk/user-guide/debug/"
+  ],
+  "prefixes": [
+   "https://docs.archer2.ac.uk/user-guide/debug/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_archer2_lumi_debug_lumi-supercomputer",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lumi-supercomputer.eu/development/debugging/stat-atp/",
+   "https://docs.lumi-supercomputer.eu/development/debugging/gdb4hpc/",
+   "https://docs.lumi-supercomputer.eu/development/debugging/valgrind4hpc/"
+  ],
+  "prefixes": [
+   "https://docs.lumi-supercomputer.eu/development/debugging/stat-atp/",
+   "https://docs.lumi-supercomputer.eu/development/debugging/gdb4hpc/",
+   "https://docs.lumi-supercomputer.eu/development/debugging/valgrind4hpc/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g3_clang_asan",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://clang.llvm.org/docs/AddressSanitizer.html",
+   "https://clang.llvm.org/docs/MemorySanitizer.html",
+   "https://clang.llvm.org/docs/ThreadSanitizer.html"
+  ],
+  "prefixes": [
+   "https://clang.llvm.org/docs/AddressSanitizer.html",
+   "https://clang.llvm.org/docs/MemorySanitizer.html",
+   "https://clang.llvm.org/docs/ThreadSanitizer.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g3_llnl_openmp_stack",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpc-tutorials.llnl.gov/openmp/thread_stack_size_and_thread_binding/"
+  ],
+  "prefixes": [
+   "https://hpc-tutorials.llnl.gov/openmp/thread_stack_size_and_thread_binding/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g3_csc_debug",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes",
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.csc.fi/computing/debugging/",
+   "https://docs.csc.fi/apps/compute-san/",
+   "https://docs.csc.fi/computing/modules/",
+   "https://docs.csc.fi/computing/containers/tykky/"
+  ],
+  "prefixes": [
+   "https://docs.csc.fi/computing/debugging/",
+   "https://docs.csc.fi/apps/compute-san/",
+   "https://docs.csc.fi/computing/modules/",
+   "https://docs.csc.fi/computing/containers/tykky/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g3_aalto_debug_faq",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes",
+   "env_library_conflicts",
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://scicomp.aalto.fi/triton/usage/debugging/",
+   "https://scicomp.aalto.fi/triton/usage/faq/",
+   "https://scicomp.aalto.fi/triton/usage/singularity/",
+   "https://scicomp.aalto.fi/triton/tut/monitoring/"
+  ],
+  "prefixes": [
+   "https://scicomp.aalto.fi/triton/usage/debugging/",
+   "https://scicomp.aalto.fi/triton/usage/faq/",
+   "https://scicomp.aalto.fi/triton/usage/singularity/",
+   "https://scicomp.aalto.fi/triton/tut/monitoring/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g3_uppmax",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes",
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.uppmax.uu.se/software/gdb/",
+   "https://docs.uppmax.uu.se/software/valgrind/",
+   "https://docs.uppmax.uu.se/cluster_guides/module_conflicts/"
+  ],
+  "prefixes": [
+   "https://docs.uppmax.uu.se/software/gdb/",
+   "https://docs.uppmax.uu.se/software/valgrind/",
+   "https://docs.uppmax.uu.se/cluster_guides/module_conflicts/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_ulhpc_debug",
+  "topic": "gap3",
+  "leaves": [
+   "segfaults_crashes"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-3.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://ulhpc-tutorials.readthedocs.io/en/latest/debugging/basics/"
+  ],
+  "prefixes": [
+   "https://ulhpc-tutorials.readthedocs.io/en/latest/debugging/basics/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g3_env_modules_nersc",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/environment/lmod/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/environment/lmod/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_env_modules_lumi-supercomputer",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lumi-supercomputer.eu/runjobs/lumi_env/Lmod_modules/",
+   "https://docs.lumi-supercomputer.eu/development/compiling/prgenv/"
+  ],
+  "prefixes": [
+   "https://docs.lumi-supercomputer.eu/runjobs/lumi_env/Lmod_modules/",
+   "https://docs.lumi-supercomputer.eu/development/compiling/prgenv/"
+  ],
+  "max_pages": 8
+ },
+ {
+  "id": "g3_env_modules_readthedocs",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/environment-and-software/user-environment/modules/",
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/environment-and-software/user-environment/package-managers/conda/"
+  ],
+  "prefixes": [
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/environment-and-software/user-environment/modules/",
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/environment-and-software/user-environment/package-managers/conda/"
+  ],
+  "max_pages": 8
+ },
+ {
+  "id": "g3_env_modules_uni",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpc-docs.uni.lu/environment/modules/",
+   "https://hpc-docs.uni.lu/environment/conda/"
+  ],
+  "prefixes": [
+   "https://hpc-docs.uni.lu/environment/modules/",
+   "https://hpc-docs.uni.lu/environment/conda/"
+  ],
+  "max_pages": 8
+ },
+ {
+  "id": "g3_env_modules_github",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://carpentries-incubator.github.io/hpc-intro/15-modules.html"
+  ],
+  "prefixes": [
+   "https://carpentries-incubator.github.io/hpc-intro/15-modules.html"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_env_modules_readthedocs_2",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://lmod.readthedocs.io/en/latest/010_user.html"
+  ],
+  "prefixes": [
+   "https://lmod.readthedocs.io/en/latest/010_user.html"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_env_modules_ac",
+  "topic": "gap3",
+  "leaves": [
+   "env_library_conflicts"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause / CC-BY-4.0 / MIT / CC-BY-SA-4.0 / CC-BY-NC-SA-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.archer2.ac.uk/user-guide/sw-environment/"
+  ],
+  "prefixes": [
+   "https://docs.archer2.ac.uk/user-guide/sw-environment/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_oom_csc",
+  "topic": "gap3",
+  "leaves": [
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.csc.fi/support/faq/how-much-memory-my-job-needs/"
+  ],
+  "prefixes": [
+   "https://docs.csc.fi/support/faq/how-much-memory-my-job-needs/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_oom_lumi-supercomputer",
+  "topic": "gap3",
+  "leaves": [
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/"
+  ],
+  "prefixes": [
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_oom_ac",
+  "topic": "gap3",
+  "leaves": [
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.archer2.ac.uk/user-guide/scheduler/"
+  ],
+  "prefixes": [
+   "https://docs.archer2.ac.uk/user-guide/scheduler/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_oom_aalto",
+  "topic": "gap3",
+  "leaves": [
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://scicomp.aalto.fi/triton/usage/jobs/"
+  ],
+  "prefixes": [
+   "https://scicomp.aalto.fi/triton/usage/jobs/"
+  ],
+  "max_pages": 4
+ },
+ {
+  "id": "g3_oom_nersc",
+  "topic": "gap3",
+  "leaves": [
+   "oom_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / BSD-3-Clause / CC0-1.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/jobs/policy/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/jobs/policy/"
+  ],
+  "max_pages": 4
+ }
+]

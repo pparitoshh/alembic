@@ -8,6 +8,7 @@ gradient accumulation; logits are computed for the answer positions only (they e
 Writes <run_dir>/adapter and TRAINING_DONE.json; resumes from the newest checkpoint.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -36,12 +37,17 @@ for f in sorted(kd_dir.glob('kd_*.npz')) if alpha > 0 else []:
         teacher[str(rid)] = (ids[offsets[i]:offsets[i + 1]], lps[offsets[i]:offsets[i + 1]])
 
 
+MIXED = os.environ.get('KD_MIXED') == '1'
+
+
 class KDData(torch.utils.data.Dataset):
     def __init__(self, path):
         self.rows = []
         for line in open(path):
             row = json.loads(line)
-            if alpha == 0 or row['id'] in teacher:
+            # KD_MIXED=1 (opt-in, round 43): rows without teacher scores (e.g. tool workflows) are kept and trained
+            # with the plain loss, while scored rows get the distillation loss.
+            if alpha == 0 or row['id'] in teacher or MIXED:
                 self.rows.append(row)
 
     def __len__(self):
@@ -51,24 +57,28 @@ class KDData(torch.utils.data.Dataset):
         row = self.rows[i]
         # Same rendering as research/kd/score.py: prompt and answer tokenized separately, as at generation time.
         msgs = [{'role': 'system', 'content': cfg.student.system_prompt}, *row['messages']]
-        prompt = tok.apply_chat_template(msgs[:-1], tokenize=False, add_generation_prompt=True, enable_thinking=False)
+        # Tool rows (round 38) carry their tool schemas; rendered into the prompt as at inference. None = unchanged.
+        prompt = tok.apply_chat_template(msgs[:-1], tools=row.get("tools"), tokenize=False, add_generation_prompt=True,
+                                         enable_thinking=False)
         prompt = tok(prompt, add_special_tokens=False)['input_ids']
         answer = tok(msgs[-1]['content'] + '<|im_end|>', add_special_tokens=False)['input_ids']
         full = prompt + answer
         n = len(answer)  # answer tokens, the tail of the sequence
-        if alpha == 0:
+        has_t = alpha > 0 and row['id'] in teacher
+        if not has_t:
             ids, lps = np.zeros((n, 1), np.int64), np.zeros((n, 1), np.float32)
         else:
             ids, lps = teacher[row['id']]
             assert len(ids) == n, row['id']
-        return {'input_ids': torch.tensor(full), 'n_answer': n,
+        return {'input_ids': torch.tensor(full), 'n_answer': n, 'has_t': has_t,
                 't_ids': torch.from_numpy(ids.astype(np.int64)), 't_lps': torch.from_numpy(lps.astype(np.float32))}
 
 
 def collate(batch):
     assert len(batch) == 1, 'per-device batch 1'
     b = batch[0]
-    return {'input_ids': b['input_ids'][None], 'n_answer': b['n_answer'], 't_ids': b['t_ids'], 't_lps': b['t_lps']}
+    return {'input_ids': b['input_ids'][None], 'n_answer': b['n_answer'], 'has_t': b['has_t'], 't_ids': b['t_ids'],
+            't_lps': b['t_lps']}
 
 
 class KDTrainer(Trainer):
@@ -80,13 +90,21 @@ class KDTrainer(Trainer):
         logp = F.log_softmax(logits, dim=-1)
         target = ids[0, -n:]
         ce = F.nll_loss(logp, target)
-        if alpha == 0:
+        if alpha == 0 or not inputs['has_t']:
             loss = ce
         else:
             t_prob = F.softmax(inputs['t_lps'], dim=-1)  # renormalised over the teacher's top-20
             soft = -(t_prob * logp.gather(1, inputs['t_ids'])).sum(-1).mean()
             loss = (1 - alpha) * ce + alpha * soft
         return (loss, out) if return_outputs else loss
+
+    def _get_train_sampler(self, *args, **kwargs):
+        # CURRICULUM=1 (opt-in, GOAL.md G14): keep the data file's order (sorted easy -> hard) instead of shuffling.
+        import os
+        if os.environ.get('CURRICULUM') == '1':
+            from torch.utils.data import SequentialSampler
+            return SequentialSampler(self.train_dataset)
+        return super()._get_train_sampler(*args, **kwargs)
 
 
 ds = KDData(run_dir / 'verified.jsonl')
@@ -96,7 +114,10 @@ model.enable_input_require_grads()  # LoRA + gradient checkpointing: inputs must
 model = get_peft_model(model, LoraConfig(r=tcfg.lora_r, lora_alpha=tcfg.lora_alpha, lora_dropout=tcfg.lora_dropout,
                                          target_modules='all-linear', task_type='CAUSAL_LM'))
 world = max(1, torch.cuda.device_count())
-args = TrainingArguments(
+# FSDP=1 (opt-in, GOAL.md G11): fully sharded data parallel over all GPUs of the job instead of DDP.
+fsdp_kw = dict(fsdp='full_shard auto_wrap', fsdp_config={'transformer_layer_cls_to_wrap': ['Qwen3DecoderLayer'],
+                                                          'use_orig_params': True}) if os.environ.get('FSDP') == '1' else {}
+args = TrainingArguments(**fsdp_kw,
     output_dir=str(run_dir / 'checkpoints'), num_train_epochs=tcfg.epochs,
     per_device_train_batch_size=1, gradient_accumulation_steps=16 // world,  # global batch 16, as SFT
     learning_rate=tcfg.learning_rate, lr_scheduler_type='cosine', warmup_steps=0.03, bf16=True,

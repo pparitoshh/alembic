@@ -1,13 +1,13 @@
 {
- "version": "hpc-taxonomy-v1.1 (2026-10-20)",
+ "version": "hpc-taxonomy-v2 (2026-10-24)",
  "description": "HPC topic taxonomy for measuring training-data coverage. Areas -> leaves; every leaf has Python regex patterns (case-insensitive; (?-i:...) = case-sensitive) used by coverage.py.",
  "matching_rules": {
   "document": "A document maps to a leaf if any leaf pattern matches its URL or title, or if the leaf's patterns match >= MIN_BODY_HITS (3) times in its extracted text (first 200,000 chars). Multi-label.",
   "qa": "A Q&A row maps to a leaf if any leaf pattern matches its question text (user turn) or its source URL. Multi-label.",
   "status": "GAP: < 10 documents or < 30 est. 1,500-char chunks; THIN: < 40 documents or < 150 chunks; otherwise OK (thresholds in coverage.py)."
  },
- "n_areas": 22,
- "n_leaves": 115,
+ "n_areas": 27,
+ "n_leaves": 156,
  "areas": [
   {
    "id": "access",
@@ -85,6 +85,23 @@
       "(?<!\\w)xquartz(?!\\w)",
       "(?<!\\w)mobaxterm(?!\\w)"
      ]
+    },
+    {
+     "id": "remote_ide_dev",
+     "name": "Remote development: VS Code Remote-SSH, code-server, PyCharm remote, sshfs mounts",
+     "patterns": [
+      "(?<!\\w)vs ?code(?!\\w)",
+      "(?<!\\w)visual studio code(?!\\w)",
+      "(?<!\\w)remote-ssh(?!\\w)",
+      "(?<!\\w)remote development(?!\\w)",
+      "(?<!\\w)code-server(?!\\w)",
+      "(?<!\\w)vscode server(?!\\w)",
+      "(?<!\\w)pycharm(?!\\w)",
+      "(?<!\\w)sshfs(?!\\w)",
+      "(?<!\\w)ides?(?!\\w)",
+      "(?<!\\w)integrated development environments?(?!\\w)",
+      "(?<!\\w)\\.vscode-server(?!\\w)"
+     ]
     }
    ]
   },
@@ -132,6 +149,27 @@
       "(?<!\\w)tmux(?!\\w)",
       "(?<!\\w)gnu screen(?!\\w)",
       "(?<!\\w)screen -r(?!\\w)"
+     ]
+    },
+    {
+     "id": "process_job_control",
+     "name": "Linux processes & job control: ps/top/htop, kill and signals, nohup, background jobs",
+     "patterns": [
+      "(?<!\\w)ps (?:aux|-ef|-u)(?!\\w)",
+      "(?<!\\w)htop(?!\\w)",
+      "(?<!\\w)top command(?!\\w)",
+      "(?<!\\w)pgrep(?!\\w)",
+      "(?<!\\w)pkill(?!\\w)",
+      "(?<!\\w)kill -(?:9|15|term|kill|hup)(?!\\w)",
+      "(?<!\\w)killall(?!\\w)",
+      "(?<!\\w)nohup(?!\\w)",
+      "(?<!\\w)disown(?!\\w)",
+      "(?<!\\w)background (?:process|jobs?)(?!\\w)",
+      "(?<!\\w)job control(?!\\w)",
+      "(?<!\\w)ctrl-z(?!\\w)",
+      "(?<!\\w)sig(?:term|kill|int|hup|tstp|stop|cont)(?!\\w)",
+      "(?<!\\w)zombie process(?:es)?(?!\\w)",
+      "(?<!\\w)process ids?(?!\\w)"
      ]
     }
    ]
@@ -262,6 +300,24 @@
       "(?<!\\w)lftp(?!\\w)",
       "(?<!\\w)aspera(?!\\w)"
      ]
+    },
+    {
+     "id": "data_compression_reduction",
+     "name": "Scientific data compression & reduction: SZ, ZFP, MGARD, Blosc, HDF5 filters, lossy vs lossless",
+     "patterns": [
+      "(?<!\\w)lossy compression(?!\\w)",
+      "(?<!\\w)lossless compression(?!\\w)",
+      "(?<!\\w)error-bounded(?!\\w)",
+      "(?<!\\w)sz3?(?!\\w)",
+      "(?<!\\w)zfp(?!\\w)",
+      "(?<!\\w)mgard(?!\\w)",
+      "(?<!\\w)blosc2?(?!\\w)",
+      "(?<!\\w)zstd(?!\\w)",
+      "(?<!\\w)hdf5 filters?(?!\\w)",
+      "(?<!\\w)compression (?:ratio|filters?|levels?)(?!\\w)",
+      "(?<!\\w)data reduction(?!\\w)",
+      "(?<!\\w)deflate(?!\\w)"
+     ]
     }
    ]
   },
@@ -340,6 +396,23 @@
       "(?<!\\w)meson(?!\\w)",
       "(?<!\\w)undefined reference(?!\\w)",
       "(?<!\\w)linker(?!\\w)"
+     ]
+    },
+    {
+     "id": "eessi_cvmfs",
+     "name": "EESSI and CernVM-FS: shared, streamed scientific software stacks",
+     "patterns": [
+      "(?<!\\w)eessi(?!\\w)",
+      "(?<!\\w)cvmfs(?!\\w)",
+      "(?<!\\w)cernvm-fs(?!\\w)",
+      "/cvmfs/",
+      "/cvmfs/software\\.eessi\\.io",
+      "(?<!\\w)cvmfs_config(?!\\w)",
+      "(?<!\\w)stratum (?:0|1|zero|one)(?!\\w)",
+      "(?<!\\w)european environment for scientific software installations(?!\\w)",
+      "(?<!\\w)archspec(?!\\w)",
+      "(?<!\\w)gentoo prefix(?!\\w)",
+      "(?<!\\w)eb-hooks?(?!\\w)"
      ]
     }
    ]
@@ -429,7 +502,10 @@
       "(?<!\\w)compiler flags(?!\\w)",
       "(?<!\\w)optimization flags(?!\\w)",
       "(?<!\\w)lto(?!\\w)",
-      "(?<!\\w)profile[- ]guided(?!\\w)"
+      "(?<!\\w)profile[- ]guided(?!\\w)",
+      "(?<!\\w)auto-?paralleli[sz]ation(?!\\w)",
+      "(?<!\\w)-ftree-parallelize-loops",
+      "(?<!\\w)-fprofile-(?:generate|use)(?!\\w)"
      ]
     },
     {
@@ -629,7 +705,8 @@
       "(?<!\\w)torque(?!\\w)",
       "(?<!\\w)qdel(?!\\w)",
       "(?<!\\w)pbs_\\w+",
-      "(?<!\\w)select=\\d"
+      "(?<!\\w)select=\\d",
+      "(?<!\\w)pbs(?!\\w)"
      ]
     },
     {
@@ -854,6 +931,44 @@
       "(?<!\\w)performance portability(?!\\w)",
       "(?<!\\w)onedpl(?!\\w)"
      ]
+    },
+    {
+     "id": "parallel_algorithms_decomposition",
+     "name": "Parallel algorithm design: domain decomposition, halo exchange, load balancing, task/data parallelism",
+     "patterns": [
+      "(?<!\\w)domain decomposition(?!\\w)",
+      "(?<!\\w)halo (?:exchange|cells?|regions?)(?!\\w)",
+      "(?<!\\w)ghost (?:cells?|zones?|layers?)(?!\\w)",
+      "(?<!\\w)load (?:balancing|imbalance)(?!\\w)",
+      "(?<!\\w)work stealing(?!\\w)",
+      "(?<!\\w)task parallelism(?!\\w)",
+      "(?<!\\w)stencil (?:codes?|computations?)(?!\\w)",
+      "(?<!\\w)surface[- ]to[- ]volume(?!\\w)",
+      "(?<!\\w)graph partitioning(?!\\w)",
+      "(?<!\\w)master[- ]worker(?!\\w)",
+      "(?<!\\w)manager[- ]worker(?!\\w)",
+      "(?<!\\w)parallel algorithms?(?!\\w)"
+     ]
+    },
+    {
+     "id": "numerical_reproducibility",
+     "name": "Floating-point & numerical reproducibility: IEEE 754, non-deterministic reductions, fast-math, determinism",
+     "patterns": [
+      "(?<!\\w)ieee[- ]?754(?!\\w)",
+      "(?<!\\w)floating[- ]point (?:arithmetic|errors?|precision|reproducibility|exceptions?)(?!\\w)",
+      "(?<!\\w)bitwise (?:reproducib\\w+|identical)(?!\\w)",
+      "(?<!\\w)-ffast-math(?!\\w)",
+      "(?<!\\w)fp-model(?!\\w)",
+      "(?<!\\w)non-?determinis(?:m|tic)(?!\\w)",
+      "(?<!\\w)deterministic (?:algorithms|results|reductions?)(?!\\w)",
+      "(?<!\\w)rounding errors?(?!\\w)",
+      "(?<!\\w)catastrophic cancellation(?!\\w)",
+      "(?<!\\w)denormals?(?!\\w)",
+      "(?<!\\w)subnormals?(?!\\w)",
+      "(?<!\\w)kahan summation(?!\\w)",
+      "(?<!\\w)use_deterministic_algorithms(?!\\w)",
+      "(?<!\\w)cublas_workspace_config(?!\\w)"
+     ]
     }
    ]
   },
@@ -988,7 +1103,8 @@
       "(?<!\\w)sundials(?!\\w)",
       "(?<!\\w)ginkgo(?!\\w)",
       "(?<!\\w)amgx(?!\\w)",
-      "(?<!\\w)sparse (?:linear )?solvers?"
+      "(?<!\\w)sparse (?:linear )?solvers?",
+      "(?<!\\w)(?:par)?metis(?!\\w)"
      ]
     },
     {
@@ -1027,7 +1143,9 @@
       "(?<!\\w)adios2?",
       "(?<!\\w)zarr(?!\\w)",
       "(?<!\\w)h5dump(?!\\w)",
-      "(?<!\\w)cdf5(?!\\w)"
+      "(?<!\\w)cdf5(?!\\w)",
+      "(?<!\\w)xios(?!\\w)",
+      "(?<!\\w)cf conventions?(?!\\w)"
      ]
     }
    ]
@@ -1093,7 +1211,9 @@
       "(?<!\\w)perftools-lite(?!\\w)",
       "(?<!\\w)cube ?gui(?!\\w)",
       "(?<!\\w)otf2(?!\\w)",
-      "(?<!\\w)caliper(?!\\w)"
+      "(?<!\\w)caliper(?!\\w)",
+      "(?<!\\w)pika(?!\\w)",
+      "(?<!\\w)lo2s(?!\\w)"
      ]
     },
     {
@@ -1128,7 +1248,10 @@
       "(?<!\\w)ulimit -c(?!\\w)",
       "(?<!\\w)backtrace(?!\\w)",
       "(?<!\\w)helgrind(?!\\w)",
-      "(?<!\\w)rocgdb(?!\\w)"
+      "(?<!\\w)rocgdb(?!\\w)",
+      "(?<!\\w)(?-i:MUST)(?!\\w)",
+      "(?<!\\w)archer(?!\\w)",
+      "(?<!\\w)mpi correctness(?!\\w)"
      ]
     },
     {
@@ -1142,7 +1265,47 @@
       "(?<!\\w)gustafson(?!\\w)",
       "(?<!\\w)speed-?up(?!\\w)",
       "(?<!\\w)parallel efficiency(?!\\w)",
-      "(?<!\\w)scalability(?!\\w)"
+      "(?<!\\w)scalability(?!\\w)",
+      "(?<!\\w)time[- ]to[- ]solution(?!\\w)"
+     ]
+    },
+    {
+     "id": "hpc_benchmarks",
+     "name": "Standard HPC benchmarks: HPL/Linpack, HPCG, TOP500/Green500, OSU, IOR/IO500, MLPerf, JUBE",
+     "patterns": [
+      "(?<!\\w)hpl(?!\\w)",
+      "(?<!\\w)linpack(?!\\w)",
+      "(?<!\\w)hpcg(?!\\w)",
+      "(?<!\\w)top500(?!\\w)",
+      "(?<!\\w)green500(?!\\w)",
+      "(?<!\\w)graph500(?!\\w)",
+      "(?<!\\w)io500(?!\\w)",
+      "(?<!\\w)osu_\\w+(?!\\w)",
+      "(?<!\\w)osu micro-?benchmarks(?!\\w)",
+      "(?<!\\w)mlperf(?!\\w)",
+      "(?<!\\w)jube(?!\\w)",
+      "(?<!\\w)rmax(?!\\w)",
+      "(?<!\\w)rpeak(?!\\w)",
+      "(?<!\\w)benchmark suites?(?!\\w)"
+     ]
+    },
+    {
+     "id": "serial_code_optimisation",
+     "name": "Single-core code optimisation: cache blocking/tiling, data layout (AoS/SoA), memory access patterns, false sharing",
+     "patterns": [
+      "(?<!\\w)loop (?:tiling|blocking|interchange|fusion|fission)(?!\\w)",
+      "(?<!\\w)cache blocking(?!\\w)",
+      "(?<!\\w)cache[- ]friendly(?!\\w)",
+      "(?<!\\w)structures? of arrays(?!\\w)",
+      "(?<!\\w)arrays? of structures(?!\\w)",
+      "(?<!\\w)aos(?:/| vs\\.? | and )soa(?!\\w)",
+      "(?<!\\w)data layout(?!\\w)",
+      "(?<!\\w)memory access patterns?(?!\\w)",
+      "(?<!\\w)stride-?1(?!\\w)",
+      "(?<!\\w)false sharing(?!\\w)",
+      "(?<!\\w)spatial locality(?!\\w)",
+      "(?<!\\w)temporal locality(?!\\w)",
+      "(?<!\\w)cache thrashing(?!\\w)"
      ]
     }
    ]
@@ -1246,7 +1409,10 @@
       "(?<!\\w)resume training(?!\\w)",
       "(?<!\\w)torch\\.save(?!\\w)",
       "(?<!\\w)distributed checkpoint(?!\\w)",
-      "(?<!\\w)checkpoint/restart(?!\\w)"
+      "(?<!\\w)checkpoint/restart(?!\\w)",
+      "(?<!\\w)ulfm(?!\\w)",
+      "(?<!\\w)fault[- ]toleran(?:t|ce)(?!\\w)",
+      "(?<!\\w)resilience(?!\\w)"
      ]
     },
     {
@@ -1282,7 +1448,10 @@
       "(?<!\\w)inference server(?!\\w)",
       "(?<!\\w)model serving(?!\\w)",
       "(?<!\\w)openai-compatible(?!\\w)",
-      "(?<!\\w)kv cache(?!\\w)"
+      "(?<!\\w)kv cache(?!\\w)",
+      "(?<!\\w)quantiz(?:ation|ed)(?!\\w)",
+      "(?<!\\w)(?:awq|gptq|gguf)(?!\\w)",
+      "(?<!\\w)tensorrt(?!\\w)"
      ]
     },
     {
@@ -1315,6 +1484,48 @@
       "(?<!\\w)axolotl(?!\\w)",
       "(?<!\\w)unsloth(?!\\w)",
       "(?<!\\w)torchtune(?!\\w)"
+     ]
+    },
+    {
+     "id": "rag_agents_ai_services",
+     "name": "RAG, embeddings/vector stores, LLM agents and AI service APIs on HPC",
+     "patterns": [
+      "(?<!\\w)retrieval[- ]augmented generation(?!\\w)",
+      "(?<!\\w)(?-i:RAG)(?!\\w)",
+      "(?<!\\w)vector (?:stores?|databases?|search)(?!\\w)",
+      "(?<!\\w)embedding models?(?!\\w)",
+      "(?<!\\w)faiss(?!\\w)",
+      "(?<!\\w)chromadb(?!\\w)",
+      "(?<!\\w)milvus(?!\\w)",
+      "(?<!\\w)langchain(?!\\w)",
+      "(?<!\\w)(?:llamaindex|llama_index)(?!\\w)",
+      "(?<!\\w)llm agents?(?!\\w)",
+      "(?<!\\w)agentic(?!\\w)",
+      "(?<!\\w)prompt engineering(?!\\w)",
+      "(?<!\\w)rerank(?:er|ing)s?(?!\\w)",
+      "(?<!\\w)function calling(?!\\w)",
+      "(?<!\\w)tool calling(?!\\w)"
+     ]
+    },
+    {
+     "id": "scientific_ml",
+     "name": "Scientific ML: PINNs, neural operators, GNNs, surrogate models, AI weather/climate models",
+     "patterns": [
+      "(?<!\\w)physics-informed neural networks?(?!\\w)",
+      "(?<!\\w)pinns?(?!\\w)",
+      "(?<!\\w)neural operators?(?!\\w)",
+      "(?<!\\w)fourier neural operators?(?!\\w)",
+      "(?<!\\w)(?-i:FNO)(?!\\w)",
+      "(?<!\\w)graph neural networks?(?!\\w)",
+      "(?<!\\w)(?-i:GNN)s?(?!\\w)",
+      "(?<!\\w)pytorch[ _]geometric(?!\\w)",
+      "(?<!\\w)surrogate models?(?!\\w)",
+      "(?<!\\w)physicsnemo(?!\\w)",
+      "(?<!\\w)nvidia modulus(?!\\w)",
+      "(?<!\\w)graphcast(?!\\w)",
+      "(?<!\\w)ai weather (?:models?|forecasting)(?!\\w)",
+      "(?<!\\w)machine[- ]learned (?:interatomic )?potentials?(?!\\w)",
+      "(?<!\\w)foundation models? for science(?!\\w)"
      ]
     }
    ]
@@ -1375,7 +1586,8 @@
       "(?<!\\w)pylauncher(?!\\w)",
       "(?<!\\w)job packing(?!\\w)",
       "(?<!\\w)xargs -P(?!\\w)",
-      "(?<!\\w)parallel -j(?!\\w)"
+      "(?<!\\w)parallel -j(?!\\w)",
+      "(?<!\\w)embarrassingly parallel(?!\\w)"
      ]
     }
    ]
@@ -1595,7 +1807,11 @@
       "(?<!\\w)ec2(?!\\w)",
       "(?<!\\w)cloud computing(?!\\w)",
       "(?<!\\w)hybrid cloud(?!\\w)",
-      "(?<!\\w)terraform(?!\\w)"
+      "(?<!\\w)terraform(?!\\w)",
+      "(?<!\\w)kvm(?!\\w)",
+      "(?<!\\w)qemu(?!\\w)",
+      "(?<!\\w)libvirt(?!\\w)",
+      "(?<!\\w)hypervisors?(?!\\w)"
      ]
     }
    ]
@@ -1734,7 +1950,28 @@
       "(?<!\\w)discoverer(?!\\w)",
       "(?<!\\w)jupiter(?!\\w)",
       "(?<!\\w)alice recoque(?!\\w)",
-      "(?<!\\w)daedalus(?!\\w)"
+      "(?<!\\w)daedalus(?!\\w)",
+      "(?<!\\w)arrhenius(?!\\w)",
+      "(?<!\\w)jules verne(?!\\w)"
+     ]
+    },
+    {
+     "id": "federated_identity_portals",
+     "name": "Federated identity & allocation portals: MyAccessID, Puhuri, eduGAIN, Fenix, site user portals",
+     "patterns": [
+      "(?<!\\w)myaccessid(?!\\w)",
+      "(?<!\\w)puhuri(?!\\w)",
+      "(?<!\\w)edugain(?!\\w)",
+      "(?<!\\w)eduteams(?!\\w)",
+      "(?<!\\w)fenix (?:infrastructure|ri|ials?)(?!\\w)",
+      "(?<!\\w)haka(?!\\w)",
+      "(?<!\\w)federated (?:identity|login|authentication)(?!\\w)",
+      "(?<!\\w)identity providers?(?!\\w)",
+      "(?<!\\w)(?-i:IdP)s?(?!\\w)",
+      "(?<!\\w)judoor(?!\\w)",
+      "(?<!\\w)userdb\\.hpc\\.cineca\\.it(?!\\w)",
+      "(?<!\\w)my\\.csc\\.fi(?!\\w)",
+      "(?<!\\w)lumi project portal(?!\\w)"
      ]
     }
    ]
@@ -1975,9 +2212,595 @@
      ]
     }
    ]
+  },
+  {
+   "id": "admin",
+   "name": "Cluster administration & operations",
+   "leaves": [
+    {
+     "id": "slurm_admin_config",
+     "name": "Slurm administration: slurm.conf, daemons, cgroups, plugins, prolog/epilog, node states",
+     "patterns": [
+      "(?<!\\w)slurm\\.conf(?!\\w)",
+      "(?<!\\w)slurmctld(?!\\w)",
+      "(?<!\\w)slurmd(?!\\w)",
+      "(?<!\\w)cgroup\\.conf(?!\\w)",
+      "(?<!\\w)munge(?:d|\\.key)?(?!\\w)",
+      "(?<!\\w)job_submit(?:\\.lua|/lua)(?!\\w)",
+      "(?<!\\w)spank plugins?(?!\\w)",
+      "(?<!\\w)(?:task_prolog|task_epilog|prologctld|epilogctld|prologflags)(?!\\w)",
+      "(?<!\\w)prolog(?: and |/)epilog(?!\\w)",
+      "(?<!\\w)epilog scripts?(?!\\w)",
+      "(?<!\\w)scontrol reconfigure(?!\\w)",
+      "(?<!\\w)scontrol update node(?:name)?=",
+      "(?<!\\w)state=(?:resume|drain|down)(?!\\w)",
+      "(?<!\\w)slurm (?:upgrade|installation|configurator)(?!\\w)",
+      "(?<!\\w)healthcheckprogram(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_accounting_setup",
+     "name": "Slurm accounting setup: slurmdbd, sacctmgr, associations, TRES, limits enforcement",
+     "patterns": [
+      "(?<!\\w)slurmdbd(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)sacctmgr(?!\\w)",
+      "(?<!\\w)slurm associations?(?!\\w)",
+      "(?<!\\w)association (?:limits?|tree|table)s?(?!\\w)",
+      "(?<!\\w)accountingstorage(?:type|enforce|host)(?!\\w)",
+      "(?<!\\w)accounting_storage/(?:slurmdbd|mysql)(?!\\w)",
+      "(?<!\\w)(?-i:TRES)(?!\\w)",
+      "(?<!\\w)tresbillingweights(?!\\w)",
+      "(?<!\\w)grptres(?:mins)?(?!\\w)",
+      "(?<!\\w)maxtres(?:perjob|peruser|pernode)?(?!\\w)",
+      "(?<!\\w)priorityweight(?:fairshare|age|qos|jobsize)(?!\\w)",
+      "(?<!\\w)slurm_acct_db(?!\\w)"
+     ]
+    },
+    {
+     "id": "cluster_provisioning",
+     "name": "Cluster provisioning: Warewulf, xCAT, OpenHPC, Bright/BCM, PXE, stateless/stateful node images",
+     "patterns": [
+      "(?<!\\w)warewulf(?!\\w)",
+      "(?<!\\w)wwctl(?!\\w)",
+      "(?<!\\w)xcat(?!\\w)",
+      "(?<!\\w)openhpc(?!\\w)",
+      "(?<!\\w)ohpc(?!\\w)",
+      "(?<!\\w)bright cluster manager(?!\\w)",
+      "(?<!\\w)base command manager(?!\\w)",
+      "(?<!\\w)pxe(?:[- ]?boot)?(?!\\w)",
+      "(?<!\\w)ipxe(?!\\w)",
+      "(?<!\\w)netboot(?!\\w)",
+      "(?<!\\w)diskless (?:nodes?|images?|boot)(?!\\w)",
+      "(?<!\\w)state(?:less|ful) (?:node )?images?(?!\\w)",
+      "(?<!\\w)node images?(?!\\w)",
+      "(?<!\\w)kickstart (?:files?|install(?:ation)?s?)(?!\\w)",
+      "(?<!\\w)head node (?:installation|setup)(?!\\w)"
+     ]
+    },
+    {
+     "id": "config_mgmt_parallel_shell",
+     "name": "Configuration management & parallel shells: Ansible, Puppet, Salt, pdsh, ClusterShell",
+     "patterns": [
+      "(?<!\\w)ansible(?:-playbook)?(?!\\w)",
+      "(?<!\\w)puppet(?!\\w)",
+      "(?<!\\w)saltstack(?!\\w)",
+      "(?<!\\w)salt (?:states?|minions?|master)(?!\\w)",
+      "(?<!\\w)chef (?:cookbook|recipe)s?(?!\\w)",
+      "(?<!\\w)pdsh(?!\\w)",
+      "(?<!\\w)pdcp(?!\\w)",
+      "(?<!\\w)dshbak(?!\\w)",
+      "(?<!\\w)clustershell(?!\\w)",
+      "(?<!\\w)clush(?!\\w)",
+      "(?<!\\w)nodeset(?!\\w)",
+      "(?<!\\w)configuration management(?!\\w)",
+      "(?<!\\w)parallel shell(?!\\w)"
+     ]
+    },
+    {
+     "id": "monitoring_telemetry",
+     "name": "Cluster monitoring & telemetry: Prometheus, Grafana, Icinga/Nagios, Ganglia, XDMoD, LLview, DCGM exporter",
+     "patterns": [
+      "(?<!\\w)prometheus(?!\\w)",
+      "(?<!\\w)node_exporter(?!\\w)",
+      "(?<!\\w)grafana(?!\\w)",
+      "(?<!\\w)icinga2?(?!\\w)",
+      "(?<!\\w)nagios(?!\\w)",
+      "(?<!\\w)ganglia(?!\\w)",
+      "(?<!\\w)telegraf(?!\\w)",
+      "(?<!\\w)influxdb(?!\\w)",
+      "(?<!\\w)open xdmod(?!\\w)",
+      "(?<!\\w)xdmod(?!\\w)",
+      "(?<!\\w)llview(?!\\w)",
+      "(?<!\\w)dcgm[- ]exporter(?!\\w)",
+      "(?<!\\w)zabbix(?!\\w)",
+      "(?<!\\w)alertmanager(?!\\w)",
+      "(?<!\\w)(?:cluster|node|system) monitoring(?!\\w)"
+     ]
+    },
+    {
+     "id": "node_health_bmc",
+     "name": "Node health & out-of-band management: NHC, IPMI/BMC, Redfish, SOL, hardware burn-in",
+     "patterns": [
+      "(?<!\\w)node health check(?!\\w)",
+      "(?<!\\w)(?-i:NHC)(?!\\w)",
+      "(?<!\\w)ipmitool(?!\\w)",
+      "(?<!\\w)ipmi(?!\\w)",
+      "(?<!\\w)(?-i:BMC)s?(?!\\w)",
+      "(?<!\\w)baseboard management controller(?!\\w)",
+      "(?<!\\w)redfish(?!\\w)",
+      "(?<!\\w)serial[- ]over[- ]lan(?!\\w)",
+      "(?<!\\w)(?-i:SOL) (?:console|session)(?!\\w)",
+      "(?<!\\w)(?:idrac|ilo|xclarity)(?!\\w)",
+      "(?<!\\w)burn[- ]in tests?(?!\\w)",
+      "(?<!\\w)memtest(?:86)?(?!\\w)",
+      "(?<!\\w)dcgmi diag(?!\\w)",
+      "(?<!\\w)power (?:cycle|on|off) (?:the )?nodes?(?!\\w)"
+     ]
+    },
+    {
+     "id": "identity_auth_admin",
+     "name": "Identity & authentication administration: LDAP, FreeIPA, Kerberos, SSSD, PAM, user/group management",
+     "patterns": [
+      "(?<!\\w)ldap(?!\\w)",
+      "(?<!\\w)openldap(?!\\w)",
+      "(?<!\\w)ldapsearch(?!\\w)",
+      "(?<!\\w)freeipa(?!\\w)",
+      "(?<!\\w)(?-i:IdM)(?!\\w)",
+      "(?<!\\w)kerberos(?!\\w)",
+      "(?<!\\w)kinit(?!\\w)",
+      "(?<!\\w)krb5(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)sssd(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)pam_\\w+(?!\\w)",
+      "(?<!\\w)(?-i:PAM) (?:module|stack|configuration)s?(?!\\w)",
+      "(?<!\\w)nsswitch(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)keycloak(?!\\w)",
+      "(?<!\\w)useradd(?!\\w)",
+      "(?<!\\w)active directory(?!\\w)"
+     ]
+    },
+    {
+     "id": "fabric_network_admin",
+     "name": "HPC fabric & cluster network administration: OpenSM, UFM, ibdiagnet, LNet routing, DNS/DHCP, NTP",
+     "patterns": [
+      "(?<!\\w)opensm(?!\\w)",
+      "(?<!\\w)subnet manager(?!\\w)",
+      "(?<!\\w)ufm(?!\\w)",
+      "(?<!\\w)ibdiagnet(?!\\w)",
+      "(?<!\\w)ibnetdiscover(?!\\w)",
+      "(?<!\\w)perfquery(?!\\w)",
+      "(?<!\\w)iblinkinfo(?!\\w)",
+      "(?<!\\w)rdma-core(?!\\w)",
+      "(?<!\\w)lnet(?:ctl)?(?!\\w)",
+      "(?<!\\w)lnet routers?(?!\\w)",
+      "(?<!\\w)chronyd?(?!\\w)",
+      "(?<!\\w)ntpd(?!\\w)",
+      "(?<!\\w)dhcpd(?!\\w)",
+      "(?<!\\w)(?:dns|dhcp) server(?!\\w)",
+      "(?<!\\w)vlans?(?!\\w)"
+     ]
+    },
+    {
+     "id": "storage_server_admin",
+     "name": "Storage server administration: Lustre MDS/OSS ops, ZFS, RAID, NFS exports, GPFS management",
+     "patterns": [
+      "(?<!\\w)lctl(?!\\w)",
+      "(?<!\\w)mkfs\\.lustre(?!\\w)",
+      "(?<!\\w)(?-i:MDS|OSS|MDT|OST|MGS)s? (?:failover|recovery|mount|server)s?(?!\\w)",
+      "(?<!\\w)lustre (?:server|administration|operations manual)(?!\\w)",
+      "(?<!\\w)zpool(?!\\w)",
+      "(?<!\\w)zfs (?:pool|dataset|send|snapshot)s?(?!\\w)",
+      "(?<!\\w)openzfs(?!\\w)",
+      "(?<!\\w)raid ?(?:[0156]|10|z[23]?)(?!\\w)",
+      "(?<!\\w)mdadm(?!\\w)",
+      "(?<!\\w)/etc/exports(?!\\w)",
+      "(?<!\\w)exportfs(?!\\w)",
+      "(?<!\\w)mm(?:crfs|mount|lsfs|add(?:disk|node)|chconfig)(?!\\w)",
+      "(?<!\\w)e2fsck(?!\\w)"
+     ]
+    },
+    {
+     "id": "linux_sysadmin_services",
+     "name": "Linux system administration for HPC nodes: systemd, packages, kernel tuning, hugepages, sysctl",
+     "patterns": [
+      "(?<!\\w)systemctl(?!\\w)",
+      "(?<!\\w)systemd (?:units?|services?|timers?)(?!\\w)",
+      "(?<!\\w)journalctl(?!\\w)",
+      "(?<!\\w)dnf (?:install|update)(?!\\w)",
+      "(?<!\\w)yum install(?!\\w)",
+      "(?<!\\w)rpm -[qiU]\\w*(?!\\w)",
+      "(?<!\\w)sysctl(?!\\w)",
+      "(?<!\\w)hugepages?(?!\\w)",
+      "(?<!\\w)hugetlbfs(?!\\w)",
+      "(?<!\\w)transparent huge ?pages?(?!\\w)",
+      "(?<!\\w)(?-i:THP)(?!\\w)",
+      "(?<!\\w)kernel (?:parameters?|modules?|tuning)(?!\\w)",
+      "(?<!\\w)modprobe(?!\\w)",
+      "(?<!\\w)grub(?:2)?(?!\\w)",
+      "(?<!\\w)selinux(?!\\w)"
+     ]
+    },
+    {
+     "id": "security_hardening_ops",
+     "name": "HPC security operations: hardening, firewalls, patching/CVEs, intrusion detection, NIST HPC security",
+     "patterns": [
+      "(?<!\\w)firewalld(?!\\w)",
+      "(?<!\\w)nftables(?!\\w)",
+      "(?<!\\w)iptables(?!\\w)",
+      "(?<!\\w)fail2ban(?!\\w)",
+      "(?<!\\w)auditd(?!\\w)",
+      "(?<!\\w)cves?(?:-\\d{4}-\\d+)?(?!\\w)",
+      "(?<!\\w)security patch(?:es|ing)?(?!\\w)",
+      "(?<!\\w)vulnerabilit(?:y|ies)(?!\\w)",
+      "(?<!\\w)hardening(?!\\w)",
+      "(?<!\\w)intrusion detection(?!\\w)",
+      "(?<!\\w)sp 800-223(?!\\w)",
+      "(?<!\\w)sp 800-234(?!\\w)",
+      "(?<!\\w)zero trust(?!\\w)",
+      "(?<!\\w)network segmentation(?!\\w)",
+      "(?<!\\w)security incidents?(?!\\w)"
+     ]
+    },
+    {
+     "id": "datacenter_facilities_tco",
+     "name": "Data-centre facilities & economics: power, cooling (DLC), PUE, UPS, procurement, TCO",
+     "patterns": [
+      "(?<!\\w)pue(?!\\w)",
+      "(?<!\\w)power usage effectiveness(?!\\w)",
+      "(?<!\\w)direct liquid cooling(?!\\w)",
+      "(?<!\\w)warm[- ]water cooling(?!\\w)",
+      "(?<!\\w)liquid[- ]cooled(?!\\w)",
+      "(?<!\\w)immersion cooling(?!\\w)",
+      "(?<!\\w)(?-i:UPS)(?!\\w)",
+      "(?<!\\w)uninterruptible power(?!\\w)",
+      "(?<!\\w)power distribution units?(?!\\w)",
+      "(?<!\\w)(?-i:PDU)s?(?!\\w)",
+      "(?<!\\w)data ?cent(?:re|er) (?:infrastructure|facilit(?:y|ies)|cooling)(?!\\w)",
+      "(?<!\\w)total cost of ownership(?!\\w)",
+      "(?<!\\w)(?-i:TCO)(?!\\w)",
+      "(?<!\\w)procurement(?!\\w)",
+      "(?<!\\w)heat reuse(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rse",
+   "name": "Research software engineering & reproducibility",
+   "leaves": [
+    {
+     "id": "testing_ci_hpc",
+     "name": "Software testing & CI on HPC: unit/regression tests, GitLab/GitHub CI runners, Jacamar, ReFrame",
+     "patterns": [
+      "(?<!\\w)unit tests?(?!\\w)",
+      "(?<!\\w)unit testing(?!\\w)",
+      "(?<!\\w)regression tests?(?!\\w)",
+      "(?<!\\w)pytest(?!\\w)",
+      "(?<!\\w)ctest(?!\\w)",
+      "(?<!\\w)googletest(?!\\w)",
+      "(?<!\\w)pfunit(?!\\w)",
+      "(?<!\\w)continuous integration(?!\\w)",
+      "(?<!\\w)(?-i:CI)(?:/CD)? (?:pipelines?|runners?|jobs?)(?!\\w)",
+      "(?<!\\w)gitlab[- ]ci(?!\\w)",
+      "(?<!\\w)github actions(?!\\w)",
+      "(?<!\\w)jacamar(?!\\w)",
+      "(?<!\\w)reframe(?!\\w)",
+      "(?<!\\w)test coverage(?!\\w)",
+      "(?<!\\w)test-driven development(?!\\w)"
+     ]
+    },
+    {
+     "id": "software_practices_docs_licensing",
+     "name": "Research software practices: documentation, code review, modular code, packaging/releases, software licences, citation",
+     "patterns": [
+      "(?<!\\w)sphinx(?!\\w)",
+      "(?<!\\w)doxygen(?!\\w)",
+      "(?<!\\w)read ?the ?docs(?!\\w)",
+      "(?<!\\w)mkdocs(?!\\w)",
+      "(?<!\\w)code review(?!\\w)",
+      "(?<!\\w)semantic versioning(?!\\w)",
+      "(?<!\\w)software licen[cs](?:e|es|ing)(?!\\w)",
+      "(?<!\\w)open[- ]source licen[cs]es?(?!\\w)",
+      "(?<!\\w)citation\\.cff(?!\\w)",
+      "(?<!\\w)research software engineer(?:ing|s)?(?!\\w)",
+      "(?<!\\w)(?-i:RSE)s?(?!\\w)",
+      "(?<!\\w)coding (?:standards?|style)(?!\\w)",
+      "(?<!\\w)linters?(?!\\w)"
+     ]
+    },
+    {
+     "id": "reproducibility_rdm_fair",
+     "name": "Reproducibility & research data management: FAIR, data management plans, metadata, DOIs, provenance",
+     "patterns": [
+      "(?<!\\w)fair (?:data|principles|software)(?!\\w)",
+      "(?<!\\w)findable,? accessible,? interoperable(?!\\w)",
+      "(?<!\\w)data management plans?(?!\\w)",
+      "(?<!\\w)(?-i:DMP)s?(?!\\w)",
+      "(?<!\\w)research data management(?!\\w)",
+      "(?<!\\w)(?-i:RDM)(?!\\w)",
+      "(?<!\\w)metadata (?:schemas?|standards?)(?!\\w)",
+      "(?<!\\w)zenodo(?!\\w)",
+      "(?<!\\w)digital object identifiers?(?!\\w)",
+      "(?<!\\w)data provenance(?!\\w)",
+      "(?<!\\w)reproducib(?:le|ility) (?:research|workflows?|results)(?!\\w)",
+      "(?<!\\w)data repositor(?:y|ies)(?!\\w)",
+      "(?<!\\w)open data(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bigdata",
+   "name": "Big data & data analytics on HPC",
+   "leaves": [
+    {
+     "id": "spark_hadoop_hpc",
+     "name": "Spark, Hadoop and big-data frameworks on HPC (PySpark, HDFS, RayDP, Ophidia)",
+     "patterns": [
+      "(?<!\\w)apache spark(?!\\w)",
+      "(?<!\\w)pyspark(?!\\w)",
+      "(?<!\\w)spark-submit(?!\\w)",
+      "(?<!\\w)spark (?:standalone|cluster|executors?|driver)(?!\\w)",
+      "(?<!\\w)hadoop(?!\\w)",
+      "(?<!\\w)hdfs(?!\\w)",
+      "(?<!\\w)mapreduce(?!\\w)",
+      "(?<!\\w)yarn (?:resource manager|cluster)(?!\\w)",
+      "(?<!\\w)raydp(?!\\w)",
+      "(?<!\\w)ophidia(?!\\w)",
+      "(?<!\\w)big data analytics(?!\\w)",
+      "(?<!\\w)spark on (?:slurm|hpc)(?!\\w)"
+     ]
+    },
+    {
+     "id": "postprocessing_analysis_tools",
+     "name": "Post-processing & data analysis tools: CDO, NCO, xarray, pandas/Polars on HPC output",
+     "patterns": [
+      "(?<!\\w)(?-i:CDO)(?!\\w)",
+      "(?<!\\w)climate data operators(?!\\w)",
+      "(?<!\\w)cdo (?:-\\w+|remap\\w*|mergetime|sellonlatbox|timmean)(?!\\w)",
+      "(?<!\\w)(?-i:NCO)(?!\\w)",
+      "(?<!\\w)nc(?:ks|ra|rcat|ea|ap2|wa|diff)(?!\\w)",
+      "(?<!\\w)xarray(?!\\w)",
+      "(?<!\\w)open_mfdataset(?!\\w)",
+      "(?<!\\w)pandas(?!\\w)",
+      "(?<!\\w)polars(?!\\w)",
+      "(?<!\\w)post-?processing(?!\\w)",
+      "(?<!\\w)ncview(?!\\w)",
+      "(?<!\\w)dask\\.dataframe(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "emerging",
+   "name": "Emerging & heterogeneous computing",
+   "leaves": [
+    {
+     "id": "quantum_hpc",
+     "name": "Quantum computing & HPC-QC integration: EuroHPC quantum computers, Qiskit, CUDA-Q, simulators",
+     "patterns": [
+      "(?<!\\w)quantum comput(?:er|ers|ing)(?!\\w)",
+      "(?<!\\w)qubits?(?!\\w)",
+      "(?<!\\w)qiskit(?!\\w)",
+      "(?<!\\w)cuda-?q(?!\\w)",
+      "(?<!\\w)pennylane(?!\\w)",
+      "(?<!\\w)cirq(?!\\w)",
+      "(?<!\\w)myqlm(?!\\w)",
+      "(?<!\\w)pulser(?!\\w)",
+      "(?<!\\w)quantum circuits?(?!\\w)",
+      "(?<!\\w)hpc-qc(?!\\w)",
+      "(?<!\\w)quantum simulators?(?!\\w)",
+      "(?<!\\w)statevector(?!\\w)",
+      "(?<!\\w)lumi-q(?!\\w)",
+      "(?<!\\w)euro-?qcs(?!\\w)",
+      "(?<!\\w)quantum annealing(?!\\w)"
+     ]
+    },
+    {
+     "id": "fpga_riscv_other_arch",
+     "name": "FPGAs, RISC-V, Arm SVE/A64FX, vector engines and other non-GPU accelerators",
+     "patterns": [
+      "(?<!\\w)fpgas?(?!\\w)",
+      "(?<!\\w)field[- ]programmable gate arrays?(?!\\w)",
+      "(?<!\\w)high[- ]level synthesis(?!\\w)",
+      "(?<!\\w)(?-i:HLS)(?!\\w)",
+      "(?<!\\w)vitis(?!\\w)",
+      "(?<!\\w)oneapi fpga(?!\\w)",
+      "(?<!\\w)risc-?v(?!\\w)",
+      "(?<!\\w)a64fx(?!\\w)",
+      "(?<!\\w)(?-i:SVE2?)(?!\\w)",
+      "(?<!\\w)scalable vector extension(?!\\w)",
+      "(?<!\\w)sx-aurora(?!\\w)",
+      "(?<!\\w)vector engines?(?!\\w)",
+      "(?<!\\w)neuromorphic(?!\\w)",
+      "(?<!\\w)european processor initiative(?!\\w)",
+      "(?<!\\w)rhea processor(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eurohpc_sites",
+   "name": "EuroHPC site-specific usage guides",
+   "leaves": [
+    {
+     "id": "lumi_usage",
+     "name": "LUMI usage guide: LUMI-C/G/O partitions, project_465 paths, LUMI software stacks, LUST",
+     "patterns": [
+      "(?<!\\w)lumi-[cgodfk](?!\\w)",
+      "(?<!\\w)(?:small|standard|dev)-g(?!\\w)",
+      "(?<!\\w)lumi\\.csc\\.fi(?!\\w)",
+      "(?<!\\w)lumi-workspaces(?!\\w)",
+      "(?<!\\w)lumi-allocations(?!\\w)",
+      "(?<!\\w)project_465\\d+",
+      "(?<!\\w)lumi-container-wrapper(?!\\w)",
+      "(?<!\\w)cotainr(?!\\w)",
+      "(?<!\\w)crayenv(?!\\w)",
+      "(?<!\\w)lumi/2\\d\\.\\d\\d(?!\\w)",
+      "(?<!\\w)partition/[gcl](?!\\w)",
+      "(?<!\\w)lumi user support team(?!\\w)",
+      "(?<!\\w)(?-i:LUST)(?!\\w)",
+      "docs\\.lumi-supercomputer\\.eu",
+      "(?<!\\w)lumidata\\.eu(?!\\w)"
+     ]
+    },
+    {
+     "id": "leonardo_usage",
+     "name": "Leonardo (CINECA) usage guide: Booster/DCGP partitions, QoS names, CINECA filesystems",
+     "patterns": [
+      "(?<!\\w)boost_usr_prod(?!\\w)",
+      "(?<!\\w)dcgp_usr_prod(?!\\w)",
+      "(?<!\\w)lrd_all_serial(?!\\w)",
+      "(?<!\\w)boost_qos_\\w+(?!\\w)",
+      "(?<!\\w)dcgp_qos_\\w+(?!\\w)",
+      "(?<!\\w)leonardo booster(?!\\w)",
+      "(?<!\\w)leonardo dcgp(?!\\w)",
+      "(?<!\\w)login\\.leonardo\\.cineca\\.it(?!\\w)",
+      "(?<!\\w)cineca(?!\\w)",
+      "\\$cineca_scratch",
+      "docs\\.hpc\\.cineca\\.it",
+      "(?<!\\w)lrd_\\w+(?!\\w)",
+      "(?<!\\w)data centric general purpose(?!\\w)"
+     ]
+    },
+    {
+     "id": "marenostrum5_usage",
+     "name": "MareNostrum 5 (BSC) usage guide: GPP/ACC partitions, BSC login/transfer nodes, QoS",
+     "patterns": [
+      "(?<!\\w)[ag]login[1-5]\\.bsc\\.es(?!\\w)",
+      "(?<!\\w)mn5[- ]?(?:gpp|acc)(?!\\w)",
+      "(?<!\\w)marenostrum ?5 (?:gpp|acc)(?!\\w)",
+      "(?<!\\w)(?:gp|acc)_debug(?!\\w)",
+      "(?<!\\w)(?:gp|acc)_(?:bsc|ehpc|res)\\w*(?!\\w)",
+      "(?<!\\w)transfer[1-4]\\.bsc\\.es(?!\\w)",
+      "(?<!\\w)bsc\\.es(?!\\w)",
+      "(?<!\\w)barcelona supercomputing cent(?:re|er)(?!\\w)",
+      "(?<!\\w)bsc_quota(?!\\w)",
+      "(?<!\\w)bsc_acct(?!\\w)",
+      "(?<!\\w)(?-i:BSC)(?!\\w)"
+     ]
+    },
+    {
+     "id": "meluxina_usage",
+     "name": "MeluXina (LuxProvide) usage guide: login on port 8822, CPU/GPU/FPGA/LargeMem partitions",
+     "patterns": [
+      "(?<!\\w)login\\.lxp\\.lu(?!\\w)",
+      "(?<!\\w)lxp\\.lu(?!\\w)",
+      "(?<!\\w)luxprovide(?!\\w)",
+      "(?<!\\w)(?-i:LXP)(?!\\w)",
+      "(?<!\\w)meluxina[- ](?:cpu|gpu|fpga|largemem|c|g|f|l)(?!\\w)",
+      "(?<!\\w)-p 8822(?!\\w)",
+      "(?<!\\w)port 8822(?!\\w)",
+      "/project/home/p\\d+",
+      "(?<!\\w)servicedesk\\.lxp\\.lu(?!\\w)"
+     ]
+    },
+    {
+     "id": "karolina_usage",
+     "name": "Karolina (IT4Innovations) usage guide: qcpu/qgpu queues, it4ifree, IT4I filesystems",
+     "patterns": [
+      "(?<!\\w)karolina\\.it4i\\.cz(?!\\w)",
+      "(?<!\\w)it4i(?!\\w)",
+      "(?<!\\w)it4innovations(?!\\w)",
+      "(?<!\\w)qcpu(?:_\\w+)?(?!\\w)",
+      "(?<!\\w)qgpu(?:_\\w+)?(?!\\w)",
+      "(?<!\\w)qfat(?!\\w)",
+      "(?<!\\w)it4ifree(?!\\w)",
+      "(?<!\\w)it4ifsusage(?!\\w)",
+      "docs\\.it4i\\.cz",
+      "(?<!\\w)scs\\.it4i\\.cz(?!\\w)",
+      "(?<!\\w)barbora(?!\\w)"
+     ]
+    },
+    {
+     "id": "vega_usage",
+     "name": "Vega (IZUM) usage guide: Vega login nodes, partitions, IZUM support",
+     "patterns": [
+      "(?<!\\w)login\\.vega\\.izum\\.si(?!\\w)",
+      "(?<!\\w)vglogin\\d*(?!\\w)",
+      "(?<!\\w)izum(?!\\w)",
+      "(?<!\\w)vega\\.izum\\.si(?!\\w)",
+      "(?<!\\w)hpc vega(?!\\w)",
+      "(?<!\\w)eurohpc vega(?!\\w)",
+      "(?<!\\w)(?-i:SLING)(?!\\w)",
+      "(?<!\\w)vega (?:cpu|gpu|largemem) partition(?!\\w)"
+     ]
+    },
+    {
+     "id": "discoverer_usage",
+     "name": "Discoverer / Discoverer+ (Sofia Tech Park) usage guide",
+     "patterns": [
+      "(?<!\\w)login\\.discoverer\\.bg(?!\\w)",
+      "(?<!\\w)discoverer\\.bg(?!\\w)",
+      "(?<!\\w)discoverer ?\\+",
+      "(?<!\\w)sofia tech park(?!\\w)",
+      "(?<!\\w)petasc(?!\\w)",
+      "(?<!\\w)discoverer (?:hpc|supercomputer|cluster|gpu)(?!\\w)"
+     ]
+    },
+    {
+     "id": "deucalion_usage",
+     "name": "Deucalion (MACC, Portugal) usage guide: ARM/x86/A100 partitions",
+     "patterns": [
+      "(?<!\\w)normal-(?:arm|x86|a100)(?!\\w)",
+      "(?<!\\w)dev-(?:arm|x86|a100)(?!\\w)",
+      "(?<!\\w)large-(?:arm|x86)(?!\\w)",
+      "(?<!\\w)macc\\.fccn\\.pt(?!\\w)",
+      "(?<!\\w)(?-i:MACC)(?!\\w)",
+      "(?<!\\w)fccn(?!\\w)",
+      "(?<!\\w)minho advanced computing cent(?:re|er)(?!\\w)",
+      "(?<!\\w)deucalion (?:arm|x86|gpu)(?!\\w)",
+      "(?<!\\w)(?-i:CNCA)(?!\\w)"
+     ]
+    },
+    {
+     "id": "jupiter_usage",
+     "name": "JUPITER (JSC) usage guide: JUPITER Booster, JEDI/JETI, JuDoor, jutil, JSC software stages",
+     "patterns": [
+      "(?<!\\w)jupiter booster(?!\\w)",
+      "(?<!\\w)(?-i:JEDI)(?!\\w)",
+      "(?<!\\w)(?-i:JETI)(?!\\w)",
+      "(?<!\\w)judoor(?!\\w)",
+      "(?<!\\w)jutil(?!\\w)",
+      "(?<!\\w)j(?:ü|ue|u)lich supercomputing cent(?:re|er)(?!\\w)",
+      "(?<!\\w)(?-i:JSC)(?!\\w)",
+      "(?<!\\w)jupiter\\.fz-juelich\\.de(?!\\w)",
+      "apps\\.fz-juelich\\.de/jsc",
+      "(?<!\\w)juwels(?!\\w)",
+      "(?<!\\w)jureca(?!\\w)",
+      "(?<!\\w)stages/20\\d\\d(?!\\w)",
+      "(?<!\\w)jupiter exascale(?!\\w)"
+     ]
+    },
+    {
+     "id": "daedalus_usage",
+     "name": "Daedalus (GRNET, Greece) system & access (pre-operational)",
+     "patterns": [
+      "(?<!\\w)daedalus (?:supercomputer|system|hpc)(?!\\w)",
+      "(?<!\\w)grnet(?!\\w)",
+      "(?<!\\w)aris (?:hpc|supercomputer)(?!\\w)",
+      "(?<!\\w)pharos ai factory(?!\\w)",
+      "(?<!\\w)lavrion(?!\\w)",
+      "(?<!\\w)hpc\\.grnet\\.gr(?!\\w)"
+     ]
+    },
+    {
+     "id": "alice_recoque_usage",
+     "name": "Alice Recoque (Jules Verne / TGCC, France) exascale system (pre-operational); TGCC ccc_* tools",
+     "patterns": [
+      "(?<!\\w)alice recoque(?!\\w)",
+      "(?<!\\w)jules verne (?:consortium|exascale|system|supercomputer)(?!\\w)",
+      "(?<!\\w)tgcc(?!\\w)",
+      "(?<!\\w)genci(?!\\w)",
+      "(?<!\\w)ccc_m(?:sub|prun|pp|del|stat)(?!\\w)",
+      "(?<!\\w)bruy[eè]res-le-ch[aâ]tel(?!\\w)",
+      "(?<!\\w)(?-i:CEA) (?:tgcc|hpc)(?!\\w)"
+     ]
+    }
+   ]
   }
  ],
  "changelog": [
-  "v1.1: broadened mpi_containers (e.g. 'Apptainer and MPI') and cuda_gpu_errors (cudaError*/hipError*/RuntimeError: CUDA) rules after v1 missed obviously relevant page titles; before/after both measured with v1.1"
+  "v1.1: broadened mpi_containers (e.g. 'Apptainer and MPI') and cuda_gpu_errors (cudaError*/hipError*/RuntimeError: CUDA) rules after v1 missed obviously relevant page titles; before/after both measured with v1.1",
+  "v2: 41 leaves from an audit against the HPC Certification Forum skill tree, HPC Carpentry/ENCCS/CodeRefinery lessons, sysadmin topics and the 11 EuroHPC systems (new areas admin, rse, bigdata, emerging, eurohpc_sites); extra patterns for 10 partial leaves; fixed metis and bare PBS patterns"
  ]
 }
