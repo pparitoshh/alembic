@@ -8,6 +8,7 @@ gradient accumulation; logits are computed for the answer positions only (they e
 Writes <run_dir>/adapter and TRAINING_DONE.json; resumes from the newest checkpoint.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -106,7 +107,10 @@ model.enable_input_require_grads()  # LoRA + gradient checkpointing: inputs must
 model = get_peft_model(model, LoraConfig(r=tcfg.lora_r, lora_alpha=tcfg.lora_alpha, lora_dropout=tcfg.lora_dropout,
                                          target_modules='all-linear', task_type='CAUSAL_LM'))
 world = max(1, torch.cuda.device_count())
-args = TrainingArguments(
+# FSDP=1 (opt-in, GOAL.md G11): fully sharded data parallel over all GPUs of the job instead of DDP.
+fsdp_kw = dict(fsdp='full_shard auto_wrap', fsdp_config={'transformer_layer_cls_to_wrap': ['Qwen3DecoderLayer'],
+                                                          'use_orig_params': True}) if os.environ.get('FSDP') == '1' else {}
+args = TrainingArguments(**fsdp_kw,
     output_dir=str(run_dir / 'checkpoints'), num_train_epochs=tcfg.epochs,
     per_device_train_batch_size=1, gradient_accumulation_steps=16 // world,  # global batch 16, as SFT
     learning_rate=tcfg.learning_rate, lr_scheduler_type='cosine', warmup_steps=0.03, bf16=True,
