@@ -1,6 +1,6 @@
 #!/bin/bash
 # Automatic release decision and build after vs_release.sh RD: a seed of round RD becomes the release candidate when,
-# against the current release (12e), v3 improves significantly (p < 0.05) under the 2-of-3 majority vote of three judges
+# against the current release (ctl/RELEASE), v3 improves significantly (p < 0.05) under the 2-of-3 majority vote of three judges
 # and its mean over v3/v2/d1 is not worse (no single judge worse by more than 0.01); without the third judge, the
 # earlier rule: v3 better under both judges, significant under one, mean not worse under either. The best such arm is merged, exported (bf16 / Q8_0 / Q4_K_M),
 # given an imatrix Q4_K_M, its quantized files are evaluated against it, and runs/hf_<RD>/ is staged with READY.
@@ -18,10 +18,10 @@ import json
 g = json.load(open('$V/PAIRED.json')); m = json.load(open('$V/PAIRED_gemma.json'))
 import os
 maj = json.load(open('$V/PAIRED_majority.json')) if os.path.exists('$V/PAIRED_majority.json') else None
-arms = sorted({k.split('/', 1)[1].split('-vs-')[0] for k in g if k.endswith('-vs-rel12e_rag')})
+arms = sorted({k.split('/', 1)[1].split('-vs-')[0] for k in g if k.endswith('-vs-rel_rag')})
 best = None
 for a in arms:
-    d = lambda P, l: P.get(f'{l}/{a}-vs-rel12e_rag')
+    d = lambda P, l: P.get(f'{l}/{a}-vs-rel_rag')
     v3g, v3m = d(g, 'v3'), d(m, 'v3')
     if not v3g or not v3m:
         continue
@@ -40,7 +40,7 @@ PY
 )
 log "decision:"; echo "$decision" >> $LOG
 arm=$(echo "$decision" | grep '^WIN ' | cut -d' ' -f2)
-[ -n "$arm" ] || { log "NOWIN: the release stays 12e"; exit 0; }
+[ -n "$arm" ] || { log "NOWIN: the release stays as in ctl/RELEASE"; exit 0; }
 seed=$(echo $arm | sed -E 's/^s([0-9]+).*/\1/'); x05=$(echo $arm | grep -q '_x05_' && echo _x05 || echo '')
 adapter=runs/$RD/train/seed$seed/adapter$x05
 base=$(grep -m1 '^MERGED=' $R/ctl/$RD/controller.sh | sed -E 's/^MERGED=([^ ]*).*/\1/' | sed "s#\$C#$C#")
@@ -88,7 +88,7 @@ for f in config.json generation_config.json tokenizer.json tokenizer_config.json
 ln -sf $C/$G/merged/model.safetensors $H/model.safetensors
 ln -sf $C/$G/model-Q4_K_M-imat.gguf $H/gguf/hpc-assistant-qwen3-4b-Q4_K_M.gguf
 ln -sf $C/$G/model-Q8_0.gguf $H/gguf/hpc-assistant-qwen3-4b-Q8_0.gguf
-cp runs/$RD/RESULT.json $H/eval_RESULT.json; cp $V/PAIRED.json $H/eval_PAIRED_vs_previous.json; cp $V/PAIRED_gemma.json $H/eval_PAIRED_gemma_judge.json
+{ cp runs/$RD/RESULT.json $H/eval_RESULT.json 2>/dev/null || $VPY research/rag65/aggregate.py $V/judged $V/answers $H/eval_RESULT.json > /dev/null 2>&1; }; cp $V/PAIRED.json $H/eval_PAIRED_vs_previous.json; cp $V/PAIRED_gemma.json $H/eval_PAIRED_gemma_judge.json
 cp $E/PAIRED.json $H/gguf/eval_PAIRED_gguf.json
 cp runs/hf_r12e/gguf/Modelfile $H/gguf/Modelfile 2>/dev/null
 echo "$RD $arm" > $H/READY
