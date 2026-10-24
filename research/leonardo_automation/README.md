@@ -14,3 +14,17 @@ These controllers run unattended on the Leonardo login node. They chain data gen
 `dryrun.sh` exercises the merge and the round-4/5 data builders on the current shards, writing to a separate release directory.
 
 Every stage resumes from files. Factory controllers keep in-flight job ids in `inflight/` and forget a job only when sacct reports a final state. Round controllers adopt a running job instead of submitting a duplicate.
+
+## Checks and experiments (`checks/`, Oct 20–24)
+
+Single-file controllers that live directly in `$R/ctl/` on the server. Each one judges, confirms or prepares one result
+and logs to `ctl/<name>.log`.
+
+| Group | Scripts | What they do |
+|---|---|---|
+| Release gates | `vs_release.sh`, `auto_release.sh`, `vs_newret.sh` | A round against the current release (`ctl/RELEASE`) in one 3-judge run plus majority, with the default retriever (`vs_release`) or both on the improved retriever (`vs_newret`) |
+| Confirmations | `confirm_op235.sh`, `confirm_soup27.sh`, `lb_confirm.sh`, `kd_gemma.sh`, `r11_gemma.sh` | The same answers judged again in a fresh run, against judge noise and the winner's curse |
+| Leaderboard | `lb_add_r20.sh`, `lb_add_r27.sh`, `lb_b768.sh`, `lb_newsearch.sh`, `lb_newsearch_full.sh` | Adding releases, the equal 768-token budget (Leaderboard A) and the improved-retriever run (Leaderboard B) |
+| Soups | `soup32.sh`, `soup32old.sh`, `soup38.sh`, `soup42.sh`, `soup43.sh` | Uniform weight soups of seed adapters merged into round 27 or 20, answered for the gates |
+| Laptop files | `gguf_soup27_eval.sh`, `gguf_q56_eval.sh`, `gguf_s17_eval.sh`, `release43.sh` | GGUF quantization checks (Q4_K_M to Q8_0, 1.7B vs 4B) and release preparation |
+| GOAL.md studies | `vs_ablation.sh`, `rs37_score.sh`, `ragc.sh` | Filtering and curriculum ablations, teacher scoring for round 37, retriever variant c |
