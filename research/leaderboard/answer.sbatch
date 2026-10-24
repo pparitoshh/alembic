@@ -20,8 +20,15 @@ srun --kill-on-bad-exit=0 --output="$L/lb-answer-%j.out" --error="$L/lb-answer-%
     for spec in ${MODELS:?}; do
         arm=${spec%%=*}; rest=${spec#*=}; model=${rest%%:*}; tp=$(echo $rest | cut -d: -f2); think=$(echo $rest | cut -d: -f3)
         if [ "$tp" = 1 ]; then devs=$gpu; else devs=0,1,2,3; fi
+        src="$model"
+        if [ "$tp" = 4 ]; then  # big checkpoints: parallel copy into node RAM first; loading from Lustre can exceed the 30 min limit
+            SNAP=$(ls -d "$HF_HOME"/hub/models--${model//\//--}/snapshots/* | head -1)
+            src=/dev/shm/lb-$arm-$SLURM_JOB_ID; mkdir -p $src
+            for f in "$SNAP"/*; do cp -rL "$f" $src/ & done; wait
+            trap "rm -rf /dev/shm/lb-*-$SLURM_JOB_ID" EXIT
+        fi
         ( export CUDA_VISIBLE_DEVICES=$devs
-          start_vllm "$model" $((P + gpu * 4)) --tensor-parallel-size $tp --max-model-len 16384 --gpu-memory-utilization 0.88 --served-model-name $arm
+          start_vllm "$src" $((P + gpu * 4)) --tensor-parallel-size $tp --max-model-len 16384 --gpu-memory-utilization 0.88 --served-model-name $arm
           "$VENV/bin/python" research/teacher_probe/answer_teacher.py $arm "http://127.0.0.1:$((P + gpu * 4))/v1" $arm "${OUT:?}" $think rag ) &
         gpu=$((gpu + 1))
     done

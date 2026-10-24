@@ -29,7 +29,8 @@ answer)
             --enable-lora --max-lora-rank 64 --max-loras 5 \
             --lora-modules $(IFS=,; for v in $VARIANTS; do echo "s$s$v=$T/seed$s/adapter$v"; done)
     else
-        start_vllm "${BASE_MODEL:-Qwen/Qwen3-4B-Instruct-2507}" "$PORT" --dtype bfloat16 --max-model-len 16384 --gpu-memory-utilization 0.85
+        # BASE_SERVED (opt-in): name a merged base model as answer.py expects (round 27 soup answered as a plain model).
+        start_vllm "${BASE_MODEL:-Qwen/Qwen3-4B-Instruct-2507}" "$PORT" --dtype bfloat16 --max-model-len 16384 --gpu-memory-utilization 0.85 ${BASE_SERVED:+--served-model-name $BASE_SERVED}
     fi
     "$VENV/bin/python" research/rag65/answer.py "$W" "http://127.0.0.1:$PORT/v1" "runs/$RUN/answers" ;;
 judge)
