@@ -11,6 +11,12 @@ which raised round 27's Slurm (v3) win rate from about 0.82 to 0.879. Its prompt
 tokens) per question, so with chat history it asks Ollama for a 16K context (a llama-server needs `-c 16384`); on a
 CPU-only laptop the first token takes longer. `--retriever classic` gives the original 3 excerpts.
 
+`--retriever d` (opt-in) adds up to 3 excerpts from a general HPC documentation index (general_docs.sqlite next to
+the built-in index, or `--general-index PATH`; built with research/rag65/build_general_index.py from documentation you
+have downloaded) to questions that name neither Slurm, a Slurm command nor LUMI/CINECA (RAG_VARIANT=d). With round 27
+and the project's full crawl it raised the GPU/MPI win rate (d1) by 0.073 under the 3-judge majority, with the Slurm
+sets level. The index is not distributed: the gain came from vendor documentation that may not be redistributed.
+
 Users can add their own manuals (PDF, Markdown, text, HTML) to a local user index; their excerpts are
 searched alongside the built-in documentation. The chat keeps its history. With `--tools`, the model can also
 call the retriever itself through a `search_docs` tool for follow-up lookups; this is off by default because the
@@ -318,16 +324,20 @@ SEARCH_TOOL = {'type': 'function', 'function': {
 
 class Assistant:
     def __init__(self, index_dir=DEFAULT_INDEX, docs=True, k=3, model='hpc-assistant', openai=None,
-                 ollama='http://localhost:11434', tools=False, retriever='b'):
-        if retriever not in ('b', 'classic'):
-            raise ValueError("retriever must be 'b' or 'classic'")
+                 ollama='http://localhost:11434', tools=False, retriever='b', general_index=None):
+        if retriever not in ('b', 'd', 'classic'):
+            raise ValueError("retriever must be 'b', 'd' or 'classic'")
         index_dir = Path(index_dir)
         self.pilot, self.factory = index_dir / 'documents.sqlite', index_dir / 'factory_docs.sqlite'
+        self.general = Path(general_index) if general_index else index_dir / 'general_docs.sqlite'
+        if retriever == 'd' and not self.general.exists():
+            print(f'[hpc-assistant] no general index at {self.general}; using retriever b', file=sys.stderr)
+            retriever = 'b'
         self.user_db = index_dir / 'user_docs.sqlite'
         self.builtin = self.pilot.exists() and self.factory.exists()
         self.docs = docs
         self.k, self.model, self.openai, self.ollama, self.tools = k, model, openai, ollama, tools
-        self.retriever = retriever  # 'b' (default): the improved retriever; 'classic': the original 3 excerpts
+        self.retriever = retriever  # 'b' (default): improved; 'd': b + general index; 'classic': the original 3
         self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         self.titles = {}  # source url -> page title, for the Sources list
 
@@ -369,8 +379,8 @@ class Assistant:
                               (query, k - 1 if self.builtin else k)).fetchall()
             db.close()
             found = [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
-        if self.builtin and self.retriever == 'b':
-            found += retrieve(question, self.pilot, self.factory, variant='b')
+        if self.builtin and self.retriever in ('b', 'd'):
+            found += retrieve(question, self.pilot, self.factory, variant=self.retriever, general_db=self.general)
             kept, used = [], 0  # the same 40,000-character excerpt budget as the evaluation, manuals first
             for d in found:
                 if used + len(d['text']) <= VARIANT_BUDGET:
@@ -402,7 +412,7 @@ class Assistant:
             url = self.ollama.rstrip('/') + '/api/chat'
             # The improved retriever's prompts are ~6K tokens per question, so a chat with history outgrows the
             # Modelfile's 8192 and Ollama silently drops the start of the prompt: use the evaluation's 16384.
-            opts = {'temperature': 0, **({'num_ctx': 16384} if self.retriever == 'b' and self.docs else {})}
+            opts = {'temperature': 0, **({'num_ctx': 16384} if self.retriever in ('b', 'd') and self.docs else {})}
             body = {'model': self.model, 'messages': messages, 'stream': True, 'options': opts}
         if tools:
             body['tools'] = tools
@@ -504,9 +514,12 @@ def main(argv=None):
     ap.add_argument('--index', default=DEFAULT_INDEX, help='directory with documents.sqlite and factory_docs.sqlite')
     ap.add_argument('--model', default='hpc-assistant')
     ap.add_argument('--openai', help='OpenAI-compatible base URL (e.g. llama-server) instead of Ollama')
-    ap.add_argument('--retriever', choices=['b', 'classic'], default='b',
+    ap.add_argument('--retriever', choices=['b', 'd', 'classic'], default='b',
                     help='b (default): improved retriever, up to 8 excerpts, needs a 16K context (llama-server: -c '
-                         '16384); classic: the original 3 excerpts, shorter prompts, faster on CPU')
+                         '16384); d: b plus a general HPC documentation index for non-Slurm questions; classic: the '
+                         'original 3 excerpts, shorter prompts, faster on CPU')
+    ap.add_argument('--general-index', metavar='SQLITE',
+                    help='general documentation index for --retriever d (default: general_docs.sqlite in --index)')
     ap.add_argument('--k', type=int, default=3,
                     help='classic retriever: excerpts per question (the model was trained with 3); b: max manual excerpts + 1')
     ap.add_argument('--add', action='append', default=[], metavar='FILE', help='index a manual (PDF, md, txt, html)')
@@ -520,7 +533,8 @@ def main(argv=None):
         setup(Path(args.index), args.model)
         return
     bot = Assistant(args.index, docs=not args.no_docs, k=args.k, model=args.model, openai=args.openai,
-                    tools=args.tools, retriever=args.retriever)
+                    tools=args.tools, retriever=args.retriever,
+                    general_index=args.general_index)
     for f in args.add:
         print(f'[hpc-assistant] indexed {f}: {bot.add(f)} excerpts', file=sys.stderr)
     if not args.no_docs and not bot.builtin:

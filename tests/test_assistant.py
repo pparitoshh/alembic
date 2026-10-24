@@ -86,6 +86,16 @@ def test_general_retrievers_match_eval_retriever(tmp_path, monkeypatch):
                    for d in assistant.retrieve(qs[2], p, f, variant='d'))
 
 
+def test_retriever_d_uses_general_index_and_falls_back_without_it(tmp_path):
+    idx = _indexes(tmp_path)
+    q = 'How do I profile a CUDA kernel with Nsight?'
+    assert assistant.Assistant(idx, retriever='d').retriever == 'b'  # no general index yet
+    _general_index(idx)
+    bot = assistant.Assistant(idx, retriever='d')
+    assert bot.retriever == 'd' and bot.search(q) == assistant.retrieve(q, idx / 'documents.sqlite',
+                                                                         idx / 'factory_docs.sqlite', variant='d')
+
+
 def test_improved_retriever_is_default_and_asks_ollama_for_16k_context(tmp_path, monkeypatch):
     idx = _indexes(tmp_path)
     p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
