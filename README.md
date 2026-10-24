@@ -22,6 +22,8 @@ uv run distillkit bench    -c configs/tools_pilot.yaml   # laptop speed, peak RA
 uv run pytest -q
 ```
 
+To use another teacher, student or domain, see [docs/BRING_YOUR_OWN.md](docs/BRING_YOUR_OWN.md).
+
 | Config | Use |
 |---|---|
 | `configs/tools_pilot.yaml` | small live pilot: prose + tool traces from the toy teacher API, Qwen3-0.6B student |
