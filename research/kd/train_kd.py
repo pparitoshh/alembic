@@ -90,6 +90,14 @@ class KDTrainer(Trainer):
             loss = (1 - alpha) * ce + alpha * soft
         return (loss, out) if return_outputs else loss
 
+    def _get_train_sampler(self, *args, **kwargs):
+        # CURRICULUM=1 (opt-in, GOAL.md G14): keep the data file's order (sorted easy -> hard) instead of shuffling.
+        import os
+        if os.environ.get('CURRICULUM') == '1':
+            from torch.utils.data import SequentialSampler
+            return SequentialSampler(self.train_dataset)
+        return super()._get_train_sampler(*args, **kwargs)
+
 
 ds = KDData(run_dir / 'verified.jsonl')
 print(f'[kd] {len(ds)} rows with teacher distributions (alpha={alpha}), student={cfg.student.model}', flush=True)
