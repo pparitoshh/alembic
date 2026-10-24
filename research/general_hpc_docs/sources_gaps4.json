@@ -1,0 +1,1111 @@
+[
+ {
+  "id": "g4_apps_fz_juelich_de",
+  "topic": "gap4",
+  "leaves": [
+   "jupiter_usage"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-NC-SA-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://apps.fz-juelich.de/jsc/hps/jupiter/index.html",
+   "https://apps.fz-juelich.de/jsc/hps/jureca/index.html"
+  ],
+  "prefixes": [
+   "https://apps.fz-juelich.de/jsc/hps/jupiter/index.html",
+   "https://apps.fz-juelich.de/jsc/hps/jureca/index.html"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g4_book_the_turing_way_org",
+  "topic": "gap4",
+  "leaves": [
+   "reproducibility_rdm_fair",
+   "software_practices_docs_licensing"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://book.the-turing-way.org/reproducible-research/rdm"
+  ],
+  "prefixes": [
+   "https://book.the-turing-way.org/reproducible-research/rdm"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_carpentries_incubator_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "hpc_benchmarks",
+   "parallel_algorithms_decomposition",
+   "process_job_control",
+   "remote_ide_dev",
+   "reproducibility_rdm_fair",
+   "software_practices_docs_licensing",
+   "testing_ci_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://carpentries-incubator.github.io/byte-sized-rse-testing/",
+   "https://carpentries-incubator.github.io/byte-sized-rse-ci/",
+   "https://carpentries-incubator.github.io/better-research-software/",
+   "https://carpentries-incubator.github.io/FAIR-research-data-coursebook/",
+   "https://carpentries-incubator.github.io/hpc-workflows-jube/",
+   "https://carpentries-incubator.github.io/lesson-parallel-python/",
+   "https://carpentries-incubator.github.io/byte-sized-rse-vscode/",
+   "https://carpentries-incubator.github.io/shell-extras/06-job-control/index.html"
+  ],
+  "prefixes": [
+   "https://carpentries-incubator.github.io/byte-sized-rse-testing/",
+   "https://carpentries-incubator.github.io/byte-sized-rse-ci/",
+   "https://carpentries-incubator.github.io/better-research-software/",
+   "https://carpentries-incubator.github.io/FAIR-research-data-coursebook/",
+   "https://carpentries-incubator.github.io/hpc-workflows-jube/",
+   "https://carpentries-incubator.github.io/lesson-parallel-python/",
+   "https://carpentries-incubator.github.io/byte-sized-rse-vscode/",
+   "https://carpentries-incubator.github.io/shell-extras/06-job-control/index.html"
+  ],
+  "max_pages": 24
+ },
+ {
+  "id": "g4_clustershell_readthedocs_io",
+  "topic": "gap4",
+  "leaves": [
+   "config_mgmt_parallel_shell"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://clustershell.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://clustershell.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_code_mpimet_mpg_de",
+  "topic": "gap4",
+  "leaves": [
+   "postprocessing_analysis_tools"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://code.mpimet.mpg.de/projects/cdo/wiki"
+  ],
+  "prefixes": [
+   "https://code.mpimet.mpg.de/projects/cdo/wiki"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_code_visualstudio_com",
+  "topic": "gap4",
+  "leaves": [
+   "remote_ide_dev"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-3.0-US",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://code.visualstudio.com/docs/remote/ssh"
+  ],
+  "prefixes": [
+   "https://code.visualstudio.com/docs/remote/ssh"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_coderefinery_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "reproducibility_rdm_fair",
+   "software_practices_docs_licensing",
+   "testing_ci_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://coderefinery.github.io/testing/",
+   "https://coderefinery.github.io/documentation/",
+   "https://coderefinery.github.io/social-coding/",
+   "https://coderefinery.github.io/reproducible-research/"
+  ],
+  "prefixes": [
+   "https://coderefinery.github.io/testing/",
+   "https://coderefinery.github.io/documentation/",
+   "https://coderefinery.github.io/social-coding/",
+   "https://coderefinery.github.io/reproducible-research/"
+  ],
+  "max_pages": 12
+ },
+ {
+  "id": "g4_csrc_nist_gov",
+  "topic": "gap4",
+  "leaves": [
+   "security_hardening_ops"
+  ],
+  "kind": "technical_documentation",
+  "license": "Public domain (US Government work)",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://csrc.nist.gov/pubs/sp/800/223/final",
+   "https://csrc.nist.gov/pubs/sp/800/234/final"
+  ],
+  "prefixes": [
+   "https://csrc.nist.gov/pubs/sp/800/223/final",
+   "https://csrc.nist.gov/pubs/sp/800/234/final"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g4_doc_lustre_org",
+  "topic": "gap4",
+  "leaves": [
+   "storage_server_admin"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-3.0-US",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://doc.lustre.org/lustre_manual.xhtml"
+  ],
+  "prefixes": [
+   "https://doc.lustre.org/lustre_manual.xhtml"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_docs_ansible_com",
+  "topic": "gap4",
+  "leaves": [
+   "config_mgmt_parallel_shell"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-3.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.ansible.com/ansible/latest/getting_started/index.html"
+  ],
+  "prefixes": [
+   "https://docs.ansible.com/ansible/latest/getting_started/index.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_docs_csc_fi",
+  "topic": "gap4",
+  "leaves": [
+   "federated_identity_portals",
+   "remote_ide_dev"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.csc.fi/support/tutorials/remote-dev/",
+   "https://docs.csc.fi/accounts/how-to-create-new-user-account/"
+  ],
+  "prefixes": [
+   "https://docs.csc.fi/support/tutorials/remote-dev/",
+   "https://docs.csc.fi/accounts/how-to-create-new-user-account/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g4_docs_kernel_org",
+  "topic": "gap4",
+  "leaves": [
+   "linux_sysadmin_services"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.kernel.org/admin-guide/mm/hugetlbpage.html",
+   "https://docs.kernel.org/admin-guide/mm/transhuge.html"
+  ],
+  "prefixes": [
+   "https://docs.kernel.org/admin-guide/mm/hugetlbpage.html",
+   "https://docs.kernel.org/admin-guide/mm/transhuge.html"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g4_docs_llamaindex_ai",
+  "topic": "gap4",
+  "leaves": [
+   "rag_agents_ai_services"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.llamaindex.ai/en/stable/"
+  ],
+  "prefixes": [
+   "https://docs.llamaindex.ai/en/stable/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_docs_lumi_supercomputer_eu",
+  "topic": "gap4",
+  "leaves": [
+   "federated_identity_portals",
+   "lumi_usage"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.lumi-supercomputer.eu/firststeps/accessLUMI/",
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/partitions/",
+   "https://docs.lumi-supercomputer.eu/development/compiling/prgenv/"
+  ],
+  "prefixes": [
+   "https://docs.lumi-supercomputer.eu/firststeps/accessLUMI/",
+   "https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/partitions/",
+   "https://docs.lumi-supercomputer.eu/development/compiling/prgenv/"
+  ],
+  "max_pages": 9
+ },
+ {
+  "id": "g4_docs_nersc_gov",
+  "topic": "gap4",
+  "leaves": [
+   "remote_ide_dev"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/connect/vscode/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/connect/vscode/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_docs_pytorch_org",
+  "topic": "gap4",
+  "leaves": [
+   "numerical_reproducibility"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.pytorch.org/docs/2.14/notes/randomness.html"
+  ],
+  "prefixes": [
+   "https://docs.pytorch.org/docs/2.14/notes/randomness.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_docs_rockylinux_org",
+  "topic": "gap4",
+  "leaves": [
+   "linux_sysadmin_services",
+   "process_job_control",
+   "security_hardening_ops"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.rockylinux.org/books/admin_guide/00-toc/",
+   "https://docs.rockylinux.org/books/admin_guide/08-process/",
+   "https://docs.rockylinux.org/guides/security/firewalld/",
+   "https://docs.rockylinux.org/guides/security/learning_selinux/"
+  ],
+  "prefixes": [
+   "https://docs.rockylinux.org/books/admin_guide/00-toc/",
+   "https://docs.rockylinux.org/books/admin_guide/08-process/",
+   "https://docs.rockylinux.org/guides/security/firewalld/",
+   "https://docs.rockylinux.org/guides/security/learning_selinux/"
+  ],
+  "max_pages": 12
+ },
+ {
+  "id": "g4_docs_xarray_dev",
+  "topic": "gap4",
+  "leaves": [
+   "postprocessing_analysis_tools"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://docs.xarray.dev/en/stable/"
+  ],
+  "prefixes": [
+   "https://docs.xarray.dev/en/stable/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_ecp_ci_gitlab_io",
+  "topic": "gap4",
+  "leaves": [
+   "testing_ci_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 OR MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://ecp-ci.gitlab.io/"
+  ],
+  "prefixes": [
+   "https://ecp-ci.gitlab.io/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_en_wikipedia_org",
+  "topic": "gap4",
+  "leaves": [
+   "alice_recoque_usage",
+   "cluster_provisioning",
+   "daedalus_usage",
+   "datacenter_facilities_tco",
+   "deucalion_usage",
+   "fpga_riscv_other_arch",
+   "hpc_benchmarks",
+   "identity_auth_admin",
+   "jupiter_usage",
+   "leonardo_usage",
+   "lumi_usage",
+   "marenostrum5_usage",
+   "node_health_bmc",
+   "numerical_reproducibility",
+   "parallel_algorithms_decomposition",
+   "process_job_control",
+   "serial_code_optimisation",
+   "storage_server_admin"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://en.wikipedia.org/wiki/Preboot_Execution_Environment",
+   "https://en.wikipedia.org/wiki/Intelligent_Platform_Management_Interface",
+   "https://en.wikipedia.org/wiki/Redfish_(specification)",
+   "https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol",
+   "https://en.wikipedia.org/wiki/RAID",
+   "https://en.wikipedia.org/wiki/Power_usage_effectiveness",
+   "https://en.wikipedia.org/wiki/Data_center",
+   "https://en.wikipedia.org/wiki/Computer_cooling",
+   "https://en.wikipedia.org/wiki/Total_cost_of_ownership",
+   "https://en.wikipedia.org/wiki/TOP500",
+   "https://en.wikipedia.org/wiki/LINPACK_benchmarks",
+   "https://en.wikipedia.org/wiki/Loop_nest_optimization",
+   "https://en.wikipedia.org/wiki/AoS_and_SoA",
+   "https://en.wikipedia.org/wiki/False_sharing",
+   "https://en.wikipedia.org/wiki/Domain_decomposition_methods",
+   "https://en.wikipedia.org/wiki/Load_balancing_(computing)",
+   "https://en.wikipedia.org/wiki/IEEE_754",
+   "https://en.wikipedia.org/wiki/Floating-point_arithmetic",
+   "https://en.wikipedia.org/wiki/Field-programmable_gate_array",
+   "https://en.wikipedia.org/wiki/RISC-V",
+   "https://en.wikipedia.org/wiki/Fujitsu_A64FX",
+   "https://en.wikipedia.org/wiki/Signal_(IPC)",
+   "https://en.wikipedia.org/wiki/LUMI",
+   "https://en.wikipedia.org/wiki/Leonardo_(supercomputer)",
+   "https://en.wikipedia.org/wiki/MareNostrum",
+   "https://en.wikipedia.org/wiki/Deucalion_(supercomputer)",
+   "https://en.wikipedia.org/wiki/Jupiter_(supercomputer)",
+   "https://en.wikipedia.org/wiki/European_High-Performance_Computing_Joint_Undertaking",
+   "https://en.wikipedia.org/wiki/Alice_Recoque"
+  ],
+  "prefixes": [
+   "https://en.wikipedia.org/wiki/Preboot_Execution_Environment",
+   "https://en.wikipedia.org/wiki/Intelligent_Platform_Management_Interface",
+   "https://en.wikipedia.org/wiki/Redfish_(specification)",
+   "https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol",
+   "https://en.wikipedia.org/wiki/RAID",
+   "https://en.wikipedia.org/wiki/Power_usage_effectiveness",
+   "https://en.wikipedia.org/wiki/Data_center",
+   "https://en.wikipedia.org/wiki/Computer_cooling",
+   "https://en.wikipedia.org/wiki/Total_cost_of_ownership",
+   "https://en.wikipedia.org/wiki/TOP500",
+   "https://en.wikipedia.org/wiki/LINPACK_benchmarks",
+   "https://en.wikipedia.org/wiki/Loop_nest_optimization",
+   "https://en.wikipedia.org/wiki/AoS_and_SoA",
+   "https://en.wikipedia.org/wiki/False_sharing",
+   "https://en.wikipedia.org/wiki/Domain_decomposition_methods",
+   "https://en.wikipedia.org/wiki/Load_balancing_(computing)",
+   "https://en.wikipedia.org/wiki/IEEE_754",
+   "https://en.wikipedia.org/wiki/Floating-point_arithmetic",
+   "https://en.wikipedia.org/wiki/Field-programmable_gate_array",
+   "https://en.wikipedia.org/wiki/RISC-V",
+   "https://en.wikipedia.org/wiki/Fujitsu_A64FX",
+   "https://en.wikipedia.org/wiki/Signal_(IPC)",
+   "https://en.wikipedia.org/wiki/LUMI",
+   "https://en.wikipedia.org/wiki/Leonardo_(supercomputer)",
+   "https://en.wikipedia.org/wiki/MareNostrum",
+   "https://en.wikipedia.org/wiki/Deucalion_(supercomputer)",
+   "https://en.wikipedia.org/wiki/Jupiter_(supercomputer)",
+   "https://en.wikipedia.org/wiki/European_High-Performance_Computing_Joint_Undertaking",
+   "https://en.wikipedia.org/wiki/Alice_Recoque"
+  ],
+  "max_pages": 87
+ },
+ {
+  "id": "g4_enccs_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "alice_recoque_usage",
+   "daedalus_usage",
+   "deucalion_usage",
+   "discoverer_usage",
+   "eessi_cvmfs",
+   "federated_identity_portals",
+   "jupiter_usage",
+   "karolina_usage",
+   "leonardo_usage",
+   "lumi_usage",
+   "marenostrum5_usage",
+   "meluxina_usage",
+   "parallel_algorithms_decomposition",
+   "postprocessing_analysis_tools",
+   "quantum_hpc",
+   "scientific_ml",
+   "serial_code_optimisation",
+   "spark_hadoop_hpc",
+   "vega_usage"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 / CC-BY-SA-4.0 / MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://enccs.github.io/webinar_software_install_hpc/",
+   "https://enccs.github.io/performance-programming/",
+   "https://enccs.github.io/intermediate-mpi/",
+   "https://enccs.github.io/hpda-python/",
+   "https://enccs.github.io/gnn-transformers/",
+   "https://enccs.github.io/eurohpc-quantum-devices-access-hpcqc/",
+   "https://enccs.github.io/qas2025/",
+   "https://enccs.github.io/ju-systems-applications-procedures/",
+   "https://enccs.github.io/port-to-lumi/"
+  ],
+  "prefixes": [
+   "https://enccs.github.io/webinar_software_install_hpc/",
+   "https://enccs.github.io/performance-programming/",
+   "https://enccs.github.io/intermediate-mpi/",
+   "https://enccs.github.io/hpda-python/",
+   "https://enccs.github.io/gnn-transformers/",
+   "https://enccs.github.io/eurohpc-quantum-devices-access-hpcqc/",
+   "https://enccs.github.io/qas2025/",
+   "https://enccs.github.io/ju-systems-applications-procedures/",
+   "https://enccs.github.io/port-to-lumi/"
+  ],
+  "max_pages": 27
+ },
+ {
+  "id": "g4_github_com",
+  "topic": "gap4",
+  "leaves": [
+   "cluster_provisioning",
+   "config_mgmt_parallel_shell",
+   "data_compression_reduction",
+   "fabric_network_admin",
+   "fpga_riscv_other_arch",
+   "hpc_benchmarks",
+   "monitoring_telemetry",
+   "node_health_bmc",
+   "rag_agents_ai_services",
+   "scientific_ml",
+   "slurm_admin_config",
+   "spark_hadoop_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 / BSD-3-Clause / BSD-3-Clause (LBNL) / BSD-style / GPL-2.0 / GPL-2.0 OR BSD / GPL-2.0 OR BSD-MIT / GPL-3.0 / MIT / MIT (repo; wiki pages not explicitly licensed - flag)",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://github.com/openhpc/ohpc",
+   "https://github.com/chaos/pdsh",
+   "https://github.com/prometheus/node_exporter",
+   "https://github.com/NVIDIA/dcgm-exporter",
+   "https://github.com/FZJ-JSC/LLview",
+   "https://github.com/mej/nhc",
+   "https://github.com/ipmitool/ipmitool",
+   "https://github.com/linux-rdma/opensm",
+   "https://github.com/linux-rdma/rdma-core",
+   "https://github.com/hpcg-benchmark/hpcg",
+   "https://github.com/szcompressor/SZ3",
+   "https://github.com/CODARcode/MGARD",
+   "https://github.com/oap-project/raydp",
+   "https://github.com/OphidiaBigData/ophidia-server",
+   "https://github.com/facebookresearch/faiss/wiki",
+   "https://github.com/NVIDIA/physicsnemo",
+   "https://github.com/ecmwf-lab/ai-models",
+   "https://github.com/Xilinx/Vitis-Tutorials"
+  ],
+  "prefixes": [
+   "https://github.com/openhpc/ohpc",
+   "https://github.com/chaos/pdsh",
+   "https://github.com/prometheus/node_exporter",
+   "https://github.com/NVIDIA/dcgm-exporter",
+   "https://github.com/FZJ-JSC/LLview",
+   "https://github.com/mej/nhc",
+   "https://github.com/ipmitool/ipmitool",
+   "https://github.com/linux-rdma/opensm",
+   "https://github.com/linux-rdma/rdma-core",
+   "https://github.com/hpcg-benchmark/hpcg",
+   "https://github.com/szcompressor/SZ3",
+   "https://github.com/CODARcode/MGARD",
+   "https://github.com/oap-project/raydp",
+   "https://github.com/OphidiaBigData/ophidia-server",
+   "https://github.com/facebookresearch/faiss/wiki",
+   "https://github.com/NVIDIA/physicsnemo",
+   "https://github.com/ecmwf-lab/ai-models",
+   "https://github.com/Xilinx/Vitis-Tutorials"
+  ],
+  "max_pages": 54
+ },
+ {
+  "id": "g4_hadoop_apache_org",
+  "topic": "gap4",
+  "leaves": [
+   "spark_hadoop_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://hadoop.apache.org/docs/stable/"
+  ],
+  "prefixes": [
+   "https://hadoop.apache.org/docs/stable/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_hpc_carpentry_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "parallel_algorithms_decomposition"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://hpc-carpentry.github.io/hpc-parallel-novice/"
+  ],
+  "prefixes": [
+   "https://hpc-carpentry.github.io/hpc-parallel-novice/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_huggingface_co",
+  "topic": "gap4",
+  "leaves": [
+   "rag_agents_ai_services"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://huggingface.co/learn/cookbook/en/rag_zephyr_langchain"
+  ],
+  "prefixes": [
+   "https://huggingface.co/learn/cookbook/en/rag_zephyr_langchain"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_ior_readthedocs_io",
+  "topic": "gap4",
+  "leaves": [
+   "hpc_benchmarks"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://ior.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://ior.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_lumi_supercomputer_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "lumi_usage"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://lumi-supercomputer.github.io/LUMI-training-materials/"
+  ],
+  "prefixes": [
+   "https://lumi-supercomputer.github.io/LUMI-training-materials/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_neuraloperator_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "scientific_ml"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://neuraloperator.github.io/dev/index.html"
+  ],
+  "prefixes": [
+   "https://neuraloperator.github.io/dev/index.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_nvidia_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "quantum_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://nvidia.github.io/cuda-quantum/latest/index.html"
+  ],
+  "prefixes": [
+   "https://nvidia.github.io/cuda-quantum/latest/index.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_open_xdmod_org",
+  "topic": "gap4",
+  "leaves": [
+   "monitoring_telemetry"
+  ],
+  "kind": "technical_documentation",
+  "license": "LGPL-3.0 (not in accepted list - flag)",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://open.xdmod.org/11.0/index.html"
+  ],
+  "prefixes": [
+   "https://open.xdmod.org/11.0/index.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_openzfs_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "storage_server_admin"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-3.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://openzfs.github.io/openzfs-docs/"
+  ],
+  "prefixes": [
+   "https://openzfs.github.io/openzfs-docs/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_pennylane_ai",
+  "topic": "gap4",
+  "leaves": [
+   "quantum_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://pennylane.ai/qml/"
+  ],
+  "prefixes": [
+   "https://pennylane.ai/qml/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_prometheus_io",
+  "topic": "gap4",
+  "leaves": [
+   "monitoring_telemetry"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://prometheus.io/docs/introduction/overview/"
+  ],
+  "prefixes": [
+   "https://prometheus.io/docs/introduction/overview/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_python_langchain_com",
+  "topic": "gap4",
+  "leaves": [
+   "rag_agents_ai_services"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://python.langchain.com/docs/tutorials/rag/"
+  ],
+  "prefixes": [
+   "https://python.langchain.com/docs/tutorials/rag/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_pytorch_geometric_readthedocs_io",
+  "topic": "gap4",
+  "leaves": [
+   "scientific_ml"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://pytorch-geometric.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://pytorch-geometric.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_quantum_cloud_ibm_com",
+  "topic": "gap4",
+  "leaves": [
+   "quantum_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://quantum.cloud.ibm.com/docs/en/guides"
+  ],
+  "prefixes": [
+   "https://quantum.cloud.ibm.com/docs/en/guides"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_rdmkit_elixir_europe_org",
+  "topic": "gap4",
+  "leaves": [
+   "reproducibility_rdm_fair"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://rdmkit.elixir-europe.org/"
+  ],
+  "prefixes": [
+   "https://rdmkit.elixir-europe.org/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_reframe_hpc_readthedocs_io",
+  "topic": "gap4",
+  "leaves": [
+   "testing_ci_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://reframe-hpc.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://reframe-hpc.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_riscv_github_io",
+  "topic": "gap4",
+  "leaves": [
+   "fpga_riscv_other_arch"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://riscv.github.io/riscv-isa-manual/"
+  ],
+  "prefixes": [
+   "https://riscv.github.io/riscv-isa-manual/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_scicomp_aalto_fi",
+  "topic": "gap4",
+  "leaves": [
+   "process_job_control",
+   "remote_ide_dev"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://scicomp.aalto.fi/triton/apps/vscode/",
+   "https://scicomp.aalto.fi/scicomp/shell/"
+  ],
+  "prefixes": [
+   "https://scicomp.aalto.fi/triton/apps/vscode/",
+   "https://scicomp.aalto.fi/scicomp/shell/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g4_slurm_schedmd_com",
+  "topic": "gap4",
+  "leaves": [
+   "node_health_bmc",
+   "slurm_accounting_setup",
+   "slurm_admin_config"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://slurm.schedmd.com/quickstart_admin.html",
+   "https://slurm.schedmd.com/slurm.conf.html",
+   "https://slurm.schedmd.com/cgroup.conf.html",
+   "https://slurm.schedmd.com/prolog_epilog.html",
+   "https://slurm.schedmd.com/accounting.html",
+   "https://slurm.schedmd.com/sacctmgr.html",
+   "https://slurm.schedmd.com/slurmdbd.conf.html",
+   "https://slurm.schedmd.com/resource_limits.html"
+  ],
+  "prefixes": [
+   "https://slurm.schedmd.com/quickstart_admin.html",
+   "https://slurm.schedmd.com/slurm.conf.html",
+   "https://slurm.schedmd.com/cgroup.conf.html",
+   "https://slurm.schedmd.com/prolog_epilog.html",
+   "https://slurm.schedmd.com/accounting.html",
+   "https://slurm.schedmd.com/sacctmgr.html",
+   "https://slurm.schedmd.com/slurmdbd.conf.html",
+   "https://slurm.schedmd.com/resource_limits.html"
+  ],
+  "max_pages": 24
+ },
+ {
+  "id": "g4_spark_apache_org",
+  "topic": "gap4",
+  "leaves": [
+   "spark_hadoop_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://spark.apache.org/docs/latest/spark-standalone.html"
+  ],
+  "prefixes": [
+   "https://spark.apache.org/docs/latest/spark-standalone.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_tutorial_xarray_dev",
+  "topic": "gap4",
+  "leaves": [
+   "postprocessing_analysis_tools"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://tutorial.xarray.dev/intro.html"
+  ],
+  "prefixes": [
+   "https://tutorial.xarray.dev/intro.html"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_warewulf_org",
+  "topic": "gap4",
+  "leaves": [
+   "cluster_provisioning"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://warewulf.org/docs/main/"
+  ],
+  "prefixes": [
+   "https://warewulf.org/docs/main/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_web_mit_edu",
+  "topic": "gap4",
+  "leaves": [
+   "identity_auth_admin"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (BSD-style)",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://web.mit.edu/kerberos/krb5-latest/doc/"
+  ],
+  "prefixes": [
+   "https://web.mit.edu/kerberos/krb5-latest/doc/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_wiki_lustre_org",
+  "topic": "gap4",
+  "leaves": [
+   "fabric_network_admin",
+   "storage_server_admin"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-4.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://wiki.lustre.org/Main_Page"
+  ],
+  "prefixes": [
+   "https://wiki.lustre.org/Main_Page"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_www_blosc_org",
+  "topic": "gap4",
+  "leaves": [
+   "data_compression_reduction"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://www.blosc.org/pages/blosc-in-depth/"
+  ],
+  "prefixes": [
+   "https://www.blosc.org/pages/blosc-in-depth/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_www_eessi_io",
+  "topic": "gap4",
+  "leaves": [
+   "eessi_cvmfs"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://www.eessi.io/docs/",
+   "https://www.eessi.io/docs/getting_access/native_installation/"
+  ],
+  "prefixes": [
+   "https://www.eessi.io/docs/",
+   "https://www.eessi.io/docs/getting_access/native_installation/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "g4_www_netlib_org",
+  "topic": "gap4",
+  "leaves": [
+   "hpc_benchmarks"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-style",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://www.netlib.org/benchmark/hpl/"
+  ],
+  "prefixes": [
+   "https://www.netlib.org/benchmark/hpl/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_www_openldap_org",
+  "topic": "gap4",
+  "leaves": [
+   "identity_auth_admin"
+  ],
+  "kind": "technical_documentation",
+  "license": "OpenLDAP Public License (BSD-style; not in list - flag)",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://www.openldap.org/doc/admin26/"
+  ],
+  "prefixes": [
+   "https://www.openldap.org/doc/admin26/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_www_promptingguide_ai",
+  "topic": "gap4",
+  "leaves": [
+   "rag_agents_ai_services"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://www.promptingguide.ai/"
+  ],
+  "prefixes": [
+   "https://www.promptingguide.ai/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "g4_zfp_readthedocs_io",
+  "topic": "gap4",
+  "leaves": [
+   "data_compression_reduction"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "licence evidence recorded in the Oct 24 coverage audit (gap_audit.md); verify in licence review",
+  "seeds": [
+   "https://zfp.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://zfp.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 3
+ }
+]
