@@ -46,6 +46,41 @@ def test_retrieval_matches_eval_retriever(tmp_path):
     assert assistant.FACTORY_SITES == ref.FACTORY_SITES and assistant.STOP == ref.STOP
 
 
+def test_improved_retriever_matches_eval_retriever(tmp_path, monkeypatch):
+    monkeypatch.setenv('RAG_VARIANT', 'b')
+    spec = importlib.util.spec_from_file_location('rag65_retrieve_b', ROOT / 'research/rag65/retrieve.py')
+    ref = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ref)
+    idx = _indexes(tmp_path)
+    p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
+    for q in ['How do I request GPUs on LUMI?', 'Set a time limit with sbatch', 'GPUs per node on Leonardo booster?',
+              'How many GPUs per node on JUWELS?', 'How do I cancel a pending array job?', 'the and for']:
+        assert assistant.retrieve(q, p, f, variant='b') == ref.retrieve(q, p, f)
+    for name in ['VARIANT_K', 'VARIANT_GENERIC', 'VARIANT_BUDGET', 'VARIANT_DUP', 'COMMANDS', 'INTENT']:
+        assert getattr(assistant, name) == getattr(ref, name), name
+
+
+def test_improved_retriever_is_default_and_asks_ollama_for_16k_context(tmp_path, monkeypatch):
+    idx = _indexes(tmp_path)
+    p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
+    q = 'How do I request GPUs on LUMI?'
+    bot = assistant.Assistant(idx)
+    assert bot.retriever == 'b' and bot.search(q) == assistant.retrieve(q, p, f, variant='b')
+    sent = []
+
+    class Resp:  # stands in for urlopen's response: one Ollama chat chunk
+        def __enter__(self):
+            return iter([json.dumps({'message': {'content': 'ok'}}).encode()])
+
+        def __exit__(self, *a):
+            return False
+
+    monkeypatch.setattr(assistant.urllib.request, 'urlopen', lambda req, timeout: sent.append(json.loads(req.data)) or Resp())
+    assistant.Assistant(idx).ask(q, StringIO())
+    assistant.Assistant(idx, retriever='classic').ask(q, StringIO())
+    assert sent[0]['options'] == {'temperature': 0, 'num_ctx': 16384} and sent[1]['options'] == {'temperature': 0}
+
+
 def test_system_prompt_matches_training_config():
     cfg = json.loads((ROOT / 'configs/rag65v4_seed42.json').read_text())
     assert assistant.SYSTEM_PROMPT == cfg['student']['system_prompt']
@@ -65,7 +100,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
         yield from ['Use ', '--gpus-per-node.']
 
     monkeypatch.setattr(assistant.Assistant, '_stream', fake_stream)
-    bot = assistant.Assistant(_indexes(tmp_path))
+    bot = assistant.Assistant(_indexes(tmp_path), retriever='classic')
     out = StringIO()
     answer, sources = bot.ask('How do I request GPUs on LUMI?', out)
     assert answer == 'Use --gpus-per-node.' and sources == ['https://docs.lumi/gpu']
@@ -122,7 +157,7 @@ def test_model_can_call_search_docs_tool_and_chat_keeps_history(tmp_path, monkey
 
 
 def test_generic_question_falls_back_to_any_site(tmp_path):
-    bot = assistant.Assistant(_indexes(tmp_path))
+    bot = assistant.Assistant(_indexes(tmp_path), retriever='classic')
     # Routed to the generic Slurm docs, which have nothing on Leonardo's booster: the fallback finds it anyway.
     docs = bot.search('What does the booster partition boost_usr_prod offer?')
     assert docs and docs[0]['url'] == 'https://cineca/leo'
