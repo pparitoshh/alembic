@@ -5,10 +5,16 @@ excerpts go into the prompt in exactly the format the student was trained and ev
 rag arm of the eval). No separate RAG service: retrieval is SQLite FTS5/BM25 over two files (~220 MB),
 ~6 ms per question on one CPU core. Without the index files the assistant answers closed-book.
 
+Two retrievers over the same index: `b` (default) is the improved retriever of the evaluation (RAG_VARIANT=b: up
+to 8 deduplicated excerpts, Slurm manual pages for the commands a question names or implies, title-weighted BM25),
+which raised round 27's Slurm (v3) win rate from about 0.82 to 0.879. Its prompts are ~20,000 characters (~6K
+tokens) per question, so with chat history it asks Ollama for a 16K context (a llama-server needs `-c 16384`); on a
+CPU-only laptop the first token takes longer. `--retriever classic` gives the original 3 excerpts.
+
 Users can add their own manuals (PDF, Markdown, text, HTML) to a local user index; their excerpts are
 searched alongside the built-in documentation. The chat keeps its history. With `--tools`, the model can also
 call the retriever itself through a `search_docs` tool for follow-up lookups; this is off by default because the
-current release (round 11) was trained on single-turn prose answers without tool calls.
+current release (round 27) was trained on single-turn prose answers without tool calls.
 
 The model runs locally behind Ollama (default, `ollama create hpc-assistant -f Modelfile` from the
 export stage) or any OpenAI-compatible server such as llama-server (`--openai http://127.0.0.1:8080/v1`).
@@ -65,7 +71,10 @@ def _query(question):
     return ' OR '.join('"' + t + '"' for t in dict.fromkeys(terms))
 
 
-def retrieve(question, pilot_db, factory_db, k=3):
+def retrieve(question, pilot_db, factory_db, k=3, variant=''):
+    """Site-routed BM25 retrieval. variant='b' is research/rag65/retrieve.py's RAG_VARIANT=b (k is then ignored)."""
+    if variant:
+        return _retrieve_variant(question, pilot_db, factory_db, variant)
     low = question.lower()
     query = _query(question)
     if not query:
@@ -86,6 +95,106 @@ def retrieve(question, pilot_db, factory_db, k=3):
                       'ORDER BY bm25(search) LIMIT ?', (query, site, k)).fetchall()
     db.close()
     return [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
+
+
+# Improved retriever (RAG_VARIANT=b in research/rag65/retrieve.py, kept identical; tests/test_assistant.py checks it):
+# 8 excerpts with near-duplicates dropped, intent words add the Slurm command they imply, up to 2 commands get a slot
+# for their manual page, title-weighted BM25, at most 40,000 characters of excerpts. On round 27 it raised the v3
+# (Slurm) win rate from about 0.82 to 0.879 under the 3-judge leaderboard.
+VARIANT_K, VARIANT_GENERIC, VARIANT_BUDGET, VARIANT_DUP = 8, 2, 40000, 0.6
+COMMANDS = ['sbatch', 'srun', 'salloc', 'sacct', 'scontrol', 'squeue', 'scancel', 'sinfo', 'sstat', 'sprio',
+            'sshare', 'sacctmgr', 'sreport', 'strigger', 'sattach', 'sbcast']
+INTENT = {
+    'cancel': 'scancel', 'kill': 'scancel', 'signal': 'scancel',
+    'queue': 'squeue', 'pending': 'squeue', 'queued': 'squeue', 'waiting': 'squeue', 'priority': 'sprio',
+    'accounting': 'sacct', 'efficiency': 'sacct', 'usage': 'sacct', 'elapsed': 'sacct', 'finished': 'sacct',
+    'exit': 'sacct', 'maxrss': 'sacct', 'history': 'sacct',
+    'hold': 'scontrol', 'release': 'scontrol', 'requeue': 'scontrol', 'update': 'scontrol', 'suspend': 'scontrol',
+    'dependency': 'sbatch', 'dependencies': 'sbatch', 'array': 'sbatch', 'script': 'sbatch', 'submit': 'sbatch',
+    'mail': 'sbatch', 'email': 'sbatch', 'output': 'sbatch', 'constraint': 'sbatch', 'partition': 'sbatch',
+    'memory': 'sbatch', 'gpus': 'sbatch', 'gpu': 'sbatch', 'nodes': 'sbatch', 'tasks': 'sbatch', 'time': 'sbatch',
+    'interactive': 'salloc', 'allocation': 'salloc', 'step': 'srun', 'steps': 'srun', 'mpi': 'srun',
+    'running': 'sstat', 'fairshare': 'sshare', 'idle': 'sinfo', 'available': 'sinfo',
+}
+
+
+def _shingles(text):
+    w = re.findall(r'\w+', text.lower())
+    return {' '.join(w[i:i + 5]) for i in range(max(1, len(w) - 4))}
+
+
+def _dedupe_take(cands, n, taken):
+    out = []
+    for d in cands:
+        if len(out) >= n:
+            break
+        if any(d['url'] == t['url'] and d['text'] == t['text'] for t in taken + out):
+            continue
+        sh = _shingles(d['text'])
+        if any(len(sh & t['_sh']) / max(1, len(sh | t['_sh'])) >= VARIANT_DUP for t in taken + out):
+            continue
+        d['_sh'] = sh
+        out.append(d)
+    return out
+
+
+def _search(db, query, where, params, n, weights=''):
+    cols = 'c.url, c.factories, c.title, c.text, c.retrieved_at' if 'factories' in where else \
+        'c.url, c.site, c.title, c.text, c.retrieved_at'
+    rows = db.execute('SELECT ' + cols + ' FROM search JOIN chunks c ON c.id = search.rowid WHERE search MATCH ? AND '
+                      + where + ' ORDER BY bm25(search' + weights + ') LIMIT ?', (query, *params, n)).fetchall()
+    return [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
+
+
+def _retrieve_variant(question, pilot_db, factory_db, variant):
+    if variant not in ('a', 'b'):
+        raise ValueError('RAG_VARIANT must be unset, a or b')
+    low = question.lower()
+    words = [t for t in re.findall(r'[a-z0-9_]+', low) if len(t) > 2 and t not in STOP]
+    cmds = []
+    if variant == 'b':
+        named = [t for t in words if t in COMMANDS]
+        implied = [INTENT[t] for t in words if t in INTENT]
+        cmds = list(dict.fromkeys(named + implied))[:2]
+        words = words + cmds
+    query = ' OR '.join('"' + t + '"' for t in dict.fromkeys(words))
+    if not query:
+        return []
+    wide = VARIANT_K * 4
+    factory = next((name for key, name in FACTORY_SITES.items() if re.search(r'\b' + key + r'\b', low)), None)
+    out = []
+    if factory and 'lumi' not in low:
+        db = sqlite3.connect('file:' + str(factory_db) + '?mode=ro', uri=True)
+        cands = _search(db, query, 'c.factories LIKE ?', ('%' + factory + '%',), wide,
+                        ', 1.0, 2.0, 0.0' if variant == 'b' else '')
+        db.close()
+        out = _dedupe_take(cands, VARIANT_K, [])
+    if not out:
+        site = 'LUMI' if 'lumi' in low else 'CINECA' if any(s in low for s in ['leonardo', 'cineca', 'marconi']) else 'Slurm'
+        weights = ', 1.0, 2.0, 1.0' if variant == 'b' else ''
+        db = sqlite3.connect('file:' + str(pilot_db) + '?mode=ro', uri=True)
+        n_site = VARIANT_K - VARIANT_GENERIC if site != 'Slurm' else VARIANT_K
+        manual = []
+        for c in cmds:
+            manual += _dedupe_take(_search(db, query, 'c.site = ? AND c.url = ?',
+                                           ('Slurm', 'https://slurm.schedmd.com/' + c + '.html'), 3, weights), 1, manual)
+        if site == 'Slurm':
+            rest = _dedupe_take(_search(db, query, 'c.site = ?', (site,), wide, weights), VARIANT_K - len(manual), manual)
+            out = rest[:2] + manual + rest[2:]  # the two best BM25 hits stay on top
+        else:
+            out = _dedupe_take(_search(db, query, 'c.site = ?', (site,), wide, weights), n_site, [])
+            out += manual[:VARIANT_GENERIC]
+            out += _dedupe_take(_search(db, query, 'c.site = ?', ('Slurm',), wide, weights),
+                                VARIANT_GENERIC - len(manual[:VARIANT_GENERIC]), out)
+        db.close()
+    kept, used = [], 0
+    for d in out:
+        d.pop('_sh', None)
+        if used + len(d['text']) > VARIANT_BUDGET:
+            continue
+        kept.append(d)
+        used += len(d['text'])
+    return kept
 
 
 def retrieve_any(question, dbs, k):
@@ -196,13 +305,16 @@ SEARCH_TOOL = {'type': 'function', 'function': {
 
 class Assistant:
     def __init__(self, index_dir=DEFAULT_INDEX, docs=True, k=3, model='hpc-assistant', openai=None,
-                 ollama='http://localhost:11434', tools=False):
+                 ollama='http://localhost:11434', tools=False, retriever='b'):
+        if retriever not in ('b', 'classic'):
+            raise ValueError("retriever must be 'b' or 'classic'")
         index_dir = Path(index_dir)
         self.pilot, self.factory = index_dir / 'documents.sqlite', index_dir / 'factory_docs.sqlite'
         self.user_db = index_dir / 'user_docs.sqlite'
         self.builtin = self.pilot.exists() and self.factory.exists()
         self.docs = docs
         self.k, self.model, self.openai, self.ollama, self.tools = k, model, openai, ollama, tools
+        self.retriever = retriever  # 'b' (default): the improved retriever; 'classic': the original 3 excerpts
         self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         self.titles = {}  # source url -> page title, for the Sources list
 
@@ -230,7 +342,10 @@ class Assistant:
         return n
 
     def search(self, question, k=None):
-        """Up to k excerpts: the user's manuals first (at most k-1 when built-in docs exist), then built-in."""
+        """Excerpts for one question: the user's manuals first (at most k-1 when built-in docs exist), then built-in.
+
+        With the improved retriever (default) the built-in part is research/rag65/retrieve.py's RAG_VARIANT=b result
+        (up to 8 excerpts) and k only bounds the user's manuals; with retriever='classic' everything is capped at k."""
         k = k or self.k
         found = []
         query = _query(question)
@@ -241,7 +356,15 @@ class Assistant:
                               (query, k - 1 if self.builtin else k)).fetchall()
             db.close()
             found = [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
-        if self.builtin and len(found) < k:
+        if self.builtin and self.retriever == 'b':
+            found += retrieve(question, self.pilot, self.factory, variant='b')
+            kept, used = [], 0  # the same 40,000-character excerpt budget as the evaluation, manuals first
+            for d in found:
+                if used + len(d['text']) <= VARIANT_BUDGET:
+                    kept.append(d)
+                    used += len(d['text'])
+            found = kept
+        elif self.builtin and len(found) < k:
             found += retrieve(question, self.pilot, self.factory, k - len(found))
         if self.builtin and not found:
             # Generic HPC questions (any scheduler, any centre): only when the site-routed search used in training
@@ -264,7 +387,10 @@ class Assistant:
             body = {'model': self.model, 'messages': messages, 'stream': True, 'temperature': 0}
         else:
             url = self.ollama.rstrip('/') + '/api/chat'
-            body = {'model': self.model, 'messages': messages, 'stream': True, 'options': {'temperature': 0}}
+            # The improved retriever's prompts are ~6K tokens per question, so a chat with history outgrows the
+            # Modelfile's 8192 and Ollama silently drops the start of the prompt: use the evaluation's 16384.
+            opts = {'temperature': 0, **({'num_ctx': 16384} if self.retriever == 'b' and self.docs else {})}
+            body = {'model': self.model, 'messages': messages, 'stream': True, 'options': opts}
         if tools:
             body['tools'] = tools
         req = urllib.request.Request(url, json.dumps(body).encode(), {'Content-Type': 'application/json'})
@@ -365,7 +491,11 @@ def main(argv=None):
     ap.add_argument('--index', default=DEFAULT_INDEX, help='directory with documents.sqlite and factory_docs.sqlite')
     ap.add_argument('--model', default='hpc-assistant')
     ap.add_argument('--openai', help='OpenAI-compatible base URL (e.g. llama-server) instead of Ollama')
-    ap.add_argument('--k', type=int, default=3, help='excerpts per question (the model was trained with 3)')
+    ap.add_argument('--retriever', choices=['b', 'classic'], default='b',
+                    help='b (default): improved retriever, up to 8 excerpts, needs a 16K context (llama-server: -c '
+                         '16384); classic: the original 3 excerpts, shorter prompts, faster on CPU')
+    ap.add_argument('--k', type=int, default=3,
+                    help='classic retriever: excerpts per question (the model was trained with 3); b: max manual excerpts + 1')
     ap.add_argument('--add', action='append', default=[], metavar='FILE', help='index a manual (PDF, md, txt, html)')
     ap.add_argument('--tools', action='store_true',
                     help='offer the model a search_docs tool (only for releases trained with tool calls)')
@@ -377,7 +507,7 @@ def main(argv=None):
         setup(Path(args.index), args.model)
         return
     bot = Assistant(args.index, docs=not args.no_docs, k=args.k, model=args.model, openai=args.openai,
-                    tools=args.tools)
+                    tools=args.tools, retriever=args.retriever)
     for f in args.add:
         print(f'[hpc-assistant] indexed {f}: {bot.add(f)} excerpts', file=sys.stderr)
     if not args.no_docs and not bot.builtin:
