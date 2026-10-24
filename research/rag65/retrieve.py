@@ -13,6 +13,8 @@ RAG_VARIANT (opt-in, exp30, Oct 23; unset or empty = the original retriever abov
   c  b + up to 3 excerpts from the general HPC documentation index (general_docs.sqlite next to the pilot index, or
      RAG_GENERAL_DB; build_general_index.py, evaluation sources excluded), appended after b's excerpts, near-duplicates
      dropped, same 40,000-character budget (Oct 24).
+  d  c, but only for questions that name neither Slurm, a Slurm command nor LUMI/CINECA: those keep variant b (on the
+     clean index, c raised d1 by 0.068 and lowered the Slurm-heavy v3 by 0.033; chosen after that run, Oct 24).
 """
 import os
 import re
@@ -64,7 +66,7 @@ def retrieve(question, pilot_db, factory_db, k=3):
     return [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
 
 
-# ---- opt-in variants (RAG_VARIANT=a|b|c); nothing below runs when RAG_VARIANT is unset ----
+# ---- opt-in variants (RAG_VARIANT=a|b|c|d); nothing below runs when RAG_VARIANT is unset ----
 VARIANT_K, VARIANT_GENERIC, VARIANT_BUDGET, VARIANT_DUP, VARIANT_GENERAL = 8, 2, 40000, 0.6, 3
 COMMANDS = ['sbatch', 'srun', 'salloc', 'sacct', 'scontrol', 'squeue', 'scancel', 'sinfo', 'sstat', 'sprio',
             'sshare', 'sacctmgr', 'sreport', 'strigger', 'sattach', 'sbcast']
@@ -103,6 +105,11 @@ def _dedupe_take(cands, n, taken):
     return out
 
 
+def _slurm_explicit(low):
+    return 'slurm' in low or any(re.search(r'\b' + c + r'\b', low) for c in COMMANDS) or \
+        any(s in low for s in ['lumi', 'leonardo', 'cineca', 'marconi'])
+
+
 def _search(db, query, where, params, n, weights=''):
     cols = 'c.url, c.factories, c.title, c.text, c.retrieved_at' if 'factories' in where else \
         'c.url, c.site, c.title, c.text, c.retrieved_at'
@@ -112,11 +119,11 @@ def _search(db, query, where, params, n, weights=''):
 
 
 def _retrieve_variant(question, pilot_db, factory_db, variant):
-    if variant not in ('a', 'b', 'c'):
-        raise ValueError('RAG_VARIANT must be unset, a, b or c')
-    general = variant == 'c'
-    variant = 'b' if general else variant
+    if variant not in ('a', 'b', 'c', 'd'):
+        raise ValueError('RAG_VARIANT must be unset, a, b, c or d')
     low = question.lower()
+    general = variant == 'c' or (variant == 'd' and not _slurm_explicit(low))
+    variant = 'b' if variant in ('c', 'd') else variant
     words = [t for t in re.findall(r'[a-z0-9_]+', low) if len(t) > 2 and t not in STOP]
     cmds = []
     if variant == 'b':
