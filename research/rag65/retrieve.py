@@ -10,6 +10,9 @@ RAG_VARIANT (opt-in, exp30, Oct 23; unset or empty = the original retriever abov
   b  a + command-aware query: intent words add the Slurm command they imply (cancel -> scancel, ...), up to 2
      named/implied commands each reserve a slot for the best-matching chunk of their manual page (placed after the
      two best BM25 hits), title-weighted BM25 (text 1, title 2, url/factories 1/0).
+  c  b + up to 3 excerpts from the general HPC documentation index (general_docs.sqlite next to the pilot index, or
+     RAG_GENERAL_DB; build_general_index.py, evaluation sources excluded), appended after b's excerpts, near-duplicates
+     dropped, same 40,000-character budget (Oct 24).
 """
 import os
 import re
@@ -61,8 +64,8 @@ def retrieve(question, pilot_db, factory_db, k=3):
     return [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
 
 
-# ---- opt-in variants (RAG_VARIANT=a|b); nothing below runs when RAG_VARIANT is unset ----
-VARIANT_K, VARIANT_GENERIC, VARIANT_BUDGET, VARIANT_DUP = 8, 2, 40000, 0.6
+# ---- opt-in variants (RAG_VARIANT=a|b|c); nothing below runs when RAG_VARIANT is unset ----
+VARIANT_K, VARIANT_GENERIC, VARIANT_BUDGET, VARIANT_DUP, VARIANT_GENERAL = 8, 2, 40000, 0.6, 3
 COMMANDS = ['sbatch', 'srun', 'salloc', 'sacct', 'scontrol', 'squeue', 'scancel', 'sinfo', 'sstat', 'sprio',
             'sshare', 'sacctmgr', 'sreport', 'strigger', 'sattach', 'sbcast']
 # Intent words -> the Slurm command whose manual page documents them (query expansion, variant b only).
@@ -109,8 +112,10 @@ def _search(db, query, where, params, n, weights=''):
 
 
 def _retrieve_variant(question, pilot_db, factory_db, variant):
-    if variant not in ('a', 'b'):
-        raise ValueError('RAG_VARIANT must be unset, a or b')
+    if variant not in ('a', 'b', 'c'):
+        raise ValueError('RAG_VARIANT must be unset, a, b or c')
+    general = variant == 'c'
+    variant = 'b' if general else variant
     low = question.lower()
     words = [t for t in re.findall(r'[a-z0-9_]+', low) if len(t) > 2 and t not in STOP]
     cmds = []
@@ -149,6 +154,11 @@ def _retrieve_variant(question, pilot_db, factory_db, variant):
             out += manual[:VARIANT_GENERIC]
             out += _dedupe_take(_search(db, query, 'c.site = ?', ('Slurm',), wide, weights),
                                 VARIANT_GENERIC - len(manual[:VARIANT_GENERIC]), out)
+        db.close()
+    if general:
+        gdb = os.environ.get('RAG_GENERAL_DB') or os.path.join(os.path.dirname(str(pilot_db)), 'general_docs.sqlite')
+        db = sqlite3.connect('file:' + gdb + '?mode=ro', uri=True)
+        out += _dedupe_take(_search(db, query, '1', (), wide, ', 1.0, 2.0, 0.0'), VARIANT_GENERAL, out)
         db.close()
     kept, used = [], 0
     for d in out:
