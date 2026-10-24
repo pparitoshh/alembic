@@ -51,7 +51,9 @@ class KDData(torch.utils.data.Dataset):
         row = self.rows[i]
         # Same rendering as research/kd/score.py: prompt and answer tokenized separately, as at generation time.
         msgs = [{'role': 'system', 'content': cfg.student.system_prompt}, *row['messages']]
-        prompt = tok.apply_chat_template(msgs[:-1], tokenize=False, add_generation_prompt=True, enable_thinking=False)
+        # Tool rows (round 38) carry their tool schemas; rendered into the prompt as at inference. None = unchanged.
+        prompt = tok.apply_chat_template(msgs[:-1], tools=row.get("tools"), tokenize=False, add_generation_prompt=True,
+                                         enable_thinking=False)
         prompt = tok(prompt, add_special_tokens=False)['input_ids']
         answer = tok(msgs[-1]['content'] + '<|im_end|>', add_special_tokens=False)['input_ids']
         full = prompt + answer
