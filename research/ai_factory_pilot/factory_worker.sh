@@ -46,18 +46,21 @@ if [ "$PHASE" = generate ] && [ "${GEN_TP:-1}" = 4 ]; then
         (( i < ${#LIST[@]} )) && MINE+=("${LIST[$i]}")
     done
     (( ${#MINE[@]} )) || exit 0
-    TNEXT=cyankiwi/Qwen3-Next-80B-A3B-Instruct-AWQ-4bit
-    # Stage the 46 GB checkpoint in node RAM first: ten parallel sequential copies take well under a minute, while
+    TNEXT=cyankiwi/Qwen3-Next-80B-A3B-Instruct-AWQ-4bit; UTIL=()
+    # FACTORY_TEACHER=q235b (opt-in, batches v9-v18 from Oct 22): Qwen3-235B-A22B-Instruct-2507 (AWQ), the strongest
+    # model on our leaderboard, as teacher instead; the batch configs must name it as the teacher model.
+    if [ "${FACTORY_TEACHER:-}" = q235b ]; then TNEXT=QuantTrio/Qwen3-235B-A22B-Instruct-2507-AWQ; UTIL=(--gpu-memory-utilization 0.92); fi
+    # Stage the checkpoint in node RAM first: ten parallel sequential copies take well under a minute, while
     # vLLM's four TP ranks prefetching from Lustre with 8 threads each took 764 s (Oct 19, job 61459978).
-    SNAP=$(ls -d "$HF_HOME"/hub/models--cyankiwi--Qwen3-Next-80B-A3B-Instruct-AWQ-4bit/snapshots/* | head -1)
-    STAGE=/dev/shm/tnext-$SLURM_JOB_ID
+    SNAP=$(ls -d "$HF_HOME"/hub/models--${TNEXT//\//--}/snapshots/* | head -1)
+    STAGE=/dev/shm/tnext-$SLURM_JOB_ID-$SLURM_PROCID
     mkdir -p $STAGE && trap 'rm -rf "$STAGE"' EXIT
     t0=$SECONDS
-    for f in "$SNAP"/*; do cp -L "$f" $STAGE/ & done
+    for f in "$SNAP"/*; do cp -rL "$f" $STAGE/ & done
     wait
     echo "[job] staged $(du -sh $STAGE | cut -f1) in node RAM in $(( SECONDS - t0 )) s"
-    # Same flags as the 32B teacher (logprobs, hermes tool calls); served under the hub name the configs use.
-    start_vllm $STAGE "$PORT" $(teacher_args) --tensor-parallel-size 4 --served-model-name $TNEXT
+    # Same flags as the earlier teachers (logprobs, hermes tool calls); served under the hub name the configs use.
+    start_vllm $STAGE "$PORT" $(teacher_args) --tensor-parallel-size 4 "${UTIL[@]}" --served-model-name $TNEXT
     trap 'stop_vllm; rm -rf "$STAGE"' EXIT  # start_vllm replaced the trap: free the node RAM too
     GENS=()
     for K in "${MINE[@]}"; do

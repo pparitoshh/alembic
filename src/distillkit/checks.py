@@ -70,7 +70,7 @@ def bash_syntax_ok(script: str) -> bool:
     bash = shutil.which("bash")
     if bash is None:
         raise RuntimeError("bash not found on PATH: the shell-syntax check needs it")
-    r = subprocess.run([bash, "-n"], input=script, text=True, capture_output=True)
+    r = subprocess.run([bash, "-n"], input=script, text=True, errors="replace", capture_output=True)
     return r.returncode == 0
 
 

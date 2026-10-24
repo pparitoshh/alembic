@@ -8,6 +8,7 @@ Output: OUT_DIR/kd_<worker>_<chunk>.npz with, per row, the answer tokens' top-20
 (float16), concatenated, plus offsets and row ids. Resumable per chunk.
 """
 import json
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -20,7 +21,8 @@ from distillkit.config import load_config
 
 worker, n_workers, endpoint, served, data, out = (int(sys.argv[1]), int(sys.argv[2]), sys.argv[3], sys.argv[4],
                                                    sys.argv[5], Path(sys.argv[6]))
-K, CHUNK, MAX_LEN = 20, 256, 4096
+K, CHUNK = 20, 256
+MAX_LEN = int(os.environ.get("SCORE_MAX_LEN") or 4096)  # rows longer than this are skipped; round 32 (8 excerpts per prompt) uses 16384
 system = load_config('configs/rag65_seed42.json').student.system_prompt
 tok = AutoTokenizer.from_pretrained('Qwen/Qwen3-4B-Instruct-2507')
 out.mkdir(parents=True, exist_ok=True)
