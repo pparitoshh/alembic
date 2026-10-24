@@ -37,12 +37,17 @@ for f in sorted(kd_dir.glob('kd_*.npz')) if alpha > 0 else []:
         teacher[str(rid)] = (ids[offsets[i]:offsets[i + 1]], lps[offsets[i]:offsets[i + 1]])
 
 
+MIXED = os.environ.get('KD_MIXED') == '1'
+
+
 class KDData(torch.utils.data.Dataset):
     def __init__(self, path):
         self.rows = []
         for line in open(path):
             row = json.loads(line)
-            if alpha == 0 or row['id'] in teacher:
+            # KD_MIXED=1 (opt-in, round 43): rows without teacher scores (e.g. tool workflows) are kept and trained
+            # with the plain loss, while scored rows get the distillation loss.
+            if alpha == 0 or row['id'] in teacher or MIXED:
                 self.rows.append(row)
 
     def __len__(self):
@@ -59,19 +64,21 @@ class KDData(torch.utils.data.Dataset):
         answer = tok(msgs[-1]['content'] + '<|im_end|>', add_special_tokens=False)['input_ids']
         full = prompt + answer
         n = len(answer)  # answer tokens, the tail of the sequence
-        if alpha == 0:
+        has_t = alpha > 0 and row['id'] in teacher
+        if not has_t:
             ids, lps = np.zeros((n, 1), np.int64), np.zeros((n, 1), np.float32)
         else:
             ids, lps = teacher[row['id']]
             assert len(ids) == n, row['id']
-        return {'input_ids': torch.tensor(full), 'n_answer': n,
+        return {'input_ids': torch.tensor(full), 'n_answer': n, 'has_t': has_t,
                 't_ids': torch.from_numpy(ids.astype(np.int64)), 't_lps': torch.from_numpy(lps.astype(np.float32))}
 
 
 def collate(batch):
     assert len(batch) == 1, 'per-device batch 1'
     b = batch[0]
-    return {'input_ids': b['input_ids'][None], 'n_answer': b['n_answer'], 't_ids': b['t_ids'], 't_lps': b['t_lps']}
+    return {'input_ids': b['input_ids'][None], 'n_answer': b['n_answer'], 'has_t': b['has_t'], 't_ids': b['t_ids'],
+            't_lps': b['t_lps']}
 
 
 class KDTrainer(Trainer):
@@ -83,7 +90,7 @@ class KDTrainer(Trainer):
         logp = F.log_softmax(logits, dim=-1)
         target = ids[0, -n:]
         ce = F.nll_loss(logp, target)
-        if alpha == 0:
+        if alpha == 0 or not inputs['has_t']:
             loss = ce
         else:
             t_prob = F.softmax(inputs['t_lps'], dim=-1)  # renormalised over the teacher's top-20
