@@ -1,7 +1,7 @@
 """Retrieval index over the general HPC documentation crawls (RAG_VARIANT=c): every downloaded page of the given
 archives, chunked like the pilot index (~2,200 characters on paragraph boundaries), in the same SQLite FTS5 schema
-(chunks + search(text, title, url)). URLs on the evaluation-source exclusion list are left out, so no test material is
-retrievable. usage: build_general_index.py OUT.sqlite EXCLUDE_URLS.txt ARCHIVE_DIR...
+(chunks + search(text, title, url)). URLs on the evaluation-source exclusion list and every page of the held-out
+evaluation source families are left out, so no test material is retrievable. usage: build_general_index.py OUT.sqlite EXCLUDE_URLS.txt ARCHIVE_DIR...
 """
 import json
 import os
@@ -18,6 +18,16 @@ def norm(u):
 
 
 skip = {norm(u.strip()) for u in open(exclude) if u.strip()}
+# Held-out source families of the evaluation sets (data/eval/dataset_v1/evidence/evaluation_family_assignments.json:
+# Aalto Triton docs for the development split, Open MPI and NVIDIA CUDA Samples for the final split) are held out as
+# whole sites, not page by page: any page of these sites, in any version, is left out.
+HELD_OUT = ('scicomp.aalto.fi', 'aaltoscicomp.github.io', 'github.com/aaltoscicomp', 'githubusercontent.com/aaltoscicomp',
+            'open-mpi.org', 'github.com/open-mpi/ompi', 'githubusercontent.com/open-mpi/ompi',
+            'github.com/nvidia/cuda-samples', 'githubusercontent.com/nvidia/cuda-samples')
+
+
+def held_out(u):
+    return any(h in norm(u) for h in HELD_OUT)
 if os.path.exists(out):
     os.remove(out)
 db = sqlite3.connect(out)
@@ -51,7 +61,7 @@ for arch in archives:
         if r.get('status') != 'downloaded' or not r.get('text_path'):
             continue
         url = (r.get('resolved_url') or r['url']).rstrip('/')
-        if norm(url) in skip or norm(r['url']) in skip:
+        if norm(url) in skip or norm(r['url']) in skip or held_out(url) or held_out(r['url']):
             n_skip += 1
             continue
         if r.get('text_sha256') in seen:
@@ -70,4 +80,4 @@ for arch in archives:
 db.commit()
 db.execute("INSERT INTO search(search) VALUES('optimize')")
 db.commit()
-print(f'INDEX READY: {n_doc} documents, {n_chunk} chunks, {n_skip} evaluation-source URLs excluded -> {out}')
+print(f'INDEX READY: {n_doc} documents, {n_chunk} chunks, {n_skip} evaluation-source pages excluded -> {out}')
