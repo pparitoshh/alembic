@@ -71,10 +71,11 @@ def _query(question):
     return ' OR '.join('"' + t + '"' for t in dict.fromkeys(terms))
 
 
-def retrieve(question, pilot_db, factory_db, k=3, variant=''):
-    """Site-routed BM25 retrieval. variant='b' is research/rag65/retrieve.py's RAG_VARIANT=b (k is then ignored)."""
+def retrieve(question, pilot_db, factory_db, k=3, variant='', general_db=None):
+    """Site-routed BM25 retrieval. variant='b'/'c'/'d' is research/rag65/retrieve.py's RAG_VARIANT (k is then
+    ignored); c and d read general_db (default: general_docs.sqlite next to pilot_db)."""
     if variant:
-        return _retrieve_variant(question, pilot_db, factory_db, variant)
+        return _retrieve_variant(question, pilot_db, factory_db, variant, general_db)
     low = question.lower()
     query = _query(question)
     if not query:
@@ -101,7 +102,7 @@ def retrieve(question, pilot_db, factory_db, k=3, variant=''):
 # 8 excerpts with near-duplicates dropped, intent words add the Slurm command they imply, up to 2 commands get a slot
 # for their manual page, title-weighted BM25, at most 40,000 characters of excerpts. On round 27 it raised the v3
 # (Slurm) win rate from about 0.82 to 0.879 under the 3-judge leaderboard.
-VARIANT_K, VARIANT_GENERIC, VARIANT_BUDGET, VARIANT_DUP = 8, 2, 40000, 0.6
+VARIANT_K, VARIANT_GENERIC, VARIANT_BUDGET, VARIANT_DUP, VARIANT_GENERAL = 8, 2, 40000, 0.6, 3
 COMMANDS = ['sbatch', 'srun', 'salloc', 'sacct', 'scontrol', 'squeue', 'scancel', 'sinfo', 'sstat', 'sprio',
             'sshare', 'sacctmgr', 'sreport', 'strigger', 'sattach', 'sbcast']
 INTENT = {
@@ -138,6 +139,11 @@ def _dedupe_take(cands, n, taken):
     return out
 
 
+def _slurm_explicit(low):
+    return 'slurm' in low or any(re.search(r'\b' + c + r'\b', low) for c in COMMANDS) or \
+        any(s in low for s in ['lumi', 'leonardo', 'cineca', 'marconi'])
+
+
 def _search(db, query, where, params, n, weights=''):
     cols = 'c.url, c.factories, c.title, c.text, c.retrieved_at' if 'factories' in where else \
         'c.url, c.site, c.title, c.text, c.retrieved_at'
@@ -146,10 +152,12 @@ def _search(db, query, where, params, n, weights=''):
     return [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
 
 
-def _retrieve_variant(question, pilot_db, factory_db, variant):
-    if variant not in ('a', 'b'):
-        raise ValueError('RAG_VARIANT must be unset, a or b')
+def _retrieve_variant(question, pilot_db, factory_db, variant, general_db=None):
+    if variant not in ('a', 'b', 'c', 'd'):
+        raise ValueError('RAG_VARIANT must be unset, a, b, c or d')
     low = question.lower()
+    general = variant == 'c' or (variant == 'd' and not _slurm_explicit(low))
+    variant = 'b' if variant in ('c', 'd') else variant
     words = [t for t in re.findall(r'[a-z0-9_]+', low) if len(t) > 2 and t not in STOP]
     cmds = []
     if variant == 'b':
@@ -186,6 +194,11 @@ def _retrieve_variant(question, pilot_db, factory_db, variant):
             out += manual[:VARIANT_GENERIC]
             out += _dedupe_take(_search(db, query, 'c.site = ?', ('Slurm',), wide, weights),
                                 VARIANT_GENERIC - len(manual[:VARIANT_GENERIC]), out)
+        db.close()
+    if general:
+        gdb = str(general_db or Path(pilot_db).parent / 'general_docs.sqlite')
+        db = sqlite3.connect('file:' + gdb + '?mode=ro', uri=True)
+        out += _dedupe_take(_search(db, query, '1', (), wide, ', 1.0, 2.0, 0.0'), VARIANT_GENERAL, out)
         db.close()
     kept, used = [], 0
     for d in out:

@@ -60,6 +60,32 @@ def test_improved_retriever_matches_eval_retriever(tmp_path, monkeypatch):
         assert getattr(assistant, name) == getattr(ref, name), name
 
 
+def _general_index(idx):
+    _index(idx / 'general_docs.sqlite', [
+        ('https://docs.nvidia/nsight', 'NVIDIA', 'Profile a CUDA kernel with Nsight Compute: ncu --set full ./app.'),
+        ('https://openmp/offload', 'OpenMP', 'OpenMP target offload moves loops to the GPU with omp target teams.')], 'site')
+
+
+def test_general_retrievers_match_eval_retriever(tmp_path, monkeypatch):
+    idx = _indexes(tmp_path)
+    _general_index(idx)
+    p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
+    qs = ['How do I profile a CUDA kernel with Nsight?', 'How do I cancel a pending Slurm array job?',
+          'GPU offload with OpenMP on LUMI?', 'How do I request GPUs on LUMI?', 'the and for']
+    for v in ['c', 'd']:
+        monkeypatch.setenv('RAG_VARIANT', v)
+        spec = importlib.util.spec_from_file_location('rag65_retrieve_' + v, ROOT / 'research/rag65/retrieve.py')
+        ref = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ref)
+        for q in qs:
+            assert assistant.retrieve(q, p, f, variant=v) == ref.retrieve(q, p, f), (v, q)
+    assert assistant.VARIANT_GENERAL == ref.VARIANT_GENERAL
+    # d adds general excerpts only to questions that do not name Slurm, a Slurm command or LUMI/CINECA
+    assert any('nvidia' in d['url'] for d in assistant.retrieve(qs[0], p, f, variant='d'))
+    assert not any(d['url'].startswith(('https://docs.nvidia', 'https://openmp'))
+                   for d in assistant.retrieve(qs[2], p, f, variant='d'))
+
+
 def test_improved_retriever_is_default_and_asks_ollama_for_16k_context(tmp_path, monkeypatch):
     idx = _indexes(tmp_path)
     p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
