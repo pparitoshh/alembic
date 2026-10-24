@@ -3,7 +3,10 @@ import importlib.util
 import json
 from pathlib import Path
 
-import httpx
+try:  # openai 3.x (uv.lock) is built on httpx2; older openai on httpx
+    import httpx2 as httpx
+except ImportError:
+    import httpx
 import pytest
 from openai import OpenAI
 
