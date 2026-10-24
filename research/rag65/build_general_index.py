@@ -11,7 +11,13 @@ import sys
 from pathlib import Path
 
 out, exclude, *archives = sys.argv[1:]
-skip = {u.strip().rstrip('/') for u in open(exclude) if u.strip()}
+# Loose URL match (scheme, www., query, fragment, trailing slash, /index.html, case): on Oct 24 an exact match missed 6
+# evaluation-source pages written as .../index.html or with www.
+def norm(u):
+    return re.sub(r'^https?://(www\.)?', '', u.split('#')[0].split('?')[0]).rstrip('/').lower().replace('/index.html', '')
+
+
+skip = {norm(u.strip()) for u in open(exclude) if u.strip()}
 if os.path.exists(out):
     os.remove(out)
 db = sqlite3.connect(out)
@@ -45,7 +51,7 @@ for arch in archives:
         if r.get('status') != 'downloaded' or not r.get('text_path'):
             continue
         url = (r.get('resolved_url') or r['url']).rstrip('/')
-        if url in skip or r['url'].rstrip('/') in skip:
+        if norm(url) in skip or norm(r['url']) in skip:
             n_skip += 1
             continue
         if r.get('text_sha256') in seen:
