@@ -30,3 +30,39 @@ Date: 2026-10-25. Cluster: container `slurm-test` (ubuntu:24.04, slurm-wlm 23.11
 - The node was declared with 12 CPUs and 32000 MB so the 8-CPU/16G header could actually run; declared memory larger than reported needed `SlurmctldParameters=node_reg_mem_percent=40` to avoid auto-drain.
 - The container HAS accounting (slurmdbd + MariaDB), so item 6 produced an empty result, not an "accounting disabled" error.
 - Only file names and the B.sh shebang were adapted when running model answers; no model errors were fixed.
+
+## Accuracy
+
+Computed by `../../accuracy.py` (standard library only). Round 1 ratings come
+from `round1_smoke.md`; round 2 ratings come from `results.json` in this
+folder.
+
+| model / round | n | strict | lenient | Wilson 95% (strict) | format |
+|---|---|---|---|---|---|
+| round 2, qwen3-4b | 10 | 60.0% | 70.0% | [31.3%, 83.2%] | n/a |
+| round 1, qwen3-4b | 4 | 75.0% | 75.0% | [30.1%, 95.4%] | 4/4 |
+| round 1, hpc-assistant-x02 | 4 | 25.0% | 25.0% | [4.6%, 69.9%] | 0/4 |
+
+Strict accuracy is the share of fully correct answers. Lenient accuracy counts
+a partly correct answer as half a point. The Wilson 95% interval shows the
+range where the true strict accuracy most likely sits. Format-follow rate is
+the share of answers that obey the prompt's format instruction; round 2 had no
+format instruction, so the rate is n/a.
+
+The sample is small (4 and 10 prompts, one run each), so the intervals are
+wide and the difference between the models is not proven.
+
+### Round 2 per item (each item is one task type)
+
+| id | task | rating |
+|---|---|---|
+| 1 | sbatch header: 1 node, 8 CPUs, 16G, 2h, job name, output with job id | correct |
+| 2 | job array 1-10, max 3 concurrent | wrong |
+| 3 | dependency: B after A (42) ends OK | correct |
+| 4 | mail on end/failure | correct |
+| 5 | srun with 4 tasks | correct |
+| 6 | sacct elapsed and state | partly correct |
+| 7 | scontrol show job | correct |
+| 8 | sinfo custom format: partition, node, state | correct |
+| 9 | hold and release job 55 | wrong |
+| 10 | script: module load python + srun python -c 'print(42)' | partly correct |

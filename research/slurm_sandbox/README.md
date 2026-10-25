@@ -54,3 +54,23 @@ MariaDB for accounting. Without accounting, Slurm 23.11 pends every job with
 Round 2 details are in `results/2026-10-25/results.md`. The repeated weakness
 is the cancel-by-name command (`scancel -n train`). The sbatch header,
 dependencies, mail flags, srun, sinfo, and scontrol show job forms are solid.
+
+## Accuracy
+
+Computed by `accuracy.py` (standard library only). Run it from any directory:
+`python3 research/slurm_sandbox/accuracy.py`.
+
+| model / round | n | strict | lenient | Wilson 95% (strict) | format |
+|---|---|---|---|---|---|
+| round 2, qwen3-4b | 10 | 60.0% | 70.0% | [31.3%, 83.2%] | n/a |
+| round 1, qwen3-4b | 4 | 75.0% | 75.0% | [30.1%, 95.4%] | 4/4 |
+| round 1, hpc-assistant-x02 | 4 | 25.0% | 25.0% | [4.6%, 69.9%] | 0/4 |
+
+Strict accuracy is the share of fully correct answers. Lenient accuracy counts
+a partly correct answer as half a point. The Wilson 95% interval shows the
+range where the true strict accuracy most likely sits. Format-follow rate is
+the share of answers that obey the prompt's format instruction; round 2 had no
+format instruction, so the rate is n/a.
+
+The sample is small (4 and 10 prompts, one run each), so the intervals are
+wide and the difference between the models is not proven.
