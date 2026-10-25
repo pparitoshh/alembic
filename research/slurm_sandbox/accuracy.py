@@ -33,7 +33,6 @@ def main():
     print("|---|---|---|---|---|---|")
     row("round 2, qwen3-4b", correct, partly, len(results))
     row("round 1, qwen3-4b", 3, 0, 4, (4, 4))
-    row("round 1, hpc-assistant-x02", 1, 0, 4, (0, 4))
     print()
     print("Round 2 per item (each item is one task type):")
     print("| id | task | rating |")

@@ -1,13 +1,11 @@
 # Slurm sandbox model evaluation
 
 Goal: measure how well the distilled student
-(`hf.co/VaibhavKKM/hpc-assistant-qwen3-4b`, called NEW) answers real Slurm
-tasks, and compare it against the old student (`hpc-assistant-x02`, called
-OLD). Every answer is executed unchanged in a real Slurm 23.11 container, so
-the verdicts come from Slurm itself, not from a human reading text. The
-round-1 smoke test of the two models is in
-`results/2026-10-25/round1_smoke.md`; the 10-prompt round 2 for NEW is in
-`results/2026-10-25/results.md`.
+(`hf.co/VaibhavKKM/hpc-assistant-qwen3-4b`) answers real Slurm tasks. Every
+answer is executed unchanged in a real Slurm 23.11 container, so the verdicts
+come from Slurm itself, not from a human reading text. The round-1 smoke test
+of the student is in `results/2026-10-25/round1_smoke.md`; the 10-prompt
+round 2 is in `results/2026-10-25/results.md`.
 
 ## Method
 
@@ -51,7 +49,7 @@ MariaDB for accounting. Without accounting, Slurm 23.11 pends every job with
 
 | Round | Date | Prompts | Correct | Partly | Wrong |
 |---|---|---|---|---|---|
-| 1 (smoke, x02 vs new) | 2026-10-25 | 4 | new 3, old 1 | 0 | new 1, old 3 |
+| 1 (smoke, 4 prompts) | 2026-10-25 | 4 | 3 | 0 | 1 |
 | 2 (10 prompts, new model) | 2026-10-25 | 10 | 6 | 2 | 2 |
 
 Round 2 details are in `results/2026-10-25/results.md`. The repeated weakness
@@ -67,7 +65,6 @@ Computed by `accuracy.py` (standard library only). Run it from any directory:
 |---|---|---|---|---|---|
 | round 2, qwen3-4b | 10 | 60.0% | 70.0% | [31.3%, 83.2%] | n/a |
 | round 1, qwen3-4b | 4 | 75.0% | 75.0% | [30.1%, 95.4%] | 4/4 |
-| round 1, hpc-assistant-x02 | 4 | 25.0% | 25.0% | [4.6%, 69.9%] | 0/4 |
 
 Strict accuracy is the share of fully correct answers. Lenient accuracy counts
 a partly correct answer as half a point. The Wilson 95% interval shows the

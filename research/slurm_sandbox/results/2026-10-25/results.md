@@ -41,7 +41,6 @@ folder.
 |---|---|---|---|---|---|
 | round 2, qwen3-4b | 10 | 60.0% | 70.0% | [31.3%, 83.2%] | n/a |
 | round 1, qwen3-4b | 4 | 75.0% | 75.0% | [30.1%, 95.4%] | 4/4 |
-| round 1, hpc-assistant-x02 | 4 | 25.0% | 25.0% | [4.6%, 69.9%] | 0/4 |
 
 Strict accuracy is the share of fully correct answers. Lenient accuracy counts
 a partly correct answer as half a point. The Wilson 95% interval shows the
