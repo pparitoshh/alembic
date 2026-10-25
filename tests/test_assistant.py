@@ -60,6 +60,19 @@ def test_improved_retriever_matches_eval_retriever(tmp_path, monkeypatch):
         assert getattr(assistant, name) == getattr(ref, name), name
 
 
+def test_relevance_header_matches_eval_variant_e(tmp_path, monkeypatch):
+    monkeypatch.setenv('RAG_VARIANT', 'e')
+    spec = importlib.util.spec_from_file_location('rag65_retrieve_e', ROOT / 'research/rag65/retrieve.py')
+    ref = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ref)
+    idx = _indexes(tmp_path)
+    p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
+    for q in ['How do I request GPUs on LUMI?', 'How do I cancel a pending array job?', 'the and for']:
+        docs = assistant.retrieve(q, p, f, variant='e')
+        assert docs == assistant.retrieve(q, p, f, variant='b') == ref.retrieve(q, p, f)
+        assert assistant.with_context(q, docs, relevance=True) == ref.with_context(q, ref.retrieve(q, p, f))
+
+
 def _general_index(idx):
     _index(idx / 'general_docs.sqlite', [
         ('https://docs.nvidia/nsight', 'NVIDIA', 'Profile a CUDA kernel with Nsight Compute: ncu --set full ./app.'),
@@ -101,7 +114,9 @@ def test_improved_retriever_is_default_and_asks_ollama_for_16k_context(tmp_path,
     p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
     q = 'How do I request GPUs on LUMI?'
     bot = assistant.Assistant(idx)
-    assert bot.retriever == 'b' and bot.search(q) == assistant.retrieve(q, p, f, variant='b')
+    assert bot.retriever == 'e' and bot.search(q) == assistant.retrieve(q, p, f, variant='b')
+    assert bot.prompt(q)[0].startswith(q + assistant.RELEVANCE_HEADER)
+    assert assistant.Assistant(idx, retriever='b').prompt(q)[0] == assistant.with_context(q, bot.search(q))
     sent = []
 
     class Resp:  # stands in for urlopen's response: one Ollama chat chunk
