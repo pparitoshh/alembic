@@ -1,0 +1,24 @@
+===P07-BONUS===
+JobId=70 JobName=p04.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+===P08-SINFO===
+PARTITION NODELIST STATE
+gpu slurmnode idle
+boost_usr_prod* slurmnode idle
+===P09-AS-IS-55===
+scancel: unrecognized option '--suspend'
+Try "scancel --help" for more information
+P09A-RC=1
+Access/permission denied for job 55
+P09B-RC=1
+===P09-BONUS-NEW===
+Submitted batch job 73
+jobid=73
+73 RUNNING
+scancel: unrecognized option '--suspend'
+Try "scancel --help" for more information
+Access/permission denied for job 73
+===P10-PARTITION===
+sbatch: error: invalid partition specified: compute
+sbatch: error: Batch job submission failed: Invalid partition name specified
+P10-RC=1

@@ -1,0 +1,40 @@
+===ARRAY66===
+          JobID      State 
+--------------- ---------- 
+           66_1  COMPLETED 
+     66_1.batch  COMPLETED 
+           66_4  COMPLETED 
+     66_4.batch  COMPLETED 
+           66_7  COMPLETED 
+     66_7.batch  COMPLETED 
+          66_10  COMPLETED 
+    66_10.batch  COMPLETED 
+===P03-FIX===
+Submitted batch job 71
+JobID             State 
+------------ ---------- 
+71            COMPLETED 
+71.batch      COMPLETED 
+===P05-SRUN===
+slurmnode
+slurmnode
+slurmnode
+slurmnode
+P05-RC=0
+===P06-SACCT99===
+   Elapsed      State 
+---------- ---------- 
+P06-RC=0
+===P06-BONUS===
+   Elapsed      State 
+---------- ---------- 
+  00:00:00  COMPLETED 
+  00:00:00  COMPLETED 
+===P07-A===
+slurm_load_jobs error: Invalid job id specified
+P07A-RC=1
+===P07-B===
+sacct: error: Invalid field requested: "EndTime"
+===P07-C===
+slurm_load_jobs error: Invalid job id specified
+P07C-RC=1

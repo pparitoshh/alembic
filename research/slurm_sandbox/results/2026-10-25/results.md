@@ -1,0 +1,32 @@
+# Slurm eval: hf.co/VaibhavKKM/hpc-assistant-qwen3-4b:latest
+
+Date: 2026-10-25. Cluster: container `slurm-test` (ubuntu:24.04, slurm-wlm 23.11.4), user `ubuntu`, node `slurmnode` (12 CPUs, 32000 MB, gpu:4), partitions `gpu` + `boost_usr_prod`, accounting via slurmdbd. Prompts and expected answers were written before the model calls (see `prompts.txt`, `expected.md`). Raw model answers: `ans_01.txt` ... `ans_10.txt`. Execution logs: `out_batch1.txt`, `out_batch2.txt`, `out_batch3.txt`.
+
+## Score
+
+| Rating | Count | Items |
+|---|---|---|
+| correct | 6 | 1, 3, 4, 5, 7, 8 |
+| partly correct | 2 | 6, 10 |
+| wrong | 2 | 2, 9 |
+
+## Results table
+
+| # | Task | Model answer | Real output | Rating / reason |
+|---|---|---|---|---|
+| 1 | sbatch header (1 node, 8 CPU, 16G, 2h, name, output with %j) | full header with `--cpus-per-task=8 --mem=16G --time=02:00:00 --job-name=myjob --output=myjob_%j.out` | job 65 ran: `ReqTRES=cpu=8,mem=16G`, `TimeLimit=02:00:00`, file `myjob_65.out` contains `RUN-OK` | **correct** - all flags right, `%j` works |
+| 2 | array 1-10, max 3 concurrent | `#SBATCH --array=1-10:3` | accepted, but sacct shows only tasks `66_1, 66_4, 66_7, 66_10` | **wrong** - colon is the step syntax (4 tasks, no throttle); must be `--array=1-10%3` |
+| 3 | dependency afterok | `sbatch --dependency=afterok:42 B.sh` | `Submitted batch job 71`; 71 COMPLETED after real job 42 | **correct** - exact expected form, ran |
+| 4 | mail on end/fail | `--mail-user=me@example.com` + `--mail-type=END,FAIL` | job 70 accepted and completed; delivery fails only because `/bin/mail` (MailProg) is missing in the container | **correct** - flags right; delivery error is environmental |
+| 5 | srun 4 tasks | `srun -n 4 hostname` | 4 lines `slurmnode`, RC=0 | **correct** |
+| 6 | sacct elapsed+state for job 99 | `sacct -j 99 --format=Elapsed,State` | empty table (job 99 does not exist); accounting IS active (slurmdbd), so no error; bonus with real job: `00:00:00 COMPLETED` | **partly** - works but omits the JobID column |
+| 7 | scontrol show job 77 | `scontrol show job 77` (+ squeue/sacct pre-checks) | `slurm_load_jobs error: Invalid job id specified` (77 does not exist); bonus on real job 70 works. Side note: its sacct line uses invalid field `EndTime` | **correct** - main command exactly right |
+| 8 | sinfo 3 columns | `sinfo -o "%P %N %T"` | `PARTITION NODELIST STATE`, one line per node, both partitions | **correct** |
+| 9 | hold/release job 55 | `scancel --suspend 55` / `scontrol resume 55` | `scancel: unrecognized option '--suspend'`; `scontrol resume 55` -> `Access/permission denied for job 55`; same on a real running job | **wrong** - scancel has no --suspend; expected `scontrol hold`/`release` |
+| 10 | module + srun python | script with `#SBATCH --partition=compute`, `module load python`, `srun python -c "print(42)"` | `sbatch: error: invalid partition specified: compute` (RC=1); container also has no `module` command | **partly** - structure right, partition name hallucinated |
+
+## Environment notes
+
+- The node was declared with 12 CPUs and 32000 MB so the 8-CPU/16G header could actually run; declared memory larger than reported needed `SlurmctldParameters=node_reg_mem_percent=40` to avoid auto-drain.
+- The container HAS accounting (slurmdbd + MariaDB), so item 6 produced an empty result, not an "accounting disabled" error.
+- Only file names and the B.sh shebang were adapted when running model answers; no model errors were fixed.

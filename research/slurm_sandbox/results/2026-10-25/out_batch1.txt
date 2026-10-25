@@ -1,0 +1,423 @@
+===P01-SBATCH===
+Submitted batch job 65
+===P01-SHOW-J===
+JobId=16 JobName=job.sh
+   JobState=CANCELLED Reason=PartitionNodeLimit Dependency=(null)
+   RunTime=00:00:00 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=2 NumCPUs=2 NumTasks=0 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=2,mem=2M,node=2,billing=2
+   AllocTRES=(null)
+JobId=17 JobName=train
+   JobState=CANCELLED Reason=None Dependency=(null)
+   RunTime=00:00:05 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=18 JobName=train
+   JobState=CANCELLED Reason=None Dependency=(null)
+   RunTime=00:00:05 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=19 JobName=train
+   JobState=CANCELLED Reason=None Dependency=(null)
+   RunTime=00:00:05 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=20 JobName=train
+   JobState=CANCELLED Reason=None Dependency=(null)
+   RunTime=00:00:05 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=21 JobName=train
+   JobState=CANCELLED Reason=Resources Dependency=(null)
+   RunTime=00:00:00 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=0 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,billing=1
+JobId=22 JobName=j.sh
+   JobState=CANCELLED Reason=PartitionNodeLimit Dependency=(null)
+   RunTime=00:00:00 TimeLimit=01:00:00 TimeMin=N/A
+   NumNodes=2 NumCPUs=2 NumTasks=0 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=2,mem=2M,node=2,billing=2
+   AllocTRES=(null)
+JobId=23 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=24 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=25 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=26 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=27 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=28 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=29 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=30 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=365-00:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=31 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:01 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=32 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=33 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=34 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=35 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=36 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=37 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=38 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=39 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=40 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=41 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=42 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=43 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=44 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=45 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=46 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=47 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=48 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=49 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=50 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=51 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=52 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=53 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=54 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=55 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=56 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:00 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=57 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:01 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=58 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:01 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=59 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:01 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=60 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:01 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=61 JobName=wrap
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:02:01 TimeLimit=UNLIMITED TimeMin=N/A
+   NumNodes=1 NumCPUs=1 NumTasks=1 CPUs/Task=1 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=1,mem=1M,node=1,billing=1
+   AllocTRES=cpu=1,node=1,billing=1
+JobId=62 JobName=myjob
+   JobState=CANCELLED Reason=BadConstraints Dependency=(null)
+   RunTime=00:00:00 TimeLimit=02:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=8 NumTasks=0 CPUs/Task=8 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=8,mem=16G,node=1,billing=8
+   AllocTRES=(null)
+JobId=63 JobName=myjob
+   JobState=CANCELLED Reason=Nodes_required_for_job_are_DOWN,_DRAINED_or_reserved_for_jobs_in_higher_priority_partitions Dependency=(null)
+   RunTime=00:00:00 TimeLimit=02:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=8 NumTasks=0 CPUs/Task=8 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=8,mem=16G,node=1,billing=8
+   AllocTRES=(null)
+JobId=64 JobName=myjob
+   JobState=FAILED Reason=BadConstraints Dependency=(null)
+   RunTime=00:00:00 TimeLimit=02:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=8 NumTasks=0 CPUs/Task=8 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=8,mem=16G,node=1,billing=8
+   AllocTRES=(null)
+JobId=65 JobName=myjob
+   JobState=COMPLETED Reason=None Dependency=(null)
+   RunTime=00:00:01 TimeLimit=02:00:00 TimeMin=N/A
+   NumNodes=1 NumCPUs=8 NumTasks=1 CPUs/Task=8 ReqB:S:C:T=0:0:*:*
+   ReqTRES=cpu=8,mem=16G,node=1,billing=8
+   AllocTRES=cpu=8,node=1,billing=8
+===P01-OUTFILE===
+myjob_65.out
+RUN-OK
+===P02-ARRAY===
+Submitted batch job 66
+P02-RC=0
+===P03-DEP===
+sbatch: error: This does not look like a batch script.  The first
+sbatch: error: line must start with #! followed by the path to an interpreter.
+sbatch: error: For instance: #!/bin/sh
+   JobState=CANCELLED Reason=PartitionNodeLimit Dependency=(null)
+   Command=/home/gpulab/job.sh
+   JobState=CANCELLED Reason=None Dependency=(null)
+   Command=/home/ubuntu/j.sh
+   JobState=CANCELLED Reason=None Dependency=(null)
+   Command=/home/ubuntu/j.sh
+   JobState=CANCELLED Reason=None Dependency=(null)
+   Command=/home/ubuntu/j.sh
+   JobState=CANCELLED Reason=None Dependency=(null)
+   Command=/home/ubuntu/j.sh
+   JobState=CANCELLED Reason=Resources Dependency=(null)
+   Command=/home/ubuntu/j.sh
+   JobState=CANCELLED Reason=PartitionNodeLimit Dependency=(null)
+   Command=/home/ubuntu/j.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=(null)
+   JobState=CANCELLED Reason=BadConstraints Dependency=(null)
+   Command=/home/ubuntu/eval/p01.sh
+   JobState=CANCELLED Reason=Nodes_required_for_job_are_DOWN,_DRAINED_or_reserved_for_jobs_in_higher_priority_partitions Dependency=(null)
+   Command=/home/ubuntu/eval/p01.sh
+   JobState=FAILED Reason=BadConstraints Dependency=(null)
+   Command=/home/ubuntu/eval/p01.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=/home/ubuntu/eval/p01.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=/home/ubuntu/eval/p02.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=/home/ubuntu/eval/p02.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=/home/ubuntu/eval/p02.sh
+   JobState=COMPLETED Reason=None Dependency=(null)
+   Command=/home/ubuntu/eval/p02.sh
+===P04-MAIL===
+Submitted batch job 70
