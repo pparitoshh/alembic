@@ -29,10 +29,11 @@ for s in 42 43 44; do
     [ -s configs/${RD}_seed$s.json ] || sed -e "s#runs/rag65kd/train#$D/train#" -e "s#\"model\": \"Qwen/Qwen3-4B-Instruct-2507\"#\"model\": \"$MERGED\"#" configs/rag65kd_seed$s.json > configs/${RD}_seed$s.json
 done
 want=$(wc -l < $SRC)
+GEN_PCT=${GEN_MIN_PCT:-$([ -n "${MIN_ROWS:-}" ] && echo 85 || echo 95)}  # targeted rounds (MIN_ROWS set): their prompts are longer, 12% fail the input filter
 have() { cat $GEN/cands_*.jsonl 2>/dev/null | wc -l; }
 log "start: round 27 answers $want questions (6,000 with irrelevant excerpts, 2,000 Slurm)"
 for attempt in 1 2 3 4 5; do
-    [ "$(have)" -ge $(( want * 95 / 100 )) ] && break  # 376 rows never qualify (generator input filter)
+    [ "$(have)" -ge $(( want * GEN_PCT / 100 )) ] && break  # 376 rows never qualify (generator input filter)
     j=$(adopt dk-$RD-gen); [ -n "$j" ] || j=$(cd $C && REPO=$C MODEL=$MERGED DATA=$SRC OUT=$GEN sbatch --parsable --nodes=2 --job-name=dk-$RD-gen research/kd/onpolicy_gen.sbatch 2>/dev/null | tail -1)
     [[ "$j" =~ ^[0-9]+$ ]] || { log "generation submission refused (slots busy); retrying"; sleep 120; continue; }
     log "student generation job $j ($(have)/$want)"; wait_job "$j"
@@ -59,7 +60,7 @@ with open('$DATA', 'w') as f:
 print(n)
 PY
 log "DATA: $(tail -1 "$HERE/data.out") rows with round 27's own answers"
-[ "$(wc -l < $DATA)" -ge 6000 ] || { log "STOP: too few student answers"; exit 1; }
+[ "$(wc -l < $DATA)" -ge ${MIN_ROWS:-6000} ] || { log "STOP: too few student answers"; exit 1; }  # MIN_ROWS (opt-in, Oct 25): smaller targeted rounds
 for s in 42 43 44; do mkdir -p $D/train/seed$s && cp -n $DATA $D/train/seed$s/verified.jsonl; done
 rows=$(wc -l < $DATA)
 scored() { $VPY -c "
@@ -104,5 +105,5 @@ if [ ! -s $OUTM/model.safetensors ]; then
     test -s $OUTM/model.safetensors || { log "STOP: soup failed: $(tail -3 "$HERE/soup.out")"; exit 1; }
 fi
 log "DONE: round 47 soup at $OUTM; answering with retriever b at 1536 tokens, then three judges vs round 27 at 1536"
-ANSWER_MAX_TOKENS=1536 VARIANT=b bash $R/ctl/ragc.sh $RD $OUTM
-REL_ANSWERS=runs/tok1536/answers REL_ARM=base_rag bash $R/ctl/vs_newret.sh $RD
+ANSWER_MAX_TOKENS=1536 VARIANT=${FINAL_VARIANT:-b} bash $R/ctl/ragc.sh $RD $OUTM  # FINAL_VARIANT/FINAL_REL (opt-in, Oct 25): e.g. e and runs/r27e/answers
+REL_ANSWERS=${FINAL_REL:-runs/tok1536/answers} REL_ARM=base_rag bash $R/ctl/vs_newret.sh $RD

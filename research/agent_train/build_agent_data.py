@@ -10,6 +10,7 @@ usage: build_agent_data.py OUT_DIR REPLAY_SRC TRAJ.jsonl... [--upsample N] [--n-
 import argparse
 import json
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,7 @@ a = ap.parse_args()
 out = Path(a.out)
 out.mkdir(parents=True, exist_ok=True)
 TOOLS = [SEARCH_TOOL] + openai_tools()
+THINK = re.compile(r"<think>.*?</think>\s*", re.S)
 
 
 def call_text(tc):
@@ -38,6 +40,8 @@ def call_text(tc):
 def clean(m):
     """History message as the chat template expects it (ids are an API detail, not part of the rendered prompt)."""
     m = {k: v for k, v in m.items() if k in ("role", "content", "tool_calls")}
+    if m.get("role") == "assistant" and m.get("content"):
+        m["content"] = THINK.sub("", m["content"])
     if m.get("tool_calls"):
         m["tool_calls"] = [{"type": "function", "function": {"name": tc["function"]["name"], "arguments": (
             json.loads(tc["function"]["arguments"] or "{}") if isinstance(tc["function"]["arguments"], str)
@@ -57,7 +61,7 @@ for path in a.traj:
         for i, m in enumerate(msgs):
             if m["role"] != "assistant":
                 continue
-            target = (m.get("content") or "").strip()
+            target = THINK.sub("", m.get("content") or "").strip()  # THINK=1 trajectories: keep only the actions
             if m.get("tool_calls"):
                 target = ((target + "\n") if target else "") + "\n".join(call_text(tc) for tc in m["tool_calls"])
             if not target:
