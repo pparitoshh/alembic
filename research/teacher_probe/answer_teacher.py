@@ -6,6 +6,7 @@ compares the teacher with closed-book base on the same footing as the students. 
 reasoning block is removed and only the final answer is judged.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -20,7 +21,8 @@ cfg = load_config('configs/rag65_seed42.json')
 PILOT, FACTORY = 'runs/rag65/indexes/documents.sqlite', 'runs/rag65/indexes/factory_docs.sqlite'
 cfg.teacher.model, cfg.teacher.base_url = served, endpoint
 cfg.teacher.temperature, cfg.teacher.top_logprobs = 0, 0
-cfg.teacher.max_tokens = 6144 if thinking else cfg.eval.max_new_tokens
+# ANSWER_MAX_TOKENS (opt-in, Oct 24): answer length limit for non-thinking models instead of eval.max_new_tokens (768).
+cfg.teacher.max_tokens = 6144 if thinking else int(os.environ.get('ANSWER_MAX_TOKENS') or cfg.eval.max_new_tokens)
 cfg.teacher.extra_body = {'chat_template_kwargs': {'enable_thinking': thinking}}
 cfg.teacher.concurrency = 32
 client = Teacher(cfg.teacher)
