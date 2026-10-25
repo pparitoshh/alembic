@@ -1,0 +1,104 @@
+[
+ {
+  "id": "g5_en_wikipedia_org",
+  "topic": "gap5",
+  "leaves": [
+   "datacenter_facilities_tco"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-SA-4.0",
+  "license_basis": "Wikipedia text is CC BY-SA 4.0 (footer of every page)",
+  "seeds": [
+   "https://en.wikipedia.org/wiki/Uninterruptible_power_supply",
+   "https://en.wikipedia.org/wiki/Raised_floor",
+   "https://en.wikipedia.org/wiki/Free_cooling",
+   "https://en.wikipedia.org/wiki/Immersion_cooling",
+   "https://en.wikipedia.org/wiki/Data_center_infrastructure_management",
+   "https://en.wikipedia.org/wiki/Modular_data_center",
+   "https://en.wikipedia.org/wiki/Power_distribution_unit",
+   "https://en.wikipedia.org/wiki/Server_room",
+   "https://en.wikipedia.org/wiki/Green_computing",
+   "https://en.wikipedia.org/wiki/Waste_heat",
+   "https://en.wikipedia.org/wiki/District_heating",
+   "https://en.wikipedia.org/wiki/Diesel_generator",
+   "https://en.wikipedia.org/wiki/Water_cooling",
+   "https://en.wikipedia.org/wiki/Data_center_management",
+   "https://en.wikipedia.org/wiki/Energy_proportional_computing",
+   "https://en.wikipedia.org/wiki/Thermal_design_power",
+   "https://en.wikipedia.org/wiki/Electrical_substation",
+   "https://en.wikipedia.org/wiki/Automatic_transfer_switch",
+   "https://en.wikipedia.org/wiki/Energy_Star",
+   "https://en.wikipedia.org/wiki/Server_farm",
+   "https://en.wikipedia.org/wiki/Rack_unit",
+   "https://en.wikipedia.org/wiki/19-inch_rack",
+   "https://en.wikipedia.org/wiki/Chiller",
+   "https://en.wikipedia.org/wiki/Cooling_tower",
+   "https://en.wikipedia.org/wiki/Heat_pump",
+   "https://en.wikipedia.org/wiki/Carbon_footprint"
+  ],
+  "prefixes": [
+   "https://en.wikipedia.org/wiki/Uninterruptible_power_supply",
+   "https://en.wikipedia.org/wiki/Raised_floor",
+   "https://en.wikipedia.org/wiki/Free_cooling",
+   "https://en.wikipedia.org/wiki/Immersion_cooling",
+   "https://en.wikipedia.org/wiki/Data_center_infrastructure_management",
+   "https://en.wikipedia.org/wiki/Modular_data_center",
+   "https://en.wikipedia.org/wiki/Power_distribution_unit",
+   "https://en.wikipedia.org/wiki/Server_room",
+   "https://en.wikipedia.org/wiki/Green_computing",
+   "https://en.wikipedia.org/wiki/Waste_heat",
+   "https://en.wikipedia.org/wiki/District_heating",
+   "https://en.wikipedia.org/wiki/Diesel_generator",
+   "https://en.wikipedia.org/wiki/Water_cooling",
+   "https://en.wikipedia.org/wiki/Data_center_management",
+   "https://en.wikipedia.org/wiki/Energy_proportional_computing",
+   "https://en.wikipedia.org/wiki/Thermal_design_power",
+   "https://en.wikipedia.org/wiki/Electrical_substation",
+   "https://en.wikipedia.org/wiki/Automatic_transfer_switch",
+   "https://en.wikipedia.org/wiki/Energy_Star",
+   "https://en.wikipedia.org/wiki/Server_farm",
+   "https://en.wikipedia.org/wiki/Rack_unit",
+   "https://en.wikipedia.org/wiki/19-inch_rack",
+   "https://en.wikipedia.org/wiki/Chiller",
+   "https://en.wikipedia.org/wiki/Cooling_tower",
+   "https://en.wikipedia.org/wiki/Heat_pump",
+   "https://en.wikipedia.org/wiki/Carbon_footprint"
+  ],
+  "max_pages": 26
+ },
+ {
+  "id": "g5_energy_gov_femp",
+  "topic": "gap5",
+  "leaves": [
+   "datacenter_facilities_tco"
+  ],
+  "kind": "technical_documentation",
+  "license": "US-Government-Public-Domain",
+  "license_basis": "works of the US federal government (17 U.S.C. 105); verify in licence review",
+  "seeds": [
+   "https://www.energy.gov/cmei/femp/energy-efficiency-data-centers"
+  ],
+  "prefixes": [
+   "https://www.energy.gov/cmei/femp/"
+  ],
+  "max_pages": 30
+ },
+ {
+  "id": "g5_energystar_gov",
+  "topic": "gap5",
+  "leaves": [
+   "datacenter_facilities_tco"
+  ],
+  "kind": "technical_documentation",
+  "license": "US-Government-Public-Domain",
+  "license_basis": "works of the US federal government (EPA ENERGY STAR); verify in licence review",
+  "seeds": [
+   "https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center",
+   "https://www.energystar.gov/products/data_center_equipment"
+  ],
+  "prefixes": [
+   "https://www.energystar.gov/products/data_center_equipment"
+  ],
+  "max_pages": 25
+ }
+]

@@ -64,6 +64,7 @@ LEAVES = [x.strip() for x in os.environ.get('LEAVES', '').split(',') if x.strip(
 PER_LEAF_CAP = int(os.environ.get('PER_LEAF_CAP', '1500'))
 MAX_VARIANTS = int(os.environ.get('MAX_VARIANTS', '6'))
 MIN_CHUNK_HITS = int(os.environ.get('MIN_CHUNK_HITS', '1'))
+RELEVANCE_MIN = int(os.environ.get('RELEVANCE_MIN', '2'))
 WEAK_MAX_VARIANTS = int(os.environ.get('WEAK_MAX_VARIANTS', '3'))
 TEACHER = os.environ.get('TEACHER', 'QuantTrio/Qwen3-235B-A22B-Instruct-2507-AWQ')
 JUDGE_MAX_TOKENS = int(os.environ.get('JUDGE_MAX_TOKENS', '20000'))
@@ -316,7 +317,7 @@ def scan_doc(j):
         tech = len({m.lower() for m in TECH.findall(text)})
         code = '```' in text or bool(re.search(r'^\s*[$#] \w', text, re.M))
         score = tech + 3 * code
-        if score < 2:  # v3/v4 bar: still HPC terms or code
+        if score < RELEVANCE_MIN:  # v3/v4 bar (2): still HPC terms or code; RELEVANCE_MIN=0 (opt-in) for facilities topics
             drop['low_relevance'] += 1
             continue
         out.append({'leaf': hit[2], 'leaf_score': hit[0], 'hits': hit[3], 'url_hit': hit[4],
