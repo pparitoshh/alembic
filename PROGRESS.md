@@ -6,20 +6,36 @@
 
 | Stage | Code | Ran locally | Notes |
 |---|---|---|---|
-| Seeds + doc-level split | ✅ | ✅ | 6 Slurm docs; `slurm_job_arrays` and `slurm_requeue_signals` held out for eval |
-| Eval set (prose) | ✅ | — | 26 hand-written Qs from 2 held-out docs (target: ~50 from 3+ docs before Oct 6) |
-| Eval set (tool slice) | ✅ | — | `data/eval/eval_tools.jsonl`: 16 draft items (10 call, 6 no-call), needs human review |
+| Seeds + doc-level split | ✅ | ✅ | 6 Slurm docs; `slurm_job_arrays` and `slurm_requeue_signals` held out for eval. Opt-in hash-bound source-family registry and held-out family ancestry checks ([PR #14](https://github.com/pparitoshh/alembic/pull/14), [#20](https://github.com/pparitoshh/alembic/pull/20)) |
+| Eval set (prose) | ✅ | — | [`dataset_v1`](data/eval/dataset_v1/README.md): 106 development + 22 frozen final (12 CUDA Samples, 10 Open MPI; families held out). Model-reviewed only; GOAL.md's human review still pending |
+| Eval set (tool slice) | ✅ | — | `dataset_v1/development_tools.jsonl`: 23 first-response items (decision + arguments, not full multi-turn); no final tool split |
 | Tools: 8 schemas + mock cluster | ✅ | ✅ | `tools.py`: deterministic, Leonardo-like partitions |
 | Tool-call checker | ✅ | ✅ | `toolcheck.py`: schema, execution, job-id grounding, decision, BFCL-style AST |
 | Gold examples | ✅ | ✅ | `data/gold/prose.json`, `tool_trace.json` |
-| `generate` (prose + tool traces) | ✅ | ✅ | resumable; ~30% tool traces in the Leonardo config |
-| `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination |
-| `train` (LoRA / QDoRA) | ✅ | ✅ | QDoRA on Qwen3-0.6B (RTX 2060); FSDP config written, untested |
+| `generate` (prose + tool traces) | ✅ | ✅ | Qwen3-32B-AWQ on Leonardo: [11,167 certified Q&A](data/teacher/verified_qwen_11167/README.md) toward the new at-least-50,000 target. The release remains overwhelmingly prose; the planned 30% tool-trace mix has not been achieved. |
+| `verify` | ✅ | ✅ | dedup, flag linter, `bash -n`, tool checks, decontamination. Question decontamination checks `cfg.eval.file` (`eval_all_v2.jsonl`), not the `dataset_v1` items |
+| `train` (LoRA / QDoRA) | ✅ | ✅ | Eight-record Qwen3-4B sanity run ([PR #10](https://github.com/pparitoshh/alembic/pull/10)); interim 1,100-row QDoRA run completed with 207 optimizer steps and a saved adapter. A separate 11,167-row QDoRA milestone job started on Leonardo; its outcome, the held 50,000-row full run, and student-improvement evaluation remain pending. FSDP config untested. |
 | `evaluate` | ✅ | — | prose judge + tool-slice scoring; not yet run on a tool-trained student |
-| Teacher top-20 logprob capture | ✅ | ✅ | works against the toy API; needs a vLLM test on the cluster with Qwen3-32B-AWQ (`smoke_teacher.sbatch`) |
+| Teacher top-20 logprob capture | ✅ | ✅ | vLLM + Qwen3-32B-AWQ smoke passed on Leonardo (job 59544756, [PR #2](https://github.com/pparitoshh/alembic/pull/2)): top-20 logprobs, token IDs, tool call. Not captured for multi-turn traces; training is SFT only |
 | `export` (GGUF/Ollama) | ✅ | ✅ | merge → bf16 GGUF → imatrix → Q4_K_M/Q8_0 → Modelfile → `ollama create` + tool-call smoke test |
 
 ## Log
+
+### 2026-10-11: active target raised to 50,000; historical review evidence shared
+
+The team is now working toward at least 50,000 corrected, automated-gate verified Q&A. The held full-run training job was renamed `dk-train50k` and its trigger changed from 30,000 to 50,000; the independent 11,167-row milestone training continues. The historical 1,100-row release, its review reports and 1,031-scenario plan are available to the team in `/leonardo_work/EUHPC_D30_031/alembic/campaign_evidence/pr23_1100_1031/`, with hashes and a reproducible final-evaluation-family boundary audit. Existing queued source proposals do not guarantee 50,000 accepted answers.
+
+### 2026-10-10: 10,000 milestone crossed and parallel student training started
+
+The [11,167-row corrected Qwen teacher release](data/teacher/verified_qwen_11167/README.md) adds 2,717 verified Q&A from three cohorts after the 8,450-row release. It was validated against each corrected certificate and preserves the 8,450-row prefix byte-for-byte. A separate one-GPU Qwen3-4B QDoRA job started on this milestone while the next answer-quality gates continue toward 30,000. The 30,000-row training job remains held. Neither a training result nor student improvement is claimed yet.
+
+### 2026-10-10: second corrected teacher release
+
+The [8,450-row Qwen teacher release](data/teacher/verified_qwen_8450/README.md) is hash-validated and extends the earlier 4,775-row release byte-for-byte. The second 5,307-answer batch contributed 3,675 accepted Q&A after independent Gemma source review, GPT-OSS high-risk audit, deduplication, provenance and real TRL loader checks; 1,632 were withheld. A third 2,097-answer batch has finished raw generation and entered its independent gate. The 30,000-row QDoRA job remains held pending a corrected certificate at the target; no final student-improvement claim is made.
+
+### 2026-10-10: earlier quality review and interim training status
+
+The earlier corrected, hash-validated [4,775-row automated-gate release](data/teacher/verified_qwen_4775/README.md) contained 1,100 prior accepted rows plus 3,675 accepted from 6,000 new-document questions, with 2,325 withheld. At that checkpoint, a follow-on cohort had selected 5,307 source-bound questions from 6,915 proposals; its answers had not yet been certified. An interim 1,100-row QDoRA run completed 207 optimizer steps and saved an adapter. Raw attempts and model artifacts remain outside Git.
 
 ### 2026-10-06: teacher serving decided, judges and sizes in GOAL.md
 

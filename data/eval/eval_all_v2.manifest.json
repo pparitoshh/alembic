@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "release": "normal-eval-v2",
+  "intended_use": "development evaluation; exposed during development; not a blind final test",
+  "sha256": "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4",
+  "rows": 66,
+  "composition": [
+    {
+      "path": "data/eval/eval_core.jsonl",
+      "sha256": "ed01ac6e63b3774273cdf4c48defe6ee6d8c012421e959658072167f9dda2511",
+      "rows": 10
+    },
+    {
+      "path": "data/eval/eval_req.jsonl",
+      "sha256": "f627bf1c736a2a3040aa3fcc6ea765ce6e51b113f5dbb4e21b3e3ec37f911b27",
+      "rows": 16
+    }
+  ],
+  "supplement": {
+    "supplied_artifact": "eval_astra_model_reviewed.jsonl",
+    "sha256": "49de3ddbb19f2104b995afa241645378e3ccc8100bb50a0ba1644636e3d64e5b",
+    "rows": 40
+  },
+  "held_out_sources": {
+    "slurm_job_arrays": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+    "slurm_requeue_signals": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4"
+  },
+  "review": {
+    "method": "model review plus automated validation",
+    "human_review_performed": false,
+    "generator_exact_model_version": "unknown",
+    "original_reviewer_exact_model_version": "unknown",
+    "supplement_review_date": "2026-10-06",
+    "supplied_review_sha256": "1ac86822444db01e534a9ad57fe9747156a6c0a024804f89782cf7dab847e8e8",
+    "supplied_validation_sha256": "f884c9c2e5b2b67a8ccf40e01e15c34cc4f1d49a7717634c6d9c3f9ae2bdc24b",
+    "current_integration_review": "All 26 originals including req-016 and all 40 supplemental rows examined against current repository slices and source hashes; independent model review plus exact validation. No new unresolved integration conflicts under documented related-application acceptance.",
+    "limitations": [
+      "Model review is fallible.",
+      "Original 26 label provenance is inherited; supplemental review is not retroactive review of all original labels.",
+      "Items share capabilities; they are not 66 independent skills.",
+      "Original source upstream provenance remains unresolved."
+    ]
+  },
+  "training_restriction": "Do not use questions, references, paraphrases, or held-out source material in training, gold anchors or retrieval."
+}

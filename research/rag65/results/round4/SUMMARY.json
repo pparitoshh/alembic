@@ -1,0 +1,29 @@
+{
+  "rows": 42106,
+  "base_set": "runs/rag65v3/data/verified.jsonl",
+  "base_scores_x1_rag_mean": {
+    "runs/rag65v2/data/verified.jsonl": 0.5687666666666666,
+    "runs/rag65v3/data/verified.jsonl": 0.58
+  },
+  "by_origin": {
+    "b7": 17579,
+    "ccby_v1": 1016,
+    "ccby_v2": 816,
+    "factory_v1": 22695
+  },
+  "by_licence": {
+    "b7/ccby-existing": 19411,
+    "unspecified": 13745,
+    "CC-BY-4.0": 5295,
+    "AGPL-3.0": 19,
+    "GPL-3.0": 404,
+    "CC-BY-NC-SA-4.0": 1511,
+    "Apache-2.0": 306,
+    "MIT": 652,
+    "BSD-3-Clause": 288,
+    "CC0-1.0": 473,
+    "LGPL-3.0": 2
+  },
+  "tool_fraction": 0.22,
+  "sha256": "1ddbb85762987fff49d8160f1d534e08dd7c67d597e639b4382e6ebed37c9651"
+}

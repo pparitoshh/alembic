@@ -1,0 +1,353 @@
+{
+  "version": "dev-eval-rc-v3",
+  "created_utc": "2026-10-07T12:49:46.411860+00:00",
+  "base_revision": "5e04e2a2c2ffd1e3c8d030ff3863c729a322b237",
+  "code_identity": "Exact file hashes below; final commit recorded in campaign checkpoint-07 and PR.",
+  "purpose": "Internal development RC, exposed; not final-test or externally published material.",
+  "owners": [
+    "Vaibhav Mangroliya",
+    "Shraddha Jadhav"
+  ],
+  "ready": {
+    "normal": 66,
+    "tools_first_response_scope": 16
+  },
+  "draft_pending": 0,
+  "separate": {
+    "judge_calibration_pairs": 24,
+    "diagnostic_cases": 10,
+    "fresh_final_test_items": 0
+  },
+  "protocols": {
+    "normal": "development-normal-v3",
+    "tool": "tool-first-response-v2",
+    "visible_tool_policy": "hpc-tools-clarify-first-v1",
+    "judge": "unchanged verdict-only"
+  },
+  "inputs": [
+    {
+      "path": "data/eval/eval_all_v2.jsonl",
+      "sha256": "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4"
+    },
+    {
+      "path": "data/eval/eval_core.jsonl",
+      "sha256": "ed01ac6e63b3774273cdf4c48defe6ee6d8c012421e959658072167f9dda2511"
+    },
+    {
+      "path": "data/eval/eval_req.jsonl",
+      "sha256": "f627bf1c736a2a3040aa3fcc6ea765ce6e51b113f5dbb4e21b3e3ec37f911b27"
+    },
+    {
+      "path": "data/eval/eval_tools.jsonl",
+      "sha256": "c5ec3515625067355d6232bc27b063f05d55c0def056132cb1a8575454493441"
+    },
+    {
+      "path": "data/eval/judge_calibration.jsonl",
+      "sha256": "307282a2282ec94249320fd4d021a83b0e8e209cd738d1e1a71460c71f2954de"
+    },
+    {
+      "path": "data/eval/eval_all_v2.manifest.json",
+      "sha256": "d9d49288640f73bca1d1260fc6e9bf90f23b6a187ca6b980bde04b34012cbbef"
+    },
+    {
+      "path": "data/seeds/slurm_job_arrays.md",
+      "sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b"
+    },
+    {
+      "path": "data/seeds/slurm_requeue_signals.md",
+      "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "data/eval/dev_v3/README.md",
+      "sha256": "10450e20ffb0509c0262722258732386e12dc30471d7fd2cf653447bacb961f3"
+    },
+    {
+      "path": "data/eval/dev_v3/cached_answer_compatibility.json",
+      "sha256": "a210e6ab928be0a5c24e444964567b354dd32e611de62ca1712481f4440c3d3e"
+    },
+    {
+      "path": "data/eval/dev_v3/config_overrides.json",
+      "sha256": "c34552c3f4a7483fd2c95ac1d0e177f5fada7360729b27d8832b597db00dae33"
+    },
+    {
+      "path": "data/eval/dev_v3/corrections.json",
+      "sha256": "8f811d5bd5972bd76060b6e1969d2bf4b4a22ac878728662ada858233fa7da36"
+    },
+    {
+      "path": "data/eval/dev_v3/normal.jsonl",
+      "sha256": "41ae36ffdbf30972152670db4eaea29f248a558f6ae3dffe02e1e91bb83e7f3e"
+    },
+    {
+      "path": "data/eval/dev_v3/source_support.json",
+      "sha256": "8807bb1687964b1345f5dd394f43856162f81c21a5fe454489dd70ec1085ed0b"
+    },
+    {
+      "path": "data/eval/dev_v3/tool_review.json",
+      "sha256": "2e66f18594be67460ace0d71d5e6d314e6ff4fa4cf284fb2cce9d806e8f1012b"
+    },
+    {
+      "path": "data/eval/dev_v3/tools.jsonl",
+      "sha256": "055c85bf9d622448427019334092420166873761ba2f389f7f6fd334b9ea1c96"
+    },
+    {
+      "path": "data/eval/dev_v3/validate_release.py",
+      "sha256": "93d49f8062bfa2f48cc32749c91ca68113b7c10b2d6d0729ace758ac9eeb10c0"
+    },
+    {
+      "path": "data/eval/dev_v3/validation.json",
+      "sha256": "458280d101f029ebdd200f2064cca669c121600e20416f42e705af08833544d0"
+    }
+  ],
+  "code_bindings": [
+    {
+      "path": "src/distillkit/eval_tools_v2.py",
+      "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+    },
+    {
+      "path": "src/distillkit/evaluate.py",
+      "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+    },
+    {
+      "path": "src/distillkit/gguf_eval.py",
+      "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+    },
+    {
+      "path": "src/distillkit/config.py",
+      "sha256": "fc8d7b22a42d53555304d0909ad4d53eb64d95e90894d82204773a33b86381a7"
+    },
+    {
+      "path": "src/distillkit/toolcheck.py",
+      "sha256": "14a11092a125267c1978bca713dbe06bfc6505316572a49e39343de00bc69fd8"
+    },
+    {
+      "path": "src/distillkit/tools.py",
+      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+    },
+    {
+      "path": "tests/test_eval_dev_v3.py",
+      "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+    }
+  ],
+  "composition": {
+    "original_core": 10,
+    "original_req": 16,
+    "reviewed_supplement": 40,
+    "eval_all_added_again": false
+  },
+  "review": {
+    "method": "Coordinator model content review plus independent read-only model review and automated validation. Inherited normal overlap/supplement reviews preserved.",
+    "human_review_claimed": false,
+    "human_gate_required": false,
+    "exact_reviewer_model_version": "unknown",
+    "infallible": false,
+    "inherited_overlap_sha256": "a069d268e771e84f7d88f70a08170de1d477c9636fe85f9148acb99b46924b57",
+    "independent_capabilities_claimed": false
+  },
+  "provenance": {
+    "unknown_original_six_source_fields": 18,
+    "publication_permission_not_established": true
+  },
+  "no_new_training_records": true,
+  "all_evaluation_material_excluded_from_training": true,
+  "validation": "validation.json records actual exact checks; tests exercise production scorer and prompt/cache paths with CPU mocks, not model inference.",
+  "code_integration_history": [
+    {
+      "version": "support-review-handoff-binding-v1",
+      "created_utc": "2026-10-07T23:38:47.744970+00:00",
+      "base_revision": "e533c98756ff24798c0ca6a9bdac1d015f413061",
+      "integrated_source_revision": "039c2ca08ac400e8533f44b1743fd575189a8e39",
+      "support_head_revision": "e3207f433b9d952e2330ce2eba0777e22434d3de",
+      "previous_manifest_sha256": "3a7072afb8fc22427404197a4f1ee0f80a3950a3b446a753ec3b0c17a52a0f1a",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "d673c4e8ee5c96a6a3fa4ae4568f3b1365380d00ce5bff8160385e52ca00d4f1",
+          "after": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "c40f5d94ae99bc2e9520ae1f7e2ae9ba2825022d4cbc4a8362fb1ca5e381ea7b",
+          "after": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "before": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193",
+          "after": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Integrate the opt-in job-status/support-review paths with current dev and its training audit. Only the three explicitly listed code bindings change; original source, question, reference and scoring-fixture bindings stay exact.",
+      "compatibility": "EvalCfg, tool SCHEMAS, score_tool_item, evaluate.py, gguf_eval.py and eval_tools_v2.py remain identical to the integration base. New trace guards are separate from first-response evaluation. Support-review defaults remain v1/off; v3 runtime limits are documented.",
+      "validation_scope": "Exact release validators and the full real-dependency CPU suite are run on the isolated integration snapshot and recorded in the handoff evidence. This entry does not assert a model-inference or training result."
+    },
+    {
+      "version": "source-scenario-integration-binding-v1",
+      "created_utc": "2026-10-07T23:49:29.013722+00:00",
+      "base_revision": "c2ea7aa082aa07c5106d54df99df2a35b12ff420",
+      "integrated_source_revision": "540b3bf6d673bebfe4942b485f116c73e97237e6",
+      "source_commits": [
+        "87903f445547babe80d74a2e2c606cdc6fa12fff",
+        "35b633b50f789f8672cdcb3a538c3da6179878bc"
+      ],
+      "previous_manifest_sha256": "29d1d1bc941e51aa9f2b3af0b21ce6230aed0026ff01079d9101ae336cf2fb22",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "5f57116c6f4450aff8c4ea62c537d4ff2be453c895cb907d869b535192f60269",
+          "after": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Integrate the existing opt-in source-family admission and explicit scenario planner. Only config.py binding changes to cover optional seeds.registry and generate.scenario_plan. Training audit hooks and existing support-review defaults are preserved.",
+      "compatibility": "Evaluation schemas, prompts, first-response scorer, tool schemas and default mocks are unchanged. No evaluation rows, references, source spans or scoring fixtures are changed. Active pilot runtime snapshots remain separate and immutable.",
+      "validation_scope": "Fresh full real-dependency CPU suite and both exact release validators are recorded under the campaign production_code_handoff evidence for the final snapshot; no model or training result is asserted by this metadata entry."
+    },
+    {
+      "version": "resource-request-policy-integration-binding-v1",
+      "created_utc": "2026-10-08T00:40:10.900249+00:00",
+      "base_revision": "973eb65c5443ef83ee911046d30d953371c2402c",
+      "integrated_source_revision": null,
+      "candidate_status": "uncommitted locally tested candidate",
+      "tested_source_snapshot_sha256": "f48d4c5e6e714fbd5378a66b56cdda7553d224b796cec9c133eeabaac6a6ffb7",
+      "tested_source_archive_sha256": "12468d07116210f741ad4a0e9364f024cf3a894e674534c65315536e4ab32624",
+      "previous_manifest_sha256": "a8af3beb1f4054ec4fbf91d2766abe047a0fb20179d66eaf819038d3f6b1d6eb",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db",
+          "after": "51069852b0d08d931c4be2758c02073b024f3b1072ce31f1564486eeac69f07b"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989",
+          "after": "14a11092a125267c1978bca713dbe06bfc6505316572a49e39343de00bc69fd8"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add explicit opt-in job-status-policy-v3 parsing and replay while retaining v2 defaults for historical configurations. The Config gains the version field; toolcheck passes the selected policy into training-trace target/clarification reconstruction and versions that replay contract.",
+      "compatibility": "Evaluation schemas, prompts, first-response scoring, tool schemas and default mocks are unchanged. evaluate.py, eval_tools_v2.py, gguf_eval.py and tools.py are byte-identical to the base; score_tool_item has the same AST. No evaluation rows, references, source spans or scoring fixtures are changed.",
+      "pre_binding_validation": {
+        "focused_passed": 194,
+        "full_passed": 577,
+        "full_subtests_passed": 28,
+        "full_failed": 1,
+        "full_failure": "strict release binding rejected prior toolcheck.py hash",
+        "skipped": 0
+      },
+      "validation_scope": "CPU-001/002 evidence is preserved under tool_policy_parser_handoff. The affected release test and both strict validators are recorded separately in CPU-003 after this manifest-only update. No real-model behavior or student-improvement result is asserted."
+    },
+    {
+      "version": "resource-request-policy-v4-integration-binding-v1",
+      "created_utc": "2026-10-08T02:23:34.604053+00:00",
+      "base_revision": "d558bc579b238cd5ed539bd02e921ef18f4351a5",
+      "previous_manifest_sha256": "8382038259a13a730720d0897e6e88fe945e361cbbf506333973fa648eb30993",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "51069852b0d08d931c4be2758c02073b024f3b1072ce31f1564486eeac69f07b",
+          "after": "fc8d7b22a42d53555304d0909ad4d53eb64d95e90894d82204773a33b86381a7"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Explicit opt-in job-status-policy-v4 in GenerateCfg; preserve v2 default and v3 replay. This binding update records that actual configuration change.",
+      "compatibility": "Only GenerateCfg AST changes. EvalCfg, evaluation prompts, tool schemas, first-response scorer, dataset rows, references, evidence and scoring fixtures remain unchanged.",
+      "validation_scope": "Full real-dependency CPU suite to run on this exact candidate; no new teacher behavior claimed."
+    }
+  ]
+}

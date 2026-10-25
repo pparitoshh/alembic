@@ -16,6 +16,7 @@ class SeedsCfg(_Section):
     dir: Path
     eval_docs: list[str]  # held out BEFORE any generation
     chunk_chars: int = 1500
+    registry: Path | None = None  # reviewed source-family registry; legacy configs remain compatible
 
 
 class EndpointCfg(_Section):
@@ -33,23 +34,46 @@ class EndpointCfg(_Section):
     extra_body: dict = {}
 
 
+class QuestionRepetitionCfg(_Section):
+    """Optional vLLM token-loop detection for questions only; not a quality judge."""
+    min_pattern_size: int = Field(1, ge=1, le=64)
+    max_pattern_size: int = Field(16, ge=1, le=64)
+    min_count: int = Field(16, ge=2, le=64)
+
+    @model_validator(mode='after')
+    def _ordered_sizes(self):
+        if self.min_pattern_size > self.max_pattern_size:
+            raise ValueError('min_pattern_size must not exceed max_pattern_size')
+        return self
+
+
 class GenerateCfg(_Section):
     questions_per_chunk: int
     answers_per_question: int
     personas: list[str]
     task_types: list[str]
+    scenario_plan: Path | None = None  # opt-in explicit, source-bound scenarios instead of grid sampling
+    question_repetition_detection: QuestionRepetitionCfg | None = None  # opt-in, serving support must be verified
     # share of questions that become tool-calling traces, split by mode:
     # call = needs a tool, ask = needs a tool but a required detail is missing, none = tools offered but not needed
     tool_fraction: float = Field(0.0, ge=0, le=1)
+    # None preserves the original planner; a list limits tool modes to compatible training sources.
+    tool_doc_ids: list[str] | None = None
     tool_mix: dict[Literal["call", "ask", "none"], float] = {"call": 0.6, "ask": 0.2, "none": 0.2}
     max_tool_rounds: int = 3
     gold_dir: Path | None = None  # prose.json / tool_trace.json few-shot anchors (data/gold)
+    job_status_discovery: Literal['clarify_first', 'allow_readonly'] | None = None
+    # Explicit opt-in: archived configs keep their original request-parser semantics.
+    job_status_policy_version: Literal['job-status-policy-v2', 'job-status-policy-v3', 'job-status-policy-v4'] = 'job-status-policy-v2'
 
 
 class VerifyCfg(_Section):
     dedup_threshold: float = 0.8  # Jaccard on question word 3-grams
     flag_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_flags.txt)
     max_answer_chars: int = 4000
+    require_grounding_review: bool = False
+    grounding_reviews: Path | None = None  # separate, hash-bound model support reports; never generated answers
+    grounding_review_protocol: Literal['source-support-v1', 'source-support-v2', 'source-support-v3'] = 'source-support-v1'
 
 
 class StudentCfg(_Section):
@@ -57,7 +81,13 @@ class StudentCfg(_Section):
     system_prompt: str
 
 
+class TrainingInputManifestCfg(_Section):
+    path: Path
+    sha256: str = Field(pattern=r'^[0-9a-f]{64}$')
+
+
 class TrainCfg(_Section):
+    input_manifest: TrainingInputManifestCfg | None = None
     method: Literal["lora", "dora"] = "lora"
     load_in_4bit: bool = False  # QLoRA / QDoRA: bitsandbytes NF4 base weights
     lora_r: int = 16
@@ -71,6 +101,15 @@ class TrainCfg(_Section):
     max_length: int = 1024
     fp16: bool = False  # GPUs without bf16 (e.g. RTX 20xx)
     bf16: bool | None = None  # default: the opposite of fp16
+    # None = save only the final adapter; N = checkpoint every N optimizer steps, and a rerun in the
+    # same run_dir resumes from the newest one (a job killed at the wall time loses < N steps)
+    save_steps: int | None = Field(None, gt=0)
+    save_total_limit: int = Field(2, gt=0)
+    # share of examples held out for eval loss at every save_steps, split by source document so the
+    # validation questions don't share a document with training ones; 0 = no validation set
+    val_fraction: float = Field(0.0, ge=0, lt=0.5)
+    # trainer metric sinks, e.g. [mlflow] (tracking URI/experiment from MLFLOW_* env vars); [] = none
+    report_to: list[str] = []
 
     @model_validator(mode="after")
     def _one_precision(self):
@@ -86,6 +125,8 @@ class TrainCfg(_Section):
 
 
 class EvalCfg(_Section):
+    tool_protocol: Literal["tool-first-call-v1", "tool-first-response-v2"] = "tool-first-call-v1"
+    tool_application_policy: Literal['hpc-tools-clarify-first-v1', 'hpc-tools-readonly-discovery-v1'] = 'hpc-tools-clarify-first-v1'
     file: Path
     tool_file: Path | None = None  # tool-calling slice: scored by toolcheck, not the judge
     calibration_file: Path | None = None  # human-labelled answer pairs for the `calibrate` stage

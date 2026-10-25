@@ -1,0 +1,69 @@
+{
+  "development_normal": 106,
+  "development_first_response_tools": 23,
+  "final_normal": 22,
+  "total_ready": 151,
+  "separate_calibration_pairs": 24,
+  "diagnostics_counted": 0,
+  "normal_tasks": {
+    "script": 27,
+    "concept": 32,
+    "howto": 35,
+    "debug": 34
+  },
+  "topics": {
+    "Slurm arrays": 30,
+    "Slurm requeue/signals": 36,
+    "tool decisions and arguments": 23,
+    "gpu": 8,
+    "mpi": 6,
+    "profiling": 8,
+    "environment": 9,
+    "linux": 1,
+    "batch": 3,
+    "interactive": 5,
+    "CUDA": 12,
+    "MPI": 10
+  },
+  "normal_source_counts": {
+    "slurm_job_arrays": 30,
+    "slurm_requeue_signals": 36,
+    "aalto_triton_gpu": 6,
+    "aalto_triton_gpu_reference": 1,
+    "aalto_triton_gpu_monitoring": 1,
+    "aalto_triton_mpi": 6,
+    "aalto_triton_profiling": 8,
+    "aalto_triton_modules": 4,
+    "aalto_triton_module_reference": 1,
+    "aalto_triton_conda": 4,
+    "aalto_triton_commandline": 1,
+    "aalto_triton_serial": 3,
+    "aalto_triton_interactive": 5,
+    "cuda_samples_async_api": 2,
+    "cuda_samples_streams": 3,
+    "cuda_samples_zero_copy": 2,
+    "cuda_samples_assert": 1,
+    "cuda_samples_pitch_texture": 4,
+    "ompi_build_quickstart": 1,
+    "ompi_wrapper_flags": 1,
+    "ompi_wrapper_customization": 1,
+    "ompi_launch_quickstart": 1,
+    "ompi_scheduling": 2,
+    "ompi_lost_output": 1,
+    "ompi_serial_debug": 1,
+    "ompi_valgrind": 1,
+    "ompi_affinity": 1
+  },
+  "tool_decisions": {
+    "call": 14,
+    "no_call": 9
+  },
+  "limits": [
+    "Not a comprehensive HPC benchmark",
+    "Final slice covers CUDA/MPI only; no fresh final Slurm/tool/performance slice",
+    "No multi-turn end-to-end tool score",
+    "No compiled/runtime correctness claim",
+    "No broad CUDA/NCCL,advanced MPI or profiler coverage claim",
+    "No complete source licensing claim for inherited notes"
+  ]
+}

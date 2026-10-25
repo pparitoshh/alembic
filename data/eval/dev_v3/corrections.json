@@ -1,0 +1,59 @@
+{
+  "version": "development-normal-v3",
+  "old_release": {
+    "path": "data/eval/eval_all_v2.jsonl",
+    "sha256": "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4"
+  },
+  "changes": [
+    {
+      "id": "arr-003",
+      "question_before": "How do I name the output files of an array job so each task writes to its own log file?",
+      "question_after": "How do I name the output files of an array job so each task writes to its own log file?",
+      "reference_before": "Use --output with %A (array job ID) and %a (task index), e.g. --output=logs/%x_%A_%a.out. The logs directory must exist.",
+      "reference_after": "Use --output with %A (array job ID) and %a (task index), e.g. --output=logs/%x_%A_%a.out.",
+      "answer_input_changed": false,
+      "source": {
+        "path": "data/seeds/slurm_job_arrays.md",
+        "sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+        "line": 5,
+        "quote": "In output file names, `%A` expands to the array job ID and `%a` to the task index, e.g. `--output=logs/%x_%A_%a.out`."
+      },
+      "justification": "Remove the directory prerequisite absent from the assigned note; %x is retained only as a copied pattern, with no definition inferred.",
+      "judging_guidance": "Equivalent supported wording is acceptable. The scope limitation in req-011 is not a required sentence to copy."
+    },
+    {
+      "id": "req-002",
+      "question_before": "What does the --requeue option do in an sbatch script?",
+      "question_after": "What does the --requeue option do in an sbatch script?",
+      "reference_before": "It allows the job to be put back in the queue (keeping the same job ID) if it is preempted, a node fails, or it is requeued manually with scontrol requeue. --no-requeue forbids this.",
+      "reference_after": "It allows the job to be put back in the queue, keeping the same job ID. A running job can be requeued manually with scontrol requeue <jobid>; --no-requeue forbids requeueing.",
+      "answer_input_changed": false,
+      "source": {
+        "path": "data/seeds/slurm_requeue_signals.md",
+        "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+        "line": 5,
+        "quote": "A job that is requeued goes back to the queue with the same job ID. Allow it with `#SBATCH --requeue` (or forbid it with `--no-requeue`). A running job can be requeued by hand with `scontrol requeue <jobid>`. By default a requeued job overwrites its output file; add `#SBATCH --open-mode=append` to keep the earlier output."
+      },
+      "justification": "Remove undocumented preemption/node-failure triggers; retain explicit permission, identity and manual command.",
+      "judging_guidance": "Equivalent supported wording is acceptable. The scope limitation in req-011 is not a required sentence to copy."
+    },
+    {
+      "id": "req-011",
+      "question_before": "My job's state is OUT_OF_MEMORY. What does that mean and what should I do?",
+      "question_after": "My job's state is OUT_OF_MEMORY. What does that mean and what should I do?",
+      "reference_before": "It was killed for exceeding its memory request. Request more with --mem or --mem-per-cpu.",
+      "reference_after": "It was killed for exceeding memory. Check the recorded state and exit code with sacct -j <jobid> --format=JobID,State,ExitCode. The supplied note does not specify a memory-request change or further remedy.",
+      "answer_input_changed": false,
+      "source": {
+        "path": "data/seeds/slurm_requeue_signals.md",
+        "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+        "line": 26,
+        "quote": "Set a minimum acceptable run time with `--time-min`; Slurm may then shorten the time limit so the job can start earlier (backfill). Jobs killed for hitting the time limit end in state `TIMEOUT`; jobs killed for exceeding memory end in `OUT_OF_MEMORY`. Check the reason with `sacct -j <jobid> --format=JobID,State,ExitCode`."
+      },
+      "justification": "Provide the documented state/exit-code diagnostic next step, not an invented memory-request remedy.",
+      "judging_guidance": "Equivalent supported wording is acceptable. The scope limitation in req-011 is not a required sentence to copy."
+    }
+  ],
+  "new_answers_generated": 0,
+  "judge_requests": 0
+}

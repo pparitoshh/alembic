@@ -1,0 +1,13 @@
+# Opt-in training-source admission
+
+Set the existing configuration's new optional `seeds.registry` path to a JSON registry with version `source-family-registry-v1`. Omitting it preserves legacy configurations. New dataset campaigns should use the registry in addition to `seeds.eval_docs` and gold provenance.
+
+The registry records `families` keyed by upstream family ID, each with `split` (`train`, `development`, `final`, `quarantine`), explicit `parents`, and `lineage_reviewed`. Each `documents` entry has `doc_id`, relative `path`, content `sha256`, `family`, `approved_for_training`, `origin`, `source_version`, `permission_evidence`, and `admission_review_sha256`. Keep concrete admission evidence outside model-generated records. Nonempty strings and hashes do not prove license permission or semantic independence; admission requires the documented source review.
+
+Before generation, actual selected Markdown files must be listed, hash-matched and training-admitted. Paths cannot escape the seed directory. Unknown/cyclic/unreviewed ancestry fails closed. Development/final family ancestry and explicit eval_docs family ancestry exclude aliases, derivatives and siblings; exact byte copies of declared held-out sources also fail. Existing explicit eval_docs exclusion remains additional protection. Gold examples cannot override the resolved source family split.
+
+Registry-enabled records carry source family/ancestry, document hash and registry hash. Cached questions must match their actual current planned source text, provenance, persona/task/mode, prompt/mock versions and simulated scenario before a teacher client exists. Missing/stale/duplicate/unplanned cache entries require a fresh run directory; they are not silently rewritten. Identical resumes still generate only missing answers. This does not yet bind every generation setting or detect all semantic question overlap.
+
+Verification and direct training recheck record admission. A stale registry binding cannot be made current by changing its filename or by calling training directly on an old verified file. Training checks run before tokenizer/model loading. Source bytes changing after validation remain an operational integrity risk; use immutable run snapshots, not mutable shared corpora. Semantic near-duplicates and unsupported answers require separate acceptance checks.
+
+CPU regressions exercise actual generation, source review, verification and training entry paths with fake teachers. They cover forbidden families before requests, held-out aliases/descendants/siblings, exact copies, gold checks, stale cached source markers, valid resume, record propagation and stale direct training input. No model inference or training is implied by these tests.

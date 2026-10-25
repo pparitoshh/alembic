@@ -12,7 +12,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ra
 
 from .config import EndpointCfg
 from .records import openai_tools
-from .schemas import parse_json
+from .schemas import GeneratedQuestion, parse_json, question_transport_schema
 
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
@@ -31,6 +31,8 @@ class Completion:
     content: str
     tool_calls: list[dict] | None = None  # OpenAI format: [{"id", "type": "function", "function": {...}}]
     logprobs: dict | None = None  # {"tokens": [...], "logprobs": [...], "top": [[[token, logprob], ...], ...]}
+    finish_reason: str | None = None
+    stop_reason: str | int | None = None
 
 
 def _compact_logprobs(lp) -> dict | None:
@@ -69,6 +71,7 @@ class Teacher:
         response_format: dict | None = None,
         tools: list[dict] | None = None,
         top_logprobs: int = 0,
+        extra_body: dict | None = None,
     ) -> Completion:
         extra = {}
         if response_format:
@@ -77,8 +80,8 @@ class Teacher:
             extra["tools"] = openai_tools(tools)
         if top_logprobs:
             extra |= {"logprobs": True, "top_logprobs": top_logprobs}
-        if self.cfg.extra_body:
-            extra["extra_body"] = self.cfg.extra_body
+        if self.cfg.extra_body or extra_body:
+            extra["extra_body"] = {**self.cfg.extra_body, **(extra_body or {})}
         if messages and messages[0]["role"] == "system":
             # "/no_think" disables Qwen3 hybrid thinking; other models ignore it
             messages = [{**messages[0], "content": messages[0]["content"] + " /no_think"}, *messages[1:]]
@@ -95,6 +98,8 @@ class Teacher:
             content=_THINK.sub("", choice.message.content or "").strip(),
             tool_calls=calls,
             logprobs=_compact_logprobs(choice.logprobs) if top_logprobs else None,
+            finish_reason=getattr(choice, 'finish_reason', None),
+            stop_reason=getattr(choice, 'stop_reason', None),
         )
 
     def chat(self, system: str, user: str, temperature: float | None = None, **kwargs) -> Completion:
@@ -102,14 +107,23 @@ class Teacher:
         return self.complete(messages, temperature, **kwargs)
 
     def chat_json[M: BaseModel](
-        self, system: str, user: str, model: type[M], temperature: float | None = None, retries: int = 1
+        self, system: str, user: str, model: type[M], temperature: float | None = None, retries: int = 1,
+        *, extra_body: dict | None = None,
     ) -> tuple[M | None, str]:
         """Ask for JSON matching `model` (schema sent as response_format, then validated here, since
         not every provider enforces it). Retries on invalid replies; returns (parsed or None, last raw reply)."""
-        fmt = {"type": "json_schema", "json_schema": {"name": model.__name__, "schema": model.model_json_schema()}}
+        schema = question_transport_schema() if model is GeneratedQuestion else model.model_json_schema()
+        fmt = {"type": "json_schema", "json_schema": {"name": model.__name__, "schema": schema}}
         raw = ""
         for _ in range(retries + 1):
-            raw = self.chat(system, user, temperature, response_format=fmt).content
+            kwargs = {'extra_body': extra_body} if extra_body else {}
+            response = self.chat(system, user, temperature, response_format=fmt, **kwargs)
+            raw = response.content
+            # A token limit or explicit server repetition stop is not a parse
+            # error to retry. Keep the returned text; never salvage partial JSON.
+            if model is GeneratedQuestion and (response.finish_reason in ('length', 'repetition')
+                                                or response.stop_reason == 'repetition_detected'):
+                return None, raw
             if (parsed := parse_json(model, raw)) is not None:
                 return parsed, raw
         return None, raw

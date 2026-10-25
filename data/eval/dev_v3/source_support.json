@@ -1,0 +1,559 @@
+{
+  "normal_sources": {
+    "slurm_job_arrays": {
+      "path": "data/seeds/slurm_job_arrays.md",
+      "sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "split": "held_out_development",
+      "url": "unknown",
+      "version": "unknown",
+      "license": "unknown"
+    },
+    "slurm_requeue_signals": {
+      "path": "data/seeds/slurm_requeue_signals.md",
+      "sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "split": "held_out_development",
+      "url": "unknown",
+      "version": "unknown",
+      "license": "unknown"
+    }
+  },
+  "normal_items": [
+    {
+      "id": "arr-001",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "1a999c662cf80d084f1d81282750ee816c2996fd0f99c170b826637524f719bc",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-002",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "1db5cacd937679cd5542c7274abca8aac3990502fa6e9ffb3dc0a1204bfb06f4",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-003",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "07a5b08797ee5b61c5ac33ae7d98340ea5e7615aa7d5dce315a39a4f2bb90dc8",
+      "review_lineage": "v3 reference-only correction",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-004",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "e9124cb497b8999b23def1fe9939be8fffe3bd77e6cdb6803b95911fddb94799",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-005",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "1eec52b3eb93f1c7c9c8f8e1f220a5ea641f183b3a810446eabaa4d71d29aded",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-006",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "7c563c28265e3d1ba972065ec95f8b688e0f2a671a9611bbed4328b2420864dd",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-007",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "ccb0a0593abab7f872ea7eba72cef5b0a5c1d0c0a108c59b6293b910224d4159",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-008",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "3ce31d6532e8cc5ad4bf4c62edf489e4fbb77e70d9de0fb75234cbcd55109e0a",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-009",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "6d26ee60ae26c32ce4561800823d09f25909e4cabbdffc17ae85e623462d52d7",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-010",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "31961d8cd0662dde7d3799b586109ac69e75deb445666036dfd951032d95903c",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-001",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "b4feeee6b673cff7d5b0be0915db3948cc3d17b627448e2ba448e0abe94f76a9",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-002",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "b7b13e4fbe6aeacd8e412c6715927f1628fc7e428bb3450584ef4768daf5a65e",
+      "review_lineage": "v3 reference-only correction",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-003",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "449cd18a03dc0646423844915e330fb0f1fe5c09484f10e3c5100e312630f8fa",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-004",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "6c4f38b64f87d7bdd67608e233a29dd76fd7fbd535539c582df613bd0453755f",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-005",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "75ce72a4c00b147c287e65daf24b890e425c26ff4b11cff683a46b847811e74f",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-006",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "3b1e44a8d5e96d8c521ee7184d7d99ae3b4eb6b397c92290dc3f9f50efebbbdd",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-007",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "c5083420ba64e7fabd65dcc42bb9cd08c04720727062c46d28439bbe53698711",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-008",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "f55313e49e89deda120401b577df231e5f85cee15a77f53440135834030859c5",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-009",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "0689a19b35ec102756df8f42d176ad54c9d0f0e704117dc1cf64297d131a3648",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-010",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "3bd87aaf392716e34aac5266e556ff7c1946dbe314ad69336493aa1dab7b9604",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-011",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "54c0e52e5a0cea757f8f3b94011ea4b0ce182971c36f5b1a4af5c261e44d91b1",
+      "review_lineage": "v3 reference-only correction",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-012",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "24f4759be5d90625d9bdee3d864247377e36ba6434b579311528d637212a9944",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-013",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "5053ac55a2354eaada66d03d50a666147a84342ac1ea58a81ac3860daf64a37a",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-014",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "81b30ab3139dce2816cfcceec8312f611a2e929344561e6f4423bf0d5b416538",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-015",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "4d354920b519f008a764d8cee3ed39fca67431ddf2f7cfdc8a73574836bb0abd",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-016",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "0e045e0b73a92990691e514d6bbf45809d376689cc9e120ba09ba265ca330cb1",
+      "review_lineage": "inherited original and integration review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-001",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "e8c72b88a49e22eb19be7879562a199226e9a39438e5c66cae2420439f94be52",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-002",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "52c3eae4266abf08bd354a5364d65dc937ec3d9687caa51e2312a5519e882ef7",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-003",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "6a996529649c0f7f2d7d6b3aad7450e82b6c92399f86f89cd2b8d8760481a98e",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-004",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "050b76e49ffc221833dc0306bd16bea8f1fe76cccdea4a6aa97760c03d7431bd",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-005",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "4d0abdde39fef05eb7c1bccdd917216cfe23fbd16e00d873b1fa97f7c0b2e727",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-006",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "d7ab5995567852fab9416f6a6b58f62d32a0bcffb5c8ccb9aed02f5c4b0ac825",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-007",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "d7af25bb592ff592b32f39bb8e72ead9a6d0bede3fbf97b493113fcc3aabba82",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-008",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "94dab42e79d8556789eb72a8d1397d3e25c70414a5dee3b755a38d4288939001",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-009",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "ba283ff745c5dc129876466af32f836c79f408053989a69dca8beb35ed049ea8",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-010",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "fea40abf9a632bbaddead0502099c58bd83cf2c8ba04be2227fad280ff4b0b3e",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-011",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "ffa2f86cd9dd3a8c09dee216220847e1fd44b6ea88a0d057eb0e4b24552b9053",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-012",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "3a3cee4910118f165bf731cc76fbf40b4c8cd40ec9587797190b1a507e9f306d",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-013",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "ebc5d01ee8e30a042ea9a1ef1ab668b4be2f984c354c2835e82ae1fa5ccd53de",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-014",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "a305457ac4f46e48184558f4c61e550a514eb78d72d5afaf458d4b328cdbe640",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-015",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "4e8d09c2b3f9aacdc7ebbdb7e5ac34adeb5459720722a2001ec4d97c13d0d938",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-016",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "25fc3bbd6287649e44f77944159f51cbbd9240c323244a21fb7a12f209b98b81",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-017",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "5ba372c55c0e5510609fd88d0309715ea4bb67c7238e2687eec0cf8c09ccbddd",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-018",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "4431db052afdf04d6ee48833541056bf9c696b7d0e71a0e9309d4606643d1ea6",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-019",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "55113fa48c491943cfc9046a52d93492140612c86e579c4e8ce089f0fdb0aab6",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "arr-cand-020",
+      "doc_id": "slurm_job_arrays",
+      "source_sha256": "892ed949386801d6ffaa045e42095f4bfe8ff19b97d0f58c8158b869fad0f13b",
+      "reference_sha256": "a52686231daf25c2420695f2664f850b91a962f71ea59400650636ed33cc26ff",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-001",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "5dcf21a1c8aa4d376f6e15d9ef036fbdfbf9fcc81ec33e3fd0e9fcba55c7e68e",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-002",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "e669854175f21b2f86486fa6d5b541dbb413295733a7d32feefb9a13bc45f458",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-003",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "45a7b0b2ecdc007858d9839f509f1cf5c9b85cbabee13cd7c07505cf071d2f7d",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-004",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "91bdc70a329e190798a9b830f2a2af5e3e00643420790226f581e63b045e9602",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-005",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "772339dfb2befc62bbcd5d93f7f94f94223d4065edecadcf9a2eaea928cf8620",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-006",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "f65cf636af22315c7f893d0bf60a2617f2ffeaca884aa6506af50815891187ab",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-007",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "03da625fc647d058ae4ecbb93157e3dcf586b13c20e7c1f3ac2365d978606662",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-008",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "536433a06721c36562e749b3aa426422dad2b0b85fd456fd7e5162e7c0418d4e",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-009",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "3845823b2b94c128d325007509a797f6e7a5a54b938c2f3bb83910f435309a01",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-010",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "7e3c6c9688b89af5b4c32462617b2cf3cebcb10bed3400b34fa22105e2557961",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-011",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "e1e352e71ae5f70fc41e45c19a26791015e3871cc635d1142f778720cabd1ca6",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-012",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "83babb5bdca381429867f5140f3aeff75897a95b968745468abcfd0031312050",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-013",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "3a078e30554ef85b7a0f90ac95dff14d6dd3aebc4e5243bc2e6a172caafda7c2",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-014",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "89c42f098139e7eb1c98dcf975b4a28cfa4a3b7027ae5ee97547b7d15892d05e",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-015",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "41b8e22c34997fdd5daf5a1ba95da5d35b20b9bfc48f5c903d826bb5905643b4",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-016",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "2e1c9eddd09dde7716588ca79850ab7b760b52b8653075d04c3198938f3b47c4",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-017",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "7eacff48641a36654ec58bbfa6fdb3bfcb5f698a961dab3e3f1761c44b561612",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-018",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "2155a442d93272d2b01a6ece07a93b7f30b37b7d67332a730bc17177c5d8a4b9",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-019",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "60f5312db463b802e4c38005cea5ba8e49dc5e89ca6abd79dca8625d960a7583",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    },
+    {
+      "id": "req-cand-020",
+      "doc_id": "slurm_requeue_signals",
+      "source_sha256": "45569e74877a38cfc3c9af6074164f1fe4829f796d058e30ecdf327cddcb82c4",
+      "reference_sha256": "f0226cbc78521742ce948da4daf61c89222fd8135672fde8b4cbac6db9bc3a91",
+      "review_lineage": "inherited supplied supplemental model review",
+      "scope": "Assigned complete local note; original assumptions/script-fragment caveats remain. See corrections.json for changed claim evidence."
+    }
+  ],
+  "tool_evidence": {
+    "schemas_and_mocks": {
+      "path": "src/distillkit/tools.py",
+      "sha256": "e31cb8d10b63b51bff502ac71d2827b5df03cf8a72e044775c4f8aea5a3f1193"
+    },
+    "scope": "Original project mock contracts; not real-cluster observations. Actual first-call expected arguments are user-stipulated."
+  },
+  "original_six_sources_unknown_url_version_license_fields": 18,
+  "source_provenance_not_resolved_by_this_release": true
+}

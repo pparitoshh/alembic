@@ -1,0 +1,15 @@
+{
+  "purpose": "Exposed development regression fixtures, never training or blind final test.",
+  "provenance": "Captured Qwen/Qwen3-32B-AWQ SELF-REVIEW and conversations from job 59614130; frozen production revision 7a88b6976781bb5cb910980b2612d5f5dd43093d.",
+  "transformation": "Records retain only replay/support inputs; transcript bytes as JSON values unchanged. Review JSONL and source copied byte for byte. Hidden expected fields removed; no corrected reviews generated. Original purpose=diagnostic_only and training_eligible=false are retained to preserve the training-loader safeguard.",
+  "original_hashes": {
+    "outputs/generated.jsonl": "ad82a7022bfe0c012e4ec1448cdedec6bf6a93ffae99fd433670168b781c47b3",
+    "support_reviews.jsonl": "3596803f0d2151cee65e6a603890c2f44f8459fa0495a3ba3db853fcfe1f7e50",
+    "corpus/seeds/distillkit_job_status.md": "dbd655d498129aac063f5fa4313faeab1b420311489f519e1f96ca4bd7168f1b"
+  },
+  "fixture_hashes": {
+    "reviews_v1.jsonl": "3596803f0d2151cee65e6a603890c2f44f8459fa0495a3ba3db853fcfe1f7e50",
+    "source.md": "dbd655d498129aac063f5fa4313faeab1b420311489f519e1f96ca4bd7168f1b",
+    "records.jsonl": "e761380d242470994cb2c4fb72047270c7b577ac1c65e2e44488f4dc278bc0c1"
+  }
+}

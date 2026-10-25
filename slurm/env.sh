@@ -13,6 +13,11 @@ export VLLM_VENV="${VLLM_VENV:-$WORK/venvs/vllm}"    # vLLM in its own venv: it 
 export LLAMA_CPP="${LLAMA_CPP:-$WORK/tools/llama.cpp}"
 export LLAMA_CPP_TAG="b11392"
 export HF_HOME="${HF_HOME:-$WORK/hf_cache}"          # model weights, downloaded on a login node
+export MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-file://$REPO/mlruns}"   # local store; view: mlflow ui over ssh -L
+export MLFLOW_EXPERIMENT_NAME="${MLFLOW_EXPERIMENT_NAME:-distillkit}"
+# file store (one directory per run) instead of SQLite: concurrent seeds writing one SQLite file on
+# Lustre risk lock errors. MLflow 3 needs this explicit opt-in for the file store.
+export MLFLOW_ALLOW_FILE_STORE=true
 
 # --- models (downloaded by setup_login.sh) ---
 export TEACHER_MODEL="Qwen/Qwen3-32B-AWQ"

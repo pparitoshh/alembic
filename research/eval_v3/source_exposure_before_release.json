@@ -1,0 +1,118 @@
+[
+  {
+    "run": "hpc10k",
+    "rows": 10773,
+    "source_overlap": 910,
+    "remaining": 9863,
+    "input_sha256": "179868f8b4f2fc2146266f60bb0f5fe05e6ad6192d4ba6e647ac31e70a386d01",
+    "by_doc": {
+      "slurm_man_srun": 13,
+      "slurm_guide_job_exit_code": 48,
+      "slurm_man_sbatch": 358,
+      "slurm_man_scancel": 25,
+      "slurm_man_scontrol": 62,
+      "slurm_man_salloc": 132,
+      "slurm_man_squeue": 84,
+      "slurm_guide_faq": 73,
+      "slurm_man_sacct": 115
+    }
+  },
+  {
+    "run": "hpc10k_f1",
+    "rows": 1903,
+    "source_overlap": 584,
+    "remaining": 1319,
+    "input_sha256": "cbcc7edd4952ed446d355268b5e2800ef43c83db94087e124412fe038cbcb988",
+    "by_doc": {
+      "slurm_man_sbatch": 584
+    }
+  },
+  {
+    "run": "hpc10k_f2",
+    "rows": 1751,
+    "source_overlap": 102,
+    "remaining": 1649,
+    "input_sha256": "38ea0d7767fc86bd4178437c8036d3c7e887c38b9754eaea412b5f9c8e5aaf1e",
+    "by_doc": {
+      "slurm_man_scontrol": 102
+    }
+  },
+  {
+    "run": "hpc10k_f3",
+    "rows": 1456,
+    "source_overlap": 107,
+    "remaining": 1349,
+    "input_sha256": "a468e0c819efb2e520b85506c0641c563c4afe983e52ecd336615f16b04c5911",
+    "by_doc": {
+      "slurm_guide_faq": 107
+    }
+  },
+  {
+    "run": "hpc10k_f4",
+    "rows": 998,
+    "source_overlap": 300,
+    "remaining": 698,
+    "input_sha256": "66e467f20c5921c926c6abbc9e2b5cf05c11dc110556577aa53a528007750639",
+    "by_doc": {
+      "slurm_guide_job_exit_code": 68,
+      "slurm_man_sacct": 176,
+      "slurm_man_scancel": 56
+    }
+  },
+  {
+    "run": "hpc10k_f5",
+    "rows": 887,
+    "source_overlap": 132,
+    "remaining": 755,
+    "input_sha256": "eb6b2fcc70e8fd6751c7acf7842c63f9eb97abbcdd70337e9c50dd9ef6aee45f",
+    "by_doc": {
+      "slurm_man_squeue": 132
+    }
+  },
+  {
+    "run": "hpc10k_b1",
+    "rows": 1075,
+    "source_overlap": 4,
+    "remaining": 1071,
+    "input_sha256": "9de2ed903f704b9a5cb9a8a9e1eed205f3c8688ec5272ac0b20962f7c73b2d6b",
+    "by_doc": {
+      "slurm_man_srun": 4
+    }
+  },
+  {
+    "run": "hpc10k_b2",
+    "rows": 1091,
+    "source_overlap": 71,
+    "remaining": 1020,
+    "input_sha256": "a0d812401bee3d1372566a8474fbf49a3bcda52e1c3a4312c503f933946ec53b",
+    "by_doc": {
+      "slurm_man_salloc": 71
+    }
+  },
+  {
+    "run": "hpc10k_b3",
+    "rows": 1087,
+    "source_overlap": 0,
+    "remaining": 1087,
+    "input_sha256": "88212992ed867b5c25270b357cf4afc71b785f6ae2b5a33badbcaf079b4b90c4",
+    "by_doc": {}
+  },
+  {
+    "run": "b6_hpc10k",
+    "rows": 12773,
+    "source_overlap": 910,
+    "remaining": 11863,
+    "input_sha256": "3742ab280c6308ba909272fd122b36b2745b0020bdd1550986333212e06d5734",
+    "by_doc": {
+      "slurm_man_srun": 13,
+      "slurm_guide_job_exit_code": 48,
+      "slurm_man_sbatch": 358,
+      "slurm_man_scancel": 25,
+      "slurm_man_scontrol": 62,
+      "slurm_man_salloc": 132,
+      "slurm_man_squeue": 84,
+      "slurm_guide_faq": 73,
+      "slurm_man_sacct": 115
+    }
+  }
+]

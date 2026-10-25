@@ -1,0 +1,38 @@
+{
+  "completed_variants": [
+    {
+      "variant": "lr1e4-seed42",
+      "adapter_sha256": "c3c31cba5b9d243279c511e0366d34661ab8bbf336e31f627801e9fcfe170bc7",
+      "training_job_id": "59940941"
+    },
+    {
+      "variant": "lr1e4-seed43",
+      "adapter_sha256": "2bcfa55c40fb1cdbdf89984935f3b0ceb4880013e31a6bfa3197c30d8a57a40a",
+      "training_job_id": "59942532"
+    },
+    {
+      "variant": "lr1e4-seed44",
+      "adapter_sha256": "2ebda505cc5d666d81ced609e906f2c2a60feb094b7851b1c608c3c993220c5e",
+      "training_job_id": "59942534"
+    },
+    {
+      "variant": "lr5e5-seed42",
+      "adapter_sha256": "da61cd847b6312ef2d756245fe0eb80c0aef6cecbf01d7c648ec785e4bbd4dc9",
+      "training_job_id": "59942536"
+    },
+    {
+      "variant": "lr5e5-seed43",
+      "adapter_sha256": "71581e9ed8f8065f38456b0caa1cc610c0896e2555ecb6deb51e6a7a5395648f",
+      "training_job_id": "59942541"
+    },
+    {
+      "variant": "lr5e5-seed44",
+      "adapter_sha256": "c7bb4efc160eecbdd987fbe0c0c0fd8db21922aaae659d7f463255b3fae3769e",
+      "training_job_id": "59942543"
+    }
+  ],
+  "report_status": "COMPLETE",
+  "archive_sha256": "8eb1a496f3a19bb3e2ee19a2a5a609583cdd79d618e9d2fda0242611d3762414",
+  "archive_bytes": 331620249,
+  "release": "https://github.com/pparitoshh/alembic/releases/tag/student-comparison-12092-v1"
+}

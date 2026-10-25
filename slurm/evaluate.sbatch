@@ -8,7 +8,8 @@
 #SBATCH --array=0-2
 #SBATCH --output=slurm/logs/%x-%A_%a.out
 # Per seed, on one GPU: 1) base + student answers (cached in seed_<n>/eval_answers.json),
-# 2) the judge served on the same GPU scores them.
+# 2) the judge served on the same GPU scores them, 3) `distillkit track` logs the scores into the
+# training run's MLflow run (fails if the seed was trained without train.report_to=[mlflow]).
 # Cross-check judge on the same answers:  JUDGE=cross sbatch slurm/evaluate.sbatch
 source "${REPO:-$WORK/alembic}/slurm/env.sh"
 source "$REPO/slurm/common.sh"
@@ -22,3 +23,5 @@ PORT=$(job_port 1)
 start_vllm "$MODEL" "$PORT" $(judge_args "$MODEL")
 distillkit evaluate -c "$CONFIG" --set run_dir="$SEED_DIR" --set student.model="$STUDENT_MODEL" \
     --set judge.base_url="http://127.0.0.1:$PORT/v1" --set judge.model="$MODEL" --set eval.tag="$TAG"
+stop_vllm
+distillkit track -c "$CONFIG" --set run_dir="$SEED_DIR"

@@ -1,0 +1,23 @@
+{
+  "created_utc": "2026-10-12T16:59:25.384068+00:00",
+  "eval_root": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code/data/eval",
+  "eval_v3_sha256": "e86bcd5aff7bfcd0000a43c03f092d77e5721467679371d9c935aedf094e87fc",
+  "source_holdout_sha256": "441079fdae29f843e7d9b177bf7d50fb5b0119b21ded649435ef6c1f85c01c0b",
+  "source_exclusions": 65,
+  "questions": 591,
+  "question_files": {
+    "dataset_v1/development_normal.jsonl": "12a04af09046abe7cfeb02984277a51684338c40509e8c767d8037ab3b6a7794",
+    "dataset_v1/development_tools.jsonl": "a5bb5fb807f1f394cc10733bb3ad9e8c575fa347c4d995a9b473e8fbe5e3079b",
+    "dataset_v1/final_normal.jsonl": "5a33330fd59a2937c9c05c4a7042faf4c7ce3423341ce4ec279b8c70bbfb3985",
+    "dev_v3/normal.jsonl": "41ae36ffdbf30972152670db4eaea29f248a558f6ae3dffe02e1e91bb83e7f3e",
+    "dev_v3/tools.jsonl": "055c85bf9d622448427019334092420166873761ba2f389f7f6fd334b9ea1c96",
+    "eval_all.jsonl": "c30aba341b86e235b9907b0036287573037c96c3ba4ab3f8571d827f50d5eaea",
+    "eval_all_v2.jsonl": "43885f376b29ad9c87271da87533f1c2165aebfe201b1a8f60358ae98e1f79f4",
+    "eval_core.jsonl": "ed01ac6e63b3774273cdf4c48defe6ee6d8c012421e959658072167f9dda2511",
+    "eval_req.jsonl": "f627bf1c736a2a3040aa3fcc6ea765ce6e51b113f5dbb4e21b3e3ec37f911b27",
+    "eval_tools.jsonl": "c5ec3515625067355d6232bc27b063f05d55c0def056132cb1a8575454493441",
+    "eval_v3.jsonl": "e86bcd5aff7bfcd0000a43c03f092d77e5721467679371d9c935aedf094e87fc",
+    "judge_calibration.jsonl": "307282a2282ec94249320fd4d021a83b0e8e209cd738d1e1a71460c71f2954de"
+  },
+  "question_match": "NFKC/casefold/whitespace normalization, exact or word-trigram Jaccard >= 0.8"
+}

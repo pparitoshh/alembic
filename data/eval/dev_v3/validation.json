@@ -1,0 +1,53 @@
+{
+  "normal_ready": 66,
+  "tool_ready_first_response_scope": 16,
+  "draft_pending": 0,
+  "calibration_pairs_separate": 24,
+  "unique_ids_across_slices": 106,
+  "exact_duplicate_questions": 0,
+  "normalized_duplicate_questions": 0,
+  "json_errors": 0,
+  "normal_by_doc": {
+    "slurm_job_arrays": 30,
+    "slurm_requeue_signals": 36
+  },
+  "normal_by_task": {
+    "script": 14,
+    "concept": 18,
+    "howto": 20,
+    "debug": 14
+  },
+  "tool_decisions": {
+    "call": 10,
+    "no_call": 6
+  },
+  "reference_changes_only": [
+    "arr-003",
+    "req-002",
+    "req-011"
+  ],
+  "normal_cached_inputs_compatible": 66,
+  "tool_cached_inputs_incompatible": 16,
+  "unknown_original_provenance_fields": 18,
+  "semantic_limitation": "Exact checks do not prove entailment or semantic independence; inherited overlap decisions and model review remain fallible.",
+  "checked_utc": "2026-10-07T12:52:02.520082+00:00",
+  "cpu_suite": {
+    "passed": 225,
+    "subtests_passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "real_model_runs": 0,
+    "snapshot": "checkpoint-07/eval-cpu-002",
+    "python": "3.12.15",
+    "pytest": "9.1.1",
+    "pydantic": "2.13.5",
+    "openai": "3.24.0"
+  },
+  "production_paths": [
+    "toolcheck.score_tool_item",
+    "evaluate._eval_rows",
+    "evaluate.run_answers (fake inference)",
+    "gguf_eval.answers (fake tokenizer/server)"
+  ],
+  "new_focused_regressions_in_full_suite": 40
+}

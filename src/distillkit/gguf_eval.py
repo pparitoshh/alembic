@@ -20,6 +20,7 @@ from pathlib import Path
 from .bench import physical_cores
 from .config import Config
 from .export import _bin
+from .eval_tools_v2 import PROTOCOL as TOOL_PROTOCOL_V2, system_prompt, answer_binding
 
 
 def server_cmd(llama_cpp: Path, model: Path, port: int, num_ctx: int, threads: int, ngl: int) -> list[str]:
@@ -91,16 +92,18 @@ def answers(cfg: Config, quant: str, questions: list[str], tools: list[list[dict
     gguf = cfg.run_dir / "export" / f"model-{quant}.gguf"
     if not gguf.exists():
         raise SystemExit(f"[answer] {gguf} not found; run export with {quant} in export.quants")
-    cache = cfg.run_dir / f"eval_answers_gguf_{quant}.json"
+    suffix = "_v3" if cfg.eval.tool_protocol == TOOL_PROTOCOL_V2 else ""
+    cache = cfg.run_dir / f"eval_answers_gguf_{quant}{suffix}.json"
+    binding = answer_binding(cfg, questions, tools, backend='gguf')
     stamp = gguf.stat().st_mtime
     if cache.exists():
         c = json.loads(cache.read_text())
-        if c["questions"] == questions and c["gguf_mtime"] == stamp:
+        if c["questions"] == questions and c["gguf_mtime"] == stamp and (cfg.eval.tool_protocol != TOOL_PROTOCOL_V2 or c.get("answer_binding") == binding):
             print(f"[answer] reusing {cache}")
             return c["answers"]
 
     tok = _tokenizer(cfg.student.model)
-    prompts = [render_prompt(tok, cfg.student.system_prompt, q, t) for q, t in zip(questions, tools)]
+    prompts = [render_prompt(tok, system_prompt(cfg, bool(t)), q, t) for q, t in zip(questions, tools)]
     ecfg = cfg.export
     llama_cpp = ecfg.llama_cpp.expanduser()
     threads = ecfg.bench_threads or physical_cores()
@@ -111,5 +114,5 @@ def answers(cfg: Config, quant: str, questions: list[str], tools: list[list[dict
         for i, p in enumerate(prompts):
             outs.append(complete(url, p, cfg.eval.max_new_tokens))
             print(f"[answer] {quant} {i + 1}/{len(prompts)} ({time.monotonic() - t0:.0f} s)", flush=True)
-    cache.write_text(json.dumps({"questions": questions, "gguf_mtime": stamp, "answers": outs}, ensure_ascii=False))
+    cache.write_text(json.dumps({"questions": questions, "gguf_mtime": stamp, "answer_binding": binding, "answers": outs}, ensure_ascii=False))
     return outs

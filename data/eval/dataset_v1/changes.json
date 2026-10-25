@@ -1,0 +1,28 @@
+{
+  "old82_preserved": true,
+  "original26_added_again": false,
+  "new_development_normal": 40,
+  "new_first_response_tools": 7,
+  "new_final": 22,
+  "pre_freeze_corrections": [
+    {
+      "id": "final-cuda-005",
+      "before": {
+        "id": "final-cuda-005",
+        "doc_id": "cuda_samples_streams",
+        "task": "howto",
+        "question": "For the acquired simpleStreams sample, I want its blocking synchronization option described as low CPU utilization and its cudaMallocHost allocation path rather than generic-memory registration. What command-line options select both, and what happens to nreps when that explicit synchronization option is accepted?",
+        "reference": "Run ./simpleStreams --sync_method=4 --use_cuda_malloc_host. The help labels method 4 as blocking synchronization with low CPU utilization; the allocation option sets bPinGenericMemory=false. The accepted explicit sync_method branch changes nreps to 100."
+      },
+      "after": {
+        "id": "final-cuda-005",
+        "doc_id": "cuda_samples_streams",
+        "task": "howto",
+        "question": "For the acquired simpleStreams sample, I want its blocking synchronization option described as low CPU utilization and its cudaMallocHost allocation path rather than generic-memory registration. What command-line options select both?",
+        "reference": "Run ./simpleStreams --sync_method=4 --use_cuda_malloc_host. The help labels method 4 as blocking synchronization with low CPU utilization; the allocation option selects the cudaMallocHost path by setting bPinGenericMemory=false."
+      },
+      "reason": "Independent review identified incidental internal nreps recall. Narrowed before freeze to documented command construction; no new source fact added. No answering outputs exist for this new item."
+    }
+  ],
+  "new_tool_review_field_only": "Draft status replaced with completed model-review scope; questions, policy, expected arguments and scoring unchanged."
+}

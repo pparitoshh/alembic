@@ -1,0 +1,101 @@
+{
+  "v2/t32think_rag-vs-t32_rag": {
+    "questions": 66,
+    "a": 0.7652,
+    "b": 0.7803,
+    "diff": -0.0152,
+    "paired_95": [
+      -0.0568,
+      0.0227
+    ],
+    "p_a_not_better": 0.7997
+  },
+  "v3/t32think_rag-vs-t32_rag": {
+    "questions": 200,
+    "a": 0.7025,
+    "b": 0.74,
+    "diff": -0.0375,
+    "paired_95": [
+      -0.07,
+      -0.0063
+    ],
+    "p_a_not_better": 0.9907
+  },
+  "d1/t32think_rag-vs-t32_rag": {
+    "questions": 105,
+    "a": 0.6595,
+    "b": 0.6476,
+    "diff": 0.0119,
+    "paired_95": [
+      -0.0286,
+      0.0524
+    ],
+    "p_a_not_better": 0.3015
+  },
+  "v2/t32_rag-vs-base_rag": {
+    "questions": 66,
+    "a": 0.7803,
+    "b": 0.5644,
+    "diff": 0.2159,
+    "paired_95": [
+      0.1098,
+      0.322
+    ],
+    "p_a_not_better": 0.0
+  },
+  "v3/t32_rag-vs-base_rag": {
+    "questions": 200,
+    "a": 0.74,
+    "b": 0.6613,
+    "diff": 0.0788,
+    "paired_95": [
+      0.02,
+      0.1375
+    ],
+    "p_a_not_better": 0.0052
+  },
+  "d1/t32_rag-vs-base_rag": {
+    "questions": 106,
+    "a": 0.6509,
+    "b": 0.4929,
+    "diff": 0.158,
+    "paired_95": [
+      0.0708,
+      0.2453
+    ],
+    "p_a_not_better": 0.0
+  },
+  "v2/t32think_rag-vs-base_rag": {
+    "questions": 66,
+    "a": 0.7652,
+    "b": 0.5644,
+    "diff": 0.2008,
+    "paired_95": [
+      0.0947,
+      0.303
+    ],
+    "p_a_not_better": 0.0
+  },
+  "v3/t32think_rag-vs-base_rag": {
+    "questions": 200,
+    "a": 0.7025,
+    "b": 0.6613,
+    "diff": 0.0413,
+    "paired_95": [
+      -0.02,
+      0.1025
+    ],
+    "p_a_not_better": 0.0952
+  },
+  "d1/t32think_rag-vs-base_rag": {
+    "questions": 105,
+    "a": 0.6595,
+    "b": 0.4881,
+    "diff": 0.1714,
+    "paired_95": [
+      0.0857,
+      0.2595
+    ],
+    "p_a_not_better": 0.0
+  }
+}

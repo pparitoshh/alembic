@@ -65,5 +65,5 @@ train:
   bf16: false
 
 eval:
-  file: data/eval/eval_all.jsonl
+  file: data/eval/eval_all_v2.jsonl
   max_new_tokens: 512

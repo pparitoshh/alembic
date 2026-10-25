@@ -1,0 +1,1592 @@
+[
+ {
+  "id": "ncar_hpc_docs",
+  "topic": "site",
+  "leaves": [
+   "pbs_openpbs",
+   "visualization",
+   "r_hpc",
+   "matlab_hpc",
+   "jupyter_on_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://ncar-hpc-docs.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "llnl_hpc_docs",
+  "topic": "site",
+  "leaves": [
+   "lsf",
+   "htcondor_flux_other",
+   "parallel_debuggers",
+   "gdb_valgrind_sanitizers"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpc.llnl.gov/documentation",
+   "https://hpc.llnl.gov/banks-jobs/running-jobs"
+  ],
+  "prefixes": [
+   "https://hpc.llnl.gov/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "archer2_docs",
+  "topic": "site",
+  "leaves": [
+   "cray_cpe",
+   "energy_efficiency",
+   "binding_affinity_smt",
+   "io_best_practice",
+   "data_transfer"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.archer2.ac.uk/"
+  ],
+  "prefixes": [
+   "https://docs.archer2.ac.uk/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "yale_ycrc_docs",
+  "topic": "site",
+  "leaves": [
+   "web_portals_ondemand",
+   "r_hpc",
+   "matlab_hpc",
+   "jupyter_on_hpc",
+   "conda_venv_pip",
+   "etiquette_shared_systems"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.ycrc.yale.edu/"
+  ],
+  "prefixes": [
+   "https://docs.ycrc.yale.edu/"
+  ],
+  "max_pages": 500
+ },
+ {
+  "id": "harvard_fasrc_docs",
+  "topic": "site",
+  "leaves": [
+   "web_portals_ondemand",
+   "r_hpc",
+   "matlab_hpc",
+   "x11_vnc_remote_desktop",
+   "job_failures"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.rc.fas.harvard.edu/"
+  ],
+  "prefixes": [
+   "https://docs.rc.fas.harvard.edu/kb/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "alliance_wiki",
+  "topic": "site",
+  "leaves": [
+   "r_hpc",
+   "matlab_hpc",
+   "apps_md_chem",
+   "visualization",
+   "archive_tape_object",
+   "job_failures"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links (Alliance technical documentation wiki)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.alliancecan.ca/wiki/Technical_documentation"
+  ],
+  "prefixes": [
+   "https://docs.alliancecan.ca/wiki/"
+  ],
+  "max_pages": 600,
+  "exclude": "/(fr|Special:|Talk:|User:|index\\.php|Category:)|/fr$|action="
+ },
+ {
+  "id": "purdue_rcac_kb",
+  "topic": "site",
+  "leaves": [
+   "r_hpc",
+   "matlab_hpc",
+   "web_portals_ondemand",
+   "job_failures"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.rcac.purdue.edu/knowledge"
+  ],
+  "prefixes": [
+   "https://www.rcac.purdue.edu/knowledge"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "lrz_docs_extra",
+  "topic": "site",
+  "leaves": [
+   "energy_efficiency",
+   "archive_tape_object",
+   "matlab_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://doku.lrz.de/high-performance-computing-10613431.html"
+  ],
+  "prefixes": [
+   "https://doku.lrz.de/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "imperial_rcs_guide",
+  "topic": "site",
+  "leaves": [
+   "pbs_openpbs",
+   "conda_venv_pip",
+   "jupyter_on_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://icl-rcs-user-guide.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://icl-rcs-user-guide.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "qmul_apocrita_docs",
+  "topic": "site",
+  "leaves": [
+   "htcondor_flux_other",
+   "r_hpc",
+   "matlab_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.hpc.qmul.ac.uk/"
+  ],
+  "prefixes": [
+   "https://docs.hpc.qmul.ac.uk/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "open_ondemand_docs",
+  "topic": "access",
+  "leaves": [
+   "web_portals_ondemand"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (ood-documentation repo)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://osc.github.io/ood-documentation/latest/"
+  ],
+  "prefixes": [
+   "https://osc.github.io/ood-documentation/latest/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "turbovnc_docs",
+  "topic": "access",
+  "leaves": [
+   "x11_vnc_remote_desktop"
+  ],
+  "kind": "technical_documentation",
+  "license": "TurboVNC documentation (see license_links)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://turbovnc.org/Documentation/Documentation"
+  ],
+  "prefixes": [
+   "https://turbovnc.org/"
+  ],
+  "max_pages": 40
+ },
+ {
+  "id": "virtualgl_docs",
+  "topic": "access",
+  "leaves": [
+   "x11_vnc_remote_desktop",
+   "visualization"
+  ],
+  "kind": "technical_documentation",
+  "license": "VirtualGL documentation (see license_links)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://virtualgl.org/Documentation/Documentation"
+  ],
+  "prefixes": [
+   "https://virtualgl.org/"
+  ],
+  "max_pages": 40
+ },
+ {
+  "id": "htcondor_docs_more",
+  "topic": "schedulers",
+  "leaves": [
+   "htcondor_flux_other"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://htcondor.readthedocs.io/en/latest/users-manual/index.html",
+   "https://htcondor.readthedocs.io/en/latest/admin-manual/index.html"
+  ],
+  "prefixes": [
+   "https://htcondor.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "flux_docs_more",
+  "topic": "schedulers",
+  "leaves": [
+   "htcondor_flux_other"
+  ],
+  "kind": "technical_documentation",
+  "license": "LGPL-3.0 / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://flux-framework.readthedocs.io/en/latest/tutorials/index.html",
+   "https://flux-framework.readthedocs.io/projects/flux-core/en/latest/index.html"
+  ],
+  "prefixes": [
+   "https://flux-framework.readthedocs.io/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "slurm_schedmd_docs",
+  "topic": "schedulers",
+  "leaves": [
+   "slurm_hetjobs",
+   "slurm_reservations_preemption",
+   "slurm_fairshare_priority",
+   "binding_affinity_smt"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0 (Slurm documentation in source tree) / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://slurm.schedmd.com/documentation.html"
+  ],
+  "prefixes": [
+   "https://slurm.schedmd.com/"
+  ],
+  "max_pages": 600
+ },
+ {
+  "id": "intel_oneapi_cpp_compiler",
+  "topic": "compilers",
+  "leaves": [
+   "intel_oneapi",
+   "opt_flags_vectorization"
+  ],
+  "kind": "technical_documentation",
+  "license": "Intel proprietary documentation terms",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2025-2/overview.html"
+  ],
+  "prefixes": [
+   "https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2025-2/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "intel_fortran_compiler",
+  "topic": "compilers",
+  "leaves": [
+   "intel_oneapi",
+   "pgas_coarray",
+   "fortran_cpp"
+  ],
+  "kind": "technical_documentation",
+  "license": "Intel proprietary documentation terms",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.intel.com/content/www/us/en/docs/fortran-compiler/developer-guide-reference/2025-2/overview.html"
+  ],
+  "prefixes": [
+   "https://www.intel.com/content/www/us/en/docs/fortran-compiler/developer-guide-reference/2025-2/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "intel_onemkl_guide",
+  "topic": "compilers",
+  "leaves": [
+   "blas_lapack_mkl",
+   "fft_libraries"
+  ],
+  "kind": "technical_documentation",
+  "license": "Intel proprietary documentation terms",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2025-2/overview.html"
+  ],
+  "prefixes": [
+   "https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2025-2/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "intel_gpu_opt_guide",
+  "topic": "perf_debug",
+  "leaves": [
+   "kokkos_raja_sycl",
+   "openmp_offload"
+  ],
+  "kind": "technical_documentation",
+  "license": "Intel proprietary documentation terms",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.intel.com/content/www/us/en/docs/oneapi/optimization-guide-gpu/2025-2/overview.html"
+  ],
+  "prefixes": [
+   "https://www.intel.com/content/www/us/en/docs/oneapi/optimization-guide-gpu/2025-2/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "openblas_docs",
+  "topic": "compilers",
+  "leaves": [
+   "blas_lapack_mkl"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (OpenBLAS)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "http://www.openmathlib.org/OpenBLAS/docs/"
+  ],
+  "prefixes": [
+   "http://www.openmathlib.org/OpenBLAS/docs/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "clang_docs",
+  "topic": "compilers",
+  "leaves": [
+   "gdb_valgrind_sanitizers",
+   "opt_flags_vectorization",
+   "openmp_offload"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://clang.llvm.org/docs/UsersManual.html",
+   "https://clang.llvm.org/docs/AddressSanitizer.html",
+   "https://clang.llvm.org/docs/OpenMPSupport.html"
+  ],
+  "prefixes": [
+   "https://clang.llvm.org/docs/"
+  ],
+  "max_pages": 120,
+  "exclude": "/(doxygen|analyzer/developer|ReleaseNotes|LibASTMatchers)"
+ },
+ {
+  "id": "flang_docs",
+  "topic": "compilers",
+  "leaves": [
+   "aocc_amd",
+   "fortran_cpp"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://flang.llvm.org/docs/"
+  ],
+  "prefixes": [
+   "https://flang.llvm.org/docs/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "cmake_tutorial",
+  "topic": "software",
+  "leaves": [
+   "build_link_software"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (CMake)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://cmake.org/cmake/help/latest/guide/tutorial/index.html",
+   "https://cmake.org/cmake/help/latest/guide/user-interaction/index.html"
+  ],
+  "prefixes": [
+   "https://cmake.org/cmake/help/latest/guide/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "ucx_docs",
+  "topic": "parallel",
+  "leaves": [
+   "ucx_ofi_transports"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (UCX)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://openucx.readthedocs.io/en/master/"
+  ],
+  "prefixes": [
+   "https://openucx.readthedocs.io/en/master/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "libfabric_man",
+  "topic": "parallel",
+  "leaves": [
+   "ucx_ofi_transports"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause / GPL-2.0 (libfabric)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://ofiwg.github.io/libfabric/main/man/"
+  ],
+  "prefixes": [
+   "https://ofiwg.github.io/libfabric/main/man/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "pmix_docs",
+  "topic": "parallel",
+  "leaves": [
+   "ucx_ofi_transports",
+   "mpi_placement"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (OpenPMIx)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.openpmix.org/en/latest/"
+  ],
+  "prefixes": [
+   "https://docs.openpmix.org/en/latest/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "mpi_forum_standard",
+  "topic": "parallel",
+  "leaves": [
+   "mpi_types_rma",
+   "mpi_io",
+   "mpi_collectives",
+   "hybrid_mpi_openmp"
+  ],
+  "kind": "technical_documentation",
+  "license": "MPI Forum copyright (copying permitted with notice)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.mpi-forum.org/docs/mpi-4.1/mpi41-report/mpi41-report.htm"
+  ],
+  "prefixes": [
+   "https://www.mpi-forum.org/docs/mpi-4.1/mpi41-report/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "chapel_docs",
+  "topic": "parallel",
+  "leaves": [
+   "pgas_coarray"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (Chapel)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://chapel-lang.org/docs/"
+  ],
+  "prefixes": [
+   "https://chapel-lang.org/docs/"
+  ],
+  "max_pages": 300,
+  "exclude": "/modules/packages/|/builtins/"
+ },
+ {
+  "id": "kokkos_docs",
+  "topic": "parallel",
+  "leaves": [
+   "kokkos_raja_sycl"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 WITH LLVM-exception (Kokkos)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://kokkos.org/kokkos-core-wiki/"
+  ],
+  "prefixes": [
+   "https://kokkos.org/kokkos-core-wiki/"
+  ],
+  "max_pages": 300,
+  "exclude": "/API/"
+ },
+ {
+  "id": "raja_docs",
+  "topic": "parallel",
+  "leaves": [
+   "kokkos_raja_sycl"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (RAJA)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://raja.readthedocs.io/en/develop/"
+  ],
+  "prefixes": [
+   "https://raja.readthedocs.io/en/develop/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "adaptivecpp_docs",
+  "topic": "parallel",
+  "leaves": [
+   "kokkos_raja_sycl"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause (AdaptiveCpp)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://adaptivecpp.github.io/AdaptiveCpp/"
+  ],
+  "prefixes": [
+   "https://adaptivecpp.github.io/AdaptiveCpp/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "sycl_spec",
+  "topic": "parallel",
+  "leaves": [
+   "kokkos_raja_sycl"
+  ],
+  "kind": "technical_documentation",
+  "license": "Khronos copyright (SYCL 2020 specification)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://registry.khronos.org/SYCL/specs/sycl-2020/html/sycl-2020.html"
+  ],
+  "prefixes": [
+   "https://registry.khronos.org/SYCL/specs/sycl-2020/html/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "openmp_examples",
+  "topic": "parallel",
+  "leaves": [
+   "openmp_offload",
+   "openmp_threads"
+  ],
+  "kind": "technical_documentation",
+  "license": "OpenMP ARB copyright (copying permitted with notice)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.openmp.org/wp-content/uploads/openmp-examples-6.0.pdf"
+  ],
+  "prefixes": [
+   "https://www.openmp.org/wp-content/uploads/openmp-examples-"
+  ],
+  "max_pages": 2,
+  "pdf": true
+ },
+ {
+  "id": "nvidia_mig_mps_dcgm",
+  "topic": "gpu",
+  "leaves": [
+   "multi_gpu_mig_mps"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/index.html",
+   "https://docs.nvidia.com/deploy/mps/index.html",
+   "https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/index.html",
+   "https://docs.nvidia.com/deploy/nvidia-smi/index.html",
+   "https://docs.nvidia.com/deploy/xid-errors/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/",
+   "https://docs.nvidia.com/deploy/",
+   "https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "nvidia_gpu_tools",
+  "topic": "gpu",
+  "leaves": [
+   "gpu_profiling",
+   "gdb_valgrind_sanitizers",
+   "cuda_aware_mpi",
+   "cuda_gpu_errors"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/nsight-compute/index.html",
+   "https://docs.nvidia.com/compute-sanitizer/index.html",
+   "https://docs.nvidia.com/cuda/cuda-gdb/index.html",
+   "https://docs.nvidia.com/cuda/gpudirect-rdma/index.html",
+   "https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/nsight-compute/",
+   "https://docs.nvidia.com/compute-sanitizer/",
+   "https://docs.nvidia.com/cuda/cuda-gdb/",
+   "https://docs.nvidia.com/cuda/gpudirect-rdma/",
+   "https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "nvidia_containers_ngc",
+  "topic": "containers",
+  "leaves": [
+   "gpu_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA proprietary documentation (NVIDIA notices / terms of use)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html",
+   "https://docs.nvidia.com/ngc/latest/ngc-user-guide.html",
+   "https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/",
+   "https://docs.nvidia.com/ngc/",
+   "https://docs.nvidia.com/deeplearning/frameworks/user-guide/"
+  ],
+  "max_pages": 100
+ },
+ {
+  "id": "nvidia_ai_stack",
+  "topic": "ai_ml",
+  "leaves": [
+   "megatron_nemo",
+   "mixed_precision",
+   "data_loading",
+   "llm_inference_serving"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA documentation (repos Apache-2.0/BSD-3; verify)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.nvidia.com/megatron-core/developer-guide/latest/index.html",
+   "https://docs.nvidia.com/deeplearning/dali/user-guide/docs/index.html",
+   "https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/megatron-core/developer-guide/latest/",
+   "https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/",
+   "https://docs.nvidia.com/deeplearning/dali/user-guide/docs/",
+   "https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/"
+  ],
+  "max_pages": 300,
+  "exclude": "/(api|_autosummary|apidocs|operations)/"
+ },
+ {
+  "id": "rocm_tools",
+  "topic": "gpu",
+  "leaves": [
+   "gpu_profiling",
+   "hip_rocm",
+   "multi_gpu_mig_mps"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (ROCm documentation; AMD copyright notices)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-compute/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-systems/en/latest/",
+   "https://rocm.docs.amd.com/projects/amdsmi/en/latest/",
+   "https://rocm.docs.amd.com/projects/rccl/en/latest/",
+   "https://rocm.docs.amd.com/projects/ROCgdb/en/latest/"
+  ],
+  "prefixes": [
+   "https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-compute/en/latest/",
+   "https://rocm.docs.amd.com/projects/rocprofiler-systems/en/latest/",
+   "https://rocm.docs.amd.com/projects/amdsmi/en/latest/",
+   "https://rocm.docs.amd.com/projects/rccl/en/latest/",
+   "https://rocm.docs.amd.com/projects/ROCgdb/en/latest/"
+  ],
+  "max_pages": 300,
+  "exclude": "/(doxygen|api-reference|reference/api)"
+ },
+ {
+  "id": "hypre_docs",
+  "topic": "numlibs",
+  "leaves": [
+   "petsc_trilinos_solvers"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 OR MIT (hypre)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hypre.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://hypre.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "trilinos_docs",
+  "topic": "numlibs",
+  "leaves": [
+   "petsc_trilinos_solvers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Trilinos)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://trilinos.github.io/"
+  ],
+  "prefixes": [
+   "https://trilinos.github.io/"
+  ],
+  "max_pages": 100
+ },
+ {
+  "id": "slepc_docs",
+  "topic": "numlibs",
+  "leaves": [
+   "petsc_trilinos_solvers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause (SLEPc)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://slepc.upv.es/release/documentation/index.html"
+  ],
+  "prefixes": [
+   "https://slepc.upv.es/release/"
+  ],
+  "max_pages": 40
+ },
+ {
+  "id": "petsc_docs_more",
+  "topic": "numlibs",
+  "leaves": [
+   "petsc_trilinos_solvers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://petsc.org/release/install/",
+   "https://petsc.org/release/faq/",
+   "https://petsc.org/release/tutorials/"
+  ],
+  "prefixes": [
+   "https://petsc.org/release/install/",
+   "https://petsc.org/release/faq/",
+   "https://petsc.org/release/tutorials/",
+   "https://petsc.org/release/overview/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "bsc_tools_docs",
+  "topic": "perf_debug",
+  "leaves": [
+   "trace_tools_scorep"
+  ],
+  "kind": "technical_documentation",
+  "license": "LGPL-2.1 (Extrae/Paraver) / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://tools.bsc.es/doc/html/extrae/"
+  ],
+  "prefixes": [
+   "https://tools.bsc.es/doc/html/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "vampir_docs",
+  "topic": "perf_debug",
+  "leaves": [
+   "trace_tools_scorep"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://vampir.eu/tutorial/manual"
+  ],
+  "prefixes": [
+   "https://vampir.eu/"
+  ],
+  "max_pages": 40
+ },
+ {
+  "id": "caliper_docs",
+  "topic": "perf_debug",
+  "leaves": [
+   "trace_tools_scorep",
+   "profiling_sampling"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Caliper)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://software.llnl.gov/Caliper/"
+  ],
+  "prefixes": [
+   "https://software.llnl.gov/Caliper/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "pyspy_perf_brendangregg",
+  "topic": "perf_debug",
+  "leaves": [
+   "profiling_sampling"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.brendangregg.com/perf.html"
+  ],
+  "prefixes": [
+   "https://www.brendangregg.com/"
+  ],
+  "max_pages": 30,
+  "include": "(perf|flamegraph|linuxperf|FlameGraphs|offcpu|methodology)"
+ },
+ {
+  "id": "hf_training_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "llm_finetuning",
+   "fsdp_model_parallel",
+   "llm_inference_serving",
+   "mixed_precision"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://huggingface.co/docs/peft/index",
+   "https://huggingface.co/docs/trl/index",
+   "https://huggingface.co/docs/text-generation-inference/index",
+   "https://huggingface.co/docs/transformers/perf_train_gpu_many",
+   "https://huggingface.co/docs/transformers/main_classes/trainer"
+  ],
+  "prefixes": [
+   "https://huggingface.co/docs/peft/",
+   "https://huggingface.co/docs/trl/",
+   "https://huggingface.co/docs/text-generation-inference/",
+   "https://huggingface.co/docs/transformers/"
+  ],
+  "max_pages": 500,
+  "exclude": "/(main|v\\d[^/]*)/|/model_doc/|/(ar|de|es|fr|hi|it|ja|ko|pt|te|tr|zh)/|/package_reference/|/internal/"
+ },
+ {
+  "id": "pytorch_fsdp_tp_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "fsdp_model_parallel",
+   "checkpoint_restart",
+   "mixed_precision",
+   "data_loading"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (PyTorch)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.pytorch.org/docs/stable/fsdp.html",
+   "https://docs.pytorch.org/docs/stable/distributed.checkpoint.html",
+   "https://docs.pytorch.org/docs/stable/distributed.tensor.parallel.html",
+   "https://docs.pytorch.org/docs/stable/amp.html",
+   "https://docs.pytorch.org/docs/stable/data.html",
+   "https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html",
+   "https://docs.pytorch.org/tutorials/intermediate/TP_tutorial.html",
+   "https://docs.pytorch.org/tutorials/recipes/distributed_checkpoint_recipe.html"
+  ],
+  "prefixes": [
+   "https://docs.pytorch.org/docs/",
+   "https://docs.pytorch.org/tutorials/"
+  ],
+  "max_pages": 150,
+  "include": "(fsdp|FSDP|checkpoint|tensor|parallel|amp|data\\.html|distributed|elastic|torchrun|pipelining|cuda\\.html|notes/cuda|mixed|DDP|ddp)",
+  "exclude": "/generated/"
+ },
+ {
+  "id": "torchtitan_lightning",
+  "topic": "ai_ml",
+  "leaves": [
+   "fsdp_model_parallel",
+   "other_dl_frameworks",
+   "pytorch_ddp"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (Lightning)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://lightning.ai/docs/pytorch/stable/clouds/cluster.html",
+   "https://lightning.ai/docs/pytorch/stable/advanced/model_parallel.html"
+  ],
+  "prefixes": [
+   "https://lightning.ai/docs/pytorch/stable/clouds/",
+   "https://lightning.ai/docs/pytorch/stable/advanced/",
+   "https://lightning.ai/docs/pytorch/stable/common/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "optuna_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "hyperparameter_sweeps"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (Optuna)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://optuna.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://optuna.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 120,
+  "exclude": "/reference/generated/"
+ },
+ {
+  "id": "mlflow_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "hyperparameter_sweeps"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (MLflow)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://mlflow.org/docs/latest/ml/tracking/"
+  ],
+  "prefixes": [
+   "https://mlflow.org/docs/latest/ml/tracking/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "sglang_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "llm_inference_serving"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (SGLang)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.sglang.io/"
+  ],
+  "prefixes": [
+   "https://docs.sglang.io/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "llama_cpp_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "llm_inference_serving"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (llama.cpp)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/docs/build.md",
+   "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/tools/server/README.md",
+   "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/README.md"
+  ],
+  "prefixes": [
+   "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/"
+  ],
+  "max_pages": 3
+ },
+ {
+  "id": "torchtune_docs",
+  "topic": "ai_ml",
+  "leaves": [
+   "llm_finetuning",
+   "checkpoint_restart"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (torchtune)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://meta-pytorch.org/torchtune/stable/index.html"
+  ],
+  "prefixes": [
+   "https://meta-pytorch.org/torchtune/stable/"
+  ],
+  "max_pages": 80,
+  "exclude": "/generated/|/api_ref"
+ },
+ {
+  "id": "hyperqueue_docs",
+  "topic": "workflows",
+  "leaves": [
+   "many_task_farming"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (HyperQueue)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://it4innovations.github.io/hyperqueue/stable/"
+  ],
+  "prefixes": [
+   "https://it4innovations.github.io/hyperqueue/stable/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "gnu_parallel_docs",
+  "topic": "workflows",
+  "leaves": [
+   "many_task_farming"
+  ],
+  "kind": "technical_documentation",
+  "license": "GFDL-1.3 / CC-BY-SA-4.0 (GNU parallel docs)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.gnu.org/software/parallel/parallel_tutorial.html",
+   "https://www.gnu.org/software/parallel/parallel.html",
+   "https://www.gnu.org/software/parallel/parallel_examples.html"
+  ],
+  "prefixes": [
+   "https://www.gnu.org/software/parallel/"
+  ],
+  "max_pages": 15
+ },
+ {
+  "id": "dask_docs",
+  "topic": "workflows",
+  "leaves": [
+   "other_workflow_managers",
+   "python_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Dask)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.dask.org/en/stable/",
+   "https://docs.dask.org/en/stable/deploying-hpc.html"
+  ],
+  "prefixes": [
+   "https://docs.dask.org/en/stable/"
+  ],
+  "max_pages": 150,
+  "exclude": "/generated/"
+ },
+ {
+  "id": "cwl_user_guide",
+  "topic": "workflows",
+  "leaves": [
+   "other_workflow_managers"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.commonwl.org/user_guide/"
+  ],
+  "prefixes": [
+   "https://www.commonwl.org/user_guide/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "aiida_docs",
+  "topic": "workflows",
+  "leaves": [
+   "other_workflow_managers"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (AiiDA)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://aiida.readthedocs.io/projects/aiida-core/en/stable/"
+  ],
+  "prefixes": [
+   "https://aiida.readthedocs.io/projects/aiida-core/en/stable/"
+  ],
+  "max_pages": 150,
+  "exclude": "/reference/apidoc/"
+ },
+ {
+  "id": "nf_core_docs",
+  "topic": "workflows",
+  "leaves": [
+   "nextflow"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (nf-core)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://nf-co.re/docs/"
+  ],
+  "prefixes": [
+   "https://nf-co.re/docs/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "paraview_docs",
+  "topic": "interactive",
+  "leaves": [
+   "visualization"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 (ParaView documentation) / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.paraview.org/en/latest/"
+  ],
+  "prefixes": [
+   "https://docs.paraview.org/en/latest/"
+  ],
+  "max_pages": 300
+ },
+ {
+  "id": "visit_docs",
+  "topic": "interactive",
+  "leaves": [
+   "visualization"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (VisIt)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/"
+  ],
+  "prefixes": [
+   "https://visit-sphinx-github-user-manual.readthedocs.io/en/develop/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "jupyterlab_docs",
+  "topic": "interactive",
+  "leaves": [
+   "jupyter_on_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (JupyterLab)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://jupyterlab.readthedocs.io/en/stable/user/index.html"
+  ],
+  "prefixes": [
+   "https://jupyterlab.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 80,
+  "exclude": "/(api|extension|developer)/"
+ },
+ {
+  "id": "batchspawner_wrapspawner",
+  "topic": "interactive",
+  "leaves": [
+   "jupyter_on_hpc",
+   "web_portals_ondemand"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://raw.githubusercontent.com/jupyterhub/batchspawner/main/README.md"
+  ],
+  "prefixes": [
+   "https://raw.githubusercontent.com/jupyterhub/batchspawner/main/"
+  ],
+  "max_pages": 2
+ },
+ {
+  "id": "r_parallel_future",
+  "topic": "languages",
+  "leaves": [
+   "r_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "LGPL-2.1+ (future) / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://future.futureverse.org/"
+  ],
+  "prefixes": [
+   "https://future.futureverse.org/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "r_batchtools_clustermq",
+  "topic": "languages",
+  "leaves": [
+   "r_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "LGPL-3 / Apache-2.0 (package docs)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://mschubert.github.io/clustermq/",
+   "https://mschubert.github.io/clustermq/articles/userguide.html"
+  ],
+  "prefixes": [
+   "https://mschubert.github.io/clustermq/"
+  ],
+  "max_pages": 30
+ },
+ {
+  "id": "mathworks_parallel",
+  "topic": "languages",
+  "leaves": [
+   "matlab_hpc"
+  ],
+  "kind": "technical_documentation",
+  "license": "MathWorks proprietary documentation",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://www.mathworks.com/help/parallel-computing/index.html"
+  ],
+  "prefixes": [
+   "https://www.mathworks.com/help/parallel-computing/"
+  ],
+  "max_pages": 200,
+  "exclude": "/ref/|/referencelist|\\?"
+ },
+ {
+  "id": "podman_docs",
+  "topic": "containers",
+  "leaves": [
+   "other_container_runtimes"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (Podman)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.podman.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://docs.podman.io/en/latest/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "charliecloud_docs",
+  "topic": "containers",
+  "leaves": [
+   "other_container_runtimes",
+   "mpi_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (Charliecloud)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpc.github.io/charliecloud/"
+  ],
+  "prefixes": [
+   "https://hpc.github.io/charliecloud/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "sarus_docs",
+  "topic": "containers",
+  "leaves": [
+   "other_container_runtimes",
+   "mpi_containers",
+   "gpu_containers"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (Sarus)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://sarus.readthedocs.io/en/stable/"
+  ],
+  "prefixes": [
+   "https://sarus.readthedocs.io/en/stable/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "enroot_pyxis",
+  "topic": "containers",
+  "leaves": [
+   "other_container_runtimes"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (enroot, pyxis)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://raw.githubusercontent.com/NVIDIA/enroot/master/doc/usage.md",
+   "https://raw.githubusercontent.com/NVIDIA/enroot/master/doc/cmd/import.md",
+   "https://raw.githubusercontent.com/NVIDIA/enroot/master/doc/configuration.md",
+   "https://raw.githubusercontent.com/NVIDIA/pyxis/master/README.md"
+  ],
+  "prefixes": [
+   "https://raw.githubusercontent.com/NVIDIA/enroot/master/doc/",
+   "https://raw.githubusercontent.com/NVIDIA/pyxis/master/"
+  ],
+  "max_pages": 6
+ },
+ {
+  "id": "docker_docs",
+  "topic": "containers",
+  "leaves": [
+   "docker_to_sif"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0 (docker/docs repo)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/",
+   "https://docs.docker.com/build/concepts/dockerfile/",
+   "https://docs.docker.com/reference/dockerfile/"
+  ],
+  "prefixes": [
+   "https://docs.docker.com/get-started/",
+   "https://docs.docker.com/build/concepts/",
+   "https://docs.docker.com/reference/dockerfile/",
+   "https://docs.docker.com/build/building/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "aws_parallelcluster",
+  "topic": "cloud",
+  "leaves": [
+   "cloud_hybrid"
+  ],
+  "kind": "technical_documentation",
+  "license": "AWS documentation (proprietary; see license_links)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.aws.amazon.com/parallelcluster/latest/ug/what-is-aws-parallelcluster.html"
+  ],
+  "prefixes": [
+   "https://docs.aws.amazon.com/parallelcluster/latest/ug/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "azure_cyclecloud",
+  "topic": "cloud",
+  "leaves": [
+   "cloud_hybrid"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 (Microsoft Learn docs content)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://learn.microsoft.com/en-us/azure/cyclecloud/overview"
+  ],
+  "prefixes": [
+   "https://learn.microsoft.com/en-us/azure/cyclecloud/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "gcp_cluster_toolkit",
+  "topic": "cloud",
+  "leaves": [
+   "cloud_hybrid"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 (Google Cloud docs content)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.cloud.google.com/cluster-toolkit/docs/overview"
+  ],
+  "prefixes": [
+   "https://docs.cloud.google.com/cluster-toolkit/docs/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "geopm_docs",
+  "topic": "energy",
+  "leaves": [
+   "energy_efficiency"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause (GEOPM)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://geopm.github.io/"
+  ],
+  "prefixes": [
+   "https://geopm.github.io/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "variorum_docs",
+  "topic": "energy",
+  "leaves": [
+   "energy_efficiency"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT (Variorum)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://variorum.readthedocs.io/en/latest/"
+  ],
+  "prefixes": [
+   "https://variorum.readthedocs.io/en/latest/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "eijkhout_hpc_books",
+  "topic": "architecture",
+  "leaves": [
+   "hpc_concepts_intro",
+   "cpu_nodes_numa",
+   "interconnects",
+   "scaling_studies"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-4.0 (Eijkhout, The Art of HPC)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://theartofhpc.com/"
+  ],
+  "prefixes": [
+   "https://theartofhpc.com/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "hpc_wiki_more",
+  "topic": "teaching",
+  "leaves": [
+   "scaling_studies",
+   "roofline_counters_likwid",
+   "binding_affinity_smt"
+  ],
+  "kind": "technical_documentation",
+  "license": "unstated on site; see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://hpc-wiki.info/hpc/Scaling",
+   "https://hpc-wiki.info/hpc/Binding/Pinning",
+   "https://hpc-wiki.info/hpc/HPC_Wiki"
+  ],
+  "prefixes": [
+   "https://hpc-wiki.info/hpc/"
+  ],
+  "max_pages": 400,
+  "exclude": "(Special:|action=|oldid=|Talk:|User:)"
+ },
+ {
+  "id": "gromacs_manual",
+  "topic": "applications",
+  "leaves": [
+   "apps_md_chem"
+  ],
+  "kind": "technical_documentation",
+  "license": "LGPL-2.1 / see license_links",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://manual.gromacs.org/current/user-guide/index.html"
+  ],
+  "prefixes": [
+   "https://manual.gromacs.org/current/user-guide/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "lammps_docs",
+  "topic": "applications",
+  "leaves": [
+   "apps_md_chem"
+  ],
+  "kind": "technical_documentation",
+  "license": "GPL-2.0 (LAMMPS)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://docs.lammps.org/Manual.html",
+   "https://docs.lammps.org/Speed.html",
+   "https://docs.lammps.org/Run_basics.html"
+  ],
+  "prefixes": [
+   "https://docs.lammps.org/"
+  ],
+  "max_pages": 150,
+  "include": "(Manual|Speed|Run_|Build|Install|Intro|Howto|Accelerator|package|Packages_details)"
+ },
+ {
+  "id": "openfoam_docs",
+  "topic": "applications",
+  "leaves": [
+   "apps_cfd_climate_bio"
+  ],
+  "kind": "technical_documentation",
+  "license": "CC-BY-NC-ND / see license_links (OpenFOAM Foundation user guide)",
+  "license_basis": "site footer / project LICENSE as known at crawl time; verify in licence review",
+  "seeds": [
+   "https://doc.cfd.direct/openfoam/user-guide-v13/index"
+  ],
+  "prefixes": [
+   "https://doc.cfd.direct/openfoam/user-guide-v13/"
+  ],
+  "max_pages": 150
+ }
+]

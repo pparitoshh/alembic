@@ -1,0 +1,2806 @@
+{
+ "version": "hpc-taxonomy-v2 (2026-10-24)",
+ "description": "HPC topic taxonomy for measuring training-data coverage. Areas -> leaves; every leaf has Python regex patterns (case-insensitive; (?-i:...) = case-sensitive) used by coverage.py.",
+ "matching_rules": {
+  "document": "A document maps to a leaf if any leaf pattern matches its URL or title, or if the leaf's patterns match >= MIN_BODY_HITS (3) times in its extracted text (first 200,000 chars). Multi-label.",
+  "qa": "A Q&A row maps to a leaf if any leaf pattern matches its question text (user turn) or its source URL. Multi-label.",
+  "status": "GAP: < 10 documents or < 30 est. 1,500-char chunks; THIN: < 40 documents or < 150 chunks; otherwise OK (thresholds in coverage.py)."
+ },
+ "n_areas": 27,
+ "n_leaves": 156,
+ "areas": [
+  {
+   "id": "access",
+   "name": "Access & accounts",
+   "leaves": [
+    {
+     "id": "ssh_keys_config",
+     "name": "SSH login, keys, agents and ~/.ssh/config",
+     "patterns": [
+      "(?<!\\w)ssh-keygen(?!\\w)",
+      "(?<!\\w)ssh[- ]keys?",
+      "(?<!\\w)authorized_keys(?!\\w)",
+      "(?<!\\w)ssh-agent(?!\\w)",
+      "(?<!\\w)ssh-add(?!\\w)",
+      "(?<!\\w)id_ed25519(?!\\w)",
+      "(?<!\\w)id_rsa(?!\\w)",
+      "(?<!\\w)known_hosts(?!\\w)",
+      "(?<!\\w)public key authentication(?!\\w)",
+      "(?<!\\w)ssh client(?!\\w)",
+      "~/\\.ssh/config",
+      "\\bssh (?:-i|-l) "
+     ]
+    },
+    {
+     "id": "mfa_vpn_jump_hosts",
+     "name": "2FA/MFA, SSH certificates, VPN and jump hosts",
+     "patterns": [
+      "(?<!\\w)2fa(?!\\w)",
+      "(?<!\\w)two[- ]factor(?!\\w)",
+      "(?<!\\w)multi[- ]factor(?!\\w)",
+      "(?<!\\w)mfa(?!\\w)",
+      "(?<!\\w)totp(?!\\w)",
+      "(?<!\\w)one[- ]time password(?!\\w)",
+      "(?<!\\w)otp(?!\\w)",
+      "(?<!\\w)proxyjump(?!\\w)",
+      "(?<!\\w)jump ?host(?!\\w)",
+      "(?<!\\w)bastion(?!\\w)",
+      "(?<!\\w)vpn(?!\\w)",
+      "(?<!\\w)ssh certificates?",
+      "(?<!\\w)smallstep(?!\\w)",
+      "(?<!\\w)step ssh(?!\\w)",
+      "(?<!\\w)authenticator app(?!\\w)",
+      "(?<!\\w)proxycommand(?!\\w)"
+     ]
+    },
+    {
+     "id": "web_portals_ondemand",
+     "name": "Web portals: Open OnDemand, JupyterHub front-ends, web desktops",
+     "patterns": [
+      "(?<!\\w)open ?ondemand(?!\\w)",
+      "(?<!\\w)ood(?!\\w)",
+      "(?<!\\w)web portal(?!\\w)",
+      "(?<!\\w)hpc portal(?!\\w)",
+      "(?<!\\w)jupyterhub(?!\\w)",
+      "(?<!\\w)web interface for the cluster(?!\\w)",
+      "(?<!\\w)science gateway(?!\\w)"
+     ]
+    },
+    {
+     "id": "x11_vnc_remote_desktop",
+     "name": "X11 forwarding, VNC, remote desktops",
+     "patterns": [
+      "(?<!\\w)x11(?!\\w)",
+      "(?<!\\w)ssh -[XY]",
+      "(?<!\\w)x11 ?forwarding(?!\\w)",
+      "(?<!\\w)vnc(?!\\w)",
+      "(?<!\\w)turbovnc(?!\\w)",
+      "(?<!\\w)novnc(?!\\w)",
+      "(?<!\\w)tigervnc(?!\\w)",
+      "(?<!\\w)virtualgl(?!\\w)",
+      "(?<!\\w)vglrun(?!\\w)",
+      "(?<!\\w)remote desktop(?!\\w)",
+      "(?<!\\w)thinlinc(?!\\w)",
+      "(?<!\\w)xpra(?!\\w)",
+      "(?<!\\w)xquartz(?!\\w)",
+      "(?<!\\w)mobaxterm(?!\\w)"
+     ]
+    },
+    {
+     "id": "remote_ide_dev",
+     "name": "Remote development: VS Code Remote-SSH, code-server, PyCharm remote, sshfs mounts",
+     "patterns": [
+      "(?<!\\w)vs ?code(?!\\w)",
+      "(?<!\\w)visual studio code(?!\\w)",
+      "(?<!\\w)remote-ssh(?!\\w)",
+      "(?<!\\w)remote development(?!\\w)",
+      "(?<!\\w)code-server(?!\\w)",
+      "(?<!\\w)vscode server(?!\\w)",
+      "(?<!\\w)pycharm(?!\\w)",
+      "(?<!\\w)sshfs(?!\\w)",
+      "(?<!\\w)ides?(?!\\w)",
+      "(?<!\\w)integrated development environments?(?!\\w)",
+      "(?<!\\w)\\.vscode-server(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "linux",
+   "name": "Linux & shell on clusters",
+   "leaves": [
+    {
+     "id": "shell_basics_scripting",
+     "name": "Shell basics and Bash scripting",
+     "patterns": [
+      "(?<!\\w)bash script(?!\\w)",
+      "(?<!\\w)shell script(?!\\w)",
+      "(?<!\\w)command line(?!\\w)",
+      "(?<!\\w)unix shell(?!\\w)",
+      "(?<!\\w)grep(?!\\w)",
+      "(?<!\\w)sed(?!\\w)",
+      "(?<!\\w)awk(?!\\w)",
+      "(?<!\\w)for loop(?!\\w)",
+      "(?<!\\w)pipes? and filters(?!\\w)",
+      "(?<!\\w)environment variables?",
+      "\\.bashrc(?!\\w)",
+      "(?<!\\w)shebang(?!\\w)",
+      "(?<!\\w)wildcards?",
+      "\\$PATH\\b",
+      "\\bchmod \\+x\\b"
+     ]
+    },
+    {
+     "id": "permissions_editors_git",
+     "name": "File permissions/ACLs, editors, git, tmux/screen",
+     "patterns": [
+      "(?<!\\w)chmod(?!\\w)",
+      "(?<!\\w)chgrp(?!\\w)",
+      "(?<!\\w)umask(?!\\w)",
+      "(?<!\\w)setfacl(?!\\w)",
+      "(?<!\\w)getfacl(?!\\w)",
+      "(?<!\\w)file permissions(?!\\w)",
+      "(?<!\\w)vim(?!\\w)",
+      "(?<!\\w)emacs(?!\\w)",
+      "(?<!\\w)nano(?!\\w)",
+      "(?<!\\w)git clone(?!\\w)",
+      "(?<!\\w)git commit(?!\\w)",
+      "(?<!\\w)version control(?!\\w)",
+      "(?<!\\w)tmux(?!\\w)",
+      "(?<!\\w)gnu screen(?!\\w)",
+      "(?<!\\w)screen -r(?!\\w)"
+     ]
+    },
+    {
+     "id": "process_job_control",
+     "name": "Linux processes & job control: ps/top/htop, kill and signals, nohup, background jobs",
+     "patterns": [
+      "(?<!\\w)ps (?:aux|-ef|-u)(?!\\w)",
+      "(?<!\\w)htop(?!\\w)",
+      "(?<!\\w)top command(?!\\w)",
+      "(?<!\\w)pgrep(?!\\w)",
+      "(?<!\\w)pkill(?!\\w)",
+      "(?<!\\w)kill -(?:9|15|term|kill|hup)(?!\\w)",
+      "(?<!\\w)killall(?!\\w)",
+      "(?<!\\w)nohup(?!\\w)",
+      "(?<!\\w)disown(?!\\w)",
+      "(?<!\\w)background (?:process|jobs?)(?!\\w)",
+      "(?<!\\w)job control(?!\\w)",
+      "(?<!\\w)ctrl-z(?!\\w)",
+      "(?<!\\w)sig(?:term|kill|int|hup|tstp|stop|cont)(?!\\w)",
+      "(?<!\\w)zombie process(?:es)?(?!\\w)",
+      "(?<!\\w)process ids?(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "storage",
+   "name": "File systems, storage & data",
+   "leaves": [
+    {
+     "id": "fs_tiers_quotas",
+     "name": "Home/work/scratch/project tiers, quotas, purge, backups, snapshots",
+     "patterns": [
+      "(?<!\\w)scratch(?!\\w)",
+      "(?<!\\w)quotas?",
+      "(?<!\\w)inode(?!\\w)",
+      "(?<!\\w)purge(?:d| policy)?",
+      "(?<!\\w)home directory(?!\\w)",
+      "(?<!\\w)project (?:directory|space)",
+      "(?<!\\w)work directory(?!\\w)",
+      "(?<!\\w)snapshots?",
+      "(?<!\\w)backups?",
+      "(?<!\\w)lfs quota(?!\\w)",
+      "(?<!\\w)mmlsquota(?!\\w)",
+      "(?<!\\w)disk usage(?!\\w)",
+      "(?<!\\w)storage tiers?",
+      "\\$(?:HOME|WORK|SCRATCH|FAST|CINECA_SCRATCH|PROJECT)\\b"
+     ]
+    },
+    {
+     "id": "lustre_striping",
+     "name": "Lustre and file striping",
+     "patterns": [
+      "(?<!\\w)lustre(?!\\w)",
+      "(?<!\\w)lfs setstripe(?!\\w)",
+      "(?<!\\w)lfs getstripe(?!\\w)",
+      "(?<!\\w)stripe[_ -]count(?!\\w)",
+      "(?<!\\w)stripe[_ -]size(?!\\w)",
+      "(?<!\\w)striping(?!\\w)",
+      "(?<!\\w)osts?",
+      "(?<!\\w)mdts?",
+      "(?<!\\w)progressive file layout(?!\\w)",
+      "(?<!\\w)lfs find(?!\\w)"
+     ]
+    },
+    {
+     "id": "other_parallel_fs",
+     "name": "GPFS/Storage Scale, BeeGFS, DAOS, WekaFS, NFS",
+     "patterns": [
+      "(?<!\\w)gpfs(?!\\w)",
+      "(?<!\\w)spectrum scale(?!\\w)",
+      "(?<!\\w)storage scale(?!\\w)",
+      "(?<!\\w)beegfs(?!\\w)",
+      "(?<!\\w)daos(?!\\w)",
+      "(?<!\\w)dfuse(?!\\w)",
+      "(?<!\\w)weka(?:fs)?",
+      "(?<!\\w)cephfs(?!\\w)",
+      "(?<!\\w)nfs(?!\\w)",
+      "(?<!\\w)vast data(?!\\w)"
+     ]
+    },
+    {
+     "id": "burst_buffer_local_ssd",
+     "name": "Burst buffers, node-local NVMe/SSD, $TMPDIR, RAM disk",
+     "patterns": [
+      "(?<!\\w)burst buffers?",
+      "(?<!\\w)datawarp(?!\\w)",
+      "(?<!\\w)node[- ]local (?:storage|disk|ssd|nvme)",
+      "(?<!\\w)local (?:ssd|nvme|scratch|disk)",
+      "(?<!\\w)ram ?disk(?!\\w)",
+      "/dev/shm(?!\\w)",
+      "(?<!\\w)tmpdir(?!\\w)",
+      "\\$TMPDIR\\b",
+      "\\$LOCAL_SCRATCH\\b"
+     ]
+    },
+    {
+     "id": "io_best_practice",
+     "name": "I/O best practice, small files, metadata load, I/O profiling",
+     "patterns": [
+      "(?<!\\w)small files(?!\\w)",
+      "(?<!\\w)many files(?!\\w)",
+      "(?<!\\w)metadata (?:load|server|operations|performance)",
+      "(?<!\\w)i/o (?:performance|best practices?|patterns?|bottleneck)",
+      "(?<!\\w)parallel i/o(?!\\w)",
+      "(?<!\\w)darshan(?!\\w)",
+      "(?<!\\w)ior(?!\\w)",
+      "(?<!\\w)mdtest(?!\\w)",
+      "(?<!\\w)file per process(?!\\w)",
+      "(?<!\\w)squashfs(?!\\w)"
+     ]
+    },
+    {
+     "id": "archive_tape_object",
+     "name": "Archiving, tape, HSM, object storage (S3/Swift)",
+     "patterns": [
+      "(?<!\\w)tape(?!\\w)",
+      "(?<!\\w)hpss(?!\\w)",
+      "(?<!\\w)hsm(?!\\w)",
+      "(?<!\\w)long[- ]term (?:storage|archive)",
+      "(?<!\\w)data archive(?!\\w)",
+      "(?<!\\w)archiv(?:e|ing) (?:data|files|system|storage)",
+      "(?<!\\w)object stor(?:age|e)",
+      "(?<!\\w)s3(?!\\w)",
+      "(?<!\\w)swift(?!\\w)",
+      "(?<!\\w)s3cmd(?!\\w)",
+      "(?<!\\w)rclone(?!\\w)",
+      "(?<!\\w)allas(?!\\w)",
+      "(?<!\\w)lumi-o(?!\\w)",
+      "(?<!\\w)ceph(?!\\w)"
+     ]
+    },
+    {
+     "id": "data_transfer",
+     "name": "Data transfer: scp/sftp/rsync/bbcp/Globus/DTNs",
+     "patterns": [
+      "(?<!\\w)scp(?!\\w)",
+      "(?<!\\w)sftp(?!\\w)",
+      "(?<!\\w)rsync(?!\\w)",
+      "(?<!\\w)bbcp(?!\\w)",
+      "(?<!\\w)gridftp(?!\\w)",
+      "(?<!\\w)globus(?!\\w)",
+      "(?<!\\w)data transfer nodes?",
+      "(?<!\\w)dtn(?!\\w)",
+      "(?<!\\w)transfer files(?!\\w)",
+      "(?<!\\w)file transfer(?!\\w)",
+      "(?<!\\w)winscp(?!\\w)",
+      "(?<!\\w)filezilla(?!\\w)",
+      "(?<!\\w)lftp(?!\\w)",
+      "(?<!\\w)aspera(?!\\w)"
+     ]
+    },
+    {
+     "id": "data_compression_reduction",
+     "name": "Scientific data compression & reduction: SZ, ZFP, MGARD, Blosc, HDF5 filters, lossy vs lossless",
+     "patterns": [
+      "(?<!\\w)lossy compression(?!\\w)",
+      "(?<!\\w)lossless compression(?!\\w)",
+      "(?<!\\w)error-bounded(?!\\w)",
+      "(?<!\\w)sz3?(?!\\w)",
+      "(?<!\\w)zfp(?!\\w)",
+      "(?<!\\w)mgard(?!\\w)",
+      "(?<!\\w)blosc2?(?!\\w)",
+      "(?<!\\w)zstd(?!\\w)",
+      "(?<!\\w)hdf5 filters?(?!\\w)",
+      "(?<!\\w)compression (?:ratio|filters?|levels?)(?!\\w)",
+      "(?<!\\w)data reduction(?!\\w)",
+      "(?<!\\w)deflate(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "software",
+   "name": "Modules & software environment",
+   "leaves": [
+    {
+     "id": "modules_lmod",
+     "name": "Lmod / Environment Modules",
+     "patterns": [
+      "(?<!\\w)module load(?!\\w)",
+      "(?<!\\w)module avail(?!\\w)",
+      "(?<!\\w)module spider(?!\\w)",
+      "(?<!\\w)module purge(?!\\w)",
+      "(?<!\\w)module list(?!\\w)",
+      "(?<!\\w)lmod(?!\\w)",
+      "(?<!\\w)environment modules(?!\\w)",
+      "(?<!\\w)modulefiles?",
+      "(?<!\\w)module use(?!\\w)",
+      "(?<!\\w)ml av(?!\\w)"
+     ]
+    },
+    {
+     "id": "spack",
+     "name": "Spack",
+     "patterns": [
+      "(?<!\\w)spack(?!\\w)"
+     ]
+    },
+    {
+     "id": "easybuild",
+     "name": "EasyBuild",
+     "patterns": [
+      "(?<!\\w)easybuild(?!\\w)",
+      "(?<!\\w)easyconfigs?",
+      "(?<!\\w)eb --robot(?!\\w)",
+      "(?<!\\w)easyblocks?"
+     ]
+    },
+    {
+     "id": "conda_venv_pip",
+     "name": "conda/mamba/micromamba, venv/virtualenv, pip, uv",
+     "patterns": [
+      "(?<!\\w)conda(?!\\w)",
+      "(?<!\\w)mamba(?!\\w)",
+      "(?<!\\w)micromamba(?!\\w)",
+      "(?<!\\w)miniforge(?!\\w)",
+      "(?<!\\w)miniconda(?!\\w)",
+      "(?<!\\w)anaconda(?!\\w)",
+      "(?<!\\w)venv(?!\\w)",
+      "(?<!\\w)virtualenv(?!\\w)",
+      "(?<!\\w)pip install(?!\\w)",
+      "(?<!\\w)environment\\.yml(?!\\w)",
+      "(?<!\\w)uv pip(?!\\w)",
+      "(?<!\\w)pixi(?!\\w)",
+      "(?<!\\w)requirements\\.txt(?!\\w)"
+     ]
+    },
+    {
+     "id": "build_link_software",
+     "name": "Building software: CMake/autotools, linking, rpath, shared libraries",
+     "patterns": [
+      "(?<!\\w)cmake(?!\\w)",
+      "(?<!\\w)autotools(?!\\w)",
+      "\\./configure(?!\\w)",
+      "(?<!\\w)make install(?!\\w)",
+      "(?<!\\w)makefiles?",
+      "(?<!\\w)rpath(?!\\w)",
+      "(?<!\\w)ld_library_path(?!\\w)",
+      "(?<!\\w)shared librar(?:y|ies)",
+      "(?<!\\w)static linking(?!\\w)",
+      "(?<!\\w)dynamic linking(?!\\w)",
+      "(?<!\\w)ldd(?!\\w)",
+      "(?<!\\w)pkg-config(?!\\w)",
+      "(?<!\\w)meson(?!\\w)",
+      "(?<!\\w)undefined reference(?!\\w)",
+      "(?<!\\w)linker(?!\\w)"
+     ]
+    },
+    {
+     "id": "eessi_cvmfs",
+     "name": "EESSI and CernVM-FS: shared, streamed scientific software stacks",
+     "patterns": [
+      "(?<!\\w)eessi(?!\\w)",
+      "(?<!\\w)cvmfs(?!\\w)",
+      "(?<!\\w)cernvm-fs(?!\\w)",
+      "/cvmfs/",
+      "/cvmfs/software\\.eessi\\.io",
+      "(?<!\\w)cvmfs_config(?!\\w)",
+      "(?<!\\w)stratum (?:0|1|zero|one)(?!\\w)",
+      "(?<!\\w)european environment for scientific software installations(?!\\w)",
+      "(?<!\\w)archspec(?!\\w)",
+      "(?<!\\w)gentoo prefix(?!\\w)",
+      "(?<!\\w)eb-hooks?(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "compilers",
+   "name": "Compilers & toolchains",
+   "leaves": [
+    {
+     "id": "gcc_gfortran",
+     "name": "GCC / gfortran",
+     "patterns": [
+      "(?<!\\w)gcc(?!\\w)",
+      "(?<!\\w)gfortran(?!\\w)",
+      "(?<!\\w)g\\+\\+",
+      "(?<!\\w)gnu compilers?"
+     ]
+    },
+    {
+     "id": "intel_oneapi",
+     "name": "Intel oneAPI compilers (icx/icpx/ifx, classic icc/ifort)",
+     "patterns": [
+      "(?<!\\w)oneapi(?!\\w)",
+      "(?<!\\w)icx(?!\\w)",
+      "(?<!\\w)icpx(?!\\w)",
+      "(?<!\\w)ifx(?!\\w)",
+      "(?<!\\w)ifort(?!\\w)",
+      "(?<!\\w)icc(?!\\w)",
+      "(?<!\\w)intel compilers?",
+      "(?<!\\w)dpcpp(?!\\w)"
+     ]
+    },
+    {
+     "id": "nvhpc",
+     "name": "NVIDIA HPC SDK (nvc/nvc++/nvfortran, PGI)",
+     "patterns": [
+      "(?<!\\w)nvhpc(?!\\w)",
+      "(?<!\\w)hpc sdk(?!\\w)",
+      "(?<!\\w)nvfortran(?!\\w)",
+      "(?<!\\w)nvc\\+\\+",
+      "(?<!\\w)nvc(?!\\w)",
+      "(?<!\\w)pgi(?!\\w)",
+      "(?<!\\w)pgfortran(?!\\w)"
+     ]
+    },
+    {
+     "id": "aocc_amd",
+     "name": "AMD compilers (AOCC, amdclang, AOCL)",
+     "patterns": [
+      "(?<!\\w)aocc(?!\\w)",
+      "(?<!\\w)amdclang(?!\\w)",
+      "(?<!\\w)amdflang(?!\\w)",
+      "(?<!\\w)aocl(?!\\w)",
+      "(?<!\\w)amd optimizing c(?!\\w)",
+      "(?<!\\w)znver[2-5]"
+     ]
+    },
+    {
+     "id": "cray_cpe",
+     "name": "HPE Cray Programming Environment (PrgEnv, CCE, craype wrappers)",
+     "patterns": [
+      "(?<!\\w)prgenv-\\w+",
+      "(?<!\\w)craype(?!\\w)",
+      "(?<!\\w)cray programming environment(?!\\w)",
+      "(?<!\\w)cpe(?!\\w)",
+      "(?<!\\w)cce(?!\\w)",
+      "(?<!\\w)cray compil\\w+",
+      "(?<!\\w)ftn(?!\\w)",
+      "(?<!\\w)cray-libsci(?!\\w)",
+      "(?<!\\w)craype-accel(?!\\w)"
+     ]
+    },
+    {
+     "id": "opt_flags_vectorization",
+     "name": "Optimisation flags, vectorisation, SIMD, architecture targets",
+     "patterns": [
+      "-O[23]",
+      "-Ofast(?!\\w)",
+      "-march=\\S+",
+      "-xHost(?!\\w)",
+      "(?<!\\w)vectori[sz]ation(?!\\w)",
+      "(?<!\\w)simd(?!\\w)",
+      "(?<!\\w)avx-?512(?!\\w)",
+      "(?<!\\w)avx2(?!\\w)",
+      "(?<!\\w)auto-vectori[sz]",
+      "(?<!\\w)loop unrolling(?!\\w)",
+      "(?<!\\w)compiler flags(?!\\w)",
+      "(?<!\\w)optimization flags(?!\\w)",
+      "(?<!\\w)lto(?!\\w)",
+      "(?<!\\w)profile[- ]guided(?!\\w)",
+      "(?<!\\w)auto-?paralleli[sz]ation(?!\\w)",
+      "(?<!\\w)-ftree-parallelize-loops",
+      "(?<!\\w)-fprofile-(?:generate|use)(?!\\w)"
+     ]
+    },
+    {
+     "id": "blas_lapack_mkl",
+     "name": "BLAS/LAPACK: MKL, OpenBLAS, BLIS, LibSci, cuBLAS",
+     "patterns": [
+      "(?<!\\w)blas(?!\\w)",
+      "(?<!\\w)lapack(?!\\w)",
+      "(?<!\\w)mkl(?!\\w)",
+      "(?<!\\w)openblas(?!\\w)",
+      "(?<!\\w)blis(?!\\w)",
+      "(?<!\\w)libsci(?!\\w)",
+      "(?<!\\w)cublas(?!\\w)",
+      "(?<!\\w)rocblas(?!\\w)",
+      "(?<!\\w)dgemm(?!\\w)",
+      "(?<!\\w)lapacke(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "schedulers",
+   "name": "Schedulers & resource managers",
+   "leaves": [
+    {
+     "id": "slurm_submission",
+     "name": "Slurm sbatch/srun/salloc, batch scripts, resource requests, interactive jobs",
+     "patterns": [
+      "(?<!\\w)sbatch(?!\\w)",
+      "(?<!\\w)srun(?!\\w)",
+      "(?<!\\w)salloc(?!\\w)",
+      "#sbatch(?!\\w)",
+      "--ntasks(?:-per-node)?",
+      "--cpus-per-task(?!\\w)",
+      "--time=",
+      "(?<!\\w)job scripts?",
+      "(?<!\\w)batch scripts?",
+      "(?<!\\w)interactive jobs?",
+      "--pty(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_partitions_qos_accounts",
+     "name": "Slurm partitions, QoS, accounts, limits",
+     "patterns": [
+      "(?<!\\w)partitions?",
+      "--qos(?!\\w)",
+      "(?<!\\w)qos(?!\\w)",
+      "--account(?!\\w)",
+      "--partition(?!\\w)",
+      "(?<!\\w)sinfo(?!\\w)",
+      "(?<!\\w)walltime limits?",
+      "(?<!\\w)maxwall(?!\\w)",
+      "(?<!\\w)job limits(?!\\w)",
+      "(?<!\\w)assocmaxjobslimit(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_arrays_dependencies",
+     "name": "Slurm job arrays and dependencies",
+     "patterns": [
+      "(?<!\\w)job arrays?",
+      "--array(?!\\w)",
+      "(?<!\\w)slurm_array_task_id(?!\\w)",
+      "(?<!\\w)array jobs?",
+      "--dependency(?!\\w)",
+      "(?<!\\w)afterok(?!\\w)",
+      "(?<!\\w)afterany(?!\\w)",
+      "(?<!\\w)afternotok(?!\\w)",
+      "(?<!\\w)singleton(?!\\w)",
+      "(?<!\\w)job dependenc(?:y|ies)",
+      "(?<!\\w)job chain(?:s|ing)?"
+     ]
+    },
+    {
+     "id": "slurm_hetjobs",
+     "name": "Slurm heterogeneous jobs / MPMD",
+     "patterns": [
+      "(?<!\\w)heterogeneous jobs?",
+      "(?<!\\w)hetjob(?!\\w)",
+      "(?<!\\w)het-group(?!\\w)",
+      "(?<!\\w)packjob(?!\\w)",
+      "(?<!\\w)mpmd(?!\\w)",
+      "--multi-prog(?!\\w)",
+      "(?<!\\w)multiple program(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_reservations_preemption",
+     "name": "Reservations, preemption, requeue, signals, time limits",
+     "patterns": [
+      "(?<!\\w)reservations?",
+      "--reservation(?!\\w)",
+      "(?<!\\w)preempt(?:ion|ed|ible)?",
+      "(?<!\\w)requeue(?!\\w)",
+      "--signal(?!\\w)",
+      "(?<!\\w)scancel --signal(?!\\w)",
+      "(?<!\\w)grace ?time(?!\\w)",
+      "--time-min(?!\\w)",
+      "(?<!\\w)checkpoint before(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_states_reasons",
+     "name": "Job states and pending reasons, squeue/scontrol",
+     "patterns": [
+      "(?<!\\w)squeue(?!\\w)",
+      "(?<!\\w)scontrol show job(?!\\w)",
+      "(?<!\\w)pending reasons?",
+      "(?<!\\w)reason=\\w+",
+      "(?<!\\w)job states?",
+      "\\(Priority\\)",
+      "\\(Resources\\)",
+      "(?<!\\w)QOSMaxJobsPerUserLimit(?!\\w)",
+      "(?<!\\w)ReqNodeNotAvail(?!\\w)",
+      "(?<!\\w)AssocGrp\\w+",
+      "(?<!\\w)node_fail(?!\\w)",
+      "(?<!\\w)out_of_memory(?!\\w)",
+      "(?<!\\w)state codes?"
+     ]
+    },
+    {
+     "id": "slurm_accounting_efficiency",
+     "name": "sacct/sstat/seff/sreport, job efficiency and usage",
+     "patterns": [
+      "(?<!\\w)sacct(?!\\w)",
+      "(?<!\\w)sstat(?!\\w)",
+      "(?<!\\w)seff(?!\\w)",
+      "(?<!\\w)sreport(?!\\w)",
+      "(?<!\\w)jobstats(?!\\w)",
+      "(?<!\\w)job efficiency(?!\\w)",
+      "(?<!\\w)maxrss(?!\\w)",
+      "(?<!\\w)cpu efficiency(?!\\w)",
+      "(?<!\\w)reportseff(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_fairshare_priority",
+     "name": "Fairshare, priorities, backfill",
+     "patterns": [
+      "(?<!\\w)fair[- ]?share(?!\\w)",
+      "(?<!\\w)sprio(?!\\w)",
+      "(?<!\\w)sshare(?!\\w)",
+      "(?<!\\w)job priority(?!\\w)",
+      "(?<!\\w)priority factors?",
+      "(?<!\\w)backfill(?!\\w)",
+      "(?<!\\w)multifactor(?!\\w)",
+      "(?<!\\w)priorityweight\\w*"
+     ]
+    },
+    {
+     "id": "slurm_gpu_gres",
+     "name": "GPU requests: GRES, --gpus, gpu-bind, CUDA_VISIBLE_DEVICES",
+     "patterns": [
+      "--gres(?!\\w)",
+      "(?<!\\w)gres(?!\\w)",
+      "--gpus(?:-per-\\w+)?",
+      "--gpu-bind(?!\\w)",
+      "(?<!\\w)cuda_visible_devices(?!\\w)",
+      "(?<!\\w)rocr_visible_devices(?!\\w)",
+      "(?<!\\w)hip_visible_devices(?!\\w)",
+      "(?<!\\w)gpu binding(?!\\w)",
+      "(?<!\\w)gpus? per node(?!\\w)"
+     ]
+    },
+    {
+     "id": "binding_affinity_smt",
+     "name": "CPU/memory binding, affinity, NUMA placement, hyperthreading",
+     "patterns": [
+      "--cpu-bind(?!\\w)",
+      "--mem-bind(?!\\w)",
+      "(?<!\\w)cpu[- ]binding(?!\\w)",
+      "(?<!\\w)affinity(?!\\w)",
+      "(?<!\\w)omp_proc_bind(?!\\w)",
+      "(?<!\\w)omp_places(?!\\w)",
+      "(?<!\\w)numactl(?!\\w)",
+      "(?<!\\w)taskset(?!\\w)",
+      "(?<!\\w)hwloc(?!\\w)",
+      "--distribution(?!\\w)",
+      "(?<!\\w)hyper-?threading(?!\\w)",
+      "(?<!\\w)smt(?!\\w)",
+      "--hint=nomultithread(?!\\w)",
+      "(?<!\\w)pinning(?!\\w)",
+      "(?<!\\w)thread pinning(?!\\w)",
+      "(?<!\\w)cpu masks?"
+     ]
+    },
+    {
+     "id": "pbs_openpbs",
+     "name": "PBS Pro / OpenPBS / Torque",
+     "patterns": [
+      "(?<!\\w)qsub(?!\\w)",
+      "(?<!\\w)qstat(?!\\w)",
+      "#pbs(?!\\w)",
+      "(?<!\\w)pbs pro(?:fessional)?",
+      "(?<!\\w)openpbs(?!\\w)",
+      "(?<!\\w)torque(?!\\w)",
+      "(?<!\\w)qdel(?!\\w)",
+      "(?<!\\w)pbs_\\w+",
+      "(?<!\\w)select=\\d",
+      "(?<!\\w)pbs(?!\\w)"
+     ]
+    },
+    {
+     "id": "lsf",
+     "name": "IBM Spectrum LSF",
+     "patterns": [
+      "(?<!\\w)bsub(?!\\w)",
+      "(?<!\\w)bjobs(?!\\w)",
+      "#bsub(?!\\w)",
+      "(?<!\\w)lsf(?!\\w)",
+      "(?<!\\w)bqueues(?!\\w)",
+      "(?<!\\w)bkill(?!\\w)",
+      "(?<!\\w)jsrun(?!\\w)"
+     ]
+    },
+    {
+     "id": "htcondor_flux_other",
+     "name": "HTCondor, Flux, Grid Engine, OAR, Kubernetes batch",
+     "patterns": [
+      "(?<!\\w)htcondor(?!\\w)",
+      "(?<!\\w)condor_submit(?!\\w)",
+      "(?<!\\w)classads?",
+      "(?<!\\w)flux run(?!\\w)",
+      "(?<!\\w)flux submit(?!\\w)",
+      "(?<!\\w)flux framework(?!\\w)",
+      "(?<!\\w)flux-core(?!\\w)",
+      "(?<!\\w)grid engine(?!\\w)",
+      "(?<!\\w)sge(?!\\w)",
+      "(?<!\\w)oarsub(?!\\w)",
+      "(?<!\\w)kubernetes(?!\\w)",
+      "(?<!\\w)volcano(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "parallel",
+   "name": "Parallel programming",
+   "leaves": [
+    {
+     "id": "mpi_p2p_basics",
+     "name": "MPI basics & point-to-point",
+     "patterns": [
+      "(?<!\\w)mpi_send(?!\\w)",
+      "(?<!\\w)mpi_recv(?!\\w)",
+      "(?<!\\w)mpi_isend(?!\\w)",
+      "(?<!\\w)mpi_irecv(?!\\w)",
+      "(?<!\\w)mpi_wait(?:all)?",
+      "(?<!\\w)mpi_sendrecv(?!\\w)",
+      "(?<!\\w)point-to-point(?!\\w)",
+      "(?<!\\w)mpi_comm_rank(?!\\w)",
+      "(?<!\\w)mpi_init(?!\\w)",
+      "(?<!\\w)mpi_comm_world(?!\\w)",
+      "(?<!\\w)communicators?",
+      "(?<!\\w)deadlock(?!\\w)"
+     ]
+    },
+    {
+     "id": "mpi_collectives",
+     "name": "MPI collectives",
+     "patterns": [
+      "(?<!\\w)mpi_bcast(?!\\w)",
+      "(?<!\\w)mpi_reduce(?!\\w)",
+      "(?<!\\w)mpi_allreduce(?!\\w)",
+      "(?<!\\w)mpi_alltoallv?",
+      "(?<!\\w)mpi_gatherv?",
+      "(?<!\\w)mpi_scatterv?",
+      "(?<!\\w)mpi_allgather(?!\\w)",
+      "(?<!\\w)mpi_barrier(?!\\w)",
+      "(?<!\\w)collective (?:operations?|communication)",
+      "(?<!\\w)non-blocking collectives?"
+     ]
+    },
+    {
+     "id": "mpi_types_rma",
+     "name": "MPI derived datatypes and one-sided (RMA)",
+     "patterns": [
+      "(?<!\\w)derived data ?types?",
+      "(?<!\\w)mpi_type_\\w+",
+      "(?<!\\w)one-sided(?!\\w)",
+      "(?<!\\w)mpi_win_\\w+",
+      "(?<!\\w)mpi_put(?!\\w)",
+      "(?<!\\w)mpi_get(?!\\w)",
+      "(?<!\\w)mpi_accumulate(?!\\w)",
+      "(?<!\\w)rma(?!\\w)",
+      "(?<!\\w)remote memory access(?!\\w)"
+     ]
+    },
+    {
+     "id": "mpi_io",
+     "name": "MPI-IO",
+     "patterns": [
+      "(?<!\\w)mpi-io(?!\\w)",
+      "(?<!\\w)mpi_file_\\w+",
+      "(?<!\\w)romio(?!\\w)",
+      "(?<!\\w)ompio(?!\\w)",
+      "(?<!\\w)collective i/o(?!\\w)",
+      "(?<!\\w)collective buffering(?!\\w)"
+     ]
+    },
+    {
+     "id": "mpi_placement",
+     "name": "MPI launch & process placement (mpirun/mpiexec mapping, ppn, pinning)",
+     "patterns": [
+      "(?<!\\w)mpirun(?!\\w)",
+      "(?<!\\w)mpiexec(?!\\w)",
+      "--map-by(?!\\w)",
+      "--bind-to(?!\\w)",
+      "(?<!\\w)rankfiles?",
+      "(?<!\\w)process placement(?!\\w)",
+      "-ppn(?!\\w)",
+      "(?<!\\w)i_mpi_pin\\w*",
+      "(?<!\\w)rank reordering(?!\\w)",
+      "(?<!\\w)mpich_rank_reorder\\w*",
+      "(?<!\\w)hydra(?!\\w)"
+     ]
+    },
+    {
+     "id": "mpi_implementations",
+     "name": "MPI implementations: Open MPI, MPICH, Intel MPI, Cray MPICH, MVAPICH, ParaStation",
+     "patterns": [
+      "(?<!\\w)open ?mpi(?!\\w)",
+      "(?<!\\w)mpich(?!\\w)",
+      "(?<!\\w)intel mpi(?!\\w)",
+      "(?<!\\w)cray[- ]mpich(?!\\w)",
+      "(?<!\\w)mvapich2?",
+      "(?<!\\w)parastation(?!\\w)",
+      "(?<!\\w)hpc-x(?!\\w)",
+      "(?<!\\w)mpi implementations?"
+     ]
+    },
+    {
+     "id": "ucx_ofi_transports",
+     "name": "Transports: UCX, libfabric/OFI, verbs, PSM2, PMIx",
+     "patterns": [
+      "(?<!\\w)ucx(?!\\w)",
+      "(?<!\\w)ucx_\\w+",
+      "(?<!\\w)libfabric(?!\\w)",
+      "(?<!\\w)ofi(?!\\w)",
+      "(?<!\\w)fi_provider(?!\\w)",
+      "(?<!\\w)fi_\\w+",
+      "(?<!\\w)psm2(?!\\w)",
+      "(?<!\\w)ib verbs(?!\\w)",
+      "(?<!\\w)verbs(?!\\w)",
+      "(?<!\\w)pmix(?!\\w)",
+      "(?<!\\w)pmi2(?!\\w)",
+      "(?<!\\w)cxi provider(?!\\w)"
+     ]
+    },
+    {
+     "id": "openmp_threads",
+     "name": "OpenMP threading",
+     "patterns": [
+      "#pragma omp parallel(?!\\w)",
+      "(?<!\\w)omp parallel(?!\\w)",
+      "(?<!\\w)omp_num_threads(?!\\w)",
+      "(?<!\\w)openmp(?!\\w)",
+      "!\\$omp(?!\\w)",
+      "(?<!\\w)omp for(?!\\w)",
+      "(?<!\\w)omp task(?!\\w)",
+      "(?<!\\w)omp_get_thread_num(?!\\w)",
+      "-fopenmp(?!\\w)"
+     ]
+    },
+    {
+     "id": "openmp_offload",
+     "name": "OpenMP target offload",
+     "patterns": [
+      "(?<!\\w)omp target(?!\\w)",
+      "(?<!\\w)target teams(?!\\w)",
+      "(?<!\\w)target data(?!\\w)",
+      "(?<!\\w)map\\(to(?!\\w)",
+      "(?<!\\w)map\\(tofrom(?!\\w)",
+      "(?<!\\w)openmp offload(?:ing)?",
+      "(?<!\\w)omp_target_\\w+",
+      "(?<!\\w)declare target(?!\\w)",
+      "-fopenmp-targets(?!\\w)"
+     ]
+    },
+    {
+     "id": "hybrid_mpi_openmp",
+     "name": "Hybrid MPI+OpenMP",
+     "patterns": [
+      "(?<!\\w)hybrid mpi(?!\\w)",
+      "(?<!\\w)mpi ?\\+ ?openmp(?!\\w)",
+      "(?<!\\w)mpi/openmp(?!\\w)",
+      "(?<!\\w)mpi_init_thread(?!\\w)",
+      "(?<!\\w)mpi_thread_(?:multiple|funneled|serialized)",
+      "(?<!\\w)hybrid (?:parallel|programming|jobs?)"
+     ]
+    },
+    {
+     "id": "pgas_coarray",
+     "name": "PGAS: Coarray Fortran, UPC++, Chapel, OpenSHMEM, GASNet",
+     "patterns": [
+      "(?<!\\w)coarrays?",
+      "(?<!\\w)pgas(?!\\w)",
+      "(?<!\\w)upc\\+\\+",
+      "(?<!\\w)chapel(?!\\w)",
+      "(?<!\\w)openshmem(?!\\w)",
+      "(?<!\\w)shmem(?!\\w)",
+      "(?<!\\w)gasnet(?!\\w)",
+      "(?<!\\w)co_sum(?!\\w)",
+      "(?<!\\w)sync all(?!\\w)",
+      "(?<!\\w)global arrays(?!\\w)"
+     ]
+    },
+    {
+     "id": "kokkos_raja_sycl",
+     "name": "Performance portability: Kokkos, RAJA, SYCL, alpaka, stdpar, OpenCL",
+     "patterns": [
+      "(?<!\\w)kokkos(?!\\w)",
+      "(?<!\\w)raja(?!\\w)",
+      "(?<!\\w)sycl(?!\\w)",
+      "(?<!\\w)dpc\\+\\+",
+      "(?<!\\w)adaptivecpp(?!\\w)",
+      "(?<!\\w)hipsycl(?!\\w)",
+      "(?<!\\w)alpaka(?!\\w)",
+      "(?<!\\w)stdpar(?!\\w)",
+      "(?<!\\w)std::execution::par\\w*",
+      "(?<!\\w)opencl(?!\\w)",
+      "(?<!\\w)performance portability(?!\\w)",
+      "(?<!\\w)onedpl(?!\\w)"
+     ]
+    },
+    {
+     "id": "parallel_algorithms_decomposition",
+     "name": "Parallel algorithm design: domain decomposition, halo exchange, load balancing, task/data parallelism",
+     "patterns": [
+      "(?<!\\w)domain decomposition(?!\\w)",
+      "(?<!\\w)halo (?:exchange|cells?|regions?)(?!\\w)",
+      "(?<!\\w)ghost (?:cells?|zones?|layers?)(?!\\w)",
+      "(?<!\\w)load (?:balancing|imbalance)(?!\\w)",
+      "(?<!\\w)work stealing(?!\\w)",
+      "(?<!\\w)task parallelism(?!\\w)",
+      "(?<!\\w)stencil (?:codes?|computations?)(?!\\w)",
+      "(?<!\\w)surface[- ]to[- ]volume(?!\\w)",
+      "(?<!\\w)graph partitioning(?!\\w)",
+      "(?<!\\w)master[- ]worker(?!\\w)",
+      "(?<!\\w)manager[- ]worker(?!\\w)",
+      "(?<!\\w)parallel algorithms?(?!\\w)"
+     ]
+    },
+    {
+     "id": "numerical_reproducibility",
+     "name": "Floating-point & numerical reproducibility: IEEE 754, non-deterministic reductions, fast-math, determinism",
+     "patterns": [
+      "(?<!\\w)ieee[- ]?754(?!\\w)",
+      "(?<!\\w)floating[- ]point (?:arithmetic|errors?|precision|reproducibility|exceptions?)(?!\\w)",
+      "(?<!\\w)bitwise (?:reproducib\\w+|identical)(?!\\w)",
+      "(?<!\\w)-ffast-math(?!\\w)",
+      "(?<!\\w)fp-model(?!\\w)",
+      "(?<!\\w)non-?determinis(?:m|tic)(?!\\w)",
+      "(?<!\\w)deterministic (?:algorithms|results|reductions?)(?!\\w)",
+      "(?<!\\w)rounding errors?(?!\\w)",
+      "(?<!\\w)catastrophic cancellation(?!\\w)",
+      "(?<!\\w)denormals?(?!\\w)",
+      "(?<!\\w)subnormals?(?!\\w)",
+      "(?<!\\w)kahan summation(?!\\w)",
+      "(?<!\\w)use_deterministic_algorithms(?!\\w)",
+      "(?<!\\w)cublas_workspace_config(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gpu",
+   "name": "GPU computing",
+   "leaves": [
+    {
+     "id": "cuda_programming",
+     "name": "CUDA programming",
+     "patterns": [
+      "(?<!\\w)__global__(?!\\w)",
+      "(?<!\\w)cudamalloc\\w*",
+      "(?<!\\w)cudamemcpy\\w*",
+      "(?<!\\w)threadidx(?!\\w)",
+      "(?<!\\w)blockidx(?!\\w)",
+      "(?<!\\w)nvcc(?!\\w)",
+      "(?<!\\w)cuda kernels?",
+      "(?<!\\w)cuda c\\+\\+",
+      "(?<!\\w)cuda streams?",
+      "(?<!\\w)unified memory(?!\\w)",
+      "(?<!\\w)cuda toolkit(?!\\w)"
+     ]
+    },
+    {
+     "id": "hip_rocm",
+     "name": "HIP / ROCm (AMD GPUs)",
+     "patterns": [
+      "(?<!\\w)hip(?!\\w)",
+      "(?<!\\w)rocm(?!\\w)",
+      "(?<!\\w)hipcc(?!\\w)",
+      "(?<!\\w)hipmalloc(?!\\w)",
+      "(?<!\\w)hipify(?!\\w)",
+      "(?<!\\w)mi250x?",
+      "(?<!\\w)mi300a?x?",
+      "(?<!\\w)amd gpus?",
+      "(?<!\\w)amd instinct(?!\\w)",
+      "(?<!\\w)gfx90a(?!\\w)",
+      "(?<!\\w)gfx942(?!\\w)"
+     ]
+    },
+    {
+     "id": "openacc",
+     "name": "OpenACC",
+     "patterns": [
+      "(?<!\\w)openacc(?!\\w)",
+      "#pragma acc(?!\\w)",
+      "!\\$acc(?!\\w)",
+      "(?<!\\w)acc parallel(?!\\w)",
+      "(?<!\\w)acc kernels(?!\\w)",
+      "(?<!\\w)acc data(?!\\w)"
+     ]
+    },
+    {
+     "id": "cuda_aware_mpi",
+     "name": "GPU-aware MPI, GPUDirect",
+     "patterns": [
+      "(?<!\\w)cuda-aware(?!\\w)",
+      "(?<!\\w)gpu-aware(?!\\w)",
+      "(?<!\\w)gpudirect(?!\\w)",
+      "(?<!\\w)gdrcopy(?!\\w)",
+      "(?<!\\w)mpich_gpu_support_enabled(?!\\w)",
+      "(?<!\\w)rocm-aware(?!\\w)",
+      "(?<!\\w)device buffers? (?:to|in) mpi(?!\\w)"
+     ]
+    },
+    {
+     "id": "nccl_rccl",
+     "name": "NCCL / RCCL collective libraries",
+     "patterns": [
+      "(?<!\\w)nccl(?!\\w)",
+      "(?<!\\w)rccl(?!\\w)",
+      "(?<!\\w)nccl_\\w+",
+      "(?<!\\w)aws-ofi-(?:nccl|rccl)",
+      "(?<!\\w)nccl-tests(?!\\w)"
+     ]
+    },
+    {
+     "id": "multi_gpu_mig_mps",
+     "name": "Multi-GPU nodes, MIG, MPS, nvidia-smi, GPU monitoring",
+     "patterns": [
+      "(?<!\\w)(?-i:MIG)(?!\\w)",
+      "(?<!\\w)multi-instance gpu(?!\\w)",
+      "(?<!\\w)multi-process service(?!\\w)",
+      "(?<!\\w)(?-i:MPS)(?!\\w)",
+      "(?<!\\w)nvidia-smi(?!\\w)",
+      "(?<!\\w)rocm-smi(?!\\w)",
+      "(?<!\\w)amd-smi(?!\\w)",
+      "(?<!\\w)multi-gpu(?!\\w)",
+      "(?<!\\w)multiple gpus(?!\\w)",
+      "(?<!\\w)nvlink(?!\\w)",
+      "(?<!\\w)nvswitch(?!\\w)",
+      "(?<!\\w)gpu utili[sz]ation(?!\\w)",
+      "(?<!\\w)dcgm(?!\\w)"
+     ]
+    },
+    {
+     "id": "gpu_profiling",
+     "name": "GPU profiling: Nsight Systems/Compute, rocprof, Omniperf/Omnitrace",
+     "patterns": [
+      "(?<!\\w)nsight(?!\\w)",
+      "(?<!\\w)nsys(?!\\w)",
+      "(?<!\\w)ncu(?!\\w)",
+      "(?<!\\w)nvprof(?!\\w)",
+      "(?<!\\w)rocprof\\w*",
+      "(?<!\\w)omniperf(?!\\w)",
+      "(?<!\\w)omnitrace(?!\\w)",
+      "(?<!\\w)rocm compute profiler(?!\\w)",
+      "(?<!\\w)rocm systems profiler(?!\\w)",
+      "(?<!\\w)cupti(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "numlibs",
+   "name": "Numerical & I/O libraries",
+   "leaves": [
+    {
+     "id": "petsc_trilinos_solvers",
+     "name": "PETSc/SLEPc, Trilinos, hypre, MUMPS, SuperLU, METIS",
+     "patterns": [
+      "(?<!\\w)petsc(?!\\w)",
+      "(?<!\\w)slepc(?!\\w)",
+      "(?<!\\w)trilinos(?!\\w)",
+      "(?<!\\w)hypre(?!\\w)",
+      "(?<!\\w)mumps(?!\\w)",
+      "(?<!\\w)superlu(?!\\w)",
+      "(?<!\\w)pardiso(?!\\w)",
+      "(?<!\\w)par?metis(?!\\w)",
+      "(?<!\\w)scotch(?!\\w)",
+      "(?<!\\w)sundials(?!\\w)",
+      "(?<!\\w)ginkgo(?!\\w)",
+      "(?<!\\w)amgx(?!\\w)",
+      "(?<!\\w)sparse (?:linear )?solvers?",
+      "(?<!\\w)(?:par)?metis(?!\\w)"
+     ]
+    },
+    {
+     "id": "fft_libraries",
+     "name": "FFT libraries: FFTW, cuFFT/rocFFT, heFFTe, P3DFFT",
+     "patterns": [
+      "(?<!\\w)fftw(?!\\w)",
+      "(?<!\\w)cufft(?!\\w)",
+      "(?<!\\w)rocfft(?!\\w)",
+      "(?<!\\w)heffte(?!\\w)",
+      "(?<!\\w)p3dfft(?!\\w)",
+      "(?<!\\w)2decomp(?!\\w)",
+      "(?<!\\w)fft(?!\\w)"
+     ]
+    },
+    {
+     "id": "dense_distributed_la",
+     "name": "ScaLAPACK, ELPA, MAGMA, SLATE",
+     "patterns": [
+      "(?<!\\w)scalapack(?!\\w)",
+      "(?<!\\w)elpa(?!\\w)",
+      "(?<!\\w)magma(?!\\w)",
+      "(?<!\\w)slate(?!\\w)",
+      "(?<!\\w)blacs(?!\\w)",
+      "(?<!\\w)pblas(?!\\w)"
+     ]
+    },
+    {
+     "id": "hdf5_netcdf_adios2",
+     "name": "HDF5, NetCDF, PnetCDF, ADIOS2, Zarr",
+     "patterns": [
+      "(?<!\\w)hdf5(?!\\w)",
+      "(?<!\\w)h5py(?!\\w)",
+      "(?<!\\w)netcdf(?!\\w)",
+      "(?<!\\w)pnetcdf(?!\\w)",
+      "(?<!\\w)adios2?",
+      "(?<!\\w)zarr(?!\\w)",
+      "(?<!\\w)h5dump(?!\\w)",
+      "(?<!\\w)cdf5(?!\\w)",
+      "(?<!\\w)xios(?!\\w)",
+      "(?<!\\w)cf conventions?(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "perf_debug",
+   "name": "Performance analysis & debugging",
+   "leaves": [
+    {
+     "id": "profiling_sampling",
+     "name": "Profiling basics: gprof, perf, sampling, hotspots",
+     "patterns": [
+      "(?<!\\w)gprof(?!\\w)",
+      "(?<!\\w)perf record(?!\\w)",
+      "(?<!\\w)perf stat(?!\\w)",
+      "(?<!\\w)perf report(?!\\w)",
+      "(?<!\\w)hotspots?",
+      "(?<!\\w)sampling profil\\w+",
+      "(?<!\\w)profil(?:ing|er) (?:basics|tools?|your code)",
+      "(?<!\\w)call graph(?!\\w)",
+      "(?<!\\w)flame ?graphs?",
+      "(?<!\\w)py-spy(?!\\w)",
+      "(?<!\\w)cprofile(?!\\w)"
+     ]
+    },
+    {
+     "id": "roofline_counters_likwid",
+     "name": "Roofline, hardware counters, PAPI, LIKWID",
+     "patterns": [
+      "(?<!\\w)roofline(?!\\w)",
+      "(?<!\\w)arithmetic intensity(?!\\w)",
+      "(?<!\\w)operational intensity(?!\\w)",
+      "(?<!\\w)papi(?!\\w)",
+      "(?<!\\w)likwid\\S*",
+      "(?<!\\w)hardware (?:performance )?counters?",
+      "(?<!\\w)memory bandwidth(?!\\w)",
+      "(?<!\\w)stream benchmark(?!\\w)"
+     ]
+    },
+    {
+     "id": "vtune_advisor",
+     "name": "Intel VTune, Advisor, Inspector",
+     "patterns": [
+      "(?<!\\w)vtune(?!\\w)",
+      "(?<!\\w)intel advisor(?!\\w)",
+      "(?<!\\w)intel inspector(?!\\w)",
+      "(?<!\\w)application performance snapshot(?!\\w)"
+     ]
+    },
+    {
+     "id": "trace_tools_scorep",
+     "name": "Score-P, Scalasca, Vampir, TAU, HPCToolkit, Extrae/Paraver, CrayPat",
+     "patterns": [
+      "(?<!\\w)score-p(?!\\w)",
+      "(?<!\\w)scorep(?!\\w)",
+      "(?<!\\w)scalasca(?!\\w)",
+      "(?<!\\w)vampir(?!\\w)",
+      "(?<!\\w)(?-i:TAU)(?!\\w)",
+      "(?<!\\w)hpctoolkit(?!\\w)",
+      "(?<!\\w)extrae(?!\\w)",
+      "(?<!\\w)paraver(?!\\w)",
+      "(?<!\\w)craypat(?!\\w)",
+      "(?<!\\w)perftools-lite(?!\\w)",
+      "(?<!\\w)cube ?gui(?!\\w)",
+      "(?<!\\w)otf2(?!\\w)",
+      "(?<!\\w)caliper(?!\\w)",
+      "(?<!\\w)pika(?!\\w)",
+      "(?<!\\w)lo2s(?!\\w)"
+     ]
+    },
+    {
+     "id": "parallel_debuggers",
+     "name": "Parallel debuggers & profilers: Linaro/Arm DDT & MAP, TotalView",
+     "patterns": [
+      "(?<!\\w)(?-i:DDT)(?!\\w)",
+      "(?<!\\w)linaro forge(?!\\w)",
+      "(?<!\\w)arm forge(?!\\w)",
+      "(?<!\\w)allinea(?!\\w)",
+      "(?<!\\w)(?-i:MAP) profiler(?!\\w)",
+      "(?<!\\w)totalview(?!\\w)",
+      "(?<!\\w)performance reports(?!\\w)",
+      "(?<!\\w)ddt --connect(?!\\w)",
+      "(?<!\\w)map --profile(?!\\w)"
+     ]
+    },
+    {
+     "id": "gdb_valgrind_sanitizers",
+     "name": "gdb, Valgrind, sanitizers, cuda-gdb, compute-sanitizer, core dumps",
+     "patterns": [
+      "(?<!\\w)gdb(?!\\w)",
+      "(?<!\\w)valgrind(?!\\w)",
+      "(?<!\\w)memcheck(?!\\w)",
+      "(?<!\\w)addresssanitizer(?!\\w)",
+      "-fsanitize=\\w+",
+      "(?<!\\w)sanitizers?",
+      "(?<!\\w)cuda-gdb(?!\\w)",
+      "(?<!\\w)compute-sanitizer(?!\\w)",
+      "(?<!\\w)core dumps?",
+      "(?<!\\w)core files?",
+      "(?<!\\w)ulimit -c(?!\\w)",
+      "(?<!\\w)backtrace(?!\\w)",
+      "(?<!\\w)helgrind(?!\\w)",
+      "(?<!\\w)rocgdb(?!\\w)",
+      "(?<!\\w)(?-i:MUST)(?!\\w)",
+      "(?<!\\w)archer(?!\\w)",
+      "(?<!\\w)mpi correctness(?!\\w)"
+     ]
+    },
+    {
+     "id": "scaling_studies",
+     "name": "Strong/weak scaling, speedup, Amdahl/Gustafson, benchmarking",
+     "patterns": [
+      "(?<!\\w)strong scaling(?!\\w)",
+      "(?<!\\w)weak scaling(?!\\w)",
+      "(?<!\\w)scaling (?:study|studies|tests?|curves?)",
+      "(?<!\\w)amdahl(?!\\w)",
+      "(?<!\\w)gustafson(?!\\w)",
+      "(?<!\\w)speed-?up(?!\\w)",
+      "(?<!\\w)parallel efficiency(?!\\w)",
+      "(?<!\\w)scalability(?!\\w)",
+      "(?<!\\w)time[- ]to[- ]solution(?!\\w)"
+     ]
+    },
+    {
+     "id": "hpc_benchmarks",
+     "name": "Standard HPC benchmarks: HPL/Linpack, HPCG, TOP500/Green500, OSU, IOR/IO500, MLPerf, JUBE",
+     "patterns": [
+      "(?<!\\w)hpl(?!\\w)",
+      "(?<!\\w)linpack(?!\\w)",
+      "(?<!\\w)hpcg(?!\\w)",
+      "(?<!\\w)top500(?!\\w)",
+      "(?<!\\w)green500(?!\\w)",
+      "(?<!\\w)graph500(?!\\w)",
+      "(?<!\\w)io500(?!\\w)",
+      "(?<!\\w)osu_\\w+(?!\\w)",
+      "(?<!\\w)osu micro-?benchmarks(?!\\w)",
+      "(?<!\\w)mlperf(?!\\w)",
+      "(?<!\\w)jube(?!\\w)",
+      "(?<!\\w)rmax(?!\\w)",
+      "(?<!\\w)rpeak(?!\\w)",
+      "(?<!\\w)benchmark suites?(?!\\w)"
+     ]
+    },
+    {
+     "id": "serial_code_optimisation",
+     "name": "Single-core code optimisation: cache blocking/tiling, data layout (AoS/SoA), memory access patterns, false sharing",
+     "patterns": [
+      "(?<!\\w)loop (?:tiling|blocking|interchange|fusion|fission)(?!\\w)",
+      "(?<!\\w)cache blocking(?!\\w)",
+      "(?<!\\w)cache[- ]friendly(?!\\w)",
+      "(?<!\\w)structures? of arrays(?!\\w)",
+      "(?<!\\w)arrays? of structures(?!\\w)",
+      "(?<!\\w)aos(?:/| vs\\.? | and )soa(?!\\w)",
+      "(?<!\\w)data layout(?!\\w)",
+      "(?<!\\w)memory access patterns?(?!\\w)",
+      "(?<!\\w)stride-?1(?!\\w)",
+      "(?<!\\w)false sharing(?!\\w)",
+      "(?<!\\w)spatial locality(?!\\w)",
+      "(?<!\\w)temporal locality(?!\\w)",
+      "(?<!\\w)cache thrashing(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ai_ml",
+   "name": "AI/ML on HPC",
+   "leaves": [
+    {
+     "id": "pytorch_ddp",
+     "name": "PyTorch DDP, torchrun, torch.distributed",
+     "patterns": [
+      "(?<!\\w)distributeddataparallel(?!\\w)",
+      "(?<!\\w)torchrun(?!\\w)",
+      "(?<!\\w)torch\\.distributed(?!\\w)",
+      "(?<!\\w)init_process_group(?!\\w)",
+      "(?<!\\w)ddp(?!\\w)",
+      "(?<!\\w)master_addr(?!\\w)",
+      "(?<!\\w)master_port(?!\\w)",
+      "(?<!\\w)torch\\.multiprocessing(?!\\w)",
+      "(?<!\\w)elastic launch(?!\\w)"
+     ]
+    },
+    {
+     "id": "fsdp_model_parallel",
+     "name": "FSDP, tensor/pipeline/sequence parallelism",
+     "patterns": [
+      "(?<!\\w)fsdp(?!\\w)",
+      "(?<!\\w)fully ?sharded(?!\\w)",
+      "(?<!\\w)tensor parallel\\w*",
+      "(?<!\\w)pipeline parallel\\w*",
+      "(?<!\\w)sequence parallel\\w*",
+      "(?<!\\w)model parallel\\w*",
+      "(?<!\\w)context parallel\\w*",
+      "(?<!\\w)expert parallel\\w*",
+      "(?<!\\w)3d parallelism(?!\\w)"
+     ]
+    },
+    {
+     "id": "deepspeed",
+     "name": "DeepSpeed / ZeRO",
+     "patterns": [
+      "(?<!\\w)deepspeed(?!\\w)",
+      "(?<!\\w)zero-?(?:1|2|3|offload|infinity)",
+      "(?<!\\w)zero stage(?!\\w)"
+     ]
+    },
+    {
+     "id": "megatron_nemo",
+     "name": "Megatron-LM / NeMo",
+     "patterns": [
+      "(?<!\\w)megatron(?:-lm|-core)?",
+      "(?<!\\w)nemo(?!\\w)"
+     ]
+    },
+    {
+     "id": "other_dl_frameworks",
+     "name": "Horovod, JAX, TensorFlow distributed, Lightning, Accelerate, Ray",
+     "patterns": [
+      "(?<!\\w)horovod(?!\\w)",
+      "(?<!\\w)horovodrun(?!\\w)",
+      "(?<!\\w)jax(?!\\w)",
+      "(?<!\\w)jax\\.distributed(?!\\w)",
+      "(?<!\\w)pmap(?!\\w)",
+      "(?<!\\w)tf\\.distribute(?!\\w)",
+      "(?<!\\w)multiworkermirroredstrategy(?!\\w)",
+      "(?<!\\w)tensorflow(?!\\w)",
+      "(?<!\\w)pytorch lightning(?!\\w)",
+      "(?<!\\w)lightning(?!\\w)",
+      "(?<!\\w)accelerate launch(?!\\w)",
+      "(?<!\\w)hugging ?face accelerate(?!\\w)",
+      "(?<!\\w)ray cluster(?!\\w)",
+      "(?<!\\w)ray tune(?!\\w)",
+      "(?<!\\w)ray\\.init(?!\\w)"
+     ]
+    },
+    {
+     "id": "mixed_precision",
+     "name": "Mixed precision (bf16/fp16/FP8), AMP",
+     "patterns": [
+      "(?<!\\w)mixed precision(?!\\w)",
+      "(?<!\\w)bf16(?!\\w)",
+      "(?<!\\w)bfloat16(?!\\w)",
+      "(?<!\\w)fp16(?!\\w)",
+      "(?<!\\w)fp8(?!\\w)",
+      "(?<!\\w)autocast(?!\\w)",
+      "(?<!\\w)gradscaler(?!\\w)",
+      "(?<!\\w)transformer engine(?!\\w)",
+      "(?<!\\w)tf32(?!\\w)",
+      "(?<!\\w)automatic mixed precision(?!\\w)",
+      "(?<!\\w)torch\\.(?:cuda\\.)?amp(?!\\w)"
+     ]
+    },
+    {
+     "id": "checkpoint_restart",
+     "name": "Checkpointing and restart (training & applications), DMTCP",
+     "patterns": [
+      "(?<!\\w)checkpoint(?:ing|s)?",
+      "(?<!\\w)dmtcp(?!\\w)",
+      "(?<!\\w)restart files?",
+      "(?<!\\w)resume training(?!\\w)",
+      "(?<!\\w)torch\\.save(?!\\w)",
+      "(?<!\\w)distributed checkpoint(?!\\w)",
+      "(?<!\\w)checkpoint/restart(?!\\w)",
+      "(?<!\\w)ulfm(?!\\w)",
+      "(?<!\\w)fault[- ]toleran(?:t|ce)(?!\\w)",
+      "(?<!\\w)resilience(?!\\w)"
+     ]
+    },
+    {
+     "id": "data_loading",
+     "name": "Data loaders and datasets on parallel FS (WebDataset, TFRecord, num_workers)",
+     "patterns": [
+      "(?<!\\w)dataloader(?!\\w)",
+      "(?<!\\w)data ?loaders?",
+      "(?<!\\w)num_workers(?!\\w)",
+      "(?<!\\w)webdataset(?!\\w)",
+      "(?<!\\w)tfrecords?",
+      "(?<!\\w)dataset sharding(?!\\w)",
+      "(?<!\\w)pin_memory(?!\\w)",
+      "(?<!\\w)dali(?!\\w)",
+      "(?<!\\w)datasets? on lustre(?!\\w)",
+      "(?<!\\w)hugging ?face datasets(?!\\w)",
+      "(?<!\\w)hf_home(?!\\w)",
+      "(?<!\\w)hf_datasets_cache(?!\\w)"
+     ]
+    },
+    {
+     "id": "llm_inference_serving",
+     "name": "LLM inference & serving: vLLM, TGI, Triton, llama.cpp, SGLang",
+     "patterns": [
+      "(?<!\\w)vllm(?!\\w)",
+      "(?<!\\w)text-generation-inference(?!\\w)",
+      "(?<!\\w)tgi(?!\\w)",
+      "(?<!\\w)triton inference server(?!\\w)",
+      "(?<!\\w)llama\\.cpp(?!\\w)",
+      "(?<!\\w)ollama(?!\\w)",
+      "(?<!\\w)sglang(?!\\w)",
+      "(?<!\\w)tensorrt-llm(?!\\w)",
+      "(?<!\\w)inference server(?!\\w)",
+      "(?<!\\w)model serving(?!\\w)",
+      "(?<!\\w)openai-compatible(?!\\w)",
+      "(?<!\\w)kv cache(?!\\w)",
+      "(?<!\\w)quantiz(?:ation|ed)(?!\\w)",
+      "(?<!\\w)(?:awq|gptq|gguf)(?!\\w)",
+      "(?<!\\w)tensorrt(?!\\w)"
+     ]
+    },
+    {
+     "id": "hyperparameter_sweeps",
+     "name": "Hyperparameter sweeps & experiment tracking",
+     "patterns": [
+      "(?<!\\w)hyperparameters? (?:search|sweeps?|tuning|optimi[sz]ation)",
+      "(?<!\\w)optuna(?!\\w)",
+      "(?<!\\w)ray tune(?!\\w)",
+      "(?<!\\w)wandb(?!\\w)",
+      "(?<!\\w)weights (?:&|and) biases(?!\\w)",
+      "(?<!\\w)mlflow(?!\\w)",
+      "(?<!\\w)tensorboard(?!\\w)",
+      "(?<!\\w)sweeps?"
+     ]
+    },
+    {
+     "id": "llm_finetuning",
+     "name": "LLM fine-tuning: LoRA/PEFT/QLoRA, SFT, Hugging Face Transformers",
+     "patterns": [
+      "(?<!\\w)lora(?!\\w)",
+      "(?<!\\w)qlora(?!\\w)",
+      "(?<!\\w)peft(?!\\w)",
+      "(?<!\\w)fine-?tun(?:e|ing)",
+      "(?<!\\w)sft(?!\\w)",
+      "(?<!\\w)transformers library(?!\\w)",
+      "(?<!\\w)trainer api(?!\\w)",
+      "(?<!\\w)hugging ?face transformers(?!\\w)",
+      "(?<!\\w)from_pretrained(?!\\w)",
+      "(?<!\\w)axolotl(?!\\w)",
+      "(?<!\\w)unsloth(?!\\w)",
+      "(?<!\\w)torchtune(?!\\w)"
+     ]
+    },
+    {
+     "id": "rag_agents_ai_services",
+     "name": "RAG, embeddings/vector stores, LLM agents and AI service APIs on HPC",
+     "patterns": [
+      "(?<!\\w)retrieval[- ]augmented generation(?!\\w)",
+      "(?<!\\w)(?-i:RAG)(?!\\w)",
+      "(?<!\\w)vector (?:stores?|databases?|search)(?!\\w)",
+      "(?<!\\w)embedding models?(?!\\w)",
+      "(?<!\\w)faiss(?!\\w)",
+      "(?<!\\w)chromadb(?!\\w)",
+      "(?<!\\w)milvus(?!\\w)",
+      "(?<!\\w)langchain(?!\\w)",
+      "(?<!\\w)(?:llamaindex|llama_index)(?!\\w)",
+      "(?<!\\w)llm agents?(?!\\w)",
+      "(?<!\\w)agentic(?!\\w)",
+      "(?<!\\w)prompt engineering(?!\\w)",
+      "(?<!\\w)rerank(?:er|ing)s?(?!\\w)",
+      "(?<!\\w)function calling(?!\\w)",
+      "(?<!\\w)tool calling(?!\\w)"
+     ]
+    },
+    {
+     "id": "scientific_ml",
+     "name": "Scientific ML: PINNs, neural operators, GNNs, surrogate models, AI weather/climate models",
+     "patterns": [
+      "(?<!\\w)physics-informed neural networks?(?!\\w)",
+      "(?<!\\w)pinns?(?!\\w)",
+      "(?<!\\w)neural operators?(?!\\w)",
+      "(?<!\\w)fourier neural operators?(?!\\w)",
+      "(?<!\\w)(?-i:FNO)(?!\\w)",
+      "(?<!\\w)graph neural networks?(?!\\w)",
+      "(?<!\\w)(?-i:GNN)s?(?!\\w)",
+      "(?<!\\w)pytorch[ _]geometric(?!\\w)",
+      "(?<!\\w)surrogate models?(?!\\w)",
+      "(?<!\\w)physicsnemo(?!\\w)",
+      "(?<!\\w)nvidia modulus(?!\\w)",
+      "(?<!\\w)graphcast(?!\\w)",
+      "(?<!\\w)ai weather (?:models?|forecasting)(?!\\w)",
+      "(?<!\\w)machine[- ]learned (?:interatomic )?potentials?(?!\\w)",
+      "(?<!\\w)foundation models? for science(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "workflows",
+   "name": "Workflows & many-task computing",
+   "leaves": [
+    {
+     "id": "snakemake",
+     "name": "Snakemake",
+     "patterns": [
+      "(?<!\\w)snakemake(?!\\w)",
+      "(?<!\\w)snakefile(?!\\w)"
+     ]
+    },
+    {
+     "id": "nextflow",
+     "name": "Nextflow / nf-core",
+     "patterns": [
+      "(?<!\\w)nextflow(?!\\w)",
+      "(?<!\\w)nf-core(?!\\w)"
+     ]
+    },
+    {
+     "id": "other_workflow_managers",
+     "name": "Parsl, FireWorks, Dask, CWL, Cromwell, AiiDA, Airflow, Maestro",
+     "patterns": [
+      "(?<!\\w)parsl(?!\\w)",
+      "(?<!\\w)fireworks(?!\\w)",
+      "(?<!\\w)dask(?!\\w)",
+      "(?<!\\w)dask-jobqueue(?!\\w)",
+      "(?<!\\w)cwl(?!\\w)",
+      "(?<!\\w)common workflow language(?!\\w)",
+      "(?<!\\w)cromwell(?!\\w)",
+      "(?<!\\w)aiida(?!\\w)",
+      "(?<!\\w)airflow(?!\\w)",
+      "(?<!\\w)maestro(?!\\w)",
+      "(?<!\\w)radical(?:-| )pilot(?!\\w)",
+      "(?<!\\w)balsam(?!\\w)",
+      "(?<!\\w)workflow managers?",
+      "(?<!\\w)pegasus(?!\\w)",
+      "(?<!\\w)jobqueue(?!\\w)"
+     ]
+    },
+    {
+     "id": "many_task_farming",
+     "name": "Task farming: GNU parallel, HyperQueue, srun steps, launchers, METAQ",
+     "patterns": [
+      "(?<!\\w)gnu parallel(?!\\w)",
+      "(?<!\\w)hyperqueue(?!\\w)",
+      "(?<!\\w)task farm(?:ing)?",
+      "(?<!\\w)many-task(?!\\w)",
+      "(?<!\\w)high-throughput(?!\\w)",
+      "(?<!\\w)htc(?!\\w)",
+      "(?<!\\w)launcher(?!\\w)",
+      "(?<!\\w)metaq(?!\\w)",
+      "(?<!\\w)pylauncher(?!\\w)",
+      "(?<!\\w)job packing(?!\\w)",
+      "(?<!\\w)xargs -P(?!\\w)",
+      "(?<!\\w)parallel -j(?!\\w)",
+      "(?<!\\w)embarrassingly parallel(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "interactive",
+   "name": "Interactive computing & visualisation",
+   "leaves": [
+    {
+     "id": "jupyter_on_hpc",
+     "name": "Jupyter/JupyterLab on HPC, kernels, port forwarding",
+     "patterns": [
+      "(?<!\\w)jupyter(?:lab)?",
+      "(?<!\\w)notebooks?",
+      "(?<!\\w)ipykernel(?!\\w)",
+      "(?<!\\w)jupyter kernels?",
+      "(?<!\\w)port forwarding(?!\\w)",
+      "(?<!\\w)ssh -L(?!\\w)"
+     ]
+    },
+    {
+     "id": "visualization",
+     "name": "ParaView, VisIt, VMD, in-situ, remote visualisation",
+     "patterns": [
+      "(?<!\\w)paraview(?!\\w)",
+      "(?<!\\w)(?-i:VisIt)(?!\\w)",
+      "(?<!\\w)vmd(?!\\w)",
+      "(?<!\\w)in[- ]situ(?!\\w)",
+      "(?<!\\w)catalyst(?!\\w)",
+      "(?<!\\w)ascent(?!\\w)",
+      "(?<!\\w)pvserver(?!\\w)",
+      "(?<!\\w)remote visuali[sz]ation(?!\\w)",
+      "(?<!\\w)ovito(?!\\w)",
+      "(?<!\\w)blender(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "languages",
+   "name": "Languages & environments",
+   "leaves": [
+    {
+     "id": "python_hpc",
+     "name": "Python on HPC: mpi4py, NumPy, multiprocessing, Numba, CuPy",
+     "patterns": [
+      "(?<!\\w)mpi4py(?!\\w)",
+      "(?<!\\w)numpy(?!\\w)",
+      "(?<!\\w)multiprocessing(?!\\w)",
+      "(?<!\\w)numba(?!\\w)",
+      "(?<!\\w)cupy(?!\\w)",
+      "(?<!\\w)cython(?!\\w)",
+      "(?<!\\w)joblib(?!\\w)",
+      "(?<!\\w)concurrent\\.futures(?!\\w)",
+      "(?<!\\w)python on (?:the )?(?:cluster|hpc|supercomputer)"
+     ]
+    },
+    {
+     "id": "r_hpc",
+     "name": "R on HPC",
+     "patterns": [
+      "(?<!\\w)rscript(?!\\w)",
+      "(?<!\\w)cran(?!\\w)",
+      "(?<!\\w)install\\.packages(?!\\w)",
+      "(?<!\\w)rstudio(?!\\w)",
+      "(?<!\\w)rmpi(?!\\w)",
+      "(?<!\\w)doparallel(?!\\w)",
+      "(?<!\\w)foreach(?!\\w)",
+      "(?<!\\w)r packages?",
+      "(?<!\\w)r scripts?",
+      "(?<!\\w)library\\(parallel\\)",
+      "(?<!\\w)future\\.apply(?!\\w)",
+      "(?<!\\w)r_libs\\w*"
+     ]
+    },
+    {
+     "id": "julia_hpc",
+     "name": "Julia on HPC",
+     "patterns": [
+      "(?<!\\w)julia(?!\\w)",
+      "(?<!\\w)mpi\\.jl(?!\\w)",
+      "(?<!\\w)cuda\\.jl(?!\\w)",
+      "(?<!\\w)distributed\\.jl(?!\\w)",
+      "(?<!\\w)julia_depot_path(?!\\w)"
+     ]
+    },
+    {
+     "id": "matlab_hpc",
+     "name": "MATLAB and commercial tools on HPC",
+     "patterns": [
+      "(?<!\\w)matlab(?!\\w)",
+      "(?<!\\w)parfor(?!\\w)",
+      "(?<!\\w)parallel computing toolbox(?!\\w)",
+      "(?<!\\w)matlab parallel server(?!\\w)",
+      "(?<!\\w)mdcs(?!\\w)",
+      "(?<!\\w)parpool(?!\\w)",
+      "(?<!\\w)mathematica(?!\\w)",
+      "(?<!\\w)comsol(?!\\w)",
+      "(?<!\\w)abaqus(?!\\w)",
+      "(?<!\\w)license server(?!\\w)",
+      "(?<!\\w)flexlm(?!\\w)"
+     ]
+    },
+    {
+     "id": "fortran_cpp",
+     "name": "Modern Fortran / C++ for HPC",
+     "patterns": [
+      "(?<!\\w)fortran(?!\\w)",
+      "(?<!\\w)fpm(?!\\w)",
+      "(?<!\\w)modern c\\+\\+",
+      "(?<!\\w)c\\+\\+17(?!\\w)",
+      "(?<!\\w)c\\+\\+20(?!\\w)",
+      "(?<!\\w)fortran 20(?:03|08|18)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "containers",
+   "name": "Containers",
+   "leaves": [
+    {
+     "id": "apptainer_singularity",
+     "name": "Apptainer/Singularity basics, definition files, binds",
+     "patterns": [
+      "(?<!\\w)apptainer(?!\\w)",
+      "(?<!\\w)singularity(?!\\w)",
+      "\\.sif(?!\\w)",
+      "(?<!\\w)definition files?",
+      "(?<!\\w)apptainer exec(?!\\w)",
+      "(?<!\\w)singularity exec(?!\\w)",
+      "--bind(?!-to)",
+      "(?<!\\w)fakeroot(?!\\w)",
+      "(?<!\\w)overlay(?!\\w)"
+     ]
+    },
+    {
+     "id": "docker_to_sif",
+     "name": "Docker/OCI images to SIF, registries",
+     "patterns": [
+      "(?<!\\w)docker://",
+      "(?<!\\w)dockerfile(?!\\w)",
+      "(?<!\\w)docker images?",
+      "(?<!\\w)oci images?",
+      "(?<!\\w)docker hub(?!\\w)",
+      "(?<!\\w)container registry(?!\\w)",
+      "(?<!\\w)apptainer pull(?!\\w)",
+      "(?<!\\w)singularity pull(?!\\w)",
+      "(?<!\\w)docker build(?!\\w)",
+      "(?<!\\w)ghcr\\.io(?!\\w)"
+     ]
+    },
+    {
+     "id": "other_container_runtimes",
+     "name": "Podman, Charliecloud, Sarus, Shifter, Enroot/Pyxis",
+     "patterns": [
+      "(?<!\\w)podman(?!\\w)",
+      "(?<!\\w)charliecloud(?!\\w)",
+      "(?<!\\w)sarus(?!\\w)",
+      "(?<!\\w)shifter(?!\\w)",
+      "(?<!\\w)enroot(?!\\w)",
+      "(?<!\\w)pyxis(?!\\w)",
+      "--container-image(?!\\w)",
+      "(?<!\\w)rootless containers?",
+      "(?<!\\w)container runtimes?"
+     ]
+    },
+    {
+     "id": "gpu_containers",
+     "name": "GPU containers: --nv/--rocm, NGC",
+     "patterns": [
+      "--nv(?!\\w)",
+      "--rocm(?!\\w)",
+      "(?<!\\w)ngc(?!\\w)",
+      "(?<!\\w)nvcr\\.io(?!\\w)",
+      "(?<!\\w)nvidia container toolkit(?!\\w)",
+      "(?<!\\w)gpu containers?",
+      "(?<!\\w)containers? with gpus?"
+     ]
+    },
+    {
+     "id": "mpi_containers",
+     "name": "MPI in containers (hybrid/bind models)",
+     "patterns": [
+      "(?<!\\w)mpi in containers?",
+      "(?<!\\w)containeri[sz]ed mpi(?!\\w)",
+      "(?<!\\w)hybrid model(?!\\w)",
+      "(?<!\\w)bind model(?!\\w)",
+      "(?<!\\w)mpi (?:inside|within) (?:a |the )?containers?",
+      "(?<!\\w)containers? (?:and|with) mpi(?!\\w)",
+      "(?<!\\w)(?:apptainer|singularity|charliecloud|sarus|podman|enroot)(?: containers?)? (?:and|with|for) mpi(?!\\w)",
+      "(?<!\\w)mpi (?:applications?|jobs?|codes?|programs?) (?:in|with|inside|using) (?:apptainer|singularity|containers?)",
+      "srun --mpi=pmix\\S* (?:apptainer|singularity)",
+      "mpirun (?:-\\S+ )*(?:apptainer|singularity) (?:exec|run)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cloud",
+   "name": "Cloud & hybrid HPC",
+   "leaves": [
+    {
+     "id": "cloud_hybrid",
+     "name": "Cloud HPC (ParallelCluster, CycleCloud, GCP), OpenStack, Kubernetes, bursting",
+     "patterns": [
+      "(?<!\\w)parallelcluster(?!\\w)",
+      "(?<!\\w)cyclecloud(?!\\w)",
+      "(?<!\\w)cloud hpc(?!\\w)",
+      "(?<!\\w)hpc in the cloud(?!\\w)",
+      "(?<!\\w)cloud bursting(?!\\w)",
+      "(?<!\\w)openstack(?!\\w)",
+      "(?<!\\w)virtual machines?",
+      "(?<!\\w)aws(?!\\w)",
+      "(?<!\\w)azure(?!\\w)",
+      "(?<!\\w)google cloud(?!\\w)",
+      "(?<!\\w)ec2(?!\\w)",
+      "(?<!\\w)cloud computing(?!\\w)",
+      "(?<!\\w)hybrid cloud(?!\\w)",
+      "(?<!\\w)terraform(?!\\w)",
+      "(?<!\\w)kvm(?!\\w)",
+      "(?<!\\w)qemu(?!\\w)",
+      "(?<!\\w)libvirt(?!\\w)",
+      "(?<!\\w)hypervisors?(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "energy",
+   "name": "Energy efficiency",
+   "leaves": [
+    {
+     "id": "energy_efficiency",
+     "name": "Energy, power capping, CPU/GPU frequency, carbon",
+     "patterns": [
+      "(?<!\\w)energy (?:efficiency|consumption|usage|accounting|aware)",
+      "(?<!\\w)power capping(?!\\w)",
+      "(?<!\\w)power cap(?!\\w)",
+      "(?<!\\w)dvfs(?!\\w)",
+      "--cpu-freq(?!\\w)",
+      "(?<!\\w)cpu frequency(?!\\w)",
+      "(?<!\\w)gpu frequency(?!\\w)",
+      "(?<!\\w)power consumption(?!\\w)",
+      "(?<!\\w)kwh(?!\\w)",
+      "(?<!\\w)carbon footprint(?!\\w)",
+      "(?<!\\w)green computing(?!\\w)",
+      "(?<!\\w)(?-i:EAR)(?!\\w)",
+      "(?<!\\w)energy-to-solution(?!\\w)",
+      "(?<!\\w)watts?"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "security",
+   "name": "Security & good practice",
+   "leaves": [
+    {
+     "id": "etiquette_shared_systems",
+     "name": "Login-node etiquette, fair use, acceptable use policy",
+     "patterns": [
+      "(?<!\\w)login nodes?",
+      "(?<!\\w)acceptable use(?!\\w)",
+      "(?<!\\w)fair use(?!\\w)",
+      "(?<!\\w)terms of use(?!\\w)",
+      "(?<!\\w)do not run (?:jobs|computations?) on(?!\\w)",
+      "(?<!\\w)usage polic(?:y|ies)",
+      "(?<!\\w)code of conduct(?!\\w)",
+      "(?<!\\w)shared resources?"
+     ]
+    },
+    {
+     "id": "data_protection_secrets",
+     "name": "Data protection, sensitive data/GDPR, secrets, passwords, tokens",
+     "patterns": [
+      "(?<!\\w)gdpr(?!\\w)",
+      "(?<!\\w)sensitive data(?!\\w)",
+      "(?<!\\w)personal data(?!\\w)",
+      "(?<!\\w)data protection(?!\\w)",
+      "(?<!\\w)encrypt(?:ion|ed)?",
+      "(?<!\\w)passphrase(?!\\w)",
+      "(?<!\\w)passwords?",
+      "(?<!\\w)api (?:keys?|tokens?)",
+      "(?<!\\w)secrets?",
+      "(?<!\\w)phishing(?!\\w)",
+      "(?<!\\w)trusted research environment(?!\\w)",
+      "(?<!\\w)secure (?:enclave|environment)",
+      "(?<!\\w)compromised(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eurohpc",
+   "name": "EuroHPC & AI Factory specifics",
+   "leaves": [
+    {
+     "id": "eurohpc_access_calls",
+     "name": "EuroHPC/AI Factory access calls, proposals, eligibility",
+     "patterns": [
+      "(?<!\\w)access calls?",
+      "(?<!\\w)eurohpc(?!\\w)",
+      "(?<!\\w)ai factor(?:y|ies)",
+      "(?<!\\w)benchmark access(?!\\w)",
+      "(?<!\\w)development access(?!\\w)",
+      "(?<!\\w)regular access(?!\\w)",
+      "(?<!\\w)extreme scale access(?!\\w)",
+      "(?<!\\w)ai factory (?:large scale|playground|fast lane)",
+      "(?<!\\w)call for proposals(?!\\w)",
+      "(?<!\\w)peer review(?!\\w)",
+      "(?<!\\w)proposal(?!\\w)"
+     ]
+    },
+    {
+     "id": "allocations_budget",
+     "name": "Allocations, budgets, core/GPU hours, saldo, project accounting",
+     "patterns": [
+      "(?:project|compute|cpu|gpu|resource|time) allocations?",
+      "(?<!\\w)allocation (?:usage|period|request|holder)",
+      "(?<!\\w)core[- ]hours?",
+      "(?<!\\w)node[- ]hours?",
+      "(?<!\\w)gpu[- ]hours?",
+      "(?<!\\w)saldo(?!\\w)",
+      "(?<!\\w)budgets?",
+      "(?<!\\w)billing units?",
+      "(?<!\\w)sbank(?!\\w)",
+      "(?<!\\w)cpu[- ]hours(?!\\w)",
+      "(?<!\\w)project (?:accounting|usage|quota)",
+      "(?<!\\w)compute time(?!\\w)",
+      "(?<!\\w)lumi-allocations(?!\\w)",
+      "(?<!\\w)csc-projects(?!\\w)"
+     ]
+    },
+    {
+     "id": "user_support",
+     "name": "Helpdesk, support tickets, user training",
+     "patterns": [
+      "(?<!\\w)helpdesk(?!\\w)",
+      "(?<!\\w)help desk(?!\\w)",
+      "(?<!\\w)support tickets?",
+      "(?<!\\w)service ?desk(?!\\w)",
+      "(?<!\\w)user support(?!\\w)",
+      "(?<!\\w)submit a ticket(?!\\w)",
+      "(?<!\\w)contact support(?!\\w)",
+      "(?<!\\w)superc@"
+     ]
+    },
+    {
+     "id": "eurohpc_systems",
+     "name": "EuroHPC systems (LUMI, Leonardo, MareNostrum 5, MeluXina, Karolina, Vega, Deucalion, Discoverer, JUPITER)",
+     "patterns": [
+      "(?<!\\w)lumi(?!\\w)",
+      "(?<!\\w)leonardo(?!\\w)",
+      "(?<!\\w)marenostrum ?5?",
+      "(?<!\\w)meluxina(?!\\w)",
+      "(?<!\\w)karolina(?!\\w)",
+      "(?<!\\w)vega(?!\\w)",
+      "(?<!\\w)deucalion(?!\\w)",
+      "(?<!\\w)discoverer(?!\\w)",
+      "(?<!\\w)jupiter(?!\\w)",
+      "(?<!\\w)alice recoque(?!\\w)",
+      "(?<!\\w)daedalus(?!\\w)",
+      "(?<!\\w)arrhenius(?!\\w)",
+      "(?<!\\w)jules verne(?!\\w)"
+     ]
+    },
+    {
+     "id": "federated_identity_portals",
+     "name": "Federated identity & allocation portals: MyAccessID, Puhuri, eduGAIN, Fenix, site user portals",
+     "patterns": [
+      "(?<!\\w)myaccessid(?!\\w)",
+      "(?<!\\w)puhuri(?!\\w)",
+      "(?<!\\w)edugain(?!\\w)",
+      "(?<!\\w)eduteams(?!\\w)",
+      "(?<!\\w)fenix (?:infrastructure|ri|ials?)(?!\\w)",
+      "(?<!\\w)haka(?!\\w)",
+      "(?<!\\w)federated (?:identity|login|authentication)(?!\\w)",
+      "(?<!\\w)identity providers?(?!\\w)",
+      "(?<!\\w)(?-i:IdP)s?(?!\\w)",
+      "(?<!\\w)judoor(?!\\w)",
+      "(?<!\\w)userdb\\.hpc\\.cineca\\.it(?!\\w)",
+      "(?<!\\w)my\\.csc\\.fi(?!\\w)",
+      "(?<!\\w)lumi project portal(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "architecture",
+   "name": "HPC architecture basics",
+   "leaves": [
+    {
+     "id": "hpc_concepts_intro",
+     "name": "What is HPC: clusters, nodes, login vs compute, parallelism basics",
+     "patterns": [
+      "(?<!\\w)what is hpc(?!\\w)",
+      "(?<!\\w)high[- ]performance computing(?!\\w)",
+      "(?<!\\w)supercomputers?",
+      "(?<!\\w)compute nodes?",
+      "(?<!\\w)login nodes?",
+      "(?<!\\w)cluster architecture(?!\\w)",
+      "(?<!\\w)shared memory(?!\\w)",
+      "(?<!\\w)distributed memory(?!\\w)",
+      "(?<!\\w)parallel computing(?!\\w)"
+     ]
+    },
+    {
+     "id": "cpu_nodes_numa",
+     "name": "CPU nodes, cores/sockets, caches, NUMA, memory hierarchy",
+     "patterns": [
+      "(?<!\\w)numa(?!\\w)",
+      "(?<!\\w)sockets?",
+      "(?<!\\w)cache (?:lines?|hierarchy|misses?)",
+      "(?<!\\w)l[123] cache(?!\\w)",
+      "(?<!\\w)lstopo(?!\\w)",
+      "(?<!\\w)memory hierarchy(?!\\w)",
+      "(?<!\\w)sapphire rapids(?!\\w)",
+      "(?<!\\w)epyc(?!\\w)",
+      "(?<!\\w)nvidia grace(?!\\w)",
+      "(?<!\\w)grace hopper(?!\\w)",
+      "(?<!\\w)arm64(?!\\w)",
+      "(?<!\\w)aarch64(?!\\w)",
+      "(?<!\\w)hbm(?!\\w)",
+      "(?<!\\w)ccds?",
+      "(?<!\\w)chiplets?"
+     ]
+    },
+    {
+     "id": "interconnects",
+     "name": "Interconnects: InfiniBand, Slingshot, Omni-Path, topologies, RDMA",
+     "patterns": [
+      "(?<!\\w)infiniband(?!\\w)",
+      "(?<!\\w)slingshot(?!\\w)",
+      "(?<!\\w)omni-?path(?!\\w)",
+      "(?<!\\w)dragonfly(?!\\w)",
+      "(?<!\\w)fat[- ]tree(?!\\w)",
+      "(?<!\\w)rdma(?!\\w)",
+      "(?<!\\w)interconnects?",
+      "(?<!\\w)network topology(?!\\w)",
+      "(?<!\\w)hdr(?!\\w)",
+      "(?<!\\w)ndr(?!\\w)",
+      "(?<!\\w)mellanox(?!\\w)",
+      "(?<!\\w)roce(?!\\w)",
+      "(?<!\\w)ibstat(?!\\w)"
+     ]
+    },
+    {
+     "id": "accelerator_hw",
+     "name": "Accelerator hardware: A100/H100/GH200/MI250X/MI300, tensor cores, NVLink",
+     "patterns": [
+      "(?<!\\w)a100(?!\\w)",
+      "(?<!\\w)h100(?!\\w)",
+      "(?<!\\w)h200(?!\\w)",
+      "(?<!\\w)gh200(?!\\w)",
+      "(?<!\\w)b200(?!\\w)",
+      "(?<!\\w)mi250x?",
+      "(?<!\\w)mi300a?",
+      "(?<!\\w)tensor cores?",
+      "(?<!\\w)nvlink(?!\\w)",
+      "(?<!\\w)infinity fabric(?!\\w)",
+      "(?<!\\w)hopper(?!\\w)",
+      "(?<!\\w)ampere(?!\\w)",
+      "(?<!\\w)gpu architecture(?!\\w)",
+      "(?<!\\w)streaming multiprocessors?",
+      "(?<!\\w)hbm2e?|hbm3(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "troubleshooting",
+   "name": "Troubleshooting common errors",
+   "leaves": [
+    {
+     "id": "oom_errors",
+     "name": "Out-of-memory errors (host & GPU)",
+     "patterns": [
+      "(?<!\\w)out of memory(?!\\w)",
+      "(?<!\\w)oom(?!\\w)",
+      "(?<!\\w)oom-kill\\w*",
+      "(?<!\\w)cuda out of memory(?!\\w)",
+      "(?<!\\w)memoryerror(?!\\w)",
+      "(?<!\\w)exceeded (?:job )?memory(?!\\w)",
+      "(?<!\\w)memory limit(?!\\w)",
+      "(?<!\\w)out_of_memory(?!\\w)",
+      "(?<!\\w)cgroup out-of-memory(?!\\w)"
+     ]
+    },
+    {
+     "id": "segfaults_crashes",
+     "name": "Segfaults, bus errors, stack size, illegal instruction",
+     "patterns": [
+      "(?<!\\w)segmentation fault(?!\\w)",
+      "(?<!\\w)segfaults?",
+      "(?<!\\w)sigsegv(?!\\w)",
+      "(?<!\\w)signal 11(?!\\w)",
+      "(?<!\\w)bus error(?!\\w)",
+      "(?<!\\w)illegal instruction(?!\\w)",
+      "(?<!\\w)stack size(?!\\w)",
+      "(?<!\\w)ulimit -s(?!\\w)",
+      "(?<!\\w)stack overflow(?!\\w)",
+      "(?<!\\w)sigabrt(?!\\w)",
+      "(?<!\\w)core dumped(?!\\w)"
+     ]
+    },
+    {
+     "id": "job_failures",
+     "name": "Job failures: exit codes, time limits, node failures, cancelled jobs",
+     "patterns": [
+      "(?<!\\w)exit codes?",
+      "(?<!\\w)due to time limit(?!\\w)",
+      "(?<!\\w)time limit(?!\\w)",
+      "(?<!\\w)node_fail(?!\\w)",
+      "(?<!\\w)job failed(?!\\w)",
+      "(?<!\\w)job fails?",
+      "(?<!\\w)cancelled(?!\\w)",
+      "(?<!\\w)non-zero exit(?!\\w)",
+      "(?<!\\w)timeout(?!\\w)",
+      "(?<!\\w)why (?:did )?my job(?!\\w)"
+     ]
+    },
+    {
+     "id": "env_library_conflicts",
+     "name": "Module conflicts, missing/incompatible libraries, GLIBC errors",
+     "patterns": [
+      "(?<!\\w)module conflicts?",
+      "(?<!\\w)conflicts? with(?!\\w)",
+      "(?<!\\w)cannot be loaded(?!\\w)",
+      "(?<!\\w)glibc(?!\\w)",
+      "(?<!\\w)glibcxx(?!\\w)",
+      "(?<!\\w)cannot open shared object file(?!\\w)",
+      "(?<!\\w)version `\\S+' not found(?!\\w)",
+      "(?<!\\w)command not found(?!\\w)",
+      "(?<!\\w)undefined symbol(?!\\w)",
+      "(?<!\\w)lmod has detected(?!\\w)"
+     ]
+    },
+    {
+     "id": "mpi_errors",
+     "name": "MPI errors and hangs",
+     "patterns": [
+      "(?<!\\w)mpi_abort(?!\\w)",
+      "(?<!\\w)mpi_err_\\w+",
+      "(?<!\\w)mpi errors?",
+      "(?<!\\w)pmi(?:x)? (?:error|failed)",
+      "(?<!\\w)ucx error(?!\\w)",
+      "(?<!\\w)orted(?!\\w)",
+      "(?<!\\w)mpi (?:hangs?|deadlocks?)",
+      "(?<!\\w)failed to initiali[sz]e mpi(?!\\w)",
+      "(?<!\\w)mpi_init failed(?!\\w)"
+     ]
+    },
+    {
+     "id": "cuda_gpu_errors",
+     "name": "CUDA/GPU errors: driver mismatch, illegal memory access, NCCL errors, Xid",
+     "patterns": [
+      "(?<!\\w)cuda error(?!\\w)",
+      "(?<!\\w)no cuda-capable device(?!\\w)",
+      "(?<!\\w)illegal memory access(?!\\w)",
+      "(?<!\\w)device-side assert(?!\\w)",
+      "(?<!\\w)xid(?!\\w)",
+      "(?<!\\w)nccl error(?!\\w)",
+      "(?<!\\w)cuda driver version(?!\\w)",
+      "(?<!\\w)hip error(?!\\w)",
+      "(?<!\\w)cudnn error(?!\\w)",
+      "(?<!\\w)cuda_error_\\w+",
+      "(?<!\\w)gpu errors?",
+      "(?<!\\w)ecc errors?",
+      "(?<!\\w)cudaError\\w+",
+      "(?<!\\w)hipError\\w+",
+      "(?<!\\w)cublas_status_\\w+",
+      "(?<!\\w)cuda runtime error",
+      "(?<!\\w)runtimeerror: cuda",
+      "(?<!\\w)cuda initiali[sz]ation"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "applications",
+   "name": "Scientific applications on HPC",
+   "leaves": [
+    {
+     "id": "apps_md_chem",
+     "name": "MD & electronic structure: GROMACS, LAMMPS, NAMD, AMBER, CP2K, QE, VASP, ORCA",
+     "patterns": [
+      "(?<!\\w)gromacs(?!\\w)",
+      "(?<!\\w)lammps(?!\\w)",
+      "(?<!\\w)namd(?!\\w)",
+      "(?<!\\w)amber(?!\\w)",
+      "(?<!\\w)cp2k(?!\\w)",
+      "(?<!\\w)quantum espresso(?!\\w)",
+      "(?<!\\w)vasp(?!\\w)",
+      "(?<!\\w)orca(?!\\w)",
+      "(?<!\\w)gaussian ?16(?!\\w)",
+      "(?<!\\w)g16(?!\\w)",
+      "(?<!\\w)nwchem(?!\\w)",
+      "(?<!\\w)siesta(?!\\w)",
+      "(?<!\\w)abinit(?!\\w)",
+      "(?<!\\w)openmm(?!\\w)"
+     ]
+    },
+    {
+     "id": "apps_cfd_climate_bio",
+     "name": "CFD, climate/weather, bioinformatics, AlphaFold",
+     "patterns": [
+      "(?<!\\w)openfoam(?!\\w)",
+      "(?<!\\w)ansys(?!\\w)",
+      "(?<!\\w)fluent(?!\\w)",
+      "(?<!\\w)code_saturne(?!\\w)",
+      "(?<!\\w)wrf(?!\\w)",
+      "(?<!\\w)icon model(?!\\w)",
+      "(?<!\\w)cesm(?!\\w)",
+      "(?<!\\w)nemo ocean(?!\\w)",
+      "(?<!\\w)blast\\+?",
+      "(?<!\\w)gatk(?!\\w)",
+      "(?<!\\w)alphafold(?!\\w)",
+      "(?<!\\w)bwa(?!\\w)",
+      "(?<!\\w)samtools(?!\\w)",
+      "(?<!\\w)gromacs(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "admin",
+   "name": "Cluster administration & operations",
+   "leaves": [
+    {
+     "id": "slurm_admin_config",
+     "name": "Slurm administration: slurm.conf, daemons, cgroups, plugins, prolog/epilog, node states",
+     "patterns": [
+      "(?<!\\w)slurm\\.conf(?!\\w)",
+      "(?<!\\w)slurmctld(?!\\w)",
+      "(?<!\\w)slurmd(?!\\w)",
+      "(?<!\\w)cgroup\\.conf(?!\\w)",
+      "(?<!\\w)munge(?:d|\\.key)?(?!\\w)",
+      "(?<!\\w)job_submit(?:\\.lua|/lua)(?!\\w)",
+      "(?<!\\w)spank plugins?(?!\\w)",
+      "(?<!\\w)(?:task_prolog|task_epilog|prologctld|epilogctld|prologflags)(?!\\w)",
+      "(?<!\\w)prolog(?: and |/)epilog(?!\\w)",
+      "(?<!\\w)epilog scripts?(?!\\w)",
+      "(?<!\\w)scontrol reconfigure(?!\\w)",
+      "(?<!\\w)scontrol update node(?:name)?=",
+      "(?<!\\w)state=(?:resume|drain|down)(?!\\w)",
+      "(?<!\\w)slurm (?:upgrade|installation|configurator)(?!\\w)",
+      "(?<!\\w)healthcheckprogram(?!\\w)"
+     ]
+    },
+    {
+     "id": "slurm_accounting_setup",
+     "name": "Slurm accounting setup: slurmdbd, sacctmgr, associations, TRES, limits enforcement",
+     "patterns": [
+      "(?<!\\w)slurmdbd(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)sacctmgr(?!\\w)",
+      "(?<!\\w)slurm associations?(?!\\w)",
+      "(?<!\\w)association (?:limits?|tree|table)s?(?!\\w)",
+      "(?<!\\w)accountingstorage(?:type|enforce|host)(?!\\w)",
+      "(?<!\\w)accounting_storage/(?:slurmdbd|mysql)(?!\\w)",
+      "(?<!\\w)(?-i:TRES)(?!\\w)",
+      "(?<!\\w)tresbillingweights(?!\\w)",
+      "(?<!\\w)grptres(?:mins)?(?!\\w)",
+      "(?<!\\w)maxtres(?:perjob|peruser|pernode)?(?!\\w)",
+      "(?<!\\w)priorityweight(?:fairshare|age|qos|jobsize)(?!\\w)",
+      "(?<!\\w)slurm_acct_db(?!\\w)"
+     ]
+    },
+    {
+     "id": "cluster_provisioning",
+     "name": "Cluster provisioning: Warewulf, xCAT, OpenHPC, Bright/BCM, PXE, stateless/stateful node images",
+     "patterns": [
+      "(?<!\\w)warewulf(?!\\w)",
+      "(?<!\\w)wwctl(?!\\w)",
+      "(?<!\\w)xcat(?!\\w)",
+      "(?<!\\w)openhpc(?!\\w)",
+      "(?<!\\w)ohpc(?!\\w)",
+      "(?<!\\w)bright cluster manager(?!\\w)",
+      "(?<!\\w)base command manager(?!\\w)",
+      "(?<!\\w)pxe(?:[- ]?boot)?(?!\\w)",
+      "(?<!\\w)ipxe(?!\\w)",
+      "(?<!\\w)netboot(?!\\w)",
+      "(?<!\\w)diskless (?:nodes?|images?|boot)(?!\\w)",
+      "(?<!\\w)state(?:less|ful) (?:node )?images?(?!\\w)",
+      "(?<!\\w)node images?(?!\\w)",
+      "(?<!\\w)kickstart (?:files?|install(?:ation)?s?)(?!\\w)",
+      "(?<!\\w)head node (?:installation|setup)(?!\\w)"
+     ]
+    },
+    {
+     "id": "config_mgmt_parallel_shell",
+     "name": "Configuration management & parallel shells: Ansible, Puppet, Salt, pdsh, ClusterShell",
+     "patterns": [
+      "(?<!\\w)ansible(?:-playbook)?(?!\\w)",
+      "(?<!\\w)puppet(?!\\w)",
+      "(?<!\\w)saltstack(?!\\w)",
+      "(?<!\\w)salt (?:states?|minions?|master)(?!\\w)",
+      "(?<!\\w)chef (?:cookbook|recipe)s?(?!\\w)",
+      "(?<!\\w)pdsh(?!\\w)",
+      "(?<!\\w)pdcp(?!\\w)",
+      "(?<!\\w)dshbak(?!\\w)",
+      "(?<!\\w)clustershell(?!\\w)",
+      "(?<!\\w)clush(?!\\w)",
+      "(?<!\\w)nodeset(?!\\w)",
+      "(?<!\\w)configuration management(?!\\w)",
+      "(?<!\\w)parallel shell(?!\\w)"
+     ]
+    },
+    {
+     "id": "monitoring_telemetry",
+     "name": "Cluster monitoring & telemetry: Prometheus, Grafana, Icinga/Nagios, Ganglia, XDMoD, LLview, DCGM exporter",
+     "patterns": [
+      "(?<!\\w)prometheus(?!\\w)",
+      "(?<!\\w)node_exporter(?!\\w)",
+      "(?<!\\w)grafana(?!\\w)",
+      "(?<!\\w)icinga2?(?!\\w)",
+      "(?<!\\w)nagios(?!\\w)",
+      "(?<!\\w)ganglia(?!\\w)",
+      "(?<!\\w)telegraf(?!\\w)",
+      "(?<!\\w)influxdb(?!\\w)",
+      "(?<!\\w)open xdmod(?!\\w)",
+      "(?<!\\w)xdmod(?!\\w)",
+      "(?<!\\w)llview(?!\\w)",
+      "(?<!\\w)dcgm[- ]exporter(?!\\w)",
+      "(?<!\\w)zabbix(?!\\w)",
+      "(?<!\\w)alertmanager(?!\\w)",
+      "(?<!\\w)(?:cluster|node|system) monitoring(?!\\w)"
+     ]
+    },
+    {
+     "id": "node_health_bmc",
+     "name": "Node health & out-of-band management: NHC, IPMI/BMC, Redfish, SOL, hardware burn-in",
+     "patterns": [
+      "(?<!\\w)node health check(?!\\w)",
+      "(?<!\\w)(?-i:NHC)(?!\\w)",
+      "(?<!\\w)ipmitool(?!\\w)",
+      "(?<!\\w)ipmi(?!\\w)",
+      "(?<!\\w)(?-i:BMC)s?(?!\\w)",
+      "(?<!\\w)baseboard management controller(?!\\w)",
+      "(?<!\\w)redfish(?!\\w)",
+      "(?<!\\w)serial[- ]over[- ]lan(?!\\w)",
+      "(?<!\\w)(?-i:SOL) (?:console|session)(?!\\w)",
+      "(?<!\\w)(?:idrac|ilo|xclarity)(?!\\w)",
+      "(?<!\\w)burn[- ]in tests?(?!\\w)",
+      "(?<!\\w)memtest(?:86)?(?!\\w)",
+      "(?<!\\w)dcgmi diag(?!\\w)",
+      "(?<!\\w)power (?:cycle|on|off) (?:the )?nodes?(?!\\w)"
+     ]
+    },
+    {
+     "id": "identity_auth_admin",
+     "name": "Identity & authentication administration: LDAP, FreeIPA, Kerberos, SSSD, PAM, user/group management",
+     "patterns": [
+      "(?<!\\w)ldap(?!\\w)",
+      "(?<!\\w)openldap(?!\\w)",
+      "(?<!\\w)ldapsearch(?!\\w)",
+      "(?<!\\w)freeipa(?!\\w)",
+      "(?<!\\w)(?-i:IdM)(?!\\w)",
+      "(?<!\\w)kerberos(?!\\w)",
+      "(?<!\\w)kinit(?!\\w)",
+      "(?<!\\w)krb5(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)sssd(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)pam_\\w+(?!\\w)",
+      "(?<!\\w)(?-i:PAM) (?:module|stack|configuration)s?(?!\\w)",
+      "(?<!\\w)nsswitch(?:\\.conf)?(?!\\w)",
+      "(?<!\\w)keycloak(?!\\w)",
+      "(?<!\\w)useradd(?!\\w)",
+      "(?<!\\w)active directory(?!\\w)"
+     ]
+    },
+    {
+     "id": "fabric_network_admin",
+     "name": "HPC fabric & cluster network administration: OpenSM, UFM, ibdiagnet, LNet routing, DNS/DHCP, NTP",
+     "patterns": [
+      "(?<!\\w)opensm(?!\\w)",
+      "(?<!\\w)subnet manager(?!\\w)",
+      "(?<!\\w)ufm(?!\\w)",
+      "(?<!\\w)ibdiagnet(?!\\w)",
+      "(?<!\\w)ibnetdiscover(?!\\w)",
+      "(?<!\\w)perfquery(?!\\w)",
+      "(?<!\\w)iblinkinfo(?!\\w)",
+      "(?<!\\w)rdma-core(?!\\w)",
+      "(?<!\\w)lnet(?:ctl)?(?!\\w)",
+      "(?<!\\w)lnet routers?(?!\\w)",
+      "(?<!\\w)chronyd?(?!\\w)",
+      "(?<!\\w)ntpd(?!\\w)",
+      "(?<!\\w)dhcpd(?!\\w)",
+      "(?<!\\w)(?:dns|dhcp) server(?!\\w)",
+      "(?<!\\w)vlans?(?!\\w)"
+     ]
+    },
+    {
+     "id": "storage_server_admin",
+     "name": "Storage server administration: Lustre MDS/OSS ops, ZFS, RAID, NFS exports, GPFS management",
+     "patterns": [
+      "(?<!\\w)lctl(?!\\w)",
+      "(?<!\\w)mkfs\\.lustre(?!\\w)",
+      "(?<!\\w)(?-i:MDS|OSS|MDT|OST|MGS)s? (?:failover|recovery|mount|server)s?(?!\\w)",
+      "(?<!\\w)lustre (?:server|administration|operations manual)(?!\\w)",
+      "(?<!\\w)zpool(?!\\w)",
+      "(?<!\\w)zfs (?:pool|dataset|send|snapshot)s?(?!\\w)",
+      "(?<!\\w)openzfs(?!\\w)",
+      "(?<!\\w)raid ?(?:[0156]|10|z[23]?)(?!\\w)",
+      "(?<!\\w)mdadm(?!\\w)",
+      "(?<!\\w)/etc/exports(?!\\w)",
+      "(?<!\\w)exportfs(?!\\w)",
+      "(?<!\\w)mm(?:crfs|mount|lsfs|add(?:disk|node)|chconfig)(?!\\w)",
+      "(?<!\\w)e2fsck(?!\\w)"
+     ]
+    },
+    {
+     "id": "linux_sysadmin_services",
+     "name": "Linux system administration for HPC nodes: systemd, packages, kernel tuning, hugepages, sysctl",
+     "patterns": [
+      "(?<!\\w)systemctl(?!\\w)",
+      "(?<!\\w)systemd (?:units?|services?|timers?)(?!\\w)",
+      "(?<!\\w)journalctl(?!\\w)",
+      "(?<!\\w)dnf (?:install|update)(?!\\w)",
+      "(?<!\\w)yum install(?!\\w)",
+      "(?<!\\w)rpm -[qiU]\\w*(?!\\w)",
+      "(?<!\\w)sysctl(?!\\w)",
+      "(?<!\\w)hugepages?(?!\\w)",
+      "(?<!\\w)hugetlbfs(?!\\w)",
+      "(?<!\\w)transparent huge ?pages?(?!\\w)",
+      "(?<!\\w)(?-i:THP)(?!\\w)",
+      "(?<!\\w)kernel (?:parameters?|modules?|tuning)(?!\\w)",
+      "(?<!\\w)modprobe(?!\\w)",
+      "(?<!\\w)grub(?:2)?(?!\\w)",
+      "(?<!\\w)selinux(?!\\w)"
+     ]
+    },
+    {
+     "id": "security_hardening_ops",
+     "name": "HPC security operations: hardening, firewalls, patching/CVEs, intrusion detection, NIST HPC security",
+     "patterns": [
+      "(?<!\\w)firewalld(?!\\w)",
+      "(?<!\\w)nftables(?!\\w)",
+      "(?<!\\w)iptables(?!\\w)",
+      "(?<!\\w)fail2ban(?!\\w)",
+      "(?<!\\w)auditd(?!\\w)",
+      "(?<!\\w)cves?(?:-\\d{4}-\\d+)?(?!\\w)",
+      "(?<!\\w)security patch(?:es|ing)?(?!\\w)",
+      "(?<!\\w)vulnerabilit(?:y|ies)(?!\\w)",
+      "(?<!\\w)hardening(?!\\w)",
+      "(?<!\\w)intrusion detection(?!\\w)",
+      "(?<!\\w)sp 800-223(?!\\w)",
+      "(?<!\\w)sp 800-234(?!\\w)",
+      "(?<!\\w)zero trust(?!\\w)",
+      "(?<!\\w)network segmentation(?!\\w)",
+      "(?<!\\w)security incidents?(?!\\w)"
+     ]
+    },
+    {
+     "id": "datacenter_facilities_tco",
+     "name": "Data-centre facilities & economics: power, cooling (DLC), PUE, UPS, procurement, TCO",
+     "patterns": [
+      "(?<!\\w)pue(?!\\w)",
+      "(?<!\\w)power usage effectiveness(?!\\w)",
+      "(?<!\\w)direct liquid cooling(?!\\w)",
+      "(?<!\\w)warm[- ]water cooling(?!\\w)",
+      "(?<!\\w)liquid[- ]cooled(?!\\w)",
+      "(?<!\\w)immersion cooling(?!\\w)",
+      "(?<!\\w)(?-i:UPS)(?!\\w)",
+      "(?<!\\w)uninterruptible power(?!\\w)",
+      "(?<!\\w)power distribution units?(?!\\w)",
+      "(?<!\\w)(?-i:PDU)s?(?!\\w)",
+      "(?<!\\w)data ?cent(?:re|er) (?:infrastructure|facilit(?:y|ies)|cooling)(?!\\w)",
+      "(?<!\\w)total cost of ownership(?!\\w)",
+      "(?<!\\w)(?-i:TCO)(?!\\w)",
+      "(?<!\\w)procurement(?!\\w)",
+      "(?<!\\w)heat reuse(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rse",
+   "name": "Research software engineering & reproducibility",
+   "leaves": [
+    {
+     "id": "testing_ci_hpc",
+     "name": "Software testing & CI on HPC: unit/regression tests, GitLab/GitHub CI runners, Jacamar, ReFrame",
+     "patterns": [
+      "(?<!\\w)unit tests?(?!\\w)",
+      "(?<!\\w)unit testing(?!\\w)",
+      "(?<!\\w)regression tests?(?!\\w)",
+      "(?<!\\w)pytest(?!\\w)",
+      "(?<!\\w)ctest(?!\\w)",
+      "(?<!\\w)googletest(?!\\w)",
+      "(?<!\\w)pfunit(?!\\w)",
+      "(?<!\\w)continuous integration(?!\\w)",
+      "(?<!\\w)(?-i:CI)(?:/CD)? (?:pipelines?|runners?|jobs?)(?!\\w)",
+      "(?<!\\w)gitlab[- ]ci(?!\\w)",
+      "(?<!\\w)github actions(?!\\w)",
+      "(?<!\\w)jacamar(?!\\w)",
+      "(?<!\\w)reframe(?!\\w)",
+      "(?<!\\w)test coverage(?!\\w)",
+      "(?<!\\w)test-driven development(?!\\w)"
+     ]
+    },
+    {
+     "id": "software_practices_docs_licensing",
+     "name": "Research software practices: documentation, code review, modular code, packaging/releases, software licences, citation",
+     "patterns": [
+      "(?<!\\w)sphinx(?!\\w)",
+      "(?<!\\w)doxygen(?!\\w)",
+      "(?<!\\w)read ?the ?docs(?!\\w)",
+      "(?<!\\w)mkdocs(?!\\w)",
+      "(?<!\\w)code review(?!\\w)",
+      "(?<!\\w)semantic versioning(?!\\w)",
+      "(?<!\\w)software licen[cs](?:e|es|ing)(?!\\w)",
+      "(?<!\\w)open[- ]source licen[cs]es?(?!\\w)",
+      "(?<!\\w)citation\\.cff(?!\\w)",
+      "(?<!\\w)research software engineer(?:ing|s)?(?!\\w)",
+      "(?<!\\w)(?-i:RSE)s?(?!\\w)",
+      "(?<!\\w)coding (?:standards?|style)(?!\\w)",
+      "(?<!\\w)linters?(?!\\w)"
+     ]
+    },
+    {
+     "id": "reproducibility_rdm_fair",
+     "name": "Reproducibility & research data management: FAIR, data management plans, metadata, DOIs, provenance",
+     "patterns": [
+      "(?<!\\w)fair (?:data|principles|software)(?!\\w)",
+      "(?<!\\w)findable,? accessible,? interoperable(?!\\w)",
+      "(?<!\\w)data management plans?(?!\\w)",
+      "(?<!\\w)(?-i:DMP)s?(?!\\w)",
+      "(?<!\\w)research data management(?!\\w)",
+      "(?<!\\w)(?-i:RDM)(?!\\w)",
+      "(?<!\\w)metadata (?:schemas?|standards?)(?!\\w)",
+      "(?<!\\w)zenodo(?!\\w)",
+      "(?<!\\w)digital object identifiers?(?!\\w)",
+      "(?<!\\w)data provenance(?!\\w)",
+      "(?<!\\w)reproducib(?:le|ility) (?:research|workflows?|results)(?!\\w)",
+      "(?<!\\w)data repositor(?:y|ies)(?!\\w)",
+      "(?<!\\w)open data(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bigdata",
+   "name": "Big data & data analytics on HPC",
+   "leaves": [
+    {
+     "id": "spark_hadoop_hpc",
+     "name": "Spark, Hadoop and big-data frameworks on HPC (PySpark, HDFS, RayDP, Ophidia)",
+     "patterns": [
+      "(?<!\\w)apache spark(?!\\w)",
+      "(?<!\\w)pyspark(?!\\w)",
+      "(?<!\\w)spark-submit(?!\\w)",
+      "(?<!\\w)spark (?:standalone|cluster|executors?|driver)(?!\\w)",
+      "(?<!\\w)hadoop(?!\\w)",
+      "(?<!\\w)hdfs(?!\\w)",
+      "(?<!\\w)mapreduce(?!\\w)",
+      "(?<!\\w)yarn (?:resource manager|cluster)(?!\\w)",
+      "(?<!\\w)raydp(?!\\w)",
+      "(?<!\\w)ophidia(?!\\w)",
+      "(?<!\\w)big data analytics(?!\\w)",
+      "(?<!\\w)spark on (?:slurm|hpc)(?!\\w)"
+     ]
+    },
+    {
+     "id": "postprocessing_analysis_tools",
+     "name": "Post-processing & data analysis tools: CDO, NCO, xarray, pandas/Polars on HPC output",
+     "patterns": [
+      "(?<!\\w)(?-i:CDO)(?!\\w)",
+      "(?<!\\w)climate data operators(?!\\w)",
+      "(?<!\\w)cdo (?:-\\w+|remap\\w*|mergetime|sellonlatbox|timmean)(?!\\w)",
+      "(?<!\\w)(?-i:NCO)(?!\\w)",
+      "(?<!\\w)nc(?:ks|ra|rcat|ea|ap2|wa|diff)(?!\\w)",
+      "(?<!\\w)xarray(?!\\w)",
+      "(?<!\\w)open_mfdataset(?!\\w)",
+      "(?<!\\w)pandas(?!\\w)",
+      "(?<!\\w)polars(?!\\w)",
+      "(?<!\\w)post-?processing(?!\\w)",
+      "(?<!\\w)ncview(?!\\w)",
+      "(?<!\\w)dask\\.dataframe(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "emerging",
+   "name": "Emerging & heterogeneous computing",
+   "leaves": [
+    {
+     "id": "quantum_hpc",
+     "name": "Quantum computing & HPC-QC integration: EuroHPC quantum computers, Qiskit, CUDA-Q, simulators",
+     "patterns": [
+      "(?<!\\w)quantum comput(?:er|ers|ing)(?!\\w)",
+      "(?<!\\w)qubits?(?!\\w)",
+      "(?<!\\w)qiskit(?!\\w)",
+      "(?<!\\w)cuda-?q(?!\\w)",
+      "(?<!\\w)pennylane(?!\\w)",
+      "(?<!\\w)cirq(?!\\w)",
+      "(?<!\\w)myqlm(?!\\w)",
+      "(?<!\\w)pulser(?!\\w)",
+      "(?<!\\w)quantum circuits?(?!\\w)",
+      "(?<!\\w)hpc-qc(?!\\w)",
+      "(?<!\\w)quantum simulators?(?!\\w)",
+      "(?<!\\w)statevector(?!\\w)",
+      "(?<!\\w)lumi-q(?!\\w)",
+      "(?<!\\w)euro-?qcs(?!\\w)",
+      "(?<!\\w)quantum annealing(?!\\w)"
+     ]
+    },
+    {
+     "id": "fpga_riscv_other_arch",
+     "name": "FPGAs, RISC-V, Arm SVE/A64FX, vector engines and other non-GPU accelerators",
+     "patterns": [
+      "(?<!\\w)fpgas?(?!\\w)",
+      "(?<!\\w)field[- ]programmable gate arrays?(?!\\w)",
+      "(?<!\\w)high[- ]level synthesis(?!\\w)",
+      "(?<!\\w)(?-i:HLS)(?!\\w)",
+      "(?<!\\w)vitis(?!\\w)",
+      "(?<!\\w)oneapi fpga(?!\\w)",
+      "(?<!\\w)risc-?v(?!\\w)",
+      "(?<!\\w)a64fx(?!\\w)",
+      "(?<!\\w)(?-i:SVE2?)(?!\\w)",
+      "(?<!\\w)scalable vector extension(?!\\w)",
+      "(?<!\\w)sx-aurora(?!\\w)",
+      "(?<!\\w)vector engines?(?!\\w)",
+      "(?<!\\w)neuromorphic(?!\\w)",
+      "(?<!\\w)european processor initiative(?!\\w)",
+      "(?<!\\w)rhea processor(?!\\w)"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eurohpc_sites",
+   "name": "EuroHPC site-specific usage guides",
+   "leaves": [
+    {
+     "id": "lumi_usage",
+     "name": "LUMI usage guide: LUMI-C/G/O partitions, project_465 paths, LUMI software stacks, LUST",
+     "patterns": [
+      "(?<!\\w)lumi-[cgodfk](?!\\w)",
+      "(?<!\\w)(?:small|standard|dev)-g(?!\\w)",
+      "(?<!\\w)lumi\\.csc\\.fi(?!\\w)",
+      "(?<!\\w)lumi-workspaces(?!\\w)",
+      "(?<!\\w)lumi-allocations(?!\\w)",
+      "(?<!\\w)project_465\\d+",
+      "(?<!\\w)lumi-container-wrapper(?!\\w)",
+      "(?<!\\w)cotainr(?!\\w)",
+      "(?<!\\w)crayenv(?!\\w)",
+      "(?<!\\w)lumi/2\\d\\.\\d\\d(?!\\w)",
+      "(?<!\\w)partition/[gcl](?!\\w)",
+      "(?<!\\w)lumi user support team(?!\\w)",
+      "(?<!\\w)(?-i:LUST)(?!\\w)",
+      "docs\\.lumi-supercomputer\\.eu",
+      "(?<!\\w)lumidata\\.eu(?!\\w)"
+     ]
+    },
+    {
+     "id": "leonardo_usage",
+     "name": "Leonardo (CINECA) usage guide: Booster/DCGP partitions, QoS names, CINECA filesystems",
+     "patterns": [
+      "(?<!\\w)boost_usr_prod(?!\\w)",
+      "(?<!\\w)dcgp_usr_prod(?!\\w)",
+      "(?<!\\w)lrd_all_serial(?!\\w)",
+      "(?<!\\w)boost_qos_\\w+(?!\\w)",
+      "(?<!\\w)dcgp_qos_\\w+(?!\\w)",
+      "(?<!\\w)leonardo booster(?!\\w)",
+      "(?<!\\w)leonardo dcgp(?!\\w)",
+      "(?<!\\w)login\\.leonardo\\.cineca\\.it(?!\\w)",
+      "(?<!\\w)cineca(?!\\w)",
+      "\\$cineca_scratch",
+      "docs\\.hpc\\.cineca\\.it",
+      "(?<!\\w)lrd_\\w+(?!\\w)",
+      "(?<!\\w)data centric general purpose(?!\\w)"
+     ]
+    },
+    {
+     "id": "marenostrum5_usage",
+     "name": "MareNostrum 5 (BSC) usage guide: GPP/ACC partitions, BSC login/transfer nodes, QoS",
+     "patterns": [
+      "(?<!\\w)[ag]login[1-5]\\.bsc\\.es(?!\\w)",
+      "(?<!\\w)mn5[- ]?(?:gpp|acc)(?!\\w)",
+      "(?<!\\w)marenostrum ?5 (?:gpp|acc)(?!\\w)",
+      "(?<!\\w)(?:gp|acc)_debug(?!\\w)",
+      "(?<!\\w)(?:gp|acc)_(?:bsc|ehpc|res)\\w*(?!\\w)",
+      "(?<!\\w)transfer[1-4]\\.bsc\\.es(?!\\w)",
+      "(?<!\\w)bsc\\.es(?!\\w)",
+      "(?<!\\w)barcelona supercomputing cent(?:re|er)(?!\\w)",
+      "(?<!\\w)bsc_quota(?!\\w)",
+      "(?<!\\w)bsc_acct(?!\\w)",
+      "(?<!\\w)(?-i:BSC)(?!\\w)"
+     ]
+    },
+    {
+     "id": "meluxina_usage",
+     "name": "MeluXina (LuxProvide) usage guide: login on port 8822, CPU/GPU/FPGA/LargeMem partitions",
+     "patterns": [
+      "(?<!\\w)login\\.lxp\\.lu(?!\\w)",
+      "(?<!\\w)lxp\\.lu(?!\\w)",
+      "(?<!\\w)luxprovide(?!\\w)",
+      "(?<!\\w)(?-i:LXP)(?!\\w)",
+      "(?<!\\w)meluxina[- ](?:cpu|gpu|fpga|largemem|c|g|f|l)(?!\\w)",
+      "(?<!\\w)-p 8822(?!\\w)",
+      "(?<!\\w)port 8822(?!\\w)",
+      "/project/home/p\\d+",
+      "(?<!\\w)servicedesk\\.lxp\\.lu(?!\\w)"
+     ]
+    },
+    {
+     "id": "karolina_usage",
+     "name": "Karolina (IT4Innovations) usage guide: qcpu/qgpu queues, it4ifree, IT4I filesystems",
+     "patterns": [
+      "(?<!\\w)karolina\\.it4i\\.cz(?!\\w)",
+      "(?<!\\w)it4i(?!\\w)",
+      "(?<!\\w)it4innovations(?!\\w)",
+      "(?<!\\w)qcpu(?:_\\w+)?(?!\\w)",
+      "(?<!\\w)qgpu(?:_\\w+)?(?!\\w)",
+      "(?<!\\w)qfat(?!\\w)",
+      "(?<!\\w)it4ifree(?!\\w)",
+      "(?<!\\w)it4ifsusage(?!\\w)",
+      "docs\\.it4i\\.cz",
+      "(?<!\\w)scs\\.it4i\\.cz(?!\\w)",
+      "(?<!\\w)barbora(?!\\w)"
+     ]
+    },
+    {
+     "id": "vega_usage",
+     "name": "Vega (IZUM) usage guide: Vega login nodes, partitions, IZUM support",
+     "patterns": [
+      "(?<!\\w)login\\.vega\\.izum\\.si(?!\\w)",
+      "(?<!\\w)vglogin\\d*(?!\\w)",
+      "(?<!\\w)izum(?!\\w)",
+      "(?<!\\w)vega\\.izum\\.si(?!\\w)",
+      "(?<!\\w)hpc vega(?!\\w)",
+      "(?<!\\w)eurohpc vega(?!\\w)",
+      "(?<!\\w)(?-i:SLING)(?!\\w)",
+      "(?<!\\w)vega (?:cpu|gpu|largemem) partition(?!\\w)"
+     ]
+    },
+    {
+     "id": "discoverer_usage",
+     "name": "Discoverer / Discoverer+ (Sofia Tech Park) usage guide",
+     "patterns": [
+      "(?<!\\w)login\\.discoverer\\.bg(?!\\w)",
+      "(?<!\\w)discoverer\\.bg(?!\\w)",
+      "(?<!\\w)discoverer ?\\+",
+      "(?<!\\w)sofia tech park(?!\\w)",
+      "(?<!\\w)petasc(?!\\w)",
+      "(?<!\\w)discoverer (?:hpc|supercomputer|cluster|gpu)(?!\\w)"
+     ]
+    },
+    {
+     "id": "deucalion_usage",
+     "name": "Deucalion (MACC, Portugal) usage guide: ARM/x86/A100 partitions",
+     "patterns": [
+      "(?<!\\w)normal-(?:arm|x86|a100)(?!\\w)",
+      "(?<!\\w)dev-(?:arm|x86|a100)(?!\\w)",
+      "(?<!\\w)large-(?:arm|x86)(?!\\w)",
+      "(?<!\\w)macc\\.fccn\\.pt(?!\\w)",
+      "(?<!\\w)(?-i:MACC)(?!\\w)",
+      "(?<!\\w)fccn(?!\\w)",
+      "(?<!\\w)minho advanced computing cent(?:re|er)(?!\\w)",
+      "(?<!\\w)deucalion (?:arm|x86|gpu)(?!\\w)",
+      "(?<!\\w)(?-i:CNCA)(?!\\w)"
+     ]
+    },
+    {
+     "id": "jupiter_usage",
+     "name": "JUPITER (JSC) usage guide: JUPITER Booster, JEDI/JETI, JuDoor, jutil, JSC software stages",
+     "patterns": [
+      "(?<!\\w)jupiter booster(?!\\w)",
+      "(?<!\\w)(?-i:JEDI)(?!\\w)",
+      "(?<!\\w)(?-i:JETI)(?!\\w)",
+      "(?<!\\w)judoor(?!\\w)",
+      "(?<!\\w)jutil(?!\\w)",
+      "(?<!\\w)j(?:ü|ue|u)lich supercomputing cent(?:re|er)(?!\\w)",
+      "(?<!\\w)(?-i:JSC)(?!\\w)",
+      "(?<!\\w)jupiter\\.fz-juelich\\.de(?!\\w)",
+      "apps\\.fz-juelich\\.de/jsc",
+      "(?<!\\w)juwels(?!\\w)",
+      "(?<!\\w)jureca(?!\\w)",
+      "(?<!\\w)stages/20\\d\\d(?!\\w)",
+      "(?<!\\w)jupiter exascale(?!\\w)"
+     ]
+    },
+    {
+     "id": "daedalus_usage",
+     "name": "Daedalus (GRNET, Greece) system & access (pre-operational)",
+     "patterns": [
+      "(?<!\\w)daedalus (?:supercomputer|system|hpc)(?!\\w)",
+      "(?<!\\w)grnet(?!\\w)",
+      "(?<!\\w)aris (?:hpc|supercomputer)(?!\\w)",
+      "(?<!\\w)pharos ai factory(?!\\w)",
+      "(?<!\\w)lavrion(?!\\w)",
+      "(?<!\\w)hpc\\.grnet\\.gr(?!\\w)"
+     ]
+    },
+    {
+     "id": "alice_recoque_usage",
+     "name": "Alice Recoque (Jules Verne / TGCC, France) exascale system (pre-operational); TGCC ccc_* tools",
+     "patterns": [
+      "(?<!\\w)alice recoque(?!\\w)",
+      "(?<!\\w)jules verne (?:consortium|exascale|system|supercomputer)(?!\\w)",
+      "(?<!\\w)tgcc(?!\\w)",
+      "(?<!\\w)genci(?!\\w)",
+      "(?<!\\w)ccc_m(?:sub|prun|pp|del|stat)(?!\\w)",
+      "(?<!\\w)bruy[eè]res-le-ch[aâ]tel(?!\\w)",
+      "(?<!\\w)(?-i:CEA) (?:tgcc|hpc)(?!\\w)"
+     ]
+    }
+   ]
+  }
+ ],
+ "changelog": [
+  "v1.1: broadened mpi_containers (e.g. 'Apptainer and MPI') and cuda_gpu_errors (cudaError*/hipError*/RuntimeError: CUDA) rules after v1 missed obviously relevant page titles; before/after both measured with v1.1",
+  "v2: 41 leaves from an audit against the HPC Certification Forum skill tree, HPC Carpentry/ENCCS/CodeRefinery lessons, sysadmin topics and the 11 EuroHPC systems (new areas admin, rse, bigdata, emerging, eurohpc_sites); extra patterns for 10 partial leaves; fixed metis and bare PBS patterns"
+ ]
+}

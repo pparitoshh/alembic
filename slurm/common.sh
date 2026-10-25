@@ -4,6 +4,11 @@ set -euo pipefail
 
 # compute nodes: no internet assumed; everything comes from $HF_HOME and the venvs
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 VLLM_NO_USAGE_STATS=1 DO_NOT_TRACK=1
+
+# vLLM/FlashInfer runtime tools on Leonardo.
+export PATH="$VLLM_VENV/bin:$PATH"
+export VLLM_USE_FLASHINFER_SAMPLER="${VLLM_USE_FLASHINFER_SAMPLER:-0}"
+
 cd "$REPO"
 mkdir -p slurm/logs
 
@@ -19,7 +24,7 @@ job_port() {
 # The server is stopped when the job script exits.
 start_vllm() {
     local model="$1" port="$2"; shift 2
-    local log="slurm/logs/vllm-${SLURM_JOB_ID:-local}-${port}.log"
+    local log="slurm/logs/vllm-${SLURM_JOB_ID:-local}-$(hostname -s)-${port}.log"
     echo "[job] starting vLLM: $model on 127.0.0.1:$port (log: $log)"
     "$VLLM_VENV/bin/vllm" serve "$model" --host 127.0.0.1 --port "$port" "$@" >"$log" 2>&1 &
     VLLM_PIDS="${VLLM_PIDS:-} $!"
@@ -36,8 +41,14 @@ start_vllm() {
 }
 
 stop_vllm() {
+    # Wait for the servers only (a bare `wait` would also wait for unrelated background jobs), and SIGKILL
+    # any that ignore SIGTERM for 60 s, so a job never hangs until its wall time here.
     for pid in ${VLLM_PIDS:-}; do kill "$pid" 2>/dev/null || true; done
-    wait 2>/dev/null || true
+    for pid in ${VLLM_PIDS:-}; do
+        for _ in $(seq 60); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+        kill -9 "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+    done
     VLLM_PIDS=""
 }
 

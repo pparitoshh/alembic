@@ -1,0 +1,108 @@
+{
+  "created_utc": "2026-10-12T17:44:51.753898+00:00",
+  "comparison_job": "60213268",
+  "validation_job": "60213647",
+  "validation_status": "complete",
+  "code_reference": "1fc74bbace9de402ea2573ca78d630cb1699f00a",
+  "eval_v3_sha256": "e86bcd5aff7bfcd0000a43c03f092d77e5721467679371d9c935aedf094e87fc",
+  "remote_artifacts": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code/runs/eval_v3_b6",
+  "seeds": {
+    "42": {
+      "runtime": {
+        "python": "3.12.15 (main, Oct  3 2026, 01:03:07) [Clang 22.1.3 ]",
+        "executable": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code/.venv/bin/python",
+        "torch": "2.13.0+cu129",
+        "cuda": "12.9",
+        "gpu": "NVIDIA A100-SXM-64GB",
+        "packages": {
+          "transformers": "5.17.0",
+          "peft": "0.21.1",
+          "bitsandbytes": "0.50.2",
+          "accelerate": "1.15.0"
+        }
+      },
+      "adapter_sha256_lines": [
+        "e802272491e5260babb754fd628ad73be504380b96bf8f956c197ea65a2d629e  /leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_42/adapter/adapter_config.json",
+        "4c82a3dc9a8c61a96a087fac2ed4a6eb7339aad30d992b660e0a610ffda7e529  /leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_42/adapter/adapter_model.safetensors"
+      ],
+      "outputs_sha256": "2570775732e718becc27e6e00092b2f2fe22d83384e24355a113195de6a01956",
+      "summary_sha256": "7c0ddd92ff8e7b5f292d36e74dfc5bd78ed20e5f6e19672ce88bfbb11fefce7a",
+      "base_answers_sha256": "bee48c133fcd559dd78f39f7f6dcd8137bbfa5f10abeb4e174a75fbcc682aebd",
+      "questions": 200,
+      "complete_pairs": 200,
+      "invalid_verdicts": 0
+    },
+    "1": {
+      "runtime": {
+        "python": "3.12.15 (main, Oct  3 2026, 01:03:07) [Clang 22.1.3 ]",
+        "executable": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code/.venv/bin/python",
+        "torch": "2.13.0+cu129",
+        "cuda": "12.9",
+        "gpu": "NVIDIA A100-SXM-64GB",
+        "packages": {
+          "transformers": "5.17.0",
+          "peft": "0.21.1",
+          "bitsandbytes": "0.50.2",
+          "accelerate": "1.15.0"
+        }
+      },
+      "adapter_sha256_lines": [
+        "1b276897690ece9407172f6f1819808bda2aa56db04827fc6ae4e349e5e5e0a0  /leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_1/adapter/adapter_config.json",
+        "ccce86c0de6c53c485e4b35de43e231aa0e3b231126829b38f1d1a19a4068ec0  /leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_1/adapter/adapter_model.safetensors"
+      ],
+      "outputs_sha256": "391db29c1fac208948cbb5d82d99d6f2466a499c9208d652daeccab5c6759ba9",
+      "summary_sha256": "fdc59df82844bf33778b771a684090226ee4b9b2dd2b2bb7b944ee0f9b3817e3",
+      "base_answers_sha256": "bee48c133fcd559dd78f39f7f6dcd8137bbfa5f10abeb4e174a75fbcc682aebd",
+      "questions": 200,
+      "complete_pairs": 200,
+      "invalid_verdicts": 0
+    },
+    "2": {
+      "runtime": {
+        "python": "3.12.15 (main, Oct  3 2026, 01:03:07) [Clang 22.1.3 ]",
+        "executable": "/leonardo_work/EUHPC_D30_031/runs/a08trc09/eval-v3-20261011/code/.venv/bin/python",
+        "torch": "2.13.0+cu129",
+        "cuda": "12.9",
+        "gpu": "NVIDIA A100-SXM-64GB",
+        "packages": {
+          "transformers": "5.17.0",
+          "peft": "0.21.1",
+          "bitsandbytes": "0.50.2",
+          "accelerate": "1.15.0"
+        }
+      },
+      "adapter_sha256_lines": [
+        "b479627fa4e94093fb4f09cef239f5ba3f0ac08d07d1d10b5861fca16514342f  /leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_2/adapter/adapter_config.json",
+        "ca85bf46d40e171e9e48300278a57f5c9061b01053b6e63c2f2c7f01caa9d6fb  /leonardo_work/EUHPC_D30_031/alembic/alembic/runs/b6_hpc10k/seed_2/adapter/adapter_model.safetensors"
+      ],
+      "outputs_sha256": "214500fd4283cf9553688412a9a1e8f2176817875e8af02d798e7ff96b01bbfe",
+      "summary_sha256": "5594abcdfb58c3131f89a6ef930c1886638c51305d7c9a1ae08933236fe483d2",
+      "base_answers_sha256": "bee48c133fcd559dd78f39f7f6dcd8137bbfa5f10abeb4e174a75fbcc682aebd",
+      "questions": 200,
+      "complete_pairs": 200,
+      "invalid_verdicts": 0
+    }
+  },
+  "aggregates": {
+    "v2": {
+      "student_win_rate_mean": 0.3686868686868687,
+      "student_win_rate_sample_sd": 0.037370324714517025,
+      "seeds": 3,
+      "spread_note": "Sample standard deviation across training seeds, not a confidence interval."
+    },
+    "v3": {
+      "student_win_rate_mean": 0.4266666666666667,
+      "student_win_rate_sample_sd": 0.010180659769058872,
+      "seeds": 3,
+      "spread_note": "Sample standard deviation across training seeds, not a confidence interval."
+    }
+  },
+  "identical_base_answers_across_seeds": true,
+  "limitations": [
+    "V2 and v3 measure different topic distributions; scores are not before/after model improvement.",
+    "Historical B6 source exposure makes v3 a development comparison, not a blind test.",
+    "Paired order scores count ties as one half. Questions, sources and seeds are correlated.",
+    "Deterministic checker pass rate is not Slurm execution or semantic correctness.",
+    "Raw answers and judge outputs are retained at the remote artifacts path and bound by hashes."
+  ]
+}

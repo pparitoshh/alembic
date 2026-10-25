@@ -12,6 +12,7 @@ The student's system prompt is *not* stored; `training_example` adds it, so it c
 without regenerating data.
 """
 
+import copy
 import json
 
 
@@ -31,10 +32,13 @@ def messages(row: dict) -> list[dict]:
 
 
 def final_answer(row: dict) -> str:
-    """Content of the last assistant turn: what checks and judges look at."""
-    for m in reversed(messages(row)):
-        if m["role"] == "assistant":
-            return m.get("content") or ""
+    """Terminal assistant answer, never a pre-call plan from an unfinished trace."""
+    transcript = messages(row)
+    if isinstance(transcript, list) and transcript and isinstance(transcript[-1], dict):
+        m = transcript[-1]
+        if m.get("role") == "assistant" and m.get("tool_calls") in (None, []):
+            content = m.get("content")
+            return content if isinstance(content, str) else ""
     return ""
 
 
@@ -48,9 +52,23 @@ def openai_tools(schemas: list[dict] | None) -> list[dict] | None:
 
 def training_example(row: dict, system_prompt: str) -> dict:
     """Conversational SFT example for TRL (loss on assistant turns only)."""
+    if any(m.get('origin') == 'runtime_guard' for m in messages(row)):
+        raise ValueError('runtime guard responses are application output, not teacher training targets')
+    if row.get('purpose') == 'diagnostic_only' or row.get('training_eligible') is False:
+        raise ValueError('diagnostic or explicitly ineligible records are not training examples')
     tools = openai_tools(row.get("tools"))
+    transcript = copy.deepcopy(messages(row))
+    for message in transcript:
+        for call in message.get("tool_calls") or []:
+            function = call.get("function", call)
+            arguments = function.get("arguments")
+            if isinstance(arguments, dict):
+                # Arrow unions nested argument fields across turns/rows and inserts
+                # nulls for other tools' fields. Store the OpenAI JSON-string form
+                # so training renders exactly the arguments the teacher authored.
+                function["arguments"] = json.dumps(arguments, ensure_ascii=False, allow_nan=False)
     return {
-        "messages": [{"role": "system", "content": system_prompt}, *messages(row)],
+        "messages": [{"role": "system", "content": system_prompt}, *transcript],
         # JSON string keeps the Arrow schema uniform across rows with different tools; TRL decodes it
         "tools": json.dumps(tools) if tools else None,
         "chat_template_kwargs": {"enable_thinking": False},  # Qwen3 hybrid; ignored by other templates

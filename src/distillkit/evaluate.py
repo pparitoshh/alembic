@@ -20,8 +20,11 @@ from .schemas import JudgeVerdict
 from .teacher import Teacher
 from .toolcheck import score_tool_item
 from .tools import SCHEMAS, set_valid_flags
+from .eval_tools_v2 import PROTOCOL as TOOL_PROTOCOL_V2, POLICY, system_prompt, answer_binding
 
-JUDGE_SYSTEM = "You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Reply only with JSON: {\"reasoning\": \"<short comparison>\", \"verdict\": \"A\" | \"B\" | \"T\"} (T = tie)."
+JUDGE_SYSTEM = 'You are a strict expert judge of answers about HPC clusters (Slurm, CUDA, MPI). Return exactly one JSON object: {"verdict":"A"}, {"verdict":"B"}, or {"verdict":"T"}. A means Answer A is better, B means Answer B is better, and T means a tie. Do not include an explanation or Markdown.'
+
+JUDGE_PROTOCOL = "paired-orders-v2-invalid-incomplete"
 
 JUDGE_PROMPT = """Question: {question}
 
@@ -33,7 +36,7 @@ Answer A:
 Answer B:
 {b}
 
-Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Reply with the JSON verdict."""
+Which answer is more correct and helpful given the reference? Penalise invented options/commands and wrong facts heavily; do not reward length. Return only the JSON verdict, with no explanation."""
 
 
 def generate_answers(cfg: Config, questions: list[str], tools: list[list[dict] | None] | None = None) -> dict[str, list[str]]:
@@ -68,7 +71,7 @@ def generate_answers(cfg: Config, questions: list[str], tools: list[list[dict] |
         return [o.strip() for o in outs]
 
     tools = tools or [None] * len(questions)
-    prompts = [render_prompt(tok, scfg.system_prompt, q, t) for q, t in zip(questions, tools)]
+    prompts = [render_prompt(tok, system_prompt(cfg, bool(t)), q, t) for q, t in zip(questions, tools)]
     results = {}
     if has_adapter:
         with model.disable_adapter():
@@ -83,15 +86,24 @@ def tool_summary(scores: list[dict], rows: list[dict]) -> dict:
     """Rates over the tool slice; validity/AST/execution only over items where a call was expected."""
     expected = [(s, r) for s, r in zip(scores, rows) if r["expect"] == "call"]
     called = [s for s, _ in expected if s["decision"] == "call"]
-    return {
+    v2 = bool(scores) and all(s.get("protocol") == TOOL_PROTOCOL_V2 for s in scores)
+    if any(s.get("protocol") == TOOL_PROTOCOL_V2 for s in scores) and not v2:
+        raise ValueError("cannot aggregate mixed tool scoring protocols")
+    result = {
         "tool_decision_acc": sum(s["decision_ok"] for s in scores) / len(scores),
-        "tool_false_call_rate": sum(s["decision"] == "call" for s, r in zip(scores, rows) if r["expect"] == "no_call") / max(1, sum(r["expect"] == "no_call" for r in rows)),
+        "tool_false_call_rate": sum(s["decision"] == "call" and (not v2 or not s.get("allowed_discovery", False)) for s, r in zip(scores, rows) if r["expect"] == "no_call") / max(1, sum(r["expect"] == "no_call" for r in rows)),
         "tool_valid_rate": sum(s["valid"] for s in called) / max(1, len(called)),
         "tool_ast_acc": sum(s.get("ast_ok", False) for s, _ in expected) / max(1, len(expected)),
         "tool_exec_ok_rate": sum(s["exec_ok"] for s in called) / max(1, len(called)),
         # over every item where the model called anything: no invented job ids
         "tool_grounded_rate": sum(s["grounded"] for s in scores if "grounded" in s) / max(1, sum("grounded" in s for s in scores)),
     }
+    if v2:
+        result.update(tool_protocol=TOOL_PROTOCOL_V2,
+                      tool_first_response_pass_rate=sum(s["first_response_pass"] for s in scores)/len(scores),
+                      tool_raw_call_rate=sum(s["decision"]=="call" for s in scores)/len(scores),
+                      tool_task_completion="not assessed", tool_response_quality="not assessed")
+    return result
 
 
 def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
@@ -102,7 +114,14 @@ def judge(teacher: Teacher, q: dict, a: str, b: str) -> tuple[str | None, str]:
 
 
 def _eval_rows(cfg: Config) -> tuple[list[dict], list[dict]]:
-    return read_jsonl(cfg.eval.file), read_jsonl(cfg.eval.tool_file) if cfg.eval.tool_file else []
+    normal = read_jsonl(cfg.eval.file)
+    tools = read_jsonl(cfg.eval.tool_file) if cfg.eval.tool_file else []
+    for row in tools:
+        if row.get("scoring_protocol", "tool-first-call-v1") != cfg.eval.tool_protocol:
+            raise ValueError("tool dataset/scorer protocol mismatch")
+        if cfg.eval.tool_protocol == TOOL_PROTOCOL_V2 and row.get("application_policy") != cfg.eval.tool_application_policy:
+            raise ValueError("tool item differs from the visible application policy")
+    return normal, tools
 
 
 def run_answers(cfg: Config) -> dict[str, list[str]]:
@@ -116,18 +135,19 @@ def run_answers(cfg: Config) -> dict[str, list[str]]:
     questions = [r["question"] for r in eval_rows + tool_rows]
     # tool questions are asked with the tool schemas in the prompt
     tools = [None] * len(eval_rows) + [SCHEMAS] * len(tool_rows)
-    cache = cfg.run_dir / "eval_answers.json"
+    cache = cfg.run_dir / ("eval_answers_v3.json" if cfg.eval.tool_protocol == TOOL_PROTOCOL_V2 else "eval_answers.json")
+    binding = answer_binding(cfg, questions, tools)
     adapter = cfg.run_dir / "adapter" / "adapter_model.safetensors"
     stamp = adapter.stat().st_mtime if adapter.exists() else None
     answers = None
     if cache.exists():
         c = json.loads(cache.read_text())
-        if c["questions"] == questions and c["adapter_mtime"] == stamp:
+        if c["questions"] == questions and c["adapter_mtime"] == stamp and (cfg.eval.tool_protocol != TOOL_PROTOCOL_V2 or c.get("answer_binding") == binding):
             print(f"[answer] reusing {cache}")
             answers = c["answers"]
     if answers is None:
         answers = generate_answers(cfg, questions, tools)  # one model load for both slices
-        cache.write_text(json.dumps({"questions": questions, "adapter_mtime": stamp, "answers": answers}, ensure_ascii=False))
+        cache.write_text(json.dumps({"questions": questions, "adapter_mtime": stamp, "answer_binding": binding, "answers": answers}, ensure_ascii=False))
         print(f"[answer] {len(questions)} questions x {len(answers)} models -> {cache}")
     for q in cfg.eval.gguf:
         answers[f"gguf_{q}"] = gguf_eval.answers(cfg, q, questions, tools)
@@ -145,20 +165,24 @@ def comparisons(models: list[str]) -> list[tuple[str, str]]:
     return pairs
 
 
-def win_rate(teacher: Teacher, per_q: list[dict], x: str, y: str) -> tuple[float, int]:
-    """Judge x vs y on every question in both orders; (x's win rate, unparsed verdicts).
-    Verdicts go to row["judge"]["<x>_vs_<y>"] as [x shown as A, x shown as B]."""
+def win_rate(teacher: Teacher, per_q: list[dict], x: str, y: str) -> tuple[float | None, int]:
+    """Both orders, equal question weights; any invalid verdict makes the aggregate incomplete.
+
+    Preserve invalids as None, distinct from genuine ties. No partial-subset headline score is
+    reported. Valid pairs retain the previous scoring: win=1, tie=0.5, loss=0 in each order.
+    Verdicts go to row["judge"]["<x>_vs_<y>"] as [x shown as A, x shown as B].
+    """
     pairs = [(row, a, b) for row in per_q for a, b in ((row[f"answer_{x}"], row[f"answer_{y}"]), (row[f"answer_{y}"], row[f"answer_{x}"]))]
     verdicts = teacher.map(lambda p: judge(teacher, *p), pairs)  # in parallel: [q0 x=A, q0 x=B, q1 ...]
     score, unparsed = 0.0, 0
     for i, row in enumerate(per_q):
         (v1, raw1), (v2, raw2) = verdicts[2 * i], verdicts[2 * i + 1]
         unparsed += (v1 is None) + (v2 is None)
-        v1, v2 = v1 or "T", v2 or "T"
-        score += ({"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]) / 2
+        if v1 is not None and v2 is not None:
+            score += ({"A": 1.0, "T": 0.5, "B": 0.0}[v1] + {"B": 1.0, "T": 0.5, "A": 0.0}[v2]) / 2
         row.setdefault("judge", {})[f"{x}_vs_{y}"] = [v1, v2]
         row.setdefault("judge_raw", {})[f"{x}_vs_{y}"] = [raw1, raw2]
-    return score / len(per_q), unparsed
+    return score / len(per_q) if per_q and not unparsed else None, unparsed
 
 
 def run(cfg: Config) -> dict:
@@ -196,11 +220,19 @@ def run(cfg: Config) -> dict:
     if pairs:
         teacher = Teacher(cfg.judge, name="judge")
         unparsed = 0
+        summary["judge_protocol"] = JUDGE_PROTOCOL
+        summary["judge_comparisons"] = {}
         for x, y in pairs:
             rate, bad = win_rate(teacher, per_q, x, y)
-            summary[f"{x}_vs_{y}_win_rate"] = rate
+            key = f"{x}_vs_{y}"
+            summary[f"{key}_win_rate"] = rate
+            summary["judge_comparisons"][key] = {
+                "status": "complete" if rate is not None else "incomplete",
+                "questions": len(per_q), "expected_verdicts": 2 * len(per_q), "invalid_verdicts": bad,
+                "complete_pairs": sum(all(v is not None for v in row["judge"][key]) for row in per_q),
+            }
             unparsed += bad
-        summary["judge_unparsed"] = unparsed  # counted as ties; should be 0
+        summary["judge_unparsed"] = unparsed
         summary["judge"] = cfg.judge.model
 
     suffix = f"_{cfg.eval.tag}" if cfg.eval.tag else ""
