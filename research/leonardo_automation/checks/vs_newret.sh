@@ -13,7 +13,7 @@ until grep -q ' DONE: \| STOP: ' $S/ctl/$RD/controller.log 2>/dev/null; do sleep
 grep -q ' STOP: ' $S/ctl/$RD/controller.log && { log "STOP: $RD stopped"; exit 1; }
 cd $C; A=runs/$OUT/answers; mkdir -p $A
 # The current Hugging Face release is named in ctl/RELEASE ("<answers dir> <arm>"; Oct 22: round 20 = op235 s44 x0.5).
-RA=runs/exp30/answers; RARM=s42_rag; BA=runs/vs_release_exp30/answers
+RA=${REL_ANSWERS:-runs/exp30/answers}; RARM=${REL_ARM:-s42_rag}; BA=runs/vs_release_exp30/answers  # REL_ANSWERS/REL_ARM (opt-in): another reference, e.g. runs/tok1536/answers base_rag
 cp -n $BA/*__base_closed.jsonl $BA/*__base_rag.jsonl $A/
 for f in $RA/*__${RARM}.jsonl; do b=$(basename $f); cp -n $f $A/${b/__${RARM}/__rel_rag}; done
 for f in $S/code/runs/$RD/answers/*__s4?_rag.jsonl $S/code/runs/$RD/answers/*__s4?_x05_rag.jsonl; do [ -s $f ] && cp -n $f $A/; done

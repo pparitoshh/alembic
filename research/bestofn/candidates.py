@@ -41,7 +41,9 @@ cfg = load_config('configs/rag65_seed42.json')
 cfg.teacher.model, cfg.teacher.base_url = served, endpoint
 # 192 requests in flight: the sampled candidates of a row run in parallel, not one after another. Loading the
 # model takes about half of each 30-minute job, so the remaining minutes must be fully used.
-cfg.teacher.temperature, cfg.teacher.top_logprobs, cfg.teacher.concurrency, cfg.teacher.max_tokens = 0.7, 0, 192, 760
+# CAND_MAX_TOKENS (opt-in, Oct 25): answers that do not finish within the limit are dropped; 760 dropped 46% of round 27's
+# answers to round 47's questions, so round 47 uses 1536 (the evaluation answer limit since Oct 24). Unset = 760.
+cfg.teacher.temperature, cfg.teacher.top_logprobs, cfg.teacher.concurrency, cfg.teacher.max_tokens = 0.7, 0, 192, int(os.environ.get('CAND_MAX_TOKENS') or 760)
 cfg.teacher.extra_body = {'chat_template_kwargs': {'enable_thinking': False}}
 client = Teacher(cfg.teacher)
 rows = []

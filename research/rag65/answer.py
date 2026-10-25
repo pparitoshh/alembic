@@ -49,7 +49,9 @@ for label, path in [('v2', 'data/eval/eval_all_v2.jsonl'), ('v3', 'data/eval/eva
         continue
     for name, served in models.items():
         cfg.teacher.model, cfg.teacher.base_url = served, endpoint
-        cfg.teacher.temperature, cfg.teacher.max_tokens, cfg.teacher.top_logprobs = 0, cfg.eval.max_new_tokens, 0
+        # ANSWER_MAX_TOKENS (opt-in, Oct 24): answer length limit instead of eval.max_new_tokens (768), which cut 42% of
+        # round 27's answers mid-sentence. Unset = unchanged.
+        cfg.teacher.temperature, cfg.teacher.max_tokens, cfg.teacher.top_logprobs = 0, int(os.environ.get('ANSWER_MAX_TOKENS') or cfg.eval.max_new_tokens), 0
         cfg.teacher.extra_body = {'chat_template_kwargs': {'enable_thinking': False}}
         client = Teacher(cfg.teacher)
         for variant in os.environ.get('ANSWER_MODES', 'closed,rag').split(','):  # split across nodes when set
