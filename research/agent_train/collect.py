@@ -11,6 +11,7 @@ other failures, job names, partitions, sizes and multi-step flows, plus families
 usage: collect.py OUT_DIR ACCOUNT CPU_PARTITION INDEX_DIR ENDPOINT SERVED_MODEL N_TASKS SEED [CONCURRENCY]
 """
 import json
+import os
 import random
 import re
 import sys
@@ -270,12 +271,13 @@ TEACHER_HINT = ("\n\nWhen you have tools, use them to get facts before you answe
                 "get its script with job_script first, then submit the corrected script; to cancel a job given by name, "
                 "list the queue first to find its id; for a job array use --array=FIRST-LAST%MAX and "
                 "$SLURM_ARRAY_TASK_ID; after submitting, report the job id.")
+ONLY = [f for f in os.environ.get("FAMILIES", "").split(",") if f]  # e.g. FAMILIES=debug,fix_if_failed
 SUBMITS = {"submit", "retrigger", "cancel_id", "cancel_name", "array", "dependency", "fix_if_failed", "status"}
 
 
 def run_one(i, fx):
     with lock:
-        fam = rng.choice(FAMS)
+        fam = rng.choice(ONLY or FAMS)
     if fam in SUBMITS:
         with slot():
             return attempt(i, fx, fam)
@@ -287,7 +289,9 @@ def attempt(i, fx, fam):
         fam, q, chk = task(fx, fam)
     rec = Recorder()
     bot = Assistant(INDEX, model=SERVED, openai=ENDPOINT, slurm=rec)
-    bot.extra_body = {"chat_template_kwargs": {"enable_thinking": False}}
+    # THINK=1: the teacher reasons first (Qwen3-32B with thinking passed the debug task; without it, it answers from
+    # job_status alone); build_agent_data.py removes the <think> text, so the student learns the actions
+    bot.extra_body = {"chat_template_kwargs": {"enable_thinking": os.environ.get("THINK") == "1"}}
     system = bot.history[0]["content"]
     bot.history[0]["content"] = system + TEACHER_HINT  # teacher only: training uses the plain system prompt
     try:
