@@ -1,10 +1,13 @@
 # Slurm sandbox model evaluation
 
 Goal: measure how well the distilled student
-(`hf.co/VaibhavKKM/hpc-assistant-qwen3-4b`) answers real Slurm tasks, and
-compare it against the old student (`hpc-assistant-x02`). Every answer is
-executed unchanged in a real Slurm 23.11 container, so the verdicts come from
-Slurm itself, not from a human reading text.
+(`hf.co/VaibhavKKM/hpc-assistant-qwen3-4b`, called NEW) answers real Slurm
+tasks, and compare it against the old student (`hpc-assistant-x02`, called
+OLD). Every answer is executed unchanged in a real Slurm 23.11 container, so
+the verdicts come from Slurm itself, not from a human reading text. The
+round-1 smoke test of the two models is in
+`results/2026-10-25/round1_smoke.md`; the 10-prompt round 2 for NEW is in
+`results/2026-10-25/results.md`.
 
 ## Method
 
