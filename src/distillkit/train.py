@@ -7,11 +7,21 @@ Multi-GPU: launch with `accelerate launch --config_file configs/accelerate/fsdp.
 
 import hashlib
 import json
+import os
 import random
 import shutil
 from pathlib import Path
 
 from .config import Config
+
+
+# Mentor recommendations (issue #37), opt-in through the environment (config.py is bound to the frozen evaluation
+# release): EVAL_STEPS = validate every N optimizer steps (default: at every save_steps, or 100); VAL_MAX_EXAMPLES =
+# validate on at most N examples, a fixed document-split subset (default: all); USE_LIGER_KERNEL=1 = Liger kernels
+# (pip install liger-kernel; about -7% step time on an A100 in the mentor's measurement).
+EVAL_STEPS = int(os.environ.get("EVAL_STEPS") or 0) or None
+VAL_MAX_EXAMPLES = int(os.environ.get("VAL_MAX_EXAMPLES") or 0) or None
+USE_LIGER = os.environ.get("USE_LIGER_KERNEL") == "1"
 
 
 def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> list[dict]:
@@ -130,10 +140,16 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
 
     scfg, tcfg, run_dir = cfg.student, cfg.train, cfg.run_dir
     out_dir = run_dir / "adapter"
+    if USE_LIGER:
+        import importlib.util
+        if importlib.util.find_spec("liger_kernel") is None:
+            raise SystemExit("USE_LIGER_KERNEL=1 but liger-kernel is not installed: pip install liger-kernel")
 
     tok = AutoTokenizer.from_pretrained(scfg.model)
     examples = [training_example(r, scfg.system_prompt) for r in rows]
     train_ex, val_ex = split_by_document(rows, examples, tcfg.val_fraction, tcfg.seed)
+    if VAL_MAX_EXAMPLES:
+        val_ex = val_ex[:VAL_MAX_EXAMPLES]  # the split is deterministic, so this subset is fixed
     ds = Dataset.from_list(train_ex)
     val_ds = Dataset.from_list(val_ex) if val_ex else None
     print(f"[train] {len(ds)} examples (+{len(val_ex)} validation), student={scfg.model}, method={tcfg.method}, 4bit={tcfg.load_in_4bit}")
@@ -175,7 +191,8 @@ def run(cfg: Config, *, before_train=None, callbacks=()) -> Path:
         save_steps=tcfg.save_steps or 500,
         save_total_limit=tcfg.save_total_limit,
         eval_strategy="steps" if val_ds is not None else "no",
-        eval_steps=tcfg.save_steps or 100,
+        eval_steps=EVAL_STEPS or tcfg.save_steps or 100,
+        use_liger_kernel=USE_LIGER,
         per_device_eval_batch_size=tcfg.batch_size,
         seed=tcfg.seed,
         report_to=tcfg.report_to or "none",
