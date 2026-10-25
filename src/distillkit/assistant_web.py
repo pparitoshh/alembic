@@ -148,7 +148,7 @@ PAGE = r'''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HPC Assistant</title>
+<title>ClusterPilot</title>
 <style>
 :root { --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #e3e2dc; --accent: #2457c5;
         --accent-soft: #e8eefb; --code: #f1f0ec; --user: #eef1f6; --on-accent: #ffffff; }
@@ -199,7 +199,7 @@ button:disabled { opacity: .5; cursor: default; }
 <body>
 <div class="app">
   <header>
-    <h1>HPC Assistant</h1>
+    <h1>ClusterPilot</h1>
     <span class="meta" id="meta">Runs locally</span>
   </header>
   <section class="docs">

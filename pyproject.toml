@@ -37,6 +37,7 @@ export = [
 [project.scripts]
 distillkit = "distillkit.cli:main"
 hpc-assistant = "distillkit.assistant:main"
+clusterpilot = "distillkit.assistant:main"  # the assistant's name since Oct 25; hpc-assistant kept for existing docs
 
 [build-system]
 requires = ["hatchling"]
