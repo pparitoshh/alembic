@@ -1,4 +1,4 @@
-"""`hpc-assistant`: the end-user assistant, retrieval built in. Standard library only.
+"""`clusterpilot` (also `hpc-assistant`): the end-user assistant, retrieval built in. Standard library only.
 
 The user runs one command; the bundled documentation index is searched automatically and the matching
 excerpts go into the prompt in exactly the format the student was trained and evaluated with (RAFT, the
@@ -52,6 +52,9 @@ import subprocess
 import sys
 import urllib.request
 from pathlib import Path
+
+from distillkit.slurm_live import SlurmLive, describe, openai_tools
+from distillkit.tools import ToolError
 
 # Same text as the training configs' student.system_prompt.
 SYSTEM_PROMPT = ("You are an HPC assistant. Use supplied source excerpts for site-specific facts and tool results "
@@ -337,7 +340,7 @@ SEARCH_TOOL = {'type': 'function', 'function': {
 
 class Assistant:
     def __init__(self, index_dir=DEFAULT_INDEX, docs=True, k=3, model='hpc-assistant', openai=None,
-                 ollama='http://localhost:11434', tools=False, retriever='e', general_index=None):
+                 ollama='http://localhost:11434', tools=False, retriever='e', general_index=None, slurm=None):
         if retriever not in ('e', 'b', 'd', 'classic'):
             raise ValueError("retriever must be 'e', 'b', 'd' or 'classic'")
         index_dir = Path(index_dir)
@@ -350,6 +353,8 @@ class Assistant:
         self.builtin = self.pilot.exists() and self.factory.exists()
         self.docs = docs
         self.k, self.model, self.openai, self.ollama, self.tools = k, model, openai, ollama, tools
+        self.slurm = slurm  # agent mode: a slurm_live.SlurmLive whose tools the model can call
+        self.extra_body = {}  # merged into OpenAI-compatible requests, e.g. {'chat_template_kwargs': {'enable_thinking': False}}
         self.retriever = retriever  # 'e' (default): b + relevance header; 'b': improved; 'd': b + general index; 'classic': the original 3
         self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         self.titles = {}  # source url -> page title, for the Sources list
@@ -417,10 +422,11 @@ class Assistant:
     # --- model ---------------------------------------------------------------------------------
     def _stream(self, messages):
         """Yields text pieces, then a final {'tool_calls': [...]} dict when the model called tools."""
-        tools = [SEARCH_TOOL] if self.tools and self.docs else None
+        tools = ([SEARCH_TOOL] if (self.tools or self.slurm) and self.docs else []) + (openai_tools() if self.slurm else [])
+        tools = tools or None
         if self.openai:
             url = self.openai.rstrip('/') + '/chat/completions'
-            body = {'model': self.model, 'messages': messages, 'stream': True, 'temperature': 0}
+            body = {'model': self.model, 'messages': messages, 'stream': True, 'temperature': 0, **self.extra_body}
         else:
             url = self.ollama.rstrip('/') + '/api/chat'
             # The improved retriever's prompts are ~6K tokens per question, so a chat with history outgrows the
@@ -440,6 +446,7 @@ class Assistant:
                     delta = json.loads(line[5:])['choices'][0]['delta']
                     for tc in delta.get('tool_calls') or []:  # streamed in fragments, keyed by index
                         c = calls.setdefault(tc.get('index', 0), {'name': '', 'arguments': ''})
+                        c['id'] = c.get('id') or tc.get('id')
                         c['name'] += (tc.get('function') or {}).get('name') or ''
                         c['arguments'] += (tc.get('function') or {}).get('arguments') or ''
                     yield delta.get('content') or ''
@@ -451,7 +458,8 @@ class Assistant:
         if calls:
             yield {'tool_calls': [calls[i] for i in sorted(calls)]}
 
-    def ask(self, question, out=sys.stdout, max_tool_rounds=3):
+    def ask(self, question, out=sys.stdout, max_tool_rounds=None):
+        max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
         user, sources = self.prompt(question)
         self.history.append({'role': 'user', 'content': user})
         for _ in range(max_tool_rounds + 1):
@@ -465,14 +473,33 @@ class Assistant:
                 out.flush()
             if not calls:
                 break
+            for i, c in enumerate(calls):  # OpenAI-compatible servers (vLLM) require ids linking calls and results
+                c['id'] = c.get('id') or f'call_{len(self.history)}_{i}'
             self.history.append({'role': 'assistant', 'content': ''.join(answer), 'tool_calls': [
-                {'type': 'function', 'function': {'name': c['name'], 'arguments': c['arguments']}} for c in calls]})
+                {'id': c['id'], 'type': 'function', 'function': {
+                    'name': c['name'],
+                    # OpenAI wants the arguments as a JSON string, Ollama as an object
+                    'arguments': (c['arguments'] if isinstance(c['arguments'], str) else json.dumps(c['arguments']))
+                    if self.openai else (json.loads(c['arguments'] or '{}') if isinstance(c['arguments'], str) else c['arguments'])}}
+                for c in calls]})
             for c in calls:
-                args = c['arguments'] if isinstance(c['arguments'], dict) else json.loads(c['arguments'] or '{}')
+                if c['name'] != 'search_docs' and self.slurm:
+                    out.write(f"\n[{c['name']} {c['arguments'] if isinstance(c['arguments'], str) else json.dumps(c['arguments'])}]\n")
+                    try:
+                        result = self.slurm.execute(c['name'], c['arguments'])
+                    except ToolError as e:
+                        result = {'error': str(e)}
+                    self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
+                    continue
+                try:
+                    args = c['arguments'] if isinstance(c['arguments'], dict) else json.loads(c['arguments'] or '{}')
+                except json.JSONDecodeError:
+                    args = {}
                 docs = self.search(args.get('query', '')) if c['name'] == 'search_docs' else []
                 sources += [d['url'] for d in docs]
                 out.write(f"\n[searched: {args.get('query', '')}]\n")
-                self.history.append({'role': 'tool', 'content': with_context('Results:', docs) if docs else 'No results.'})
+                self.history.append({'role': 'tool', 'tool_call_id': c['id'],
+                                     'content': with_context('Results:', docs) if docs else 'No results.'})
         self.history.append({'role': 'assistant', 'content': ''.join(answer)})
         if sources:
             out.write('\n\nSources:\n' + '\n'.join('- ' + u + (f' ({self.titles[u]})' if self.titles.get(u) else '')
@@ -521,7 +548,8 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog='hpc-assistant', description='Local HPC assistant with built-in documentation search.')
+    ap = argparse.ArgumentParser(prog=Path(sys.argv[0]).name if Path(sys.argv[0]).name in ('clusterpilot', 'hpc-assistant') else 'clusterpilot',
+                                 description='ClusterPilot: local HPC assistant with built-in documentation search and an agent mode for your Slurm jobs.')
     ap.add_argument('question', nargs='*')
     ap.add_argument('--no-docs', action='store_true', help='answer closed-book, without the documentation index')
     ap.add_argument('--index', default=DEFAULT_INDEX, help='directory with documents.sqlite and factory_docs.sqlite')
@@ -542,13 +570,28 @@ def main(argv=None):
     ap.add_argument('--setup', action='store_true', help='one-time install of the model (and docs index), then exit')
     ap.add_argument('--web', action='store_true', help='open the upload-and-chat page on http://127.0.0.1:PORT')
     ap.add_argument('--port', type=int, default=8765)
+    ap.add_argument('--agent', action='store_true',
+                    help='agent mode: the model can check, submit, cancel and debug your Slurm jobs with the real '
+                         'squeue/sacct/sbatch/scancel/sinfo/scontrol (the tool schemas of the tool-calling release)')
+    ap.add_argument('--ssh', metavar='HOST', help='agent mode: run the Slurm commands on this login node over ssh')
+    ap.add_argument('--yes', action='store_true', help='agent mode: submit and cancel without asking for confirmation')
+    ap.add_argument('--jobs-dir', default='~/.hpc-agent/jobs', help='agent mode: where submitted scripts are written')
     args = ap.parse_args(argv)
     if args.setup:
         setup(Path(args.index), args.model)
         return
+    slurm = None
+    if args.agent:
+        def confirm(name, call):
+            if args.yes:
+                return True
+            if not sys.stdin.isatty():
+                return False
+            return input(f'\n[hpc-assistant] {describe(name, call)}\nProceed? [y/N] ').strip().lower() in ('y', 'yes')
+        slurm = SlurmLive(ssh=args.ssh, workdir=args.jobs_dir, confirm=confirm)
     bot = Assistant(args.index, docs=not args.no_docs, k=args.k, model=args.model, openai=args.openai,
                     tools=args.tools, retriever=args.retriever,
-                    general_index=args.general_index)
+                    general_index=args.general_index, slurm=slurm)
     for f in args.add:
         print(f'[hpc-assistant] indexed {f}: {bot.add(f)} excerpts', file=sys.stderr)
     if not args.no_docs and not bot.builtin:
