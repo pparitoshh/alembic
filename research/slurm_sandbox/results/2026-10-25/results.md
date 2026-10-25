@@ -1,6 +1,6 @@
 # Slurm eval: hf.co/VaibhavKKM/hpc-assistant-qwen3-4b:latest
 
-Date: 2026-10-25. Cluster: container `slurm-test` (ubuntu:24.04, slurm-wlm 23.11.4), user `ubuntu`, node `slurmnode` (12 CPUs, 32000 MB, gpu:4), partitions `gpu` + `boost_usr_prod`, accounting via slurmdbd. Prompts and expected answers were written before the model calls (see `prompts.txt`, `expected.md`). The model answers are in `results.json` and `results.md`. Execution logs: `out_batch1.txt`, `out_batch2.txt`, `out_batch3.txt`.
+Date: 2026-10-25. Cluster: container `slurm-test` (ubuntu:24.04, slurm-wlm 23.11.4), user `ubuntu`, node `slurmnode` (12 CPUs, 32000 MB, gpu:4), partitions `gpu` + `boost_usr_prod`, accounting via slurmdbd. Prompts and expected answers were written before the model calls (see `prompts.txt`, `expected.md`). The model answers are in `results.json` and `results.md`. The real command output for each prompt is in `results.json` and `results.md`.
 
 ## Score
 
