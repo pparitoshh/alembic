@@ -15,7 +15,7 @@ These controllers run unattended on the Leonardo login node. They chain data gen
 
 Every stage resumes from files. Factory controllers keep in-flight job ids in `inflight/` and forget a job only when sacct reports a final state. Round controllers adopt a running job instead of submitting a duplicate.
 
-## Checks and experiments (`checks/`, Oct 20–24)
+## Checks and experiments (`checks/`, Oct 20–25)
 
 Single-file controllers that live directly in `$R/ctl/` on the server. Each one judges, confirms or prepares one result
 and logs to `ctl/<name>.log`.
@@ -28,3 +28,5 @@ and logs to `ctl/<name>.log`.
 | Soups | `soup32.sh`, `soup32old.sh`, `soup38.sh`, `soup42.sh`, `soup43.sh` | Uniform weight soups of seed adapters merged into round 27 or 20, answered for the gates |
 | Laptop files | `gguf_soup27_eval.sh`, `gguf_q56_eval.sh`, `gguf_s17_eval.sh`, `release43.sh` | GGUF quantization checks (Q4_K_M to Q8_0, 1.7B vs 4B) and release preparation |
 | GOAL.md studies | `vs_ablation.sh`, `rs37_score.sh`, `ragc.sh` | Filtering and curriculum ablations, teacher scoring for round 37, retriever variant c |
+| Oct 25 | `lb1536.sh`, `lb1536_add.sh`, `lb1536e.sh` | Leaderboard with an equal 1,536-token answer budget (768 cut 42% of round 27's answers), adding one model to it, and the same with retriever variant e for every model |
+| Oct 25 | `r47.sh`, `r47_split.sh`, `r27e.sh`, `auto_next.sh` | Round 47 (on-policy distillation on unrelated excerpts; `RD=` reuses it), splitting its teacher scoring over two jobs, the variant e test, and the decision chain after round 47 (confirmation and leaderboard or the next round; coverage and a targeted batch for thin topics) |
