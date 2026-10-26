@@ -1,0 +1,1576 @@
+{
+ "gpt-oss-20b": {
+  "n": 30,
+  "correct": 14,
+  "partly": 1,
+  "strict": 0.467,
+  "lenient": 0.483,
+  "wilson95": [
+   0.302,
+   0.639
+  ],
+  "slurm_accepted": 18,
+  "rows": [
+   {
+    "id": 1,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "6/6",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368503 to start at 2026-10-30T11:18:19 a using 8 processors on nodes login08 in partition lrd_all_serial",
+    "answer": "```bash\n#!/bin/bash\n#SBATCH --job-name=myjob\n#SBATCH --nodes=1\n#SBATCH --ntasks=8\n#SBATCH --mem=16G\n#SBATCH --time=02:00:00\n#SBATCH --output=myjob-%j.out\n```\n"
+   },
+   {
+    "id": 2,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368505 to start at 2026-10-30T11:18:19 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "I\u2019m ready to give you the exact `#SBATCH` line, but I need to know which HPC cluster you\u2019re submitting to (e.g., `clusterA`, `clusterB`, etc.) so I can use the correct syntax and any cluster\u2011specific options. Could you let me know the cluster name?"
+   },
+   {
+    "id": 3,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368508 to start at 2026-10-30T11:18:19 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty!",
+    "answer": "I\u2019m ready to give you the exact `sbatch` command, but I need to know which HPC cluster you\u2019re using (e.g., `clusterA`, `clusterB`, etc.) because the command syntax is the same, but the cluster name is required for the submission.  \n\nOnce you let me know the cluster, you can submit `B.sh` so that it starts only after job\u202f42 has finished successfully with:\n\n```bash\nsbatch --dependency=afterok:42 B.sh\n```\n\nJust replace `clusterA` with your actual cluster name if you need to specify it in a login or submission script. Let me know the cluster name, and I\u2019ll confirm the final command for you."
+   },
+   {
+    "id": 4,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368511 to start at 2026-10-30T11:18:20 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "I\u2019m not sure which HPC system you\u2019re working on, so could you let me know the cluster name (e.g., `clusterA`, `clusterB`, etc.)?  \nOnce I know that, I can confirm any cluster\u2011specific defaults or restrictions, and I\u2019ll also ask if you need any other job\u2011submission details (partition, time limit, etc.).\n\nIn the meantime, the two SLURM directives that will email you at job completion or failure are:\n\n```bash\n#SBATCH --mail-type=END,FAIL\n#SBATCH --mail-user=me@example.com\n```\n\nThese are standard across most SLURM installations. If your cluster has any custom mail settings or requires additional options, let me know!"
+   },
+   {
+    "id": 5,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368514 to start at 2026-10-30T11:18:22 a using ",
+    "answer": "I\u2019m ready to give you the exact `srun` command, but I need to know which cluster you\u2019re working on (and, if applicable, the partition or node type you want to use). Once you let me know, I can provide the precise command for running `hostname` on 4 tasks."
+   },
+   {
+    "id": 6,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "JobID             State    Elapsed \n------------ ---------- ---------- \n62368497_[1+    PENDING   00:00:00",
+    "answer": "I\u2019m ready to give you the exact command, but I need to know which cluster you\u2019re working on so I can reference the correct environment and any cluster\u2011specific defaults.\n\nOnce you let me know the cluster name, you can run the following command to display the elapsed time and state for job\u202f99:\n\n```bash\nsacct -j 99 --format=JobID,State,Elapsed\n```\n\nThis will list the job ID, its current state (e.g., RUNNING, COMPLETED, FAILED), and the elapsed wall\u2011clock time. If you need any additional fields or a different format, just let me know!"
+   },
+   {
+    "id": 7,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "I\u2019m not sure which HPC cluster you\u2019re working on.  \nCould you let me know the cluster name (or the environment you\u2019re connected to) so I can give you the exact command for that system?"
+   },
+   {
+    "id": 8,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/4",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": ""
+   },
+   {
+    "id": 9,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "67968 lrd_all_v o416_dri mdurso00 PD       0:00      1 (BeginTime)\n          62362882 lrd_all_v std_tart mdurso00 PD     | scontrol:",
+    "answer": "I need a couple of details before I can give you the exact commands:\n\n1. **Cluster name** \u2013 Which Slurm cluster are you working on?  \n2. **Job ID confirmation** \u2013 Is `55` the exact job ID (as shown by `squeue`), or is it a job name/array index?  \n3. **User context** \u2013 Are you running these commands as the job owner, or do you have `sudo`/`root` access to the controller?\n\nOnce I have that information, I can provide the precise `scontrol` commands for your environment."
+   },
+   {
+    "id": 10,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no script block",
+    "answer": "I\u2019m not sure which HPC system you\u2019re targeting.  \nCould you let me know the **cluster name** (and, if you\u2019d like, the partition or any other job\u2011submission details you normally use)? Once I have that, I can give you a ready\u2011to\u2011run Slurm batch script that loads the Python module and runs `python -c 'print(42)'` via `srun`."
+   },
+   {
+    "id": 11,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368516 to start at 2026-10-30T11:18:23 a using ",
+    "answer": "The array index is stored in the **`SLURM_ARRAY_TASK_ID`** environment variable.  \nTo run your script with that index as the sole argument, use:\n\n```bash\nsrun ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\n---\n\n**Next steps**\n\nTo tailor the script to your environment, could you let me know:\n\n1. The name of the cluster you\u2019re submitting to.  \n2. Any specific partition, job name, or resource requirements you need to include in the job script.  \n\nWith that information I can provide a complete, ready\u2011to\u2011submit job array script."
+   },
+   {
+    "id": 12,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": ""
+   },
+   {
+    "id": 13,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368517 to start at 2026-10-30T09:18:25 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "The Slurm directive you need is:\n\n```bash\n#SBATCH --signal=USR1@120\n```\n\nThis tells Slurm to send `SIGUSR1` to the batch script 120\u202fseconds before the job\u2019s time limit expires.\n\nWhich cluster are you submitting this to? Knowing the cluster can help confirm any cluster\u2011specific defaults or restrictions that might affect this directive."
+   },
+   {
+    "id": 14,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "I need to know which HPC cluster you\u2019re working on (e.g., a SLURM\u2011based system, PBS/Torque, LSF, etc.) because the exact command syntax can differ. Once you let me know the cluster and its scheduler, I can give you the precise command to requeue job\u202f77 and keep it held until you release it."
+   },
+   {
+    "id": 15,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368519 to start at 2026-10-30T09:18:25 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty!",
+    "answer": "**Cluster name?**  \nTo give you the exact command I need to know which HPC cluster you\u2019re using (different clusters may have slightly different `sbatch` options or environment modules).  \n\n**Missing details to confirm**  \n- Do you want to set a job name or any other options (e.g., output file, time limit, partition)?  \n- Is `post.sh` already in your current working directory, or do you need to provide a full path?  \n\nOnce I have that information, you can submit `post.sh` to run **after job\u202f500 finishes, regardless of its exit status**, with a command like this:\n\n```bash\nsbatch --dependency=after:500 post.sh\n```\n\nIf you\u2019d like to add a job name or other options, just let me know and I\u2019ll adjust the command accordingly."
+   },
+   {
+    "id": 16,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368520 to start at 2026-10-30T09:18:26 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To make sure that only one job with the name **nightly** runs at a time (any later submissions will wait until the earlier one finishes), add the following directives to your batch script:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=singleton\n```\n\n- `--job-name=nightly` sets the job\u2019s name.\n- `--dependency=singleton` tells SLURM to allow only one job with that name to run concurrently; subsequent jobs with the same name will be queued until the running one completes."
+   },
+   {
+    "id": 17,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "I\u2019m not sure which HPC system you\u2019re targeting, so could you let me know the cluster name (and any specific partition or time limit you\u2019d like to use)?  \n\nIn the meantime, here\u2019s a minimal set of `#SBATCH` directives that will request **1 node, 4 GPUs, and 4 tasks** (one GPU per task) on a generic Slurm cluster:\n\n```bash\n#SBATCH --nodes=1          # Request a single node\n#SBATCH --ntasks=4         # Run 4 parallel tasks\n#SBATCH --gres=gpu:4       # Allocate 4 GPUs (one per task)\n```\n\nIf you need to specify a particular partition, wall\u2011time, job name, or any other options, just let me know and I can adjust the script accordingly."
+   },
+   {
+    "id": 18,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Requested time limit is invalid (missing or exceeds some limit)",
+    "answer": "**Cluster**: Which HPC cluster are you submitting to?  \n(If you\u2019re using a specific scheduler or have a custom time\u2011format requirement, let me know.)\n\n**SBATCH directive for a 1\u2011day, 6\u2011hour wall\u2011clock limit**\n\n```bash\n#SBATCH --time=1-06:00:00\n```\n\n*Explanation*:  \n- `1-` = 1 day  \n- `06:` = 6 hours  \n- `00:00` = 0 minutes, 0 seconds  \n\nAdd this line to the top of your job script (after the shebang) to set the requested time limit."
+   },
+   {
+    "id": 19,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368521 to start at 2026-10-30T09:18:27 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "The SLURM directive that requests 4\u202fGB of memory per allocated CPU is:\n\n```bash\n#SBATCH --mem-per-cpu=4G\n```\n\nThis flag is standard on most SLURM installations.  \nIf your cluster uses a different syntax or has a specific memory unit convention, let me know the cluster name and any relevant defaults so I can adjust the line accordingly."
+   },
+   {
+    "id": 20,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368522 to start at 2026-10-30T13:18:25 a using 128 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "Which cluster are you submitting to? (The exact syntax can vary slightly between sites.)\n\nOnce I know the cluster, I can confirm the exact flag that is supported. In most SLURM installations, the line that requests exclusive access to whole nodes is:\n\n```bash\n#SBATCH --exclusive\n```\n\nThis flag tells SLURM to allocate entire nodes to your job, preventing other jobs from sharing those nodes."
+   },
+   {
+    "id": 21,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "       0:00      4 (QOSMaxJobsPerUserLimit)\n          62367862 boost_usr dk-rag65 a08trc09 PD       0:00      4 (QOSMaxJ",
+    "answer": "I\u2019m not sure which HPC system you\u2019re working on.  \nCould you let me know the **cluster name** (or the login node you\u2019re using) so I can tailor the command to that environment?\n\nIn most Slurm installations you can list only your own pending jobs with:\n\n```bash\nsqueue -u $USER -t PD\n```\n\n- `-u $USER` limits the output to jobs owned by your account.  \n- `-t PD` filters for jobs whose state is *Pending* (you can also use `-t PENDING`).\n\nIf your cluster uses a different default partition or has a custom job state abbreviation, let me know and I\u2019ll adjust the command accordingly."
+   },
+   {
+    "id": 22,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "I need a bit more information to give you the exact command:\n\n1. **Which HPC cluster are you working on?**  \n2. **What job scheduler does that cluster use?** (e.g., SLURM, PBS/Torque, LSF, etc.)\n\nOnce I know the cluster and its scheduler, I can provide the precise command to cancel all jobs whose name contains \u201csweep.\u201d"
+   },
+   {
+    "id": 23,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "I\u2019m not sure which HPC system you\u2019re working on.  \nCould you let me know:\n\n1. The name of the cluster you\u2019re using.  \n2. The workload manager it runs (e.g., SLURM, PBS/Torque, LSF, etc.).\n\nOnce I have that information I can give you the exact command to change the time limit of job\u202f88 to 3\u202fhours."
+   },
+   {
+    "id": 24,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "I can give you a ready\u2011to\u2011run `sacct` command, but I\u2019ll need a couple of details first:\n\n1. **Cluster name** \u2013 the hostname or login node you\u2019re connecting to (e.g., `hpc01`, `clusterA`, etc.).  \n2. **Your username** \u2013 the account name that owns the jobs you want to query.  \n3. (Optional) **Output format** \u2013 if you only want job IDs, names, or a full table.\n\nOnce I have those, I can tailor the command exactly to your environment. In the meantime, here\u2019s a generic template you can adapt:\n\n```bash\n# Replace <username> with your actual login name\n# Replace <cluster> with the hostname or login node you use\n\n# Example: sacct command to list all jobs that finished in FAILED state\n# since midnight today on the specified cluster.\n\n# Connect to the cluster (if needed)\n# ssh <cluster>\n\n# Run sacct\nsacct -u <username> \\\n      -S $(date +%Y-%m-%dT00:00:00) \\\n      -s FAILED \\\n      --format=JobID,JobName,Partition,State,ExitCode,Start,End\n```\n\n**Explanation of the flags used**\n\n| Flag | Purpose |\n|------|---------|\n| `-u <username>` | Filter jobs belonging to the specified user. |\n| `-S <start_time>` | Show jobs that started **on or after** the given time. `$(date +%Y-%m-%dT00:00:00)` expands to today\u2019s midnight in ISO\u20118601 format. |\n| `-s FAILED` | Show only jobs whose final state is `FAILED`. |\n| `--format=\u2026` | Optional: specify which columns to display (adjust as needed). |\n\nFeel free to let me know the missing details, and I\u2019ll adjust the command accordingly!"
+   },
+   {
+    "id": 25,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "I\u2019m not sure which HPC cluster you\u2019re working on.  \nCould you let me know the cluster name (e.g., `clusterA`, `clusterB`, etc.)? Once I have that, I can give you the exact command to display the CPU and memory efficiency for job\u202f321."
+   },
+   {
+    "id": 26,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "1/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368523 to start at 2026-10-30T09:18:28 a using ",
+    "answer": "I\u2019m not sure which cluster you\u2019re working on.  \nCould you let me know:\n\n1. **Cluster name** (e.g., `clusterA`, `hpc-xyz`, etc.)  \n2. **Partition** you\u2019d like to use (if you have a preference)  \n3. **Account/queue** you\u2019re charged to (if required)\n\nOnce I have that information I can give you the exact `srun` command to launch an interactive shell with 4 CPUs for 30\u202fminutes."
+   },
+   {
+    "id": 27,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: option '--output' requires an argument\nTry \"sbatch --help\" for more information",
+    "answer": "I\u2019m happy to help craft the `#SBATCH --output` line, but I need to know which HPC cluster you\u2019re working on. Different clusters may have slightly different environment variables or directory conventions. Could you let me know the cluster name (e.g., `titan`, `cori`, `pennstate`, etc.)? Once I have that, I can give you the exact line you should use."
+   },
+   {
+    "id": 28,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxCpuPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "I can give you a minimal set of `#SBATCH` directives that will request 2 nodes with 32 MPI tasks per node.  \nHowever, to make the script work on your specific system I\u2019ll need a few more details:\n\n| What you need to know | Why it matters |\n|-----------------------|----------------|\n| **Cluster name / login node** | Some clusters have different default partitions or require a specific `--partition` flag. |\n| **Partition / queue** | The partition you want to submit to (e.g., `compute`, `gpu`, `debug`). |\n| **Wall\u2011time limit** | Most schedulers require a `--time` value. |\n| **Job name** | Helpful for tracking and debugging. |\n| **Output / error file paths** | Where you want the job\u2019s stdout/stderr written. |\n\nOnce you provide those, I can tailor the script exactly to your environment.\n\n---\n\n### Generic template\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=mpi_job          # <-- replace with your job name\n#SBATCH --nodes=2                   # 2 nodes\n#SBATCH --ntasks-per-node=32        # 32 MPI tasks per node\n#SBATCH --time=01:00:00             # <-- set a suitable wall\u2011time\n#SBATCH --partition=compute         # <-- replace with your partition\n#SBATCH --output=mpi_job.out        # <-- output file\n#SBATCH --error=mpi_job.err         # <-- error file\n\n# Load any required modules (example)\nmodule load mpi/openmpi\n\n# Run the MPI program\nsrun ./your_mpi_executable\n```\n\nFeel free to adjust the placeholders (`mpi_job`, `01:00:00`, `compute`, etc.) once you know the specifics of your cluster."
+   },
+   {
+    "id": 29,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "4",
+    "answer": "I\u2019m not sure which HPC system you\u2019re running on, so could you let me know the cluster name (or the scheduler configuration) you\u2019re using?  \nOnce I know that, I can confirm the exact environment variable that Slurm exposes on your system.  \n\nIn most Slurm installations, the number of CPUs allocated to each task is available in the `SLURM_CPUS_PER_TASK` variable.  \nYou can set the OpenMP thread count to that value with a single line in your job script:\n\n```bash\nexport OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n```\n\nThis line should be placed before you launch your parallel application."
+   },
+   {
+    "id": 30,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "I\u2019m not sure which HPC system you\u2019re working on, so I\u2019ll need a couple of details before I can give you the exact command:\n\n1. **Cluster name** \u2013 e.g. `clusterA`, `clusterB`, etc.  \n2. **Job scheduler** \u2013 e.g. SLURM, PBS/Torque, LSF, etc.  \n3. **Job ID** \u2013 you mentioned array 999, but confirm that the job ID is indeed `999` (sometimes the array ID is part of a larger job ID like `999_1`).\n\nOnce I have that information, I can provide the precise command to set the maximum concurrent tasks for that array to 5."
+   }
+  ]
+ },
+ "kd1": {
+  "n": 30,
+  "correct": 20,
+  "partly": 6,
+  "strict": 0.667,
+  "lenient": 0.767,
+  "wilson95": [
+   0.488,
+   0.808
+  ],
+  "slurm_accepted": 22,
+  "rows": [
+   {
+    "id": 1,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "6/6",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368526 to start at 2026-10-30T09:18:29 a using 8 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "```bash\n#!/bin/bash\n#SBATCH --job-name=myjob\n#SBATCH --nodes=1\n#SBATCH --ntasks=8\n#SBATCH --cpus-per-task=1\n#SBATCH --mem=16G\n#SBATCH --time=02:00:00\n#SBATCH --output=myjob_%j.out\n```"
+   },
+   {
+    "id": 2,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "The single `#SBATCH` line to create a job array over tasks 1 to 10 with a maximum of 3 array tasks running simultaneously is:\n\n```bash\n#SBATCH --array=1-10%3\n```\n\nThis directive tells the scheduler to:\n- Run the job array with indices from 1 to 10 (`1-10`)\n- Limit concurrent execution to 3 tasks at a time (`%3`)\n\nThis is standard syntax for Slurm."
+   },
+   {
+    "id": 3,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368528 to start at 2026-10-30T09:18:30 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty!",
+    "answer": "To submit job `B.sh` such that it starts only after job `42` finishes successfully, you can use the `--dependency` option with `sbatch` and specify `afterok:42`.\n\nThe exact `sbatch` command is:\n\n```bash\nsbatch --dependency=afterok:42 B.sh\n```\n\nThis ensures that `B.sh` will only begin execution if job `42` completes successfully (i.e., exits with a status code of 0)."
+   },
+   {
+    "id": 4,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368531 to start at 2026-10-30T09:18:31 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To send an email to `me@example.com` when your job ends or fails, use the following two `#SBATCH` lines:\n\n```bash\n#SBATCH --mail-user=me@example.com\n#SBATCH --mail-type=END,FAIL\n```\n\nThese lines tell the Slurm scheduler to send an email notification to `me@example.com` when the job reaches the end state or fails."
+   },
+   {
+    "id": 5,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368533 to start at 2026-10-30T09:18:31 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368534 to start at 2026-10-30T09:18:33 a using ",
+    "answer": "The exact `srun` command to run `hostname` on 4 tasks is:\n\n```bash\nsrun -n 4 hostname\n```\n\nThis command launches 4 tasks (processes) and runs the `hostname` command on each."
+   },
+   {
+    "id": 6,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "Elapsed      State \n---------- ---------- \n  00:00:00    PENDING | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "To show the elapsed time and the state of Slurm job 99, use the following `sacct` command:\n\n```bash\nsacct -j 99 --format=Elapsed,State\n```\n\nThis command:\n- `-j 99`: specifies job ID 99\n- `--format=Elapsed,State`: displays only the elapsed time and job state fields\n\nThe output will include the `Elapsed` time (e.g., `00:15:30`) and the `State` (e.g., `COMPLETED`, `FAILED`, etc.) for job 99."
+   },
+   {
+    "id": 7,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": ") LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch",
+    "answer": "The exact command to show the full Slurm configuration of job 77 is:\n\n```bash\nscontrol show job 77\n```\n\nThis command displays detailed information about the job, including its configuration, resource requests, and current state."
+   },
+   {
+    "id": 8,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "13,4915-4928,4930-4940,4942-4943,4946-4947,4949,4952-4956,4958,4961-4968,4970-4974,4976-4979,4982-4983,4985-4987,4991] a |  viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00      1     |  viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00      1    ",
+    "answer": "To print exactly three columns \u2014 **partition name**, **node name**, and **node state** \u2014 with one line per node, use the `sinfo` command with the `-o` (format) option and specify the desired fields.\n\nThe correct `sinfo` command is:\n\n```bash\nsinfo -o \"%P %N %t\"\n```\n\n### Explanation:\n- `%P`: Partition name\n- `%N`: Node name\n- `%t`: Node state (e.g., idle, alloc, down, etc.)\n\nThis will output one line per node, showing the partition, node name, and state in that order."
+   },
+   {
+    "id": 9,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "slurm_update error: Invalid user id | sbatch: error: Unable to open file job_script.sh | sbatch: error: Invalid --time specification | scontrol: | slurm_update error: Invalid user id | sbatch: error: Unable to open file your_script.sh",
+    "answer": "To pause and later resume a Slurm job, you can use the `scontrol` command. However, **Slurm does not have a built-in \"pause\" and \"resume\" functionality** for jobs in the same way that some other HPC systems do. Instead, you can simulate pausing by **canceling the job and then resubmitting it**.\n\nHere are the exact commands to **pause** and **resume** Slurm job `55`:\n\n### 1. Pause the job (cancel it)\n```bash\nscontrol cancel 55\n```\nThis cancels the job, effectively pausing it.\n\n### 2. Resume the job (resubmit it)\n```bash\nsbatch job_script.sh\n```\nReplace `job_script.sh` with the actual script that was used to submit job 55. If you don't have the script, you can resubmit using the same command line arguments:\n\n```bash\nsbatch --job-name=your_job_name --output=output.log --error=error.log --time=HH:MM:SS --partition=your_partition your_script.sh\n```\n\n> \ud83d\udd14 **Note**: You must resubmit the job with the same or similar parameters. If you need to preserve the original job's state (e.g., checkpointed data), you must implement that in your application.\n\n### Summary\n- **Pause**: `scontrol cancel 55`\n- **Resume**: `sbatch your_script.sh` (or equivalent)\n\nThere is no native \"pause\" command in Slurm, so cancellation and resubmission is the standard method."
+   },
+   {
+    "id": 10,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368541 to start at 2026-10-30T03:40:36 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "Here's a short Slurm batch script that loads the Python module and runs `python -c 'print(42)'` using `srun`:\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=python_test\n#SBATCH --output=output_%j.txt\n#SBATCH --error=error_%j.txt\n#SBATCH --time=00:05:00\n#SBATCH --partition=short\n\n# Load the Python module (adjust module name as needed for your cluster)\nmodule load python\n\n# Run the Python command via srun\nsrun python -c 'print(42)'\n```\n\n### Notes:\n- Replace `python` with the appropriate module name if your cluster uses a different Python module (e.g., `python/3.9`, `anaconda`, etc.). You can check available modules with `module avail python`.\n- The `srun` command ensures the job runs in a parallel context, even for a single task.\n- Adjust `--partition=short` to match your cluster's partition name (e.g., `compute`, `batch`, etc.).\n\nSave this script (e.g., as `run_python.sh`), make it executable with `chmod +x run_python.sh`, and submit with `sbatch run_python.sh`."
+   },
+   {
+    "id": 11,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368542 to start at 2026-10-30T09:18:37 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368544 to start at 2026-10-30T09:18:37 a using ",
+    "answer": "In a Slurm job array script, the environment variable that holds the array index of the task is:\n\n```\nSLURM_ARRAY_TASK_ID\n```\n\nTo pass this as the only argument to `./run.sh` using `srun`, you can use the following line:\n\n```bash\nsrun ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\nThis will execute `./run.sh` once per array task, with the array index passed as the first (and only) argument."
+   },
+   {
+    "id": 12,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | srun: fatal: Can not execute ./your_application | sbatch: error: Unable to open file requeue_job.sh | scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | ) LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch_local/slurm_exec_7thst5zn/slurm-6236849 | scancel is graded by the rules only (it would cancel the fixtures) | 67968 lrd_all_v o416_dri mdurso00 PD       0:00      1 (BeginTime)\n          62362882 lrd_all_v std_tart mdurso00 PD       0:00      1 (BeginTime)\n          623 | too few arguments for keyword:requeue | scancel is graded by the rules only (it would cancel the fixtures)",
+    "answer": "The exact command to requeue a running job depends on the cluster and the job scheduler in use. On most HPC clusters using **Slurm**, the command to requeue a running job is:\n\n```bash\nscancel -r 1234\n```\n\nHowever, **requeueing** a job (i.e., resubmitting it to the queue after it has been canceled) is not a standard Slurm command. Instead, you typically:\n\n1. Cancel the job:\n   ```bash\n   scancel 1234\n   ```\n2. Then resubmit it (if needed), or use a job array or script to requeue it.\n\nIf you're using a different scheduler (e.g., PBS, LSF), the command would differ.\n\nBut if you're asking for a **requeue** operation specifically (like in some legacy systems or custom scripts), and assuming you're on a **Slurm** cluster, there is **no direct `requeue` command**. The closest equivalent is:\n\n```bash\nscancel -r 1234\n```\n\nThis cancels the job and returns it to the queue (if the scheduler allows it), but **this is not guaranteed** and depends on the cluster configuration.\n\n\u2705 **Best practice**: If you want to requeue a job, resubmit it via a script or job array.\n\nExample:\n```bash\n#!/bin/bash\n#SBATCH --job-name=requeue_job\n#SBATCH --output=requeue_%j.out\n#SBATCH --time=01:00:00\n#SBATCH --partition=normal\n\n# Your job commands here\nsrun ./your_application\n```\n\nThen submit it again:\n```bash\nsbatch requeue_job.sh\n```\n\n\ud83d\udccc **Note**: There is **no standard `squeue -r` or `scontrol requeue`** command in Slurm to requeue a job. The `-r` flag in `scancel` only cancels the job and may return it to the queue if the scheduler allows it (e.g., in some configurations with `--requeue` in the job script).\n\nIf the job was submitted with `--requeue`, then:\n```bash\nscancel -r 1234\n```\nmay work to requeue it.\n\nSo, the **exact command** to requeue a running job **if it was submitted with `--requeue`** is:\n\n```bash\nscancel -r 1234\n```\n\nOtherwise, you must resubmit the job.\n\n\ud83d\udd0d **Check if the job was submitted with `--requeue`**:\n```bash\nscontrol show job 1234\n```\n\nLook for `Requeue=1` in the output.\n\nIf present, use:\n```bash\nscancel -r 1234\n```\n\nIf not, resubmit the job.\n\nLet me know the cluster name if you need a site-specific command."
+   },
+   {
+    "id": 13,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368548 to start at 2026-10-30T09:18:39 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "The correct `#SBATCH` line to make Slurm send `SIGUSR1` to the batch script 120 seconds before the time limit is:\n\n```bash\n#SBATCH --signal=B:SIGUSR1@120\n```\n\n### Explanation:\n- `B:` indicates that the signal should be sent to the batch script (not the job step).\n- `SIGUSR1` is the signal name.\n- `@120` specifies that the signal should be sent 120 seconds before the job's time limit.\n\nThis is supported on most Slurm clusters (e.g., Summit, Frontera, etc.)."
+   },
+   {
+    "id": 14,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "scancel is graded by the rules only (it would cancel the fixtures) |  | scancel is graded by the rules only (it would cancel the fixtures) | scontrol:",
+    "answer": "To requeue job 77 and keep it held (so it does not start again until manually released), you can use the `qrequeue` command with the `--hold` option. The exact command depends on the cluster's Slurm configuration, but the standard Slurm command is:\n\n```bash\nqrequeue --hold 77\n```\n\nThis command:\n- Requeues job 77 (i.e., it will be rescheduled for later execution),\n- Keeps it in a held state (does not start until released),\n- Is typically used in environments where `qrequeue` is available (e.g., on some HPC clusters using Slurm with custom job management tools).\n\nIf `qrequeue` is not available, you may need to use `scancel` and `scontrol`:\n\n```bash\nscancel 77\nscontrol hold 77\n```\n\nThis cancels the job and holds it, preventing it from starting again until released.\n\n> **Note**: The exact command may vary slightly depending on the cluster. If you're on a specific cluster (e.g., Summit, Frontera, etc.), please specify it for a more precise answer."
+   },
+   {
+    "id": 15,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368550 to start at 2026-10-30T09:18:40 a using 2 processors on nodes login13 in par | sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368551 to start at 2026-10-30T09:18:40 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty!",
+    "answer": "To submit `post.sh` so it starts after job 500 ends (regardless of success or failure), you can use the `--dependency` option with `sbatch` and specify `afterok` or `afterany` depending on your needs.\n\nSince you want the job to start **after job 500 ends**, whether it succeeded or failed, use:\n\n```bash\nsbatch --dependency=afterany:500 post.sh\n```\n\n### Explanation:\n- `afterany:500` means the job will run after job 500 completes, regardless of outcome (success or failure).\n- `afterok:500` would only run if job 500 succeeded.\n\nThus, `afterany` is the correct choice here.\n\n### Full command:\n```bash\nsbatch --dependency=afterany:500 post.sh\n```"
+   },
+   {
+    "id": 16,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "1/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Job dependency problem",
+    "answer": "To ensure that only one job named `nightly` runs at a time (and subsequent jobs wait until the current one completes), you can use the `--exclusive` and `--job-name` options in combination with `--dependency=afterok` in a script or job submission. However, the most effective and portable way to achieve this on most HPC clusters (like those using Slurm) is to use the `--exclusive` flag along with a job array or a single job with a unique name and proper dependency handling.\n\nBut if you want **only one job named `nightly` to run at a time**, and later submissions wait for the previous one to finish, you can use the `--dependency=afterok` option in the job script or command line.\n\nHere\u2019s how to do it using `#SBATCH` directives in a job script:\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=nightly\n#SBATCH --output=nightly_%j.out\n#SBATCH --error=nightly_%j.err\n#SBATCH --time=01:00:00\n#SBATCH --partition=normal\n#SBATCH --exclusive\n#SBATCH --dependency=afterok:$SLURM_JOB_ID\n```\n\nWait \u2014 this won't work as written because `$SLURM_JOB_ID` is not set when the job is submitted.\n\n### Correct Approach: Use a Job Array or External Lock\n\nThe best way to ensure only one job with a specific name runs at a time is to use a **job array** or a **lock file**. But if you want a simple `#SBATCH` solution using Slurm's built-in mechanisms, here's a better method:\n\nUse `--exclusive` and `--dependency=afterok` in a script that checks for the existence of a lock file.\n\nHowever, since you asked for `#SBATCH` lines only, and assuming you're submitting a single job that will be submitted repeatedly, the cleanest way is to use a **job array** with a unique name and `--exclusive`:\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=nightly\n#SBATCH --array=1-1%1\n#SBATCH --output=nightly_%A_%a.out\n#SBATCH --error=nightly_%A_%a.err\n#SBATCH --time=01:00:00\n#SBATCH --partition=normal\n#SBATCH --exclusive\n```\n\nThis ensures only one job runs at a time because `%1` limits the array to one job.\n\nBut if you want **one job named `nightly`**, and **only one instance ever runs**, then you must use a **lock file** or **job array with a single slot**.\n\n### Final Answer: Use Job Array with One Slot\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=nightly\n#SBATCH --array=1-1%1\n#SBATCH --output=nightly_%A_%a.out\n#SBATCH --error=nightly_%A_%a.err\n#SBATCH --time=01:00:00\n#SBATCH --partition=normal\n#SBATCH --exclusive\n```\n\nThis ensures:\n- Only one job runs at a time (`%1` limits the array to one job).\n- The job name is `nightly`.\n- Subsequent submissions will wait until the current one finishes (since only one job is allowed).\n\n> \u2705 This is the standard and portable way to run one job at a time using Slurm.\n\nIf you're submitting multiple jobs with the same name, this setup ensures only one runs."
+   },
+   {
+    "id": 17,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "To request 1 node with 4 GPUs and 4 tasks (one GPU per task), you would use the following `#SBATCH` directives:\n\n```bash\n#SBATCH --nodes=1\n#SBATCH --gpus=4\n#SBATCH --ntasks=4\n#SBATCH --ntasks-per-node=4\n```\n\nThese lines ensure:\n- 1 node is allocated (`--nodes=1`)\n- 4 GPUs are requested (`--gpus=4`)\n- 4 total tasks are launched (`--ntasks=4`)\n- Each task runs on a separate GPU (`--ntasks-per-node=4`)\n\nThis configuration is typical for GPU-accelerated parallel jobs where each MPI task uses one GPU."
+   },
+   {
+    "id": 18,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Requested time limit is invalid (missing or exceeds some limit)",
+    "answer": "The `#SBATCH` line for a time limit of 1 day and 6 hours is:\n\n```bash\n#SBATCH --time=1-6:00\n```\n\nThis format uses the `--time` directive with the `days-hours:minutes` syntax, where:\n- `1-6:00` means 1 day, 6 hours, and 0 minutes.\n\nThis is the standard format used on most HPC clusters (e.g., Slurm-based systems)."
+   },
+   {
+    "id": 19,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: fatal: --mem, --mem-per-cpu, and --mem-per-gpu are mutually exclusive.",
+    "answer": "To request 4 GB of memory per allocated CPU in an SLURM job script, use the `--mem` option with the `--cpus-per-task` or `--ntasks` directive depending on your use case. However, if you want to specify **4 GB of memory per allocated CPU**, the correct `#SBATCH` line is:\n\n```bash\n#SBATCH --mem=4G\n```\n\nThis requests 4 GB of memory **per node**, not per CPU. If you want **4 GB of memory per CPU**, you need to combine it with `--cpus-per-task` or `--ntasks` to ensure the memory is allocated per CPU.\n\nFor example, if you are using one task with multiple CPUs:\n\n```bash\n#SBATCH --cpus-per-task=4\n#SBATCH --mem=16G\n```\n\nThis gives 4 GB per CPU (16 GB total for 4 CPUs).\n\nAlternatively, if you want to request **4 GB per CPU** explicitly, you can use:\n\n```bash\n#SBATCH --mem-per-cpu=4G\n```\n\nThis is the most direct way to request **4 GB of memory per allocated CPU**.\n\n\u2705 **Correct `#SBATCH` line:**\n\n```bash\n#SBATCH --mem-per-cpu=4G\n```\n\nThis ensures that for each CPU allocated to the job, 4 GB of memory is reserved."
+   },
+   {
+    "id": 20,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368553 to start at 2026-10-30T13:18:25 a using 128 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To request whole nodes (exclusive access) for your job on an HPC cluster, you typically use the `--exclusive` flag in your `#SBATCH` directive.\n\nHere is the appropriate `#SBATCH` line:\n\n```bash\n#SBATCH --exclusive\n```\n\nThis ensures that your job gets full access to the entire node(s), without sharing resources with other jobs.\n\n> **Note**: The exact syntax may vary slightly depending on the cluster (e.g., Slurm, PBS, etc.). On most Slurm-based clusters, `--exclusive` is the standard way to request exclusive node access. If you're on a different scheduler, the equivalent directive might be `--exclusive` or `--nodes=1 --ntasks-per-node=... --exclusive`, depending on configuration.\n\nIf you want to ensure your job runs on one or more full nodes, you might also combine it with:\n\n```bash\n#SBATCH --nodes=1\n#SBATCH --ntasks-per-node=1\n```\n\nBut the key line for exclusive node access is:\n\n```bash\n#SBATCH --exclusive\n```"
+   },
+   {
+    "id": 21,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "2/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "       0:00      4 (QOSMaxJobsPerUserLimit)\n          62367862 boost_usr dk-rag65 a08trc09 PD       0:00      4 (QOSMaxJ | 67968 lrd_all_v o416_dri mdurso00 PD       0:00      1 (BeginTime)\n          62362882 lrd_all_v std_tart mdurso00 PD    ",
+    "answer": "To list only your own jobs that are still pending, use the `squeue` command with the following options:\n\n```bash\nsqueue -u $USER -t pending\n```\n\n### Explanation:\n- `-u $USER`: Filters jobs for the current user.\n- `-t pending`: Shows only jobs in the \"PENDING\" state.\n\nThis command works on any Slurm-managed cluster (e.g., Summit, Frontera, etc.) and will display only your pending jobs."
+   },
+   {
+    "id": 22,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures)",
+    "answer": "To cancel all of your jobs named `sweep`, you can use the `scancel` command with the `--name` option, which filters jobs by their name.\n\nThe command is:\n\n```bash\nscancel --name=sweep\n```\n\nThis will cancel all jobs in your queue that have the name `sweep`. If you're on a specific cluster (e.g., Summit, Stampede2, etc.), this command is standard across most Slurm-based HPC systems.\n\nIf you want to be more specific and only cancel jobs you own, you can combine it with your username:\n\n```bash\nscancel --name=sweep --user=$USER\n```\n\nThis ensures only your jobs named `sweep` are canceled."
+   },
+   {
+    "id": 23,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": " | scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | scontrol:",
+    "answer": "To change the time limit of a pending job (job ID 88) to 3 hours, you can use the `scancel` command with the `--time` option. However, note that `scancel` is typically used to cancel jobs, not to modify job parameters like time limits.\n\nTo **modify** the time limit of a pending job, you should use the `scontrol` command:\n\n```bash\nscontrol update JobId=88 TimeLimit=03:00:00\n```\n\nThis command updates the time limit of job 88 to 3 hours (03:00:00 in HH:MM:SS format).\n\n> **Note**: This only works if the job is still pending (not running or completed). If the job is already running, you cannot change its time limit."
+   },
+   {
+    "id": 24,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "JobID           JobName      State ExitCode               Start                 End    Elapsed \n------------ ----------  | JobID           JobName      State ExitCode               Start                 End    Elapsed \n------------ ----------  | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "To list your jobs that ended in the `FAILED` state since midnight today, you can use the `sacct` command with appropriate filters for the job state, start time, and user.\n\nAssuming you're on a Slurm-managed cluster (e.g., typical HPC environments), the command is:\n\n```bash\nsacct -u $USER --state=FAILED --starttime=00:00 --format=JobID,JobName,State,ExitCode,Start,End,Elapsed\n```\n\n### Explanation:\n- `-u $USER`: Filters jobs for your user.\n- `--state=FAILED`: Shows only jobs that ended in the FAILED state.\n- `--starttime=00:00`: Sets the start time to midnight (00:00) of today. This is relative to the current date.\n- `--format=...`: Includes useful fields like JobID, JobName, State, ExitCode, Start, End, and Elapsed time.\n\n> **Note**: The `--starttime=00:00` uses the current date by default, so it refers to midnight of today. If you need to be more explicit (e.g., for scripting), you can use `--starttime=00:00:00` or combine with `--date` if needed.\n\n### Optional: Include only completed jobs (FAILED, COMPLETED, etc.)\nIf you want to include other completed states as well, you can use:\n```bash\nsacct -u $USER --state=FAILED,COMPLETED --starttime=00:00 --format=JobID,JobName,State,ExitCode,Start,End,Elapsed\n```\n\nThis command works on most Slurm clusters (e.g., Summit, Stampede2, or generic HPC systems). Adjust the cluster-specific options (like partition or time format) if required by your site."
+   },
+   {
+    "id": 25,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "seff is not installed on this cluster | seff is not installed on this cluster",
+    "answer": "To show the CPU and memory efficiency of a finished job (e.g., job ID 321), you can use the `seff` command, which is part of the Slurm workload manager.\n\nThe command is:\n\n```bash\nseff 321\n```\n\nThis will display the CPU and memory efficiency of the job, including:\n- CPU efficiency (as a percentage)\n- Memory efficiency (as a percentage)\n- Total CPU time used\n- Memory used\n\nEnsure you are on a cluster that uses Slurm (e.g., most HPC clusters), and that job 321 has completed. If you're on a specific cluster (e.g., Summit, Frontera, etc.), the command remains the same, but you may need to load the appropriate module or environment first.\n\nExample output:\n```\nJob ID: 321\nCluster: login1\nCPU Efficiency: 85.20%\nMemory Efficiency: 78.40%\nCPU Time: 00:15:30\nMemory: 1.2 GB\n```\n\nLet me know the cluster name if you need help with module loading or environment setup."
+   },
+   {
+    "id": 26,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368554 to start at 2026-10-30T09:18:45 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368555 to start at 2026-10-30T09:18:45 a using  |  viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00      1    ",
+    "answer": "To start an interactive shell on a compute node with 4 CPUs for 30 minutes using `srun`, you can use the following command:\n\n```bash\nsrun --ntasks=1 --cpus-per-task=4 --time=00:30:00 --pty /bin/bash\n```\n\n### Explanation:\n- `--ntasks=1`: Requests one task (i.e., one process).\n- `--cpus-per-task=4`: Allocates 4 CPUs for that task.\n- `--time=00:30:00`: Sets the time limit to 30 minutes (HH:MM:SS format).\n- `--pty`: Allocates a pseudo-terminal, which is needed for an interactive shell.\n- `/bin/bash`: Starts a bash shell (you can use `/bin/sh` if you prefer a minimal shell).\n\n> **Note**: The exact command may vary slightly depending on your cluster's configuration (e.g., partition name, default time limits, or required options). If your cluster uses a specific partition (e.g., `--partition=debug`), you may need to add it. For example:\n>\n> ```bash\n> srun --partition=debug --ntasks=1 --cpus-per-task=4 --time=00:30:00 --pty /bin/bash\n> ```\n>\n> Check your cluster's documentation or run `sinfo` to see available partitions and constraints."
+   },
+   {
+    "id": 27,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: option '--output' requires an argument\nTry \"sbatch --help\" for more information",
+    "answer": "To ensure each array task writes to its own output file named with the array job ID and the task index, use the following `#SBATCH --output` line:\n\n```bash\n#SBATCH --output=array_%A_%a.out\n```\n\n### Explanation:\n- `%A` expands to the **array job ID** (e.g., `12345`).\n- `%a` expands to the **array task index** (e.g., `0`, `1`, `2`, etc.).\n- The resulting filename will be `array_12345_0.out`, `array_12345_1.out`, etc., for each task.\n\nThis is the standard and recommended way to handle output files in Slurm array jobs."
+   },
+   {
+    "id": 28,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxCpuPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "To submit an MPI job on 2 nodes with 32 tasks per node using Slurm, you would use the following `#SBATCH` directives:\n\n```bash\n#SBATCH --nodes=2\n#SBATCH --ntasks-per-node=32\n```\n\nThese lines request:\n- `--nodes=2`: Use 2 compute nodes.\n- `--ntasks-per-node=32`: Launch 32 MPI tasks on each node.\n\nIf you're using a single job script and want to ensure the total number of MPI tasks is 64 (2 nodes \u00d7 32 tasks), you can also include:\n\n```bash\n#SBATCH --ntasks=64\n```\n\nHowever, this is redundant if you already specify `--nodes` and `--ntasks-per-node`, as Slurm will automatically calculate the total number of tasks.\n\nSo, the minimal and correct `#SBATCH` lines are:\n\n```bash\n#SBATCH --nodes=2\n#SBATCH --ntasks-per-node=32\n```\n\nThis configuration is suitable for most MPI applications using `mpirun` or `srun`."
+   },
+   {
+    "id": 29,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "4",
+    "answer": "To set `OMP_NUM_THREADS` to the number of CPUs allocated to each task by Slurm in a job script, use the following line:\n\n```bash\nexport OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n```\n\nThis ensures that OpenMP threads are limited to the number of CPUs assigned per task by Slurm, which is typically set via the `--cpus-per-task` option in the `sbatch` command."
+   },
+   {
+    "id": 30,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "No valid entity in update command\nInput line must include \"NodeName\", \"PartitionName\", \"Reservation\", \"JobId\", or \"SlurmctldDebug\" | No valid entity in update command\nInput line must include \"NodeName\", \"PartitionName\", \"Reservation\", \"JobId\", or \"SlurmctldDebug\" | No valid entity in update command\nInput line must include \"NodeName\", \"PartitionName\", \"Reservation\", \"JobId\", or \"SlurmctldDebug\"",
+    "answer": "The command to change job array 999 so that at most 5 of its tasks run at once is:\n\n```bash\nscontrol update JobArray=999 ArrayMaxTasksPerNode=5\n```\n\nHowever, note that `ArrayMaxTasksPerNode` controls the maximum number of tasks per node, not the concurrency across nodes. To limit the total number of running tasks (i.e., concurrency) for the entire job array, you should use:\n\n```bash\nscontrol update JobArray=999 ArrayConcurrent=5\n```\n\nThis ensures that no more than 5 tasks from job array 999 run simultaneously.\n\n\u2705 **Correct command:**\n```bash\nscontrol update JobArray=999 ArrayConcurrent=5\n```"
+   }
+  ]
+ },
+ "qwen3-235b": {
+  "n": 30,
+  "correct": 26,
+  "partly": 2,
+  "strict": 0.867,
+  "lenient": 0.9,
+  "wilson95": [
+   0.703,
+   0.947
+  ],
+  "slurm_accepted": 27,
+  "rows": [
+   {
+    "id": 1,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "6/6",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368558 to start at 2026-10-30T09:18:47 a using 8 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "```bash\n#!/bin/bash\n#SBATCH --job-name=myjob\n#SBATCH --nodes=1\n#SBATCH --ntasks=1\n#SBATCH --cpus-per-task=8\n#SBATCH --mem=16G\n#SBATCH --time=02:00:00\n#SBATCH --output=myjob_%j.out\n```"
+   },
+   {
+    "id": 2,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "On most HPC clusters using SLURM, the correct `#SBATCH` line to create a job array with tasks 1 to 10 and a maximum of 3 tasks running concurrently is:\n\n```bash\n#SBATCH --array=1-10%3\n```\n\nThis syntax specifies:\n- `1-10`: tasks numbered from 1 to 10\n- `%3`: no more than 3 tasks running simultaneously"
+   },
+   {
+    "id": 3,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368559 to start at 2026-10-30T09:18:48 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty!",
+    "answer": "To submit `B.sh` so that it starts only after job 42 finishes successfully, use the following `sbatch` command with a dependency:\n\n```bash\nsbatch --dependency=afterok:42 B.sh\n```\n\nThis command ensures that the job submitted from `B.sh` will start only if job 42 completes successfully (i.e., with an exit code of 0). This works on standard Slurm-managed clusters like most HPC systems."
+   },
+   {
+    "id": 4,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368560 to start at 2026-10-30T09:18:48 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "```bash\n#SBATCH --mail-user=me@example.com\n#SBATCH --mail-type=END,FAIL\n```"
+   },
+   {
+    "id": 5,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368561 to start at 2026-10-30T09:18:49 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368563 to start at 2026-10-30T09:18:49 a using ",
+    "answer": "The exact `srun` command to run the `hostname` command on 4 tasks is:\n\n```bash\nsrun --ntasks=4 hostname\n```\n\nThis command requests 4 tasks (processes) and runs the `hostname` command on each of them. It works on any Slurm-managed cluster (e.g., Summit, Stampede2, Bridges, etc.) assuming default resources are sufficient."
+   },
+   {
+    "id": 6,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "Elapsed      State \n---------- ---------- \n  00:00:00    PENDING | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "To display the elapsed time and state of Slurm job 99 on a cluster using the `sacct` command, use:\n\n```bash\nsacct -j 99 --format=Elapsed,State\n```\n\nThis command queries job 99 and outputs only the **Elapsed time** and **State** fields. Make sure you're on a cluster where Slurm is active (e.g., Expanse, Stampede2, etc.) and that you have permission to view the job's accounting data."
+   },
+   {
+    "id": 7,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": ") LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch | scontrol:",
+    "answer": "To display the full Slurm configuration of job 77, use the `scontrol` command with the `show job` option followed by the job ID.\n\nThe exact command is:\n\n```bash\nscontrol show job 77\n```\n\nThis command shows detailed information about job 77, including its Slurm configuration, state, allocation, and resource requirements. This works on any Slurm-managed cluster."
+   },
+   {
+    "id": 8,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "lrd_all_viz viz05 drained\nlrd_all_viz viz06 drained\nlrd_all_viz viz07 drained\nlrd_all_viz viz08 drained\nlrd_all_viz viz0 | 91]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,",
+    "answer": "The following `sinfo` command will print exactly three columns: partition name, node name, and node state \u2014 one line per node:\n\n```bash\nsinfo -N -o \"%P %N %T\"\n```\n\n### Explanation:\n- `-N`: Ensures one line per node (instead of aggregating by node state).\n- `-o \"%P %N %T\"`: Specifies the output format:\n  - `%P`: Partition name\n  - `%N`: Node name\n  - `%T`: Node state (e.g., idle, alloc, down, etc.)\n\nThis command works on standard Slurm installations and will display the information as requested."
+   },
+   {
+    "id": 9,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "Access/permission denied for job 62368497 | Access/permission denied for job 62368497",
+    "answer": "To pause and later resume Slurm job 55, use the following exact commands:\n\nPause job 55:\n```bash\nscontrol suspend 55\n```\n\nResume job 55:\n```bash\nscontrol resume 55\n```\n\nThese commands work on most Slurm clusters that support job suspension (requires appropriate permissions and system configuration). Replace `55` with the actual job ID if different."
+   },
+   {
+    "id": 10,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368564 to start at 2026-10-30T03:40:57 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "Here's a short Slurm batch script for a typical HPC cluster (e.g., **Expanse** or **Stampede2**) that loads a Python module and runs the command via `srun`:\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=python_test\n#SBATCH --output=output_%j.txt\n#SBATCH --error=error_%j.txt\n#SBATCH --partition=shared\n#SBATCH --nodes=1\n#SBATCH --ntasks=1\n#SBATCH --time=00:05:00\n#SBATCH --mem=1G\n\n# Load Python module (common module name)\nmodule load python\n\n# Run the Python command using srun\nsrun python -c 'print(42)'\n```\n\n> **Note**: The exact Python module name (e.g., `python`, `python3`, `anaconda3`, `miniconda3`) depends on the cluster. On **Expanse (SDSC)**, use `module load python`; on **Stampede2 (TACC)**, use `module load python3`. Adjust the partition, time, and memory as needed for your cluster."
+   },
+   {
+    "id": 11,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368575 to start at 2026-10-30T09:18:59 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368576 to start at 2026-10-30T09:18:59 a using ",
+    "answer": "In a Slurm job array script, the environment variable that holds the array index of the current task is `SLURM_ARRAY_TASK_ID`.\n\nTo pass this value as the only argument to `./run.sh` using `srun`, the command would be:\n\n```bash\nsrun ./run.sh $SLURM_ARRAY_TASK_ID\n```"
+   },
+   {
+    "id": 12,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "62368497_1-2: Requested operation is presently disabled",
+    "answer": "To requeue a running job on most HPC clusters using Slurm, the exact command is:\n\n```bash\nscontrol requeue 1234\n```\n\nThis command works on Slurm-based clusters (such as most modern HPC systems) and will requeue job 1234, causing it to be terminated and then placed back into the pending queue for re-scheduling.\n\nReplace `1234` with the actual job ID if different. No additional flags are needed for a basic requeue."
+   },
+   {
+    "id": 13,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368577 to start at 2026-10-30T09:19:00 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "```bash\n#SBATCH --signal=B:SIGUSR1@120\n```"
+   },
+   {
+    "id": 14,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "62368497_1-2: Requested operation is presently disabled |  | ",
+    "answer": "On the Ada cluster, to requeue job 77 and keep it held so it does not start again until manually released, use the following command:\n\n```bash\nscontrol requeue 77\nscontrol hold 77\n```\n\nThis first requeues the job, and then places a user hold on it, preventing it from starting until the hold is released with `scontrol release 77`."
+   },
+   {
+    "id": 15,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368578 to start at 2026-10-30T09:19:01 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty!",
+    "answer": "To submit the script `post.sh` so that it starts only after job 500 ends (regardless of whether it succeeds or fails), you can use the `--dependency` option in `sbatch` with the `afterany` dependency type.\n\nThe correct `sbatch` command is:\n\n```bash\nsbatch --dependency=afterany:500 post.sh\n```\n\nThis ensures that `post.sh` will be scheduled to run after job 500 completes, no matter its exit status.\n\n**Cluster Note:** This syntax is valid on standard Slurm-based HPC clusters (e.g., most academic or research clusters). Replace `500` with the actual job ID if different."
+   },
+   {
+    "id": 16,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368579 to start at 2026-10-30T09:19:02 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To ensure that only one job named `nightly` runs at a time on an HPC cluster using SLURM, you can use the `--job-name` and `--exclusive` options in combination, but more precisely, you should use SLURM's **job sharing and locking via `--dependency`** or leverage a **named semaphore** using `--kill-on-invalid-dep` and job name matching.\n\nHowever, the most practical and commonly used method is to use a **job name-based lock** via `sbatch`'s `--dependency=singleton` option.\n\n### \u2705 Correct #SBATCH line:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=singleton\n```\n\n### Explanation:\n- `#SBATCH --job-name=nightly`: Assigns the name \"nightly\" to the job.\n- `#SBATCH --dependency=singleton`: Ensures that only one job with the same name (`nightly`) can run at a time. If another job with the same name is already running or pending, the new job will wait.\n\n> \ud83d\udd14 The `singleton` dependency means: \"this job will only start when no other job with the same name from the same user is running or pending.\"\n\n### Example script header:\n```bash\n#!/bin/bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=singleton\n#SBATCH --time=02:00:00\n#SBATCH --partition=normal\n\n# Your job commands here\necho \"Running nightly job...\"\n```\n\n### Notes:\n- This works per-user: different users can still run their own `nightly` jobs.\n- The waiting jobs will stay in the pending state (`PD`) with a reason like \"Sibling job running\" or \"Dependency\".\n- This is supported on most modern SLURM clusters.\n\n\u2705 This is the standard and correct way to serialize jobs by name in SLURM."
+   },
+   {
+    "id": 17,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxWallDurationPerJobLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "On the **Expanse GPU cluster**, use the following #SBATCH lines to request 1 node with 4 GPUs and 4 tasks, assigning one GPU per task:\n\n```bash\n#SBATCH --partition=gpu\n#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --gpus-per-task=1\n#SBATCH --mem=120G\n#SBATCH --time=02:00:00\n#SBATCH --account=your_account\n```\n\n> \ud83d\udd36 Replace `your_account` with your actual allocation account (e.g., `ucsd-train1` or your project account).\n\nThis configuration ensures:\n- 1 node is allocated,\n- 4 tasks are launched,\n- Each task gets 1 GPU via `--gpus-per-task=1`,\n- Sufficient memory and time for typical GPU workloads.\n\nThe Slurm scheduler will automatically assign one GPU to each task."
+   },
+   {
+    "id": 18,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Requested time limit is invalid (missing or exceeds some limit)",
+    "answer": "For a time limit of 1 day and 6 hours, the `#SBATCH` line should be:\n\n```bash\n#SBATCH --time=30:00:00\n```\n\nThis is equivalent to 24 hours (1 day) + 6 hours = 30 hours, formatted as `HH:MM:SS`. This directive works on any Slurm-managed cluster (e.g., Stampede2, Bridges-2, Comet, etc.). If you're using a specific cluster with different time format requirements, let me know."
+   },
+   {
+    "id": 19,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368581 to start at 2026-10-30T09:19:03 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "#SBATCH --mem-per-cpu=4G\n\nThis directive requests 4 GB of memory per allocated CPU core on most HPC clusters that support SLURM. It is commonly used on clusters like Stampede2, Bridges-2, or other SLURM-managed systems. Adjust if your cluster uses a different syntax (e.g., --mem-per-cpu=4096M for megabytes), but --mem-per-cpu=4G is widely accepted."
+   },
+   {
+    "id": 20,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368582 to start at 2026-10-30T13:18:25 a using 128 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To ensure your Slurm job gets exclusive access to entire nodes (not shared with other jobs), use the `--exclusive` flag in your `#SBATCH` directive.\n\n```bash\n#SBATCH --exclusive\n```\n\nThis tells Slurm to allocate whole nodes to your job and prevents other jobs from running on those nodes during your job's execution.\n\n> **Note**: Availability of full nodes depends on the cluster's policies and current usage. On some clusters, you may need to request specific partitions or have special permissions to get exclusive node access. For example, on many clusters, you might also specify:\n>\n> ```bash\n> #SBATCH --exclusive\n> #SBATCH --partition=standard\n> #SBATCH --nodes=1\n> ```\n>\n> Replace `standard` with a partition that supports exclusive access on your specific cluster (e.g., `compute`, `batch`, etc.).\n\nPlease specify the cluster you're using if you need a tailored example."
+   },
+   {
+    "id": 21,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "PD       0:00      4 (QOSMaxJobsPerUserLimit)\n          62367862 boost_usr dk-rag65 a08trc09 PD       0:00      4 (QOSMa | PD       0:00      4 (QOSMaxJobsPerUserLimit)\n          62367862 boost_usr dk-rag65 a08trc09 PD       0:00      4 (QOSMa | 67968 lrd_all_v o416_dri mdurso00 PD       0:00      1 (BeginTime)\n          62362882 lrd_all_v std_tart mdurso00 PD    ",
+    "answer": "On most HPC clusters using SLURM, you can list only your own jobs that are still pending with the following `squeue` command:\n\n```bash\nsqueue -u $USER -t PENDING\n```\n\n- `-u $USER` filters jobs for your user.\n- `-t PENDING` shows only jobs that are pending (not yet running).\n\nThis command works on clusters such as **Stampede2**, **Frontera**, **Maverick2**, and other SLURM-managed systems.\n\n> Note: Some clusters may use slightly different state names (e.g., `PENDING`, `CONFIGURING`, `PENDING+REQUEUE`), but `PENDING` is the standard filter for jobs waiting in the queue.\n\nIf you want a more concise output, you can add flags like:\n```bash\nsqueue -u $USER -t PENDING -o \"%.18i %.9P %.8j %.8u %.2t %.10M %.6D %R\"\n```\nThis shows job ID, partition, name, user, state, time, nodes, and node list.\n\nLet me know the specific cluster if you need a tailored version."
+   },
+   {
+    "id": 22,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures)",
+    "answer": "To cancel all jobs named \"sweep\" on an HPC cluster using SLURM (common on clusters like Stampede2, Frontera, or similar), you can use the `scancel` command with the `--name` option:\n\n```bash\nscancel --name sweep\n```\n\nThis command cancels all of your jobs that have the job name \"sweep\".\n\nMake sure you are on the correct cluster (e.g., Frontera, Stampede2, etc.) and have the appropriate environment loaded. If you are using a different scheduler (like PBS), the command would differ, but SLURM is standard on most modern TACC systems."
+   },
+   {
+    "id": 23,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": " | scontrol:",
+    "answer": "To change the time limit of a pending job in Slurm, you can use the `scontrol` command. For job 88, changing the time limit to 3 hours would be done with:\n\n```bash\nscontrol update job=88 TimeLimit=3:00:00\n```\n\nThis command applies to any Slurm-managed cluster (e.g., Euler, Leonhard, or others at ETH Z\u00fcrich, or general HPC systems). Ensure you have permission to modify the job."
+   },
+   {
+    "id": 24,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "JobID           JobName      State ExitCode               Start                 End \n------------ ---------- ----------  | JobID           JobName      State ExitCode               Start                 End \n------------ ---------- ----------  | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+        | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+        | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "On an HPC cluster using Slurm, you can use the `sacct` command to list jobs that ended in the `FAILED` state since midnight today. Assuming your username is the same as your login (you may need to replace `USERNAME` with your actual username), here's the correct command:\n\n```bash\nsacct -u $USER --state=FAILED --starttime 00:00:00 --format=JobID,JobName,State,ExitCode,Start,End\n```\n\n### Explanation:\n- `sacct`: Slurm accounting command.\n- `-u $USER`: Lists jobs for the current user (you can also use `-u USERNAME`).\n- `--state=FAILED`: Filters only jobs that failed.\n- `--starttime 00:00:00`: Jobs since midnight today.\n- `--format=...`: Specifies output columns for clarity.\n\n> **Cluster Note**: This works on Slurm-based clusters such as **Expanse**, **Stampede2**, **Frontier**, or **Lassen**, provided accounting data is available.\n\nIf you are on a cluster with a different time zone or stricter time formatting, you can use:\n\n```bash\nsacct -u $USER --state=FAILED --starttime midnight --format=JobID,JobName,State,ExitCode,Start,End\n```\n\nThis uses the keyword `midnight` instead of `00:00:00`, which is also accepted by `sacct`.\n\nLet me know your username or cluster name if you'd like a more specific command."
+   },
+   {
+    "id": 25,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "JobID           JobName  Partition     MaxRSS     ReqMem   TotalCPU    Elapsed      State \n------------ ---------- ----- | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "To show the CPU and memory efficiency of a finished job on an HPC cluster using Slurm, you can use the `sacct` command with appropriate formatting.\n\nAssuming the cluster uses Slurm and accounting is enabled, the command for job 321 is:\n\n```bash\nsacct -j 321 --format=JobID,JobName,Partition,MaxRSS,ReqMem,TotalCPU,Elapsed,State\n```\n\n- `MaxRSS`: Shows the maximum memory (RAM) used.\n- `ReqMem`: The amount of memory requested.\n- `TotalCPU`: Total CPU time consumed.\n- `Elapsed`: Wall clock time.\n- Comparing `TotalCPU` to `Elapsed` gives CPU efficiency.\n- Comparing `MaxRSS` to `ReqMem` gives memory efficiency.\n\nIf detailed steps or further analysis are needed, let me know the cluster name (e.g., Summit, Stampede2, etc.) for specific tools or scripts."
+   },
+   {
+    "id": 26,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368583 to start at 2026-10-30T09:19:07 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368584 to start at 2026-10-30T09:19:08 a using ",
+    "answer": "On the **Beach cluster**, use the following `srun` command to start an interactive shell on a compute node with 4 CPUs for 30 minutes:\n\n```bash\nsrun --cpus-per-task=4 --time=00:30:00 --pty /bin/bash\n```\n\nThis command:\n- Requests 4 CPUs (`--cpus-per-task=4`)\n- Sets the time limit to 30 minutes (`--time=00:30:00`)\n- Allocates a pseudo-terminal for an interactive shell (`--pty /bin/bash`)"
+   },
+   {
+    "id": 27,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "On most HPC clusters using SLURM, you can use the `%A` and `%a` format specifiers in the `--output` directive to achieve this:\n\n- `%A` = Array job ID (the primary job ID for the array)\n- `%a` = Array task index (the individual task number within the array)\n\nTo have each array task write to its own file named with the array job ID and task index, use:\n\n```bash\n#SBATCH --output=%A_%a.out\n```\n\nThis will create output files like `123456_0.out`, `123456_1.out`, etc., where `123456` is the array job ID and `0`, `1`, etc., are the task indices.\n\nExample full script snippet:\n```bash\n#!/bin/bash\n#SBATCH --array=0-9\n#SBATCH --output=%A_%a.out\n\necho \"Running task $SLURM_ARRAY_TASK_ID\"\n```\n\nThis works on standard SLURM configurations (e.g., most clusters like Stampede2, Bridges, Comet, etc.). If your cluster has a specific naming convention or file system path requirement, adjust the path accordingly, e.g.:\n\n```bash\n#SBATCH --output=/path/to/logs/%A_%a.out\n```"
+   },
+   {
+    "id": 28,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxCpuPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "For an MPI job on 2 nodes with 32 tasks per node (total of 64 tasks), the appropriate `#SBATCH` directives depend on the cluster's configuration (e.g., Slurm settings, CPU layout). However, assuming a typical HPC cluster where each node has at least 32 CPU cores, here is a standard Slurm script header:\n\n```bash\n#!/bin/bash\n#SBATCH --nodes=2\n#SBATCH --ntasks=64\n#SBATCH --ntasks-per-node=32\n#SBATCH --cpus-per-task=1\n```\n\n### Explanation:\n- `--nodes=2`: Request 2 compute nodes.\n- `--ntasks=64`: Total number of MPI tasks (2 nodes \u00d7 32 tasks per node).\n- `--ntasks-per-node=32`: Ensures exactly 32 tasks are assigned per node.\n- `--cpus-per-task=1`: Each MPI task uses 1 CPU core (typical for MPI-only jobs).\n\n> \u2705 This configuration assumes the cluster nodes have at least 32 cores. If you're on a specific cluster (e.g., Stampede2, Cori, or ARCHER2), the partition or constraint flags may need to be added. Let me know the cluster name if you need a site-specific version."
+   },
+   {
+    "id": 29,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "4",
+    "answer": "On a Slurm-managed cluster, to set `OMP_NUM_THREADS` to the number of CPUs allocated per task, use:\n\n```bash\nexport OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n```\n\nThis line should be placed in your job script after the Slurm directives (e.g., `#SBATCH --cpus-per-task=N`). It relies on the `SLURM_CPUS_PER_TASK` environment variable, which Slurm automatically sets to the number of CPUs per task as specified with `--cpus-per-task`."
+   },
+   {
+    "id": 30,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "No valid entity in update command\nInput line must include \"NodeName\", \"PartitionName\", \"Reservation\", \"JobId\", or \"SlurmctldDebug\" | scontrol:",
+    "answer": "On the Slurm workload manager (used on clusters like Graham, Cedar, or Niagara), you can limit the number of concurrently running tasks in a job array using the `scontrol` command.\n\nTo modify job array 999 so that at most 5 of its tasks run at once, use:\n\n```bash\nscontrol update ArrayJobId=999 JobArrayMaxPending=5\n```\n\nThis sets the maximum number of pending array tasks that can be dispatched to run concurrently to 5. Note that this affects only future task starts \u2014 tasks already running or queued will adjust accordingly.\n\nMake sure you are the owner of the job or have administrative privileges. Replace `999` with the actual job ID if it's different."
+   }
+  ]
+ },
+ "qwen3-4b": {
+  "n": 30,
+  "correct": 10,
+  "partly": 10,
+  "strict": 0.333,
+  "lenient": 0.5,
+  "wilson95": [
+   0.192,
+   0.512
+  ],
+  "slurm_accepted": 16,
+  "rows": [
+   {
+    "id": 1,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "5/6",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368585 to start at 2026-10-30T09:19:09 a using 8 processors on nodes login08 in partition lrd_all_serial",
+    "answer": "```bash\n#!/bin/bash\n#SBATCH --nodes=1\n#SBATCH --ntasks=8\n#SBATCH --mem=16000\n#SBATCH --time=02:00:00\n#SBATCH --job-name=myjob\n#SBATCH --output=myjob_%j.out\n```"
+   },
+   {
+    "id": 2,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [
+     "1-10:3"
+    ],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368586 to start at 2026-10-30T09:19:09 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "```bash\n#SBATCH --array=1-10:3\n```"
+   },
+   {
+    "id": 3,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368587 to start at 2026-10-30T09:19:10 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty!",
+    "answer": "To submit `B.sh` such that it starts only after job 42 finishes successfully, you need to use the `--dependency` flag in the `sbatch` command. Specifically, you should specify `afterok:42` to ensure that job B starts only after job 42 completes successfully.\n\nHere is the exact `sbatch` command:\n\n```bash\nsbatch --dependency=afterok:42 B.sh\n```\n\n### Notes:\n- This assumes you are using a cluster that supports `sbatch` (e.g., SLURM).\n- The job ID `42` must be a valid job ID that has already been submitted and is running or completed.\n- The `afterok:42` dependency ensures that `B.sh` starts only after job 42 finishes successfully (i.e., with a return code of 0).\n\nIf you are unsure about the cluster name or environment, please provide the cluster name or system details (e.g., SLURM, PBS, etc.) for further confirmation."
+   },
+   {
+    "id": 4,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368588 to start at 2026-10-30T09:19:11 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "```bash\n#SBATCH --mail-type=END\n#SBATCH --mail-type=FAIL\n```\n\nThese lines configure the job to send an email notification to `me@example.com` when the job completes (END) or fails (FAIL). \n\nNote: The email functionality depends on the cluster's email configuration and that your email address is properly set up in the system. Ensure that the email address is correctly specified and that the cluster supports email notifications."
+   },
+   {
+    "id": 5,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368589 to start at 2026-10-30T09:19:11 a using 4 processors on nodes login08 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368590 to start at 2026-10-30T09:19:11 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368591 to start at 2026-10-30T09:19:12 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368592 to start at 2026-10-30T09:19:12 a using 2 processors on nodes login13 in partiti | sbatch: error: Batch script is empty!",
+    "answer": "To run the `hostname` command on 4 tasks using `srun`, you need to specify the number of tasks (`--ntasks=4`) and ensure the command is executed in a job context.\n\nThe exact `srun` command is:\n\n```bash\nsrun --ntasks=4 hostname\n```\n\n\u2705 This command submits a job that launches 4 tasks, each running the `hostname` command.\n\n\ud83d\udccc **Note**: This assumes you are using a standard Slurm-based HPC cluster (e.g., SLURM). The cluster name or environment (e.g., `srun`, `sbatch`) must be available in your environment. If you're on a specific cluster (e.g., \"Cray\", \"NVIDIA\", \"Piz Daint\"), additional flags or environment setup may be required \u2014 let me know if you need cluster-specific adjustments."
+   },
+   {
+    "id": 6,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "Elapsed      State \n---------- ---------- \n  00:00:00    PENDING | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+        | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+        | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "To show the **elapsed time** and **state** of a Slurm job (job ID 99), you use the `sacct` command with the appropriate options.\n\nThe exact `sacct` command is:\n\n```bash\nsacct -j 99 -o elapsed,state\n```\n\n### Explanation:\n- `-j 99`: Filters results to show only job 99.\n- `-o elapsed,state`: Specifies the output fields to display \u2014 **elapsed time** and **state**.\n\n> \u2705 This command works on any Slurm cluster where `sacct` is available and properly configured.\n\nLet me know if you need to specify a particular cluster or include additional fields (e.g., user, partition, etc.)."
+   },
+   {
+    "id": 7,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": ") LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch | h\n   WorkDir=/leonardo_work/EUHPC_D34_160/TMA/StreamKV\n   StdErr=/leonardo_work/EUHPC_D34_160/TMA/StreamKV/logs/streamkv | scontrol:",
+    "answer": "To show the full Slurm configuration of a job (e.g., job 77), you typically use the `scontrol show job` command with the job ID.\n\nThe exact command is:\n\n```bash\nscontrol show job 77\n```\n\n**Note:** This command works on Slurm clusters and will display the full configuration of the specified job, including job ID, user, nodes, time, partitions, and other attributes.\n\n\u26a0\ufe0f **Important:**  \n- Ensure you have appropriate permissions (e.g., `scontrol` access) to view job details.  \n- The cluster must be configured to allow job inspection (e.g., job accounting or visibility enabled).  \n- If the job does not exist or is not visible (e.g., completed or deleted), the command will return an error.\n\nIf you need additional details (e.g., job environment, resources, or logs), let me know the cluster name or environment, and I can provide further guidance."
+   },
+   {
+    "id": 8,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "3/4",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sinfo: unrecognized option '--no-header'\nTry \"sinfo --help\" for more information | 91]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00  | 91]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00  | 91]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00  | 91]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13-14]\nlrd_all_viz        up   12:00:00 ",
+    "answer": "To print exactly three columns \u2014 **partition name**, **node name**, and **node state** \u2014 one line per node, you can use the `sinfo` command with the appropriate format specification.\n\nThe correct `sinfo` command is:\n\n```bash\nsinfo -o \"%P %N %S\" --no-header\n```\n\n### Explanation:\n- `%P` \u2192 Partition name  \n- `%N` \u2192 Node name  \n- `%S` \u2192 Node state  \n- `--no-header` \u2192 Suppresses the header row (so no \"PARTITION NODE STATE\" line appears)  \n- This outputs one line per node, as requested.\n\n> \u2705 This command works on most HPC clusters that support SLURM or similar job schedulers (e.g., SLURM, PBS, etc.), assuming `sinfo` is available and the output format is supported.\n\n\ud83d\udccc **Note**: Ensure your cluster's `sinfo` supports the `%P`, `%N`, `%S` format specifiers. If you're unsure about the cluster (e.g., which scheduler is in use), please provide the cluster name or scheduler type for further validation."
+   },
+   {
+    "id": 9,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": ") LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch_local/slurm_exec_7thst5zn/slurm-6236849 | Access/permission denied for job 62368497 | Access/permission denied for job 62368497 | scontrol: | too few arguments for keyword:suspend | invalid keyword: pause | Access/permission denied for job 62368497 | invalid keyword: suspend/resume",
+    "answer": "To pause and resume a Slurm job, you need to use the `scontrol` command with appropriate flags. However, **Slurm does not have a direct \"pause\" and \"resume\" feature** for jobs like traditional batch systems (e.g., PBS or LSF). Instead, Slurm jobs are either running or suspended via job state changes (e.g., `PENDING`, `RUNNING`, `SUSPENDED`), and **suspending a job is not a standard or widely supported operation**.\n\n### Important Notes:\n- **Slurm does not support pausing a running job and resuming it later** in the way that some other HPC systems do.\n- The `scontrol suspend` command is **not available** in standard Slurm versions (as of 2024).\n- If a job is suspended, it typically means it was stopped manually or via a signal, and it can be resumed only if the job is in a `SUSPENDED` state and the system allows it.\n\n### What You Can Do:\n1. **Check the current state of job 55**:\n   ```bash\n   scontrol show job 55\n   ```\n   This will show the job's current state (e.g., `RUNNING`, `PENDING`, `COMPLETED`, etc.).\n\n2. **If the job is running**, you **cannot pause it** using standard Slurm commands.\n\n3. **If the job is in a `SUSPENDED` state**, you can resume it:\n   ```bash\n   scontrol resume 55\n   ```\n\n4. **To suspend a job (if supported)**:\n   ```bash\n   scontrol suspend 55\n   ```\n   \u26a0\ufe0f This command **may not be available** in all Slurm installations.\n\n---\n\n### Final Answer:\n\u274c There are **no standard Slurm commands** to pause and later resume a job like `scontrol pause 55` and `scontrol resume 55`.\n\n\u2705 **You cannot pause Slurm job 55 and resume it later** using standard Slurm tools.\n\n---\n\n### Recommendation:\nIf you need to pause a job, consider:\n- Using a **script** to kill the job and restart it manually.\n- Using **job arrays** or **interactive sessions** with manual control.\n- Contacting your HPC administrator to confirm if your cluster supports job suspension.\n\n> \ud83d\udd0d **Missing detail**: Please confirm whether your cluster supports job suspension (e.g., via `scontrol suspend/resume`) and if job 55 is currently in a `SUSPENDED` state.\n\nIf you provide the cluster name or system details, I can give more specific guidance."
+   },
+   {
+    "id": 10,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368593 to start at 2026-10-29T23:24:20 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To write a short Slurm batch script that loads a Python module and runs `python -c 'print(42)'` using `srun`, you need to specify the cluster and the appropriate module loading. Since you haven't specified the cluster or the Python module name (e.g., `python/3.9`, `python/3.10`, etc.), I'll provide a generic script assuming a common HPC environment (e.g., a cluster with a standard Python module).\n\nPlease confirm:\n- The **cluster name** (e.g., `mycluster`, `hpc`, etc.)\n- The **Python module name** (e.g., `python/3.9`, `python/3.10`, etc.)\n\nFor now, here's a **generic Slurm batch script** that assumes a standard Python module (e.g., `python/3.9`) and runs on a typical HPC cluster:\n\n```bash\n#!/bin/bash\n# Job name\n#SBATCH --job-name=python_test\n\n# Number of nodes\n#SBATCH --nodes=1\n\n# Number of tasks (processes)\n#SBATCH --ntasks=1\n\n# Time limit\n#SBATCH --time=00:01:00\n\n# Load Python module\nmodule load python/3.9\n\n# Run the Python command via srun\nsrun python -c \"print(42)\"\n```\n\n> \ud83d\udd0d **Note**: Replace `python/3.9` with the correct module name for your cluster. You can check available modules with `module avail python`.\n\nOnce you provide the cluster name and the correct Python module, I can tailor the script exactly to your environment."
+   },
+   {
+    "id": 11,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "srun: unrecognized option '--array=0-62368497'\nTry \"srun --help\" for more information | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368594 to start at 2026-10-30T09:19:20 a using 2 processors on nodes login13 in partiti",
+    "answer": "In a Slurm job array script, the environment variable that holds the array index of the task is `SLURM_ARRAY_TASK_ID`.\n\nTo pass this as the only argument to `./run.sh`, you would use the following `srun` line:\n\n```bash\nsrun --array=0-99 ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\n> **Note**: The `--array=0-99` is used to define the array range (adjust as needed for your job). The `$SLURM_ARRAY_TASK_ID` variable contains the specific index of the current task in the array. This is the standard and correct way to access the array index in Slurm.\n\n\u2705 This command will run `./run.sh` with the array index as its only argument."
+   },
+   {
+    "id": 12,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "no runnable Slurm command",
+    "answer": "To requeue a running job, the exact command depends on the HPC cluster and its job scheduler (e.g., Slurm, PBS, LSF, etc.). Since you did not specify the cluster or scheduler, I cannot provide the exact command.\n\nPlease provide the following details so I can give you the correct command:\n\n1. **Cluster name or system** (e.g., \"NCSA\", \"CSC\", \"HPC-Cluster-01\")\n2. **Job scheduler** in use (e.g., Slurm, PBS Pro, LSF, SGE)\n3. **Any relevant environment or configuration** (e.g., if it's a specific university or lab cluster)\n\nOnce I have this information, I can give you the precise command to requeue job 1234."
+   },
+   {
+    "id": 13,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368595 to start at 2026-10-30T09:19:21 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To send a SIGUSR1 signal to the batch script 120 seconds before the time limit in Slurm, you can use the `--signal` option with the `sbatch` command. However, Slurm does not natively support sending a signal (like SIGUSR1) to a job 120 seconds before the time limit via a single `#SBATCH` line.\n\nInstead, you must use a Slurm job script with a `#SBATCH` directive to set up a signal timeout, and the actual signal delivery is handled by Slurm's internal mechanisms. There is no direct `#SBATCH` line that sends SIGUSR1 120 seconds before the time limit.\n\nTherefore, **there is no valid single `#SBATCH` line** that accomplishes this exact requirement in standard Slurm.\n\n> \u274c Incorrect: There is no such `#SBATCH` directive as `--signal=SIGUSR1,120`.\n\n\u2705 Correct approach:\nYou would need to write a script that uses `sbatch` with a `--signal` option, but Slurm does not support sending a signal to the job script 120 seconds before the time limit via a simple `#SBATCH` line.\n\n\ud83d\udc49 **Conclusion**:  \n**No such single `#SBATCH` line exists in Slurm.**  \nSlurm does not provide a built-in `#SBATCH` directive to send SIGUSR1 120 seconds before the time limit.\n\nIf you need this behavior, you must implement it via a custom script or job control mechanism (e.g., using `sleep` and `kill` in the job script), which is outside the scope of standard `#SBATCH` directives.\n\nLet me know if you'd like a script that simulates this behavior."
+   },
+   {
+    "id": 14,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "62368497_1-2: Requested operation is presently disabled | too few arguments for keyword:requeue",
+    "answer": "To requeue job 77 and hold it (so it does not start again until manually released), the command depends on the HPC cluster system you're using (e.g., SLURM, PBS, Torque, etc.). Since you did not specify the cluster or system, I will provide the most common command for **SLURM**, which is widely used in HPC environments.\n\n### \u2705 SLURM Command:\n```bash\nscontrol requeue 77\n```\n\nThis command requeues job 77 and keeps it in a held state, preventing it from being scheduled again until explicitly released.\n\n> \u26a0\ufe0f **Note**: If the job is already held, `scontrol requeue` may not change its state. To ensure it is held, you may need to use:\n> ```bash\n> scontrol update JobId=77 HoldReason=USER\n> ```\n> This explicitly holds the job.\n\n---\n\n### \ud83d\udd0d To confirm the correct system:\nPlease specify:\n- The HPC cluster name (e.g., \"NVIDIA Cluster\", \"CSC\", \"TACC\", etc.)\n- The job scheduler being used (e.g., SLURM, PBS, Torque, LSF)\n\nWith that, I can give you the exact command for your environment."
+   },
+   {
+    "id": 15,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "1/1",
+    "forbidden": [
+     "afterok"
+    ],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368597 to start at 2026-10-30T09:19:22 a using 2 processors on nodes login13 in par | sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368598 to start at 2026-10-30T09:19:22 a using 2 processors on nodes login13 in par | sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368599 to start at 2026-10-30T09:19:22 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty!",
+    "answer": "To submit a job (`post.sh`) that starts **after job 500 ends**, regardless of whether job 500 succeeded or failed, you need to use the `--dependency` option in the `sbatch` command with the `afterok` or `afterany` dependency.\n\nHowever, since you want the job to start **after job 500 ends**, whether it succeeded or failed, you should use:\n\n```bash\nsbatch --dependency=afterok:500 post.sh\n```\n\n> \u2705 This ensures `post.sh` starts **after job 500 completes successfully**.\n\nBut you said: *\"whether job 500 succeeded or failed\"*, which means you want to run `post.sh` **after job 500 finishes**, regardless of success or failure.\n\nIn that case, use:\n\n```bash\nsbatch --dependency=afterany:500 post.sh\n```\n\n> \u2705 This ensures `post.sh` starts **after job 500 finishes**, whether it succeeded or failed.\n\n---\n\n\u2705 **Final Answer:**\n\n```bash\nsbatch --dependency=afterany:500 post.sh\n```\n\n> \ud83d\udd0d **Note**: This command assumes:\n> - You are using a cluster that supports `sbatch` with dependency options (e.g., SLURM).\n> - The job named `post.sh` is a valid script file.\n> - The job ID `500` exists and is valid in the cluster.\n\nIf you are unsure about the cluster name or environment (e.g., SLURM vs. PBS), or if you need to specify a queue, node, or other parameters, please provide more context."
+   },
+   {
+    "id": 16,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "1/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Job dependency problem",
+    "answer": "To ensure that only one job named `nightly` runs at a time (later submissions wait until the previous one completes), you can use the `--job-name` option in combination with `--exclusive` and `--requeue` in `sbatch`. However, the most effective and standard way to enforce **exclusive job scheduling** (i.e., only one job at a time) is to use the `--single-node` and `--exclusive` flags, or more precisely, use `sbatch` with a **job array or dependency**.\n\nBut since you want **only one job named `nightly`** to run at a time, and later ones to **wait** until the previous one finishes, the correct approach is to use **job dependencies** with `--dependency=afterok`.\n\nHowever, the **simplest and most direct way** to ensure only one job named `nightly` runs at a time is to use the `--job-name` and `--requeue` with a **dependency on itself** \u2014 but that doesn't work directly.\n\nInstead, the best practice is to use **a job dependency** that waits for the previous job with the same name to finish.\n\nBut since `sbatch` does not natively support \"only one job with name X at a time\" without job dependencies, the correct way is to **submit jobs with a dependency on the previous job with the same name**.\n\nSo, the correct `#SBATCH` lines are:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=afterok:nightly\n```\n\nWait \u2014 that would cause a job to depend on itself, which is invalid.\n\nSo instead, we need to **use a job array or a job dependency on the previous job with the same name**.\n\nBut `sbatch` does not support `afterok:nightly` unless you use a job array or a job name that is unique.\n\nTherefore, the **correct and standard way** to ensure only one job named `nightly` runs at a time is to use **a job array with a single job**, or to use **a dependency on the previous job with the same name** \u2014 but only if the job is submitted in a way that allows it.\n\nActually, the **best and simplest solution** is to use:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n```\n\nThis ensures that the job runs exclusively on a single node, and **no other job can run on that node** \u2014 but it does not guarantee that only one job named `nightly` runs at a time across the cluster.\n\nTo ensure **only one job named `nightly` runs at a time**, you must use **job dependencies**.\n\nSo, the correct `#SBATCH` lines are:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=afterok:nightly\n```\n\nBut this is **invalid** \u2014 you cannot depend on a job that hasn't been submitted.\n\nTherefore, the **only reliable way** to ensure only one job named `nightly` runs at a time is to **submit the job with a dependency on the previous job with the same name**, which requires that the job is submitted in a sequence.\n\nBut if you are submitting jobs manually, and want to ensure only one `nightly` job runs at a time, you must use a **job array** or **a dependency on the previous job**.\n\nSo, the correct `#SBATCH` lines are:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=afterok:nightly\n```\n\nThis is **not valid**.\n\nTherefore, the **correct and working solution** is to use a **job array** with a single job, or to use a **dependency on the previous job** \u2014 but only if the job is submitted in sequence.\n\nBut if you are submitting jobs from a script, and want to ensure only one `nightly` job runs at a time, you can use:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=afterok:nightly\n```\n\nThis will fail.\n\nSo, the **only way** to ensure only one job named `nightly` runs at a time is to use a **job array** with a single job, or to use a **dependency on the previous job** \u2014 but only if the job is submitted in sequence.\n\nTherefore, the **correct and standard way** is to use:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n```\n\nThis ensures that the job runs exclusively on a single node, and **no other job can run on that node** \u2014 but it does not prevent other jobs with the same name from running on other nodes.\n\nSo, to ensure only one job named `nightly` runs at a time across the cluster, you must use **a job dependency**.\n\nBut `sbatch` does not support `afterok:nightly` unless you use a"
+   },
+   {
+    "id": 17,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "To write the correct `#SBATCH` lines for a job requesting **1 node with 4 GPUs and 4 tasks**, where **one GPU is assigned per task**, you need to specify:\n\n- The number of nodes (`--nodes`)\n- The number of tasks (`--ntasks`)\n- The number of GPUs per task (`--gpus-per-task`)\n- The node allocation (e.g., using `gpu` or `gpu:4` depending on the cluster)\n\nHowever, **the exact syntax depends on the HPC cluster's scheduler** (e.g., Slurm, PBS, etc.). Since you're using `#SBATCH`, this implies you're on a **Slurm-based cluster**.\n\nIn **Slurm**, the correct `#SBATCH` directives for this request are:\n\n```bash\n#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --gpus-per-task=1\n```\n\n> \u2705 This requests 1 node, 4 tasks, and 1 GPU per task (so 4 GPUs total).\n\n\u26a0\ufe0f **Note**: Some clusters require additional flags like:\n- `--gpus=4` (if using total GPUs, not per task)\n- `--partition=gpu` (to ensure GPU access)\n- `--time=01:00:00` (optional, for time limit)\n\nBut **`--gpus-per-task=1`** is the correct way to assign one GPU per task.\n\n### Final Answer:\n```bash\n#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --gpus-per-task=1\n```\n\n\ud83d\udccc **Missing details to confirm**:\n- Is the cluster using a specific partition (e.g., `gpu`, `gpu-4`)?\n- Are there any time or memory constraints you need to add?\n- Is the job using a specific environment (e.g., CUDA, ROCm)?\n\nLet me know if you'd like to include those."
+   },
+   {
+    "id": 18,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Requested time limit is invalid (missing or exceeds some limit)",
+    "answer": "```sbatch\n#SBATCH --time=1-06:00\n```\n\nThis `#SBATCH` line sets the job time limit to 1 day and 6 hours.  \n\n**Note:** The exact syntax may vary slightly depending on the HPC cluster (e.g., SLURM, PBS, etc.). If you are using a specific cluster (e.g., NERSC, OSC, etc.), please confirm the cluster name so I can verify the correct format. Also, ensure that the cluster supports the `--time` option with the `d-h:m:s` format."
+   },
+   {
+    "id": 19,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368601 to start at 2026-10-30T09:19:24 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To request 4 GB of memory per allocated CPU in an SLURM job submission script, use the following `#SBATCH` line:\n\n```bash\n#SBATCH --mem=4G\n```\n\n> **Note**: This line requests 4 GB of memory per CPU core. SLURM automatically allocates memory per core when using `--mem`, so this is equivalent to 4 GB per allocated CPU.\n\n\u2705 This is the correct and standard way to specify memory per CPU in SLURM.\n\nIf you need to specify memory per node or total memory, additional flags may be required \u2014 but for \"4 GB per allocated CPU\", `--mem=4G` is sufficient.\n\nLet me know if you need to specify a total memory or memory per node."
+   },
+   {
+    "id": 20,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368602 to start at 2026-10-30T13:18:25 a using 128 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To allocate your job entire nodes (i.e., exclusive access to the nodes, not shared with other jobs), you need to use the `--nodes` directive with `--exclusive` in the `#SBATCH` line.\n\nHere is the correct `#SBATCH` line:\n\n```bash\n#SBATCH --nodes=1 --exclusive\n```\n\n> **Note**: This ensures that the job gets one node exclusively, with no other jobs sharing the node.  \n> The exact number of nodes should be adjusted based on your needs (e.g., `--nodes=4` for 4 nodes).  \n> This option is typically supported on clusters like **Slurm-based HPC systems** (e.g., NERSC, OSG, or university clusters).\n\n\u2705 **Required clarification**:  \nPlease confirm the **cluster name** (e.g., \"NVIDIA\", \"TACC\", \"Piz Daint\", etc.) or the **HPC system you're using**, as some clusters may have additional constraints or require specific flags. Also, if you need more than one node, specify the number (e.g., `--nodes=4`)."
+   },
+   {
+    "id": 21,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "       62367968 lrd_all_v o416_dri mdurso00 PD       0:00      1 (None)\n          62362882 lrd_all_v std_tart mdurso00 P",
+    "answer": "To list only your own jobs that are still pending, you can use the `squeue` command with the following options:\n\n- `--user` to filter by user (your username)\n- `--state=PENDING` to show only pending jobs\n- `--format=%j` (optional, to show only job IDs, but not required)\n\nThe full command is:\n\n```bash\nsqueue --user=$(whoami) --state=PENDING\n```\n\n> \u2705 This command will list only the jobs owned by your user that are currently in the PENDING state.\n\n\ud83d\udccc **Note**: This assumes you are using a Slurm-based cluster (e.g., HPC systems like those at NERSC, ORNL, or university HPC centers). If you're on a different job scheduler (e.g., PBS, LSF), the command would differ.\n\nIf you'd like, I can help tailor this further based on your specific cluster's configuration or environment. Let me know the cluster name or any additional details."
+   },
+   {
+    "id": 22,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "scontrol: unrecognized option '--job-name=sweep'\nTry \"scontrol --help\" for more information",
+    "answer": "To cancel all jobs named `sweep`, the command depends on the HPC cluster you're using and the job scheduler (e.g., Slurm, PBS, LSF, etc.). Since you haven't specified the cluster or scheduler, I'll provide the most common command for **Slurm**, which is widely used in HPC environments.\n\n### \u2705 Slurm Command (if using Slurm):\n```bash\nscontrol cancel --job-name=sweep\n```\n\n> This cancels all jobs with the name `sweep`.\n\n---\n\n\u26a0\ufe0f **Important Notes**:\n- If you're using a different scheduler (e.g., PBS, LSF, or Torque), the command will differ.\n- If you need to cancel jobs by **job ID** or **user**, additional details are required.\n- The command assumes you have the appropriate permissions and are logged into the correct cluster.\n\n---\n\n\ud83d\udd0d **Please confirm**:\n1. Which HPC cluster are you using? (e.g., NERSC, OSG, local cluster)\n2. What job scheduler is in use? (e.g., Slurm, PBS, LSF)\n\nOnce I have that, I can give you the exact command."
+   },
+   {
+    "id": 23,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "",
+    "answer": "To change the time limit of a pending job (job ID 88) to 3 hours, you need to use the appropriate command for your High-Performance Computing (HPC) cluster's job scheduler. The most common schedulers are **Slurm**, **PBS**, or **SGE (Sun Grid Engine)**.\n\nSince your request does not specify the cluster or scheduler, and the behavior of the command varies by system, I will provide the most common command for **Slurm**, which is widely used in HPC environments.\n\n### \u2705 For Slurm:\n```bash\nscontrol update JobId=88 TimeLimit=03:00:00\n```\n\n> This command updates the time limit of job 88 to 3 hours (03:00:00).\n\n---\n\n\u26a0\ufe0f **Important Notes**:\n- If your cluster uses a different scheduler (e.g., PBS, SGE), the command will differ.\n- You must have **appropriate permissions** (e.g., job owner or admin rights) to modify job parameters.\n- The job must be **pending** (not running or completed) for this to work.\n\n---\n\n\ud83d\udd0d To confirm which scheduler your cluster uses, please provide:\n- The name of the cluster (e.g., \"NVIDIA Cluster\", \"CSC\", \"TACC\")\n- Or the scheduler in use (e.g., Slurm, PBS, SGE)\n\nOnce I have that, I can give you the exact command."
+   },
+   {
+    "id": 24,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "2/3",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sacct: fatal: Bad job/step specified: --start=00:00 | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d",
+    "answer": "To list jobs that ended in the `FAILED` state since midnight today, you can use the `sacct` command with the following options:\n\n- `--jobs`: to show job information\n- `--start`: to filter by start time (use `today` to mean since midnight today)\n- `--end`: to filter by end time (optional, but we can infer it's today)\n- `--state=FAILED`: to filter only failed jobs\n- `--format=JobID,JobName,Start,End,ExitCode`: to show relevant fields (optional, depending on your needs)\n\nHowever, since `sacct` does not have a direct `since midnight today` filter, you can use the `--start` option with a time like `00:00:00` and `--end` with today's time (e.g., `23:59:59`), or use `--start=00:00` to mean from midnight.\n\n\u2705 Correct `sacct` command:\n\n```bash\nsacct --jobs --start=00:00 --end=23:59 --state=FAILED\n```\n\n> \u26a0\ufe0f **Note**: The exact time format and availability of `--start` and `--end` depend on your HPC cluster's `sacct` configuration. Some clusters may require `--start=00:00` and `--end=today` or use `--start=00:00:00` and `--end=23:59:59`.\n\n\ud83d\udccc **Missing detail**: The cluster name (e.g., `pizd`, `hpc1`, `cluster-x`) is required to confirm the correct `sacct` behavior and availability of time filters. Please provide the cluster name if you'd like confirmation or a tailored version.\n\nLet me know the cluster name if you'd like a more specific version."
+   },
+   {
+    "id": 25,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sacct: unrecognized option '--jobid' | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | scontrol:",
+    "answer": "To show the CPU and memory efficiency of a finished job (job ID 321), we need to know which HPC cluster you are using, as different clusters use different tools and commands (e.g., `sacct`, `scontrol`, `qstat`, etc.).\n\nFor most HPC clusters using SLURM, the command to get CPU and memory usage for a finished job is:\n\n```bash\nsacct --jobid 321 --format=JobID,Elapsed,AllocCPUs,AllocMem,MaxRSS,MaxCPU,MaxMemory --noheader\n```\n\nHowever, if your cluster uses PBS or another job scheduler, the command may differ.\n\nPlease confirm:\n1. The name of the HPC cluster (e.g., \"NCSA\", \"CSC\", \"HPC-Cluster-X\").\n2. The job scheduler in use (e.g., SLURM, PBS, Torque, etc.).\n\nOnce I have that information, I can provide the exact command."
+   },
+   {
+    "id": 26,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368604 to start at 2026-10-30T09:19:31 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368605 to start at 2026-10-30T09:19:35 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368609 to start at 2026-10-30T09:19:36 a using ",
+    "answer": "To start an interactive shell on a compute node with 4 CPUs for 30 minutes using `srun`, the command depends on the specific HPC cluster's configuration (e.g., job scheduler like Slurm). However, assuming you're using **Slurm** (common in HPC environments), here is the correct `srun` command:\n\n```bash\nsrun --nodes=1 --ntasks=1 --cpus-per-task=4 --time=00:30:00 --pty /bin/bash\n```\n\n### Explanation:\n- `--nodes=1`: Request one compute node.\n- `--ntasks=1`: Run one task (i.e., one shell session).\n- `--cpus-per-task=4`: Allocate 4 CPUs per task.\n- `--time=00:30:00`: Request 30 minutes of wall-clock time.\n- `--pty`: Allocate a pseudo-terminal (required for interactive shells).\n- `/bin/bash`: The shell to start (can be changed to `/bin/zsh`, etc., if needed).\n\n> \u26a0\ufe0f **Note**: The exact command may vary slightly depending on the cluster's configuration (e.g., whether `--time` is required, or if `--gres` or other flags are needed). If your cluster uses a different scheduler (e.g., PBS, LSF), the command would differ.\n\nIf you provide the name of the cluster or scheduler (e.g., \"NCSA\", \"TACC\", \"University of Michigan\"), I can tailor the command more precisely."
+   },
+   {
+    "id": 27,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: option '--output' requires an argument\nTry \"sbatch --help\" for more information",
+    "answer": "To ensure each array task writes to its own file named with the array job ID and the task index, you should use the `slurm` job array features. The `#SBATCH --output` line must include the array job ID (`$SLURM_ARRAY_JOB_ID`) and the task index (`$SLURM_ARRAY_TASK_ID`).\n\nHere is the correct `#SBATCH --output` line:\n\n```bash\n#SBATCH --output=job_%a_%i.out\n```\n\n### Explanation:\n- `job_%a_%i.out`:\n  - `%a` represents the array job ID (e.g., 0, 1, 2, ...).\n  - `%i` represents the task index (e.g., 0, 1, 2, ...).\n  - The output file will be named `job_0_0.out`, `job_0_1.out`, etc., depending on the array job ID and task index.\n\n> \u2705 This format ensures each task in the array writes to a unique output file.\n\n\u26a0\ufe0f **Note**: This assumes you are using Slurm (which is standard in HPC environments). If you are using a different batch system, the syntax may differ.\n\nLet me know if you need the script or additional details (e.g., input file naming, logging, or cluster-specific settings)."
+   },
+   {
+    "id": 28,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "1/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxCpuPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "To submit an MPI job on 2 nodes with 32 tasks per node using Slurm, you need to specify the number of nodes (`--nodes`), the number of tasks per node (`--tasks-per-node`), and the total number of tasks (`--ntasks`). Since each node has 32 tasks and there are 2 nodes, the total number of tasks is 64.\n\nHere are the required `#SBATCH` lines:\n\n```bash\n#SBATCH --nodes=2\n#SBATCH --tasks-per-node=32\n#SBATCH --ntasks=64\n```\n\n> \u2705 **Note**: These lines are appropriate for an MPI job where you want to distribute 64 MPI processes (tasks) across 2 nodes, with 32 processes per node.\n\nIf you are using a specific cluster with additional constraints (e.g., partition, time, account), those would also be included. Let me know if you need those details or if you're using a specific HPC system (e.g., NERSC, PSC, etc.) for more tailored configuration."
+   },
+   {
+    "id": 29,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "4",
+    "answer": "To set `OMP_NUM_THREADS` to the number of CPUs allocated to each task by Slurm in a job script, you should use the `${SLURM_CPUS_PER_TASK}` environment variable.\n\nThe correct line to add in your job script is:\n\n```bash\nexport OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}\n```\n\n\u2705 This sets `OMP_NUM_THREADS` to the number of CPU cores assigned to each process (task) by Slurm, as determined at runtime.\n\n> Note: This assumes your Slurm job has been properly allocated CPUs and that `SLURM_CPUS_PER_TASK` is available (which it is by default when using Slurm)."
+   },
+   {
+    "id": 30,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "No valid entity in update command\nInput line must include \"NodeName\", \"PartitionName\", \"Reservation\", \"JobId\", or \"SlurmctldDebug\"",
+    "answer": "To change the job array 999 so that at most 5 of its tasks run at once, you need to set the `array_max` parameter (or equivalent) for the job array. However, the exact command depends on the HPC cluster and its job scheduler (e.g., Slurm, PBS, LSF, etc.).\n\nSince you did not specify the cluster or scheduler, and based on common HPC environments (especially Slurm), here is the **Slurm**-specific command:\n\n```bash\nscontrol update JobArray=999 ArrayMax=5\n```\n\n> \u2705 This command sets the maximum number of tasks in job array 999 to 5, meaning at most 5 tasks will run concurrently.\n\n\u26a0\ufe0f **Important Notes**:\n- This command assumes you are using **Slurm**.\n- If you are using a different scheduler (e.g., PBS, LSF, or Torque), the command will differ.\n- You must have appropriate permissions to modify job attributes.\n- The job array must exist and be in a state where it can be modified (e.g., not already running or completed).\n\n\ud83d\udd0d **Please confirm**:\n- Which HPC cluster or scheduler are you using? (e.g., Slurm, PBS, LSF)\n- Are you running this command in a shell or via a script?\n\nOnce I have that, I can provide the exact correct command."
+   }
+  ]
+ },
+ "r27": {
+  "n": 30,
+  "correct": 17,
+  "partly": 10,
+  "strict": 0.567,
+  "lenient": 0.733,
+  "wilson95": [
+   0.392,
+   0.726
+  ],
+  "slurm_accepted": 19,
+  "rows": [
+   {
+    "id": 1,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "6/6",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368611 to start at 2026-10-30T09:19:39 a using 8 processors on nodes login08 in partition lrd_all_serial",
+    "answer": "```bash\n#!/bin/bash\n#SBATCH --job-name=myjob\n#SBATCH --nodes=1\n#SBATCH --ntasks=8\n#SBATCH --cpus-per-task=1\n#SBATCH --mem=16G\n#SBATCH --time=02:00:00\n#SBATCH --output=myjob_%j.out\n```"
+   },
+   {
+    "id": 2,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "The correct `#SBATCH` line for a job array with tasks numbered 1 to 10, and at most 3 tasks running simultaneously, is:\n\n```bash\n#SBATCH --array=1-10%3\n```\n\n### Explanation:\n- `--array=1-10` specifies the array range from task 1 to task 10.\n- `%3` limits the number of concurrent array tasks to 3, meaning Slurm will run up to 3 tasks at a time and then wait for them to complete before starting new ones.\n\nThis is the standard syntax used on most HPC clusters (e.g., Summit, Frontera, etc.) to control job array concurrency."
+   },
+   {
+    "id": 3,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368613 to start at 2026-10-30T09:19:39 a using 2 processors on nodes login13 in par |  R      22:25      7 lrdn[1262,1410,1437,1507,1538,1555,1559]\n          62367806 boost_usr dk-ai_fa a08trc09  R       9:05      1 lrdn2236\n  62368497_[1-2%1] lr | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty! |  R      22:26      7 lrdn[1262,1410,1437,1507,1538,1555,1559]\n          62367806 boost_usr dk-ai_fa a08trc09  R       9:06      1 lrdn2236\n  62368497_[1-2%1] lr | ) LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch_local/slurm_exec_7thst5zn/slurm-6236849",
+    "answer": "To submit job `B.sh` such that it starts **only after job 42 finishes successfully**, you need to use the `--dependency` option with `sbatch` and specify the dependency type as `afterok`.\n\nThe exact `sbatch` command is:\n\n```bash\nsbatch --dependency=afterok:42 B.sh\n```\n\n### Explanation:\n- `--dependency=afterok:42`: Ensures that job `B.sh` will only start **after job 42 completes successfully** (i.e., exits with a zero exit code).\n- If job 42 fails (non-zero exit code), job `B.sh` will be held in the queue until job 42 finishes, but it will not start unless job 42 succeeds.\n\n> \u2705 This assumes that job 42 is already submitted and has a job ID of `42`. If you're submitting `B.sh` from a script or terminal, make sure job 42 has been submitted and is running or queued. You can check its status with `squeue -u $USER` or `scontrol show job 42`.\n\nIf you're unsure whether job 42 has been submitted, you can first check with:\n\n```bash\nsqueue -u $USER\n```\n\nAnd then submit `B.sh` with the dependency as shown above."
+   },
+   {
+    "id": 4,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368620 to start at 2026-10-30T09:19:42 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To send an email to `me@example.com` when your job ends or fails on an HPC cluster (such as those using Slurm), you need to use the `#SBATCH` directives for `--mail-user` and `--mail-type`.\n\nHere are the two required `#SBATCH` lines:\n\n```bash\n#SBATCH --mail-user=me@example.com\n#SBATCH --mail-type=END,FAIL\n```\n\n- `--mail-user=me@example.com`: Specifies the email address to receive notifications.\n- `--mail-type=END,FAIL`: Sends an email when the job ends (successfully or otherwise) and when it fails.\n\nThese lines should be included in your Slurm job script."
+   },
+   {
+    "id": 5,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368621 to start at 2026-10-30T09:19:42 a using  | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368624 to start at 2026-10-30T09:19:43 a using ",
+    "answer": "The exact `srun` command to run `hostname` on 4 tasks is:\n\n```bash\nsrun -n 4 hostname\n```\n\nThis command launches 4 tasks (processes) across the Slurm-managed cluster, each running the `hostname` command. The `-n 4` flag specifies the number of tasks. The output will show the hostname of each task's allocated node."
+   },
+   {
+    "id": 6,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "Elapsed      State \n---------- ---------- \n  00:00:00    PENDING | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+       ",
+    "answer": "To show the elapsed time and the state of Slurm job 99, use the `sacct` command with the appropriate format options.\n\nThe exact command is:\n\n```bash\nsacct -j 99 --format=Elapsed,State\n```\n\n### Explanation:\n- `-j 99`: Filters for job ID 99.\n- `--format=Elapsed,State`: Specifies the output fields to display \u2014 `Elapsed` shows the job's runtime, and `State` shows the job's final state (e.g., COMPLETED, FAILED, etc.).\n\nThis command works on any Slurm cluster where you have access to job accounting data."
+   },
+   {
+    "id": 7,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": ") LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch | scontrol:",
+    "answer": "To show the full Slurm configuration of job 77, you can use the `scontrol` command with the `show job` option. The exact command is:\n\n```bash\nscontrol show job 77\n```\n\nThis command displays detailed information about job 77, including its configuration such as job name, user, partition, nodes, time limits, and resource allocation.\n\n> **Note**: This command works on any Slurm-managed cluster where job 77 exists and is accessible to the user. If the job has been completed or is no longer in the queue, the output may still be available depending on the cluster's retention policy."
+   },
+   {
+    "id": 8,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "82-4913,4915-4928,4930-4940,4942-4943,4946-4947,4949,4952-4956,4958-4959,4961-4968,4970-4974,4976-4979,4982-4983,4985-49 | ]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13 | ]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13 | ]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13",
+    "answer": "To print exactly three columns \u2014 **partition name**, **node name**, and **node state** \u2014 with **one line per node**, use the `sinfo` command with the `-o` (output format) option and specify the desired fields.\n\nThe correct `sinfo` command is:\n\n```bash\nsinfo -o \"%P %N %T\"\n```\n\n### Explanation:\n- `%P` \u2014 Partition name\n- `%N` \u2014 Node name\n- `%T` \u2014 Node state (e.g., idle, alloc, down, etc.)\n\nThis command outputs one line per node, as requested, with exactly the three specified columns.\n\n> \u2705 **Note**: This works on any Slurm cluster (e.g., Summit, Perlmutter, etc.) where `sinfo` is available. No additional flags are needed."
+   },
+   {
+    "id": 9,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "Access/permission denied for job 62368497 | Access/permission denied for job 62368497 | Access/permission denied for job 62368497 | Access/permission denied for job 62368497 | scontrol: | scontrol: | Access/permission denied for job 62368497",
+    "answer": "To pause and later resume a Slurm job, you can use the `scontrol` command. However, **Slurm does not support pausing jobs in the traditional sense** (like pausing a process). Instead, Slurm provides a mechanism to **suspend** a job, which stops its execution but keeps it in the queue with the same job ID. You can then resume it later.\n\n### To pause (suspend) job 55:\n```bash\nscontrol suspend 55\n```\n\n### To resume (resume) job 55 later:\n```bash\nscontrol resume 55\n```\n\n> \u2705 **Note**: These commands work on any Slurm cluster where `scontrol` is available and the job is still in the queue (not completed or failed).  \n> \u2757 The job must be in a state like `PENDING` or `RUNNING` to be suspended/resumed. If the job is already completed, these commands will fail.\n\n### Example:\n```bash\n# Pause job 55\nscontrol suspend 55\n\n# Later, resume it\nscontrol resume 55\n```\n\n> \u26a0\ufe0f **Important**: The job will not be automatically resumed. You must manually run `scontrol resume 55` when you want to restart it. Also, the job will resume from where it left off (if it was running), but if it was suspended while waiting for resources, it may need to requeue.\n\nLet me know if you're on a specific cluster (e.g., Summit, Frontera, etc.) \u2014 some clusters have additional job control features."
+   },
+   {
+    "id": 10,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368644 to start at 2026-10-30T03:41:50 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "Here is a short Slurm batch script that loads the Python module and runs `python -c 'print(42)'` using `srun`:\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=python_test\n#SBATCH --output=python_output.txt\n#SBATCH --error=python_error.txt\n#SBATCH --time=00:05:00\n#SBATCH --partition=compute\n#SBATCH --ntasks=1\n\n# Load the Python module (adjust module name as needed for your cluster)\nmodule load python\n\n# Run the Python command via srun\nsrun python -c \"print(42)\"\n```\n\n### Notes:\n- Replace `python` with the actual module name if your cluster uses a different one (e.g., `python/3.10`, `anaconda3`, etc.). You can check available modules with `module avail python`.\n- The `--partition=compute` is typical for HPC clusters; adjust based on your cluster's configuration.\n- The `srun` command ensures the job runs in a Slurm-managed environment, even if the Python module is loaded in the batch script.\n\nSave this as `job.sh`, make it executable, and submit with `sbatch job.sh`."
+   },
+   {
+    "id": 11,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "srun: unrecognized option '--array=$SLURM_ARRAY_TASK_ID'\nTry \"srun --help\" for more information | srun: unrecognized option '--array=$SLURM_ARRAY_TASK_ID'\nTry \"srun --help\" for more information | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368645 to start at 2026-10-30T09:19:52 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368648 to start at 2026-10-30T09:19:52 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368649 to start at 2026-10-30T09:19:52 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368651 to start at 2026-10-30T09:19:53 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368653 to start at 2026-10-30T09:19:53 a using 2 processors on nodes login13 in partiti | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368654 to start at 2026-10-30T09:19:53 a using 2 processors on nodes login13 in partiti",
+    "answer": "In a Slurm job array script, the environment variable that holds the array index of the task is:\n\n```\nSLURM_ARRAY_TASK_ID\n```\n\nTo pass this as the only argument to `./run.sh` in an `srun` line, you can use:\n\n```bash\nsrun --array=$SLURM_ARRAY_TASK_ID ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\nHowever, if you want to pass the array index as the **only argument** to `./run.sh`, you should use:\n\n```bash\nsrun --array=$SLURM_ARRAY_TASK_ID ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\nThis ensures that the array index is passed as the first (and only) argument to `./run.sh`.\n\n> \u2705 **Note**: The `--array` flag is used to define the array task ID, but it is not passed as an argument to the script. Instead, the variable `$SLURM_ARRAY_TASK_ID` is set by Slurm and available in the environment. The `srun` command will execute `./run.sh` with that value as an argument.\n\nSo the correct `srun` line is:\n\n```bash\nsrun ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\nThis assumes `./run.sh` is designed to accept the array index as its first argument. The `--array` flag is not needed in the `srun` line if you're using the environment variable directly \u2014 it's only used when submitting the job array.\n\n### Full Example Job Script:\n```bash\n#!/bin/bash\n#SBATCH --array=1-10\n\nsrun ./run.sh $SLURM_ARRAY_TASK_ID\n```\n\nThis will run `./run.sh` with arguments like `1`, `2`, ..., `10` depending on the task ID."
+   },
+   {
+    "id": 12,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "62368497_1-2: Requested operation is presently disabled | scontrol:",
+    "answer": "To requeue a running job with ID `1234`, you need to use the `scontrol` command on a Slurm-managed cluster.\n\nThe exact command is:\n\n```bash\nscontrol requeue 1234\n```\n\nThis command will requeue the job, which means it will be placed back into the queue and will be eligible to run again after any pending conditions are met.\n\n> **Note**: This command only works if the job is currently running and the cluster allows requeuing (i.e., the job is not in a state that prevents requeueing, such as `COMPLETED`, `FAILED`, or `CANCELLED`). Also, ensure you are on a Slurm cluster (e.g., Summit, Frontera, etc.) and have appropriate permissions to manage jobs."
+   },
+   {
+    "id": 13,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368661 to start at 2026-10-30T09:19:55 a using 2 processors on nodes login13 in partition lrd_all_serial",
+    "answer": "To send a `SIGUSR1` signal to the batch script 120 seconds before the time limit, you can use the `--signal` option in Slurm with a time-based delay. However, Slurm does **not** support sending signals to the job script 120 seconds before the time limit directly via `#SBATCH` in a single line using standard options.\n\nInstead, you can use the `--time-limit` and `--signal` options together with a **preemptive signal** mechanism, but Slurm does not natively support scheduling a signal to be sent at a specific time before the limit.\n\nHowever, **you can use a workaround** by setting a `--time-limit` and then using a `sleep` command in the script to wait 120 seconds before sending the signal. But that requires modifying the script.\n\nAlternatively, **Slurm provides a way to send a signal to the job script using `--signal` with a delay**, but only if you use `srun` or `sbatch` with a `--signal` option that includes a delay \u2014 **this is not directly supported**.\n\nActually, **Slurm does not support sending a signal to the job script 120 seconds before the time limit via `#SBATCH`**.\n\nBut if you're asking for a **single `#SBATCH` line** that configures the job to **receive a signal 120 seconds before the time limit**, the correct and supported way is:\n\n```bash\n#SBATCH --time=01:00:00\n```\n\nThen, in your script, you can use:\n\n```bash\n#!/bin/bash\n# Wait 120 seconds before the time limit\nsleep $(( $(date +%s) + 120 - $(date -d \"$(scontrol show job $SLURM_JOB_ID | grep TimeLimit | awk '{print $2}') | sed 's/hh:mm:ss//') ))\n# Then send SIGUSR1\nkill -USR1 $$\n```\n\nBut this is **not a single `#SBATCH` line**.\n\n### \u2705 Correct Answer (Single `#SBATCH` line):\n\nThere is **no single `#SBATCH` line** that makes Slurm send `SIGUSR1` 120 seconds before the time limit.\n\nSlurm does **not** support this feature natively.\n\nHowever, if you're using a **custom signal handler** or **external monitoring**, you can use:\n\n```bash\n#SBATCH --time=01:00:00\n```\n\nAnd then in your script:\n\n```bash\n#!/bin/bash\n# Wait 120 seconds before the time limit\nTIME_LIMIT=$(scontrol show job $SLURM_JOB_ID | grep TimeLimit | awk '{print $2}')\nsleep $(( $(date +%s) + 120 - $(date -d \"$TIME_LIMIT\" +%s) ))\nkill -USR1 $$\n```\n\nBut again, this is **not a single `#SBATCH` line**.\n\n### \u274c Conclusion:\n\nThere is **no single `#SBATCH` line** that makes Slurm send `SIGUSR1` 120 seconds before the time limit.\n\nSlurm does not support this feature.\n\nIf you need this behavior, you must implement it in your script using `scontrol` and `sleep`.\n\nLet me know if you're on a specific cluster (e.g., Summit, Perlmutter, etc.) \u2014 some clusters have custom tools or plugins that might support this."
+   },
+   {
+    "id": 14,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) |  | scancel is graded by the rules only (it would cancel the fixtures)",
+    "answer": "To requeue job 77 and keep it held (so it does not start again until manually released), you would use the `scancel` command with the `--hold` option on the job ID.\n\nThe correct command is:\n\n```bash\nscancel --hold 77\n```\n\nThis command will:\n- Cancel the job (requeue it into the queue),\n- Hold it in the queue so it does not start automatically,\n- Wait for manual release (e.g., using `scancel --release 77` or `scontrol release 77`) before it can run.\n\n> **Note**: This assumes you are on a Slurm-managed cluster (e.g., Summit, Frontera, etc.). The exact behavior may vary slightly depending on the cluster's configuration, but `scancel --hold` is the standard Slurm command for this purpose.\n\nIf you're unsure which cluster you're on, please specify the cluster name."
+   },
+   {
+    "id": 15,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsbatch: Job 62368666 to start at 2026-10-30T09:19:56 a using 2 processors on nodes login13 in par | sbatch: error: Batch script is empty! | sbatch: error: Batch script is empty!",
+    "answer": "To submit `post.sh` so it starts **after job 500 ends**, regardless of whether job 500 succeeded or failed, you can use the `--dependency=afterok` option in `sbatch`. However, since you want it to run **after job 500 ends**, even if it fails, you should use `--dependency=afterany`.\n\nThe correct `sbatch` command is:\n\n```bash\nsbatch --dependency=afterany:500 post.sh\n```\n\n### Explanation:\n- `--dependency=afterany:500`: Ensures that `post.sh` starts **after job 500 completes**, whether it succeeded (`afterok`) or failed (`afterany`).\n- `afterany` is the key here \u2014 it triggers the dependency on the **completion** of job 500, not just success.\n\n> \u2705 This is the standard and correct way to schedule a job to run after another job finishes, regardless of its outcome.\n\nMake sure `post.sh` is in the current directory or provide the full path to it."
+   },
+   {
+    "id": 16,
+    "rating": "partly correct",
+    "rules": false,
+    "rules_hit": "1/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Job dependency problem",
+    "answer": "To ensure that only one job named `nightly` runs at a time (and subsequent jobs wait until the current one completes), you can use the `--exclusive` and `--job-name` options in combination with `--dependency=afterok` or `--dependency=afterany` in a way that enforces exclusivity.\n\nHowever, the most reliable and standard way to ensure **only one job with a specific name** runs at a time is to use the `--exclusive` flag **together with a job array or a job name**, but since you want to **control concurrency by job name**, the best approach is to use:\n\n### \u2705 Use `--exclusive` and `--job-name=nightly` with `--dependency=afterok`\n\nBut actually, **`--exclusive`** alone ensures no other jobs run on the same node, but it doesn't prevent multiple jobs with the same name from running \u2014 unless you use a **job array** or **job name + dependency**.\n\nHowever, **Slurm does not natively support \"only one job with this name\"** as a built-in constraint. But you can simulate it using:\n\n### \u2705 Recommended: Use `--dependency=afterok` and `--job-name=nightly` with a **job array** or **a single job that waits for the previous one**\n\nBut the cleanest and most common way to ensure **only one job named `nightly` runs at a time** is to use:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n#SBATCH --dependency=afterok:$SLURM_JOB_ID\n```\n\nWait \u2014 that won't work because `$SLURM_JOB_ID` is not set until the job runs.\n\n### \u2705 Correct and Practical Solution:\n\nUse a **job array** or **a job that waits for the previous job** using `--dependency=afterok` **from the same job script**, but since you want **only one job named `nightly`**, the best way is to **submit a new job that waits for the previous one**.\n\nBut if you're submitting **multiple jobs manually**, you can use:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n#SBATCH --dependency=afterok:$SLURM_JOB_ID\n```\n\nBut again, `$SLURM_JOB_ID` is not available in the job script until it runs.\n\n### \u2705 Final Answer: Use `--exclusive` and `--dependency=afterok` with a **job array** or **submit a new job that waits for the previous one**.\n\nBut if you're writing a **single job script** and want to **submit multiple jobs**, and you want **only one `nightly` job to run at a time**, the best way is to **submit a new job that waits for the previous one**.\n\nHowever, if you're writing a **repeating job script** (e.g., a script that runs nightly), and you want to **submit a new job only if the previous one is done**, you can do:\n\n```bash\n#!/bin/bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n#SBATCH --time=01:00:00\n#SBATCH --mem=4G\n#SBATCH --output=nightly_%j.out\n\n# Your job commands here\necho \"Running nightly job at $(date)\"\n# Your actual work here\n\n# This job will wait for the previous job to finish\n# But since we're submitting this job, we need to use a different mechanism\n```\n\nBut to **ensure only one job with name `nightly` runs at a time**, you must **submit the next job with `--dependency=afterok:$SLURM_JOB_ID`**, but that requires **knowing the job ID**.\n\n### \u2705 Best Practice: Use a **job array** or **a script that submits itself with dependency**\n\nBut if you're using a **single job script** and want to **submit multiple jobs**, and you want **only one `nightly` job to run at a time**, the correct `#SBATCH` lines are:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n#SBATCH --time=01:00:00\n#SBATCH --mem=4G\n#SBATCH --output=nightly_%j.out\n```\n\nThen, when submitting **multiple jobs**, use:\n\n```bash\nsbatch --dependency=afterok:$SLURM_JOB_ID nightly_job.sh\n```\n\nBut again, `$SLURM_JOB_ID` is not available in the job script.\n\n### \u2705 Final Answer (for a single job script that runs nightly):\n\nIf you're running this job **once per night**, and you want to **ensure only one job with name `nightly` runs at a time**, you can use:\n\n```bash\n#SBATCH --job-name=nightly\n#SBATCH --exclusive\n#SBATCH --time=01:00:0"
+   },
+   {
+    "id": 17,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxSubmitJobPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "To request 1 node with 4 GPUs and 4 tasks (one GPU per task), you would use the following `#SBATCH` directives on a Slurm-managed HPC cluster (e.g., Summit, Perlmutter, or similar GPU clusters):\n\n```bash\n#SBATCH --nodes=1\n#SBATCH --gpus-per-node=4\n#SBATCH --ntasks=4\n#SBATCH --gpus-per-task=1\n```\n\n### Explanation:\n- `--nodes=1`: Request 1 node.\n- `--gpus-per-node=4`: Allocate 4 GPUs on that node.\n- `--ntasks=4`: Launch 4 tasks (MPI processes or parallel jobs).\n- `--gpus-per-task=1`: Assign exactly 1 GPU to each task.\n\nThis ensures that each of the 4 tasks gets one GPU, and the total GPU count matches the number of tasks.\n\n> \u2705 **Note**: The exact syntax may vary slightly depending on the cluster (e.g., some use `--gpus=4` instead of `--gpus-per-node=4`). If you're unsure, check your cluster's documentation or run `sinfo` and `scontrol show node <nodename>` to confirm GPU and task allocation policies."
+   },
+   {
+    "id": 18,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Requested time limit is invalid (missing or exceeds some limit)",
+    "answer": "On most HPC clusters, the `#SBATCH` directive for a time limit is specified using the `--time` option. To set a time limit of 1 day and 6 hours, you can write:\n\n```bash\n#SBATCH --time=1-6:00\n```\n\nThis format uses the `D-HH:MM` syntax, where:\n- `1` = 1 day,\n- `6:00` = 6 hours.\n\nSo the full `#SBATCH` line is:\n\n```bash\n#SBATCH --time=1-6:00\n```\n\n> **Note**: The exact syntax may vary slightly depending on the cluster (e.g., some use `--time=24:06:00` for 24 hours and 6 minutes). However, `1-6:00` is the standard and most readable format for 1 day and 6 hours."
+   },
+   {
+    "id": 19,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: option '--mem-per-cpu' requires an argument\nTry \"sbatch --help\" for more information",
+    "answer": "To request 4 GB of memory per allocated CPU in an SLURM job script, use the `#SBATCH --mem-per-cpu` directive.\n\nThe correct `#SBATCH` line is:\n\n```bash\n#SBATCH --mem-per-cpu=4G\n```\n\nThis tells SLURM to allocate 4 gigabytes of memory for each CPU core assigned to the job."
+   },
+   {
+    "id": 20,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: error: no gres/tmpfs specified, using default: gres/tmpfs:10g\nallocation failure: Node count specification invalid",
+    "answer": "To request whole nodes (exclusive access) for your job on an HPC cluster, you need to use the `--exclusive` flag in your `#SBATCH` directive.\n\nThe correct `#SBATCH` line is:\n\n```bash\n#SBATCH --exclusive\n```\n\nThis ensures that your job runs on a full node without sharing resources with other jobs.\n\n> **Note**: The exact syntax may vary slightly depending on the cluster (e.g., Slurm, PBS, etc.). On most Slurm-based clusters (like those at NERSC, TACC, or national HPC centers), `--exclusive` is the standard way to request exclusive node access.\n\nIf you also want to specify the number of nodes, you can combine it with `--nodes=N`:\n\n```bash\n#SBATCH --nodes=1 --exclusive\n```\n\nOr for multiple nodes:\n\n```bash\n#SBATCH --nodes=4 --exclusive\n```\n\nThis guarantees that no other jobs will run on the same nodes during your job's execution."
+   },
+   {
+    "id": 21,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "PD       0:00      4 (QOSMaxJobsPerUserLimit)\n          62367862 boost_usr dk-rag65 a08trc09 PD       0:00      4 (QOSMa |          62368123 lrd_all_v bmvs_hr_ mdurso00 PD       0:00      1 (BeginTime)\n          62321366 lrd_all_v claude_c cdo",
+    "answer": "To list only your own jobs that are still pending, use the `squeue` command with the following options:\n\n```bash\nsqueue -u $USER -t PENDING\n```\n\n### Explanation:\n- `-u $USER`: Filters jobs for your user account.\n- `-t PENDING`: Shows only jobs in the pending state.\n\nThis command works on any Slurm-managed cluster (e.g., Summit, Frontera, etc.). Replace `$USER` with your actual username if needed, but `$USER` is typically sufficient and safe.\n\n### Example output:\n```\nJOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)\n12345   debug     myjob   alice  PD       0:00      1 (Resources)\n```\n\n> **Note**: The `PD` state means \"Pending\"."
+   },
+   {
+    "id": 22,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures) | scancel is graded by the rules only (it would cancel the fixtures)",
+    "answer": "To cancel all of your jobs named `sweep`, you can use the `scancel` command with the `--name` option, which filters jobs by name.\n\nAssuming you are on a cluster that uses Slurm (common in HPC environments), the command is:\n\n```bash\nscancel --name=sweep\n```\n\nThis will cancel all jobs owned by your user that have the name `sweep`.\n\n> **Note**: If you're on a different job scheduler (e.g., PBS, LSF), the command would differ. However, since `scancel` is standard in Slurm, and your query is generic, this is the most likely correct command for a typical HPC cluster using Slurm. If you're unsure of the cluster name or scheduler, please specify your cluster (e.g., \"Frontera\", \"Stampede2\", etc.) for a more precise answer."
+   },
+   {
+    "id": 23,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": " | JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)\n  62368497_[1-2%1] lrd_all_s  fixture a08trc09 PD       0:00      1 (None) | scontrol: | too few arguments for update keyword",
+    "answer": "To change the time limit of a pending job (job ID 88) to 3 hours on an HPC cluster, you typically use the `scontrol` command, which is part of the Slurm workload manager.\n\nAssuming the cluster uses Slurm (common on most HPC systems), the command is:\n\n```bash\nscontrol update JobId=88 TimeLimit=03:00:00\n```\n\n### Explanation:\n- `scontrol update`: Updates a job's parameters.\n- `JobId=88`: Targets the specific job.\n- `TimeLimit=03:00:00`: Sets the new time limit to 3 hours (HH:MM:SS format).\n\n> \u2705 **Note**: This command only works if the job is still pending (not running). If the job is already running, you cannot change its time limit.\n\n### Optional: Verify the job status first\nBefore updating, check the job status:\n\n```bash\nsqueue -j 88\n```\n\nThis ensures the job is pending and not already running.\n\nLet me know if you're on a specific cluster (e.g., Summit, Frontera, etc.) \u2014 some clusters may have additional restrictions or require admin privileges."
+   },
+   {
+    "id": 24,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "3/3",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "JobID           JobName      State               Start                 End ExitCode \n------------ ---------- ---------- ------------------- -------------------  | JobID           JobName      State               Start                 End ExitCode \n------------ ---------- ---------- ------------------- -------------------  | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d |    Note, valid start/end time formats are...\n                   HH:MM[:SS] [AM|PM]\n                   MMDD[YY] or MM/DD[/YY] or MM.DD[.YY]\n                   MM",
+    "answer": "To list your jobs that started since midnight today and ended in the `FAILED` state, you can use the `sacct` command with appropriate filters.\n\nAssuming you're on a Slurm-managed cluster (e.g., **Expanse**, **Stampede2**, or similar), the command is:\n\n```bash\nsacct -u $USER --starttime today --starttime 00:00:00 --format=JobID,JobName,State,Start,End,ExitCode --state=FAILED\n```\n\n### Explanation:\n- `-u $USER`: Filters jobs for your user.\n- `--starttime today`: Starts from today.\n- `--starttime 00:00:00`: Ensures the time is set to midnight (00:00:00).\n- `--format=...`: Specifies output fields (customize as needed).\n- `--state=FAILED`: Filters only jobs that ended in FAILED state.\n\n> \u26a0\ufe0f **Note**: The `--starttime` option in `sacct` accepts relative time formats like `today`, `yesterday`, etc., but to be precise about midnight, you may need to combine it with `--starttime` and `--endtime` or use `--starttime 00:00:00` with `--starttime today` as shown.\n\nAlternatively, if your cluster supports it, you can use:\n\n```bash\nsacct -u $USER --starttime today --starttime 00:00:00 --state=FAILED --format=JobID,JobName,State,Start,End,ExitCode\n```\n\nThis will show only your jobs that:\n- Started **after midnight today**,\n- Ended in the `FAILED` state.\n\n> \u2705 **Tip**: If you're unsure of the cluster name or Slurm version, run `sacct --help` to confirm available options."
+   },
+   {
+    "id": 25,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sacct: error: Invalid field requested: \"Efficiency\" | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d | x+     extern            euhpc_d30+         24    RUNNING      0:0 \n62367806.0         bash            euhpc_d30+         12    RUNNING      0:0 \n62367862     d",
+    "answer": "To show the CPU and memory efficiency of a finished job (e.g., job ID 321), you typically use the `sacct` command on Slurm-managed HPC clusters.\n\nAssuming you're on a cluster using Slurm (like **Expanse**, **Stampede2**, or similar), the command to get CPU and memory efficiency for job 321 is:\n\n```bash\nsacct -j 321 --format=JobID,JobName,NTasks,AllocCPUS,ReqMem,MaxRSS,Elapsed,TotalCPU,Efficiency\n```\n\n### Explanation of fields:\n- `Efficiency`: Shows CPU efficiency (as a percentage) = (Total CPU time used / Total CPU time allocated) \u00d7 100\n- `MaxRSS`: Maximum resident set size (memory used)\n- `ReqMem`: Requested memory\n- `AllocCPUS`: Number of CPUs allocated\n- `TotalCPU`: Total CPU time used (in seconds)\n- `Elapsed`: Wall-clock time\n\n> \ud83d\udca1 **Note**: Efficiency is only meaningful if the job completed successfully and used CPU time. If the job is still running, `sacct` may not show efficiency yet.\n\n### Example output:\n```\nJobID    JobName    NTasks  AllocCPUS  ReqMem  MaxRSS  Elapsed  TotalCPU  Efficiency\n321      myjob      1       4          16G     8G      00:15:30  12000     80.00%\n```\n\nThis tells you the job used 80% of its allocated CPU time and consumed up to 8 GB of memory.\n\nLet me know the cluster name (e.g., Expanse, Frontera, etc.) if you need cluster-specific formatting or field names."
+   },
+   {
+    "id": 26,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "4/4",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368689 to start at 2026-10-30T09:35:07 a using  | ]\nlrd_all_viz        up   12:00:00      1 drain* viz02\nlrd_all_viz        up   12:00:00     10  drain viz[03-08,10-11,13 | srun: no gres/tmpfs specified, using default: gres/tmpfs:10g\nsrun: Job 62368693 to start at 2026-10-30T09:35:10 a using ",
+    "answer": "To start an interactive shell on a compute node with 4 CPUs for 30 minutes using `srun`, you would typically use the following command on a Slurm-managed HPC cluster (e.g., **Expanse**, **Stampede2**, or similar):\n\n```bash\nsrun --ntasks=1 --cpus-per-task=4 --time=00:30:00 --pty /bin/bash\n```\n\n### Explanation:\n- `--ntasks=1`: Request one task (i.e., one interactive session).\n- `--cpus-per-task=4`: Allocate 4 CPUs for that task.\n- `--time=00:30:00`: Set the time limit to 30 minutes (HH:MM:SS format).\n- `--pty`: Allocate a pseudo-terminal for an interactive shell.\n- `/bin/bash`: Launch the Bash shell.\n\n> \u2705 **Note**: The exact command may vary slightly depending on the cluster's configuration. For example, some clusters use `--cpus-per-task` or `--cpus-per-node` instead. If your cluster uses a different partition or has specific constraints (e.g., `--partition=debug`), you may need to add that.\n\nIf you're unsure of the default partition or available resources, check with your cluster's documentation or run:\n\n```bash\nsinfo\n```\n\nto see available partitions and node features.\n\nLet me know which cluster you're using (e.g., Expanse, Stampede2, etc.) if you need a cluster-specific version."
+   },
+   {
+    "id": 27,
+    "rating": "partly correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "sbatch: option '--output' requires an argument\nTry \"sbatch --help\" for more information",
+    "answer": "To ensure each array task writes to its own output file named with the **array job ID** and the **task index**, you can use the `%A` (array job ID) and `%a` (task index) Slurm environment variables in the `#SBATCH --output` directive.\n\nThe correct `#SBATCH --output` line is:\n\n```bash\n#SBATCH --output=job_%A_%a.out\n```\n\n### Explanation:\n- `%A` \u2192 The array job ID (e.g., `12345`)\n- `%a` \u2192 The task index (e.g., `0`, `1`, `2`, etc.)\n- `.out` \u2192 Output file extension\n\n### Example:\nIf your array job ID is `12345` and you have 3 tasks, the output files will be:\n- `job_12345_0.out`\n- `job_12345_1.out`\n- `job_12345_2.out`\n\nThis is the standard and recommended way to handle per-task output in Slurm array jobs."
+   },
+   {
+    "id": 28,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "2/2",
+    "forbidden": [],
+    "slurm": "policy",
+    "slurm_output": "sbatch: error: QOSMaxCpuPerUserLimit\nallocation failure: Job violates accounting/QOS policy (job submit limit, user's size and/or time limits)",
+    "answer": "To submit an MPI job on 2 nodes with 32 tasks per node using Slurm, you need to specify the number of nodes (`--nodes`), the number of tasks per node (`--ntasks-per-node`), and the total number of tasks (`--ntasks`). Since you want 32 tasks per node on 2 nodes, the total number of tasks is 64.\n\nHere are the appropriate `#SBATCH` lines:\n\n```bash\n#SBATCH --nodes=2\n#SBATCH --ntasks-per-node=32\n#SBATCH --ntasks=64\n```\n\nThese lines ensure that Slurm allocates 2 nodes, each with 32 MPI tasks, for a total of 64 tasks. This is the standard way to request MPI resources in Slurm.\n\n> **Note**: The exact number of tasks per node may depend on the cluster's node configuration (e.g., CPU cores per node). Ensure that 32 tasks per node is supported by the cluster's hardware and that you are using a job scheduler compatible with MPI (e.g., Slurm with `srun` or `mpirun`)."
+   },
+   {
+    "id": 29,
+    "rating": "correct",
+    "rules": true,
+    "rules_hit": "1/1",
+    "forbidden": [],
+    "slurm": "ok",
+    "slurm_output": "4",
+    "answer": "To set `OMP_NUM_THREADS` to the number of CPUs Slurm allocated to each task in a job script, use the following line:\n\n```bash\nexport OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n```\n\nThis ensures that OpenMP threads are limited to the number of CPUs assigned per task by Slurm, which is typically set via the `--cpus-per-task` option in your `sbatch` command.\n\n### Example job script snippet:\n```bash\n#!/bin/bash\n#SBATCH --job-name=my_openmp_job\n#SBATCH --ntasks=1\n#SBATCH --cpus-per-task=4\n\nexport OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\nexport OMP_PROC_BIND=true\nexport OMP_PLACES=cores\n\n# Your OpenMP application here\n./my_openmp_program\n```\n\n> **Note**: This assumes you're using a single task (`--ntasks=1`) and want to use all allocated CPUs for that task. If you're using multiple tasks, each task will independently use `SLURM_CPUS_PER_TASK` CPUs."
+   },
+   {
+    "id": 30,
+    "rating": "wrong",
+    "rules": false,
+    "rules_hit": "0/2",
+    "forbidden": [],
+    "slurm": "rejected",
+    "slurm_output": "No valid entity in update command\nInput line must include \"NodeName\", \"PartitionName\", \"Reservation\", \"JobId\", or \"SlurmctldDebug\" | ) LicensesAlloc=(null) Network=(null)\n   Command=(null)\n   WorkDir=/scratch_local/slurm_exec_7thst5zn\n   StdErr=/scratch_local/slurm_exec_7thst5zn/slurm-6236849",
+    "answer": "To limit the number of tasks (jobs) in a job array to run simultaneously, you use the `--array` option with the `--max-array-simultaneous` flag in Slurm.\n\nAssuming you are on a Slurm-managed cluster (e.g., **Expanse**, **Stampede2**, or similar), the command to modify job array 999 so that at most 5 tasks run at once is:\n\n```bash\nscontrol update JobArray=999 MaxArraySimultaneous=5\n```\n\n### Notes:\n- This command must be run **on the cluster** where the job array is submitted (typically by an administrator or user with appropriate privileges).\n- The job array must still be in a **pending** or **running** state for this update to take effect.\n- If the job array has already started, this setting will only affect future tasks \u2014 it does not immediately kill or pause running tasks.\n- You can verify the current setting with:\n  ```bash\n  scontrol show job 999\n  ```\n\n> \u26a0\ufe0f **Important**: This command is **not** available in all Slurm versions or on all clusters. If you're unsure of the cluster or Slurm version, please specify the cluster name (e.g., \"Expanse\", \"Stampede2\", \"Frontera\") for a more accurate answer."
+   }
+  ]
+ }
+}
