@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: priority_submit.sh SBATCH_ARGS...   (run with setsid nohup; env such as REPO/RUN is passed through)
 # Reserves the next free debug-QoS slot: factory controllers stop submitting while ctl/PRIORITY exists.
-# Submits straight into the queue, waits for the job to end, then releases the reservation.
+# Submits straight into the queue, releases the reservation once the job runs, and waits for the job to end.
 CTL="$(cd "$(dirname "$0")" && pwd)"
 log() { echo "$(date -u +%FT%TZ) $*" >> "$CTL/priority.log"; }
 echo "$*" > "$CTL/PRIORITY"
@@ -27,5 +27,9 @@ while true; do
     log "submit refused, retrying: $j ($*)"; sleep 120
 done
 log "submitted $j: $*"
+# Oct 26: release the reservation once the job runs (it no longer waits for a slot); holding it until the job ended
+# kept the factory off this account's other 7 nodes for a whole 1-node score job.
+while squeue -h -j "$j" -t PD 2>/dev/null | grep -q .; do sleep 30; done
+rm -f "$CTL/PRIORITY"
 while squeue -h -j "$j" 2>/dev/null | grep -q .; do sleep 60; done
 log "job $j: $(sacct -n -X -j "$j" --format=State,Elapsed | head -1 | xargs)"
