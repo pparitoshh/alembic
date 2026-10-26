@@ -13,3 +13,6 @@ better of its answer with excerpts and its closed-book answer. Round 50 trains t
 
 Unlike round 47 (token-level correction of the with-excerpts answer, which lost), the target here can be the model's
 own closed-book answer, so it learns to fall back on its own knowledge when the excerpts do not help.
+
+Result (Oct 25, 3-judge majority vs round 27): v2 -0.034, v3 +0.011, d1 -0.012. Lost: the model did not learn when to
+ignore the excerpts. See `research/round51/` for the next attempt.
