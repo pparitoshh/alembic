@@ -1,0 +1,30 @@
+{"id": 1, "model": "reference", "answer": "```bash\n#!/bin/bash\n#SBATCH --job-name=myjob\n#SBATCH --nodes=1\n#SBATCH --ntasks=1\n#SBATCH --cpus-per-task=8\n#SBATCH --mem=16G\n#SBATCH --time=02:00:00\n#SBATCH --output=myjob_%j.out\n```"}
+{"id": 2, "model": "reference", "answer": "```bash\n#SBATCH --array=1-10%3\n```"}
+{"id": 3, "model": "reference", "answer": "```bash\nsbatch --dependency=afterok:42 B.sh\n```"}
+{"id": 4, "model": "reference", "answer": "```bash\n#SBATCH --mail-type=END,FAIL\n#SBATCH --mail-user=me@example.com\n```"}
+{"id": 5, "model": "reference", "answer": "```bash\nsrun --ntasks=4 hostname\n```"}
+{"id": 6, "model": "reference", "answer": "```bash\nsacct -j 99 --format=JobID,Elapsed,State\n```"}
+{"id": 7, "model": "reference", "answer": "```bash\nscontrol show job 77\n```"}
+{"id": 8, "model": "reference", "answer": "```bash\nsinfo -N -o \"%P %N %T\"\n```"}
+{"id": 9, "model": "reference", "answer": "```bash\nscontrol hold 55\nscontrol release 55\n```"}
+{"id": 10, "model": "reference", "answer": "```bash\n#!/bin/bash\n#SBATCH --job-name=modpy\n#SBATCH --ntasks=1\n#SBATCH --time=00:05:00\nmodule load python\nsrun python -c 'print(42)'\n```"}
+{"id": 11, "model": "reference", "answer": "```bash\nsrun ./run.sh $SLURM_ARRAY_TASK_ID\n```"}
+{"id": 12, "model": "reference", "answer": "```bash\nscontrol requeue 1234\n```"}
+{"id": 13, "model": "reference", "answer": "```bash\n#SBATCH --signal=B:USR1@120\n```"}
+{"id": 14, "model": "reference", "answer": "```bash\nscontrol requeuehold 77\n```"}
+{"id": 15, "model": "reference", "answer": "```bash\nsbatch --dependency=afterany:500 post.sh\n```"}
+{"id": 16, "model": "reference", "answer": "```bash\n#SBATCH --job-name=nightly\n#SBATCH --dependency=singleton\n```"}
+{"id": 17, "model": "reference", "answer": "```bash\n#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --gres=gpu:4\n#SBATCH --gpus-per-task=1\n```"}
+{"id": 18, "model": "reference", "answer": "```bash\n#SBATCH --time=1-06:00:00\n```"}
+{"id": 19, "model": "reference", "answer": "```bash\n#SBATCH --mem-per-cpu=4G\n```"}
+{"id": 20, "model": "reference", "answer": "```bash\n#SBATCH --exclusive\n```"}
+{"id": 21, "model": "reference", "answer": "```bash\nsqueue --me --states=PENDING\n```"}
+{"id": 22, "model": "reference", "answer": "```bash\nscancel --name=sweep\n```"}
+{"id": 23, "model": "reference", "answer": "```bash\nscontrol update JobId=88 TimeLimit=03:00:00\n```"}
+{"id": 24, "model": "reference", "answer": "```bash\nsacct --starttime=today --state=FAILED\n```"}
+{"id": 25, "model": "reference", "answer": "```bash\nseff 321\n```"}
+{"id": 26, "model": "reference", "answer": "```bash\nsrun --cpus-per-task=4 --time=00:30:00 --pty bash\n```"}
+{"id": 27, "model": "reference", "answer": "```bash\n#SBATCH --output=out_%A_%a.txt\n```"}
+{"id": 28, "model": "reference", "answer": "```bash\n#SBATCH --nodes=2\n#SBATCH --ntasks-per-node=32\n```"}
+{"id": 29, "model": "reference", "answer": "```bash\nexport OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n```"}
+{"id": 30, "model": "reference", "answer": "```bash\nscontrol update JobId=999 ArrayTaskThrottle=5\n```"}
