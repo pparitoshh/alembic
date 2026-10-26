@@ -1,0 +1,47 @@
+"""Round 51b step 4: training rows from the Qwen3-235B verdicts (round 27's answer vs Qwen3-235B's answer to the same
+prompt, judged with the verified reference, both orders). Where Qwen3-235B's answer is clearly better (round 27 scores
+0 or 0.25) the target is Qwen3-235B's answer; for as many questions where round 27 is at least level (0.5 or more), the
+target is round 27's own answer (keeps its style). (Round 51 judged against the reference itself, which the judge
+preferred on 4,589/5,000 questions, so it found no errors.)
+The prompt always carries the excerpts (the app's prompt). Replay rows (round 38's non-tool rows, Qwen3-235B scores,
+KD_MIXED=1) protect the Slurm sets.
+
+usage: r51b_train_data.py RD_DIR REPLAY_SRC OUT.jsonl [N_REPLAY]
+"""
+import glob
+import json
+import random
+import sys
+
+rd, replay, out = sys.argv[1:4]
+n_replay = int(sys.argv[4]) if len(sys.argv) > 4 else 6000
+
+
+def sc(v):
+    return ((v[0] == 'A') + (v[0] == 'T') * .5 + (v[1] == 'B') + (v[1] == 'T') * .5) / 2
+
+
+q = {json.loads(l)['id']: json.loads(l) for l in open(f'{rd}/questions.jsonl')}
+own = {json.loads(l)['id']: json.loads(l)['answer'] for l in open(f'{rd}/answers/d1__rag.jsonl')}
+teacher = {json.loads(l)['id']: json.loads(l)['answer'] for l in open(f'{rd}/answers/d1__base_closed.jsonl')}
+wrong, right = [], []
+for f in glob.glob(f'{rd}/judged_qwen/d1__rag__*.jsonl'):
+    for line in open(f):
+        r = json.loads(line)
+        s = sc(r['judge']['arm_vs_base'])
+        (wrong if s <= 0.25 else right).append(r['id'])
+rng = random.Random(51)
+rng.shuffle(right)
+rows = [{'id': i, 'pick': 'teacher', 'messages': [{'role': 'user', 'content': q[i]['rag_prompt']},
+                                                  {'role': 'assistant', 'content': teacher[i]}]} for i in wrong]
+rows += [{'id': i, 'pick': 'own', 'messages': [{'role': 'user', 'content': q[i]['rag_prompt']},
+                                               {'role': 'assistant', 'content': own[i]}]} for i in right[:len(wrong)]]
+rep = [r for r in map(json.loads, open(replay)) if not r.get('tools')]
+rng.shuffle(rep)
+data = rows + rep[:n_replay]
+rng.shuffle(data)
+with open(out, 'w') as f:
+    for r in data:
+        f.write(json.dumps(r, ensure_ascii=False) + '\n')
+print(f'INPUT READY: {len(wrong) + len(right)} judged questions, Qwen3-235B clearly better on {len(wrong)}; '
+      f'{len(rows)} rows ({len(wrong)} Qwen3-235B, {len(rows) - len(wrong)} own), {min(n_replay, len(rep))} replay rows, {len(data)} rows')
