@@ -21,6 +21,10 @@ have downloaded) to questions that name neither Slurm, a Slurm command nor LUMI/
 and the project's full crawl it raised the GPU/MPI win rate (d1) by 0.073 under the 3-judge majority, with the Slurm
 sets level. The index is not distributed: the gain came from vendor documentation that may not be redistributed.
 
+`f` is d's excerpts under e's header (RAG_VARIANT=f). With round 27 and the same index it beat e under the 3-judge
+majority (v2 +0.076, v3 +0.007, d1 +0.024). It is the default when a general index is present (otherwise `e`), and
+`--retriever f` without one falls back to e.
+
 Users can add their own manuals (PDF, Markdown, text, HTML) to a local user index; their excerpts are
 searched alongside the built-in documentation. The chat keeps its history. With `--tools`, the model can also
 call the retriever itself through a `search_docs` tool for follow-up lookups; this is off by default because the
@@ -85,8 +89,8 @@ def _query(question):
 
 
 def retrieve(question, pilot_db, factory_db, k=3, variant='', general_db=None):
-    """Site-routed BM25 retrieval. variant='b'/'c'/'d'/'e' is research/rag65/retrieve.py's RAG_VARIANT (k is then
-    ignored; e retrieves like b); c and d read general_db (default: general_docs.sqlite next to pilot_db)."""
+    """Site-routed BM25 retrieval. variant='b'/'c'/'d'/'e'/'f' is research/rag65/retrieve.py's RAG_VARIANT (k is then
+    ignored; e retrieves like b, f like d); c, d and f read general_db (default: general_docs.sqlite next to pilot_db)."""
     if variant:
         return _retrieve_variant(question, pilot_db, factory_db, variant, general_db)
     low = question.lower()
@@ -166,9 +170,9 @@ def _search(db, query, where, params, n, weights=''):
 
 
 def _retrieve_variant(question, pilot_db, factory_db, variant, general_db=None):
-    if variant not in ('a', 'b', 'c', 'd', 'e'):
-        raise ValueError('RAG_VARIANT must be unset, a, b, c, d or e')
-    variant = 'b' if variant == 'e' else variant
+    if variant not in ('a', 'b', 'c', 'd', 'e', 'f'):
+        raise ValueError('RAG_VARIANT must be unset, a, b, c, d, e or f')
+    variant = {'e': 'b', 'f': 'd'}.get(variant, variant)
     low = question.lower()
     general = variant == 'c' or (variant == 'd' and not _slurm_explicit(low))
     variant = 'b' if variant in ('c', 'd') else variant
@@ -340,22 +344,25 @@ SEARCH_TOOL = {'type': 'function', 'function': {
 
 class Assistant:
     def __init__(self, index_dir=DEFAULT_INDEX, docs=True, k=3, model='hpc-assistant', openai=None,
-                 ollama='http://localhost:11434', tools=False, retriever='e', general_index=None, slurm=None):
-        if retriever not in ('e', 'b', 'd', 'classic'):
-            raise ValueError("retriever must be 'e', 'b', 'd' or 'classic'")
+                 ollama='http://localhost:11434', tools=False, retriever=None, general_index=None, slurm=None):
+        if retriever not in (None, 'e', 'f', 'b', 'd', 'classic'):
+            raise ValueError("retriever must be 'e', 'f', 'b', 'd' or 'classic'")
         index_dir = Path(index_dir)
         self.pilot, self.factory = index_dir / 'documents.sqlite', index_dir / 'factory_docs.sqlite'
         self.general = Path(general_index) if general_index else index_dir / 'general_docs.sqlite'
-        if retriever == 'd' and not self.general.exists():
-            print(f'[hpc-assistant] no general index at {self.general}; using retriever b', file=sys.stderr)
-            retriever = 'b'
+        if retriever is None:  # default: f with a general index (same header, plus general excerpts), otherwise e
+            retriever = 'f' if self.general.exists() else 'e'
+        if retriever in ('d', 'f') and not self.general.exists():
+            fallback = {'d': 'b', 'f': 'e'}[retriever]
+            print(f'[hpc-assistant] no general index at {self.general}; using retriever {fallback}', file=sys.stderr)
+            retriever = fallback
         self.user_db = index_dir / 'user_docs.sqlite'
         self.builtin = self.pilot.exists() and self.factory.exists()
         self.docs = docs
         self.k, self.model, self.openai, self.ollama, self.tools = k, model, openai, ollama, tools
         self.slurm = slurm  # agent mode: a slurm_live.SlurmLive whose tools the model can call
         self.extra_body = {}  # merged into OpenAI-compatible requests, e.g. {'chat_template_kwargs': {'enable_thinking': False}}
-        self.retriever = retriever  # 'e' (default): b + relevance header; 'b': improved; 'd': b + general index; 'classic': the original 3
+        self.retriever = retriever  # 'e' (default): b + relevance header; 'f': d + relevance header (the default with a general index); 'b': improved; 'd': b + general index; 'classic': the original 3
         self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         self.titles = {}  # source url -> page title, for the Sources list
 
@@ -397,7 +404,7 @@ class Assistant:
                               (query, k - 1 if self.builtin else k)).fetchall()
             db.close()
             found = [dict(zip(['url', 'site', 'title', 'text', 'retrieved_at'], r)) for r in rows]
-        if self.builtin and self.retriever in ('e', 'b', 'd'):
+        if self.builtin and self.retriever in ('e', 'f', 'b', 'd'):
             found += retrieve(question, self.pilot, self.factory, variant=self.retriever, general_db=self.general)
             kept, used = [], 0  # the same 40,000-character excerpt budget as the evaluation, manuals first
             for d in found:
@@ -417,7 +424,7 @@ class Assistant:
         """The user turn the model sees, and the sources behind it."""
         docs = self.search(question) if self.docs else []
         self.titles.update({d['url']: d['title'] for d in docs if d.get('title')})
-        return with_context(question, docs, relevance=self.retriever == 'e'), [d['url'] for d in docs]
+        return with_context(question, docs, relevance=self.retriever in ('e', 'f')), [d['url'] for d in docs]
 
     # --- model ---------------------------------------------------------------------------------
     def _stream(self, messages):
@@ -431,7 +438,7 @@ class Assistant:
             url = self.ollama.rstrip('/') + '/api/chat'
             # The improved retriever's prompts are ~6K tokens per question, so a chat with history outgrows the
             # Modelfile's 8192 and Ollama silently drops the start of the prompt: use the evaluation's 16384.
-            opts = {'temperature': 0, **({'num_ctx': 16384} if self.retriever in ('e', 'b', 'd') and self.docs else {})}
+            opts = {'temperature': 0, **({'num_ctx': 16384} if self.retriever in ('e', 'f', 'b', 'd') and self.docs else {})}
             body = {'model': self.model, 'messages': messages, 'stream': True, 'options': opts}
         if tools:
             body['tools'] = tools
@@ -555,13 +562,14 @@ def main(argv=None):
     ap.add_argument('--index', default=DEFAULT_INDEX, help='directory with documents.sqlite and factory_docs.sqlite')
     ap.add_argument('--model', default='hpc-assistant')
     ap.add_argument('--openai', help='OpenAI-compatible base URL (e.g. llama-server) instead of Ollama')
-    ap.add_argument('--retriever', choices=['e', 'b', 'd', 'classic'], default='e',
+    ap.add_argument('--retriever', choices=['e', 'f', 'b', 'd', 'classic'],
                     help='e (default): improved retriever, up to 8 excerpts, with a header that tells the model to use '
-                         'only the relevant ones; needs a 16K context (llama-server: -c 16384); b: the same excerpts '
-                         'with the trained header; d: b plus a general HPC documentation index for non-Slurm '
-                         'questions; classic: the original 3 excerpts, shorter prompts, faster on CPU')
+                         'only the relevant ones; needs a 16K context (llama-server: -c 16384); f: e plus a general HPC '
+                         'documentation index for non-Slurm questions (the default when that index exists); b: '
+                         "e's excerpts with the trained header; d: b plus the general index; classic: the original 3 "
+                         'excerpts, shorter prompts, faster on CPU')
     ap.add_argument('--general-index', metavar='SQLITE',
-                    help='general documentation index for --retriever d (default: general_docs.sqlite in --index)')
+                    help='general documentation index for --retriever f/d (default: general_docs.sqlite in --index)')
     ap.add_argument('--k', type=int, default=3,
                     help='classic retriever: excerpts per question (the model was trained with 3); e/b: max manual excerpts + 1')
     ap.add_argument('--add', action='append', default=[], metavar='FILE', help='index a manual (PDF, md, txt, html)')

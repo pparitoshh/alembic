@@ -85,7 +85,7 @@ def test_general_retrievers_match_eval_retriever(tmp_path, monkeypatch):
     p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
     qs = ['How do I profile a CUDA kernel with Nsight?', 'How do I cancel a pending Slurm array job?',
           'GPU offload with OpenMP on LUMI?', 'How do I request GPUs on LUMI?', 'the and for']
-    for v in ['c', 'd']:
+    for v in ['c', 'd', 'f']:
         monkeypatch.setenv('RAG_VARIANT', v)
         spec = importlib.util.spec_from_file_location('rag65_retrieve_' + v, ROOT / 'research/rag65/retrieve.py')
         ref = importlib.util.module_from_spec(spec)
@@ -107,6 +107,20 @@ def test_retriever_d_uses_general_index_and_falls_back_without_it(tmp_path):
     bot = assistant.Assistant(idx, retriever='d')
     assert bot.retriever == 'd' and bot.search(q) == assistant.retrieve(q, idx / 'documents.sqlite',
                                                                          idx / 'factory_docs.sqlite', variant='d')
+
+
+def test_retriever_f_is_the_default_with_a_general_index_and_falls_back_to_e(tmp_path):
+    idx = _indexes(tmp_path)
+    p, f = idx / 'documents.sqlite', idx / 'factory_docs.sqlite'
+    q = 'How do I profile a CUDA kernel with Nsight?'
+    assert assistant.Assistant(idx, retriever='f').retriever == 'e'  # no general index yet
+    assert assistant.Assistant(idx).retriever == 'e'
+    _general_index(idx)
+    bot = assistant.Assistant(idx)
+    assert bot.retriever == 'f' and bot.search(q) == assistant.retrieve(q, p, f, variant='d')
+    assert bot.prompt(q)[0] == assistant.with_context(q, bot.search(q), relevance=True)
+    assert assistant.Assistant(idx, retriever='e').retriever == 'e'  # an explicit choice is kept
+    assert assistant.Assistant(idx, retriever='b').retriever == 'b'
 
 
 def test_improved_retriever_is_default_and_asks_ollama_for_16k_context(tmp_path, monkeypatch):
