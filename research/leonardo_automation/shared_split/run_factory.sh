@@ -4,7 +4,7 @@
 # ctl/factory_v8/controller.sh (same jobs, per-shard markers GENERATE_DONE / REVIEW_V2_DONE, MAX_ATTEMPTS per shard and
 # phase, same merge), without its rag65/priority/FREEZE rules. Runs under whichever account starts it.
 # Slot rules: at most one job of its own at a time, sized to the free nodes (8 per user minus nodes already queued);
-# a 1-node tail that would take the user's last slot is offered to another batch's next job (bundled tails, Oct 26);
+# a tail of up to 2 nodes that would take the user's last slot is offered to another batch's next job (bundled tails, Oct 26);
 # it YIELDS (submits nothing) while any ctl/*/WANT_SLOT exists, while the user already has 2 jobs, or while an
 # unfinished review filler listed in ctl/QUEUE waits for a slot.
 # usage: run_factory.sh <batch>   (started by queue_runner.sh; resumable: rerun to continue)
@@ -48,7 +48,7 @@ filler_waiting() {
     return 1
 }
 
-# Bundled tails (Oct 26): a batch whose next job would be a 1-node tail taking the user's last debug slot offers its
+# Bundled tails (Oct 26): a batch whose next job would be a tail of at most 2 nodes taking the user's last debug slot offers its
 # shards in ctl/.donate_$USER/<batch> instead; the next job another batch of this account submits runs them on extra
 # nodes (factory_dbg.sbatch SHARD_LIST2) and records the job in the donor's inflight/. Unclaimed offers expire after
 # 10 minutes and the donor submits the tail itself.
@@ -177,7 +177,7 @@ while true; do
             if [ "$phase" = review ]; then src=$rev; else src=$gen; fi
             list=$(head -n $(( (free - N2) * 4 )) <<< "$src" | grep . | tr '\n' ' ')
             n=$(wc -w <<< "$list"); nodes=$(( (n + 3) / 4 + N2 ))
-        elif [ "$DRY" != 1 ] && [ "$nodes" -le 1 ] && [ "$njobs" -ge 1 ] \
+        elif [ "$DRY" != 1 ] && [ "$nodes" -le 2 ] && [ "$njobs" -ge 1 ] \
             && [ "$(date +%s)" -ge "$(cat $HERE/no_donate_until 2>/dev/null || echo 0)" ] && partner_ready; then
             printf '%s\n%s\n' "$phase" "$list" > $DON/.$BATCH.tmp && mv $DON/.$BATCH.tmp $DON/$BATCH
             log "tail of $n $phase shards offered to another batch's next job (keeps the last debug slot for a bigger job)"
