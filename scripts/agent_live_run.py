@@ -14,6 +14,7 @@ Writes one JSON line per task to data/agent_live/runs/<timestamp>.jsonl
 No side effects at import: everything happens in `main()` under `__main__`.
 """
 import argparse
+import concurrent.futures
 import json
 import shlex
 import subprocess
@@ -67,6 +68,8 @@ def main(argv=None):
     ap.add_argument("--running-job", default="<RUNNING_JOB>")
     ap.add_argument("--pending-job", default="<PENDING_JOB>")
     ap.add_argument("--finished-job", default="<FINISHED_JOB>")
+    ap.add_argument("--task-timeout", type=float, default=180.0,
+                    help="wall-clock seconds per task; the task is recorded with timeout: true and the run continues")
     args = ap.parse_args(argv)
     placeholders = {"<RUNNING_JOB>": args.running_job, "<PENDING_JOB>": args.pending_job,
                     "<FINISHED_JOB>": args.finished_job}
@@ -79,17 +82,26 @@ def main(argv=None):
     RUNS.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     out = RUNS / f"{stamp}.jsonl"
-    for t in tasks:
-        prompt, t0 = fill(t["prompt"], placeholders), time.time()
-        rec = Recorder()
-        bot = Assistant(args.index, model=args.model, slurm=rec)
-        with StringIO() as buf:
-            answer, _ = bot.ask(prompt, out=buf)
-        row = {"id": t["id"], "prompt": prompt, "calls": rec.log, "answer": answer,
-               "seconds": round(time.time() - t0, 1)}
-        with open(out, "a") as f:
-            f.write(json.dumps(row) + "\n")
-        print(json.dumps(row), flush=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        for t in tasks:
+            prompt, t0 = fill(t["prompt"], placeholders), time.time()
+            rec = Recorder()
+            bot = Assistant(args.index, model=args.model, slurm=rec)
+            timed_out = False
+            with StringIO() as buf:
+                fut = pool.submit(bot.ask, prompt, buf)
+                try:
+                    answer, _ = fut.result(timeout=args.task_timeout)
+                except concurrent.futures.TimeoutError:
+                    timed_out = True
+                    answer = ""
+            row = {"id": t["id"], "prompt": prompt, "calls": rec.log, "answer": answer,
+                   "seconds": round(time.time() - t0, 1)}
+            if timed_out:
+                row["timeout"] = True
+            with open(out, "a") as f:
+                f.write(json.dumps(row) + "\n")
+            print(json.dumps(row), flush=True)
 
 
 if __name__ == "__main__":
