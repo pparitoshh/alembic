@@ -8,6 +8,7 @@ Example:
 """
 import argparse
 import json
+import socket
 import sys
 import urllib.request
 
@@ -36,11 +37,12 @@ def chat(base_url, model, question):
         "tools": openai_tools(),
         "stream": False,
         "temperature": 0,
+        "max_tokens": 1500,
     }).encode()
     req = urllib.request.Request(
         f"{base_url.rstrip('/')}/chat/completions",
         data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=300) as r:
+    with urllib.request.urlopen(req, timeout=120) as r:
         return json.load(r)["choices"][0]["message"]
 
 
@@ -60,7 +62,11 @@ def main():
     for run in range(1, args.runs + 1):
         for question, want in QUESTIONS:
             total += 1
-            got = names(chat(args.base_url, args.model, question))
+            try:
+                got = names(chat(args.base_url, args.model, question))
+            except (TimeoutError, socket.timeout):
+                print(f"run {run}: {question!r} ERROR timeout")
+                continue
             hit = bool(got) and got[0] == want
             if got:
                 called += 1
