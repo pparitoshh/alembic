@@ -4,7 +4,7 @@
 # --- Slurm: read by sbatch at submission (no hard-coded account in the scripts) ---
 export SBATCH_ACCOUNT="${SBATCH_ACCOUNT:-TODO_account}"        # project account: `saldo -b`
 export SBATCH_PARTITION="${SBATCH_PARTITION:-boost_usr_prod}"   # Booster: 4x A100 64 GB per node
-# export SBATCH_RESERVATION="TODO_hackathon_reservation"        # if the hackathon node is a reservation
+export SBATCH_RESERVATION="${SBATCH_RESERVATION:-s_tra_ncc1}"  # hackathon reservation: every job must run in it
 
 # --- paths ($WORK is set by CINECA per project) ---
 export REPO="${REPO:-$WORK/alembic}"                 # this repository

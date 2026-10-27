@@ -23,8 +23,55 @@ JOB_SCRIPT_SCHEMA = {
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
-LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA]
-ACTIONS = ("submit_job", "cancel_job")  # change the cluster: confirmed first (submit_job only without test_only)
+JOB_USAGE_SCHEMA = {
+    "name": "job_usage",
+    "description": "Live resource usage of a running job: CPU time and memory (current and peak).",
+    "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
+                   "required": ["job_id"]},
+}
+JOB_PRIORITY_SCHEMA = {
+    "name": "job_priority",
+    "description": "Why a job is waiting: priority factors (age, fairness, size, QOS) and the shares behind them.",
+    "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
+                   "required": ["job_id"]},
+}
+UPDATE_JOB_SCHEMA = {
+    "name": "update_job",
+    "description": "Change one setting of a pending job (time limit, partition, node count or QOS).",
+    "parameters": {"type": "object", "properties": {
+        "job_id": {"type": "string", "description": "Slurm job id"},
+        "field": {"type": "string", "enum": ["TimeLimit", "Partition", "NumNodes", "QOS"], "description": "Field to change"},
+        "value": {"type": "string", "description": "New value for the field"}},
+        "required": ["job_id", "field", "value"]},
+}
+HOLD_JOB_SCHEMA = {
+    "name": "hold_job",
+    "description": "Hold a pending job so the scheduler does not start it (release it later).",
+    "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
+                   "required": ["job_id"]},
+}
+RELEASE_JOB_SCHEMA = {
+    "name": "release_job",
+    "description": "Release a held job so the scheduler can start it again.",
+    "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
+                   "required": ["job_id"]},
+}
+REQUEUE_JOB_SCHEMA = {
+    "name": "requeue_job",
+    "description": "Put a finished or running job back in the queue to run again.",
+    "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
+                   "required": ["job_id"]},
+}
+RUN_READONLY_COMMAND_SCHEMA = {
+    "name": "run_readonly_command",
+    "description": "Run a read-only Slurm command (squeue, sinfo, sacct, sstat, sprio, sshare, sacctmgr show, scontrol show) and return its output.",
+    "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
+                   "required": ["command"]},
+}
+LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
+                          HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA]
+ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
+# change the cluster: confirmed first (submit_job only without test_only)
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
 _TYPES = {"string": str, "integer": int, "boolean": bool}
 
@@ -229,6 +276,86 @@ class SlurmLive:
             return {"job_id": job_id, "script": re.sub(r"^Batch Script for \S+\n-+\n", "", out)}
         return {"error": (err.strip() or err2.strip() or f"no batch script stored for job {job_id}")}
 
+    # --- own-jobs guard (same as cancel_job) -------------------------------------------------------
+    def _own_job(self, job_id):
+        """True if the job is one of the user's queued or running jobs."""
+        rc, out, _ = self.run(["squeue", "--me", "-h", "-j", job_id.split("_")[0], "-o", "%i"])
+        return rc == 0 and bool(out.strip())
+
+    def job_usage(self, job_id):
+        fields = ["JobID", "AveCPU", "MaxRSS", "AveRSS", "MaxVMSize"]
+        rc, out, _ = self.run(["sstat", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
+        rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()] if rc == 0 else []
+        if not rows:
+            return {"error": f"sstat has no live usage for job {job_id} (it only covers running jobs). "
+                             "For finished jobs use job_accounting."}
+        return {"job_id": job_id, "steps": rows}
+
+    def job_priority(self, job_id):
+        rc, out, err = self.run(["sprio", "-j", job_id, "-l"])
+        if rc != 0:
+            return {"error": err.strip() or "sprio failed"}
+        res = {"job_id": job_id, "priority": out.strip(), "sprio_exit_code": rc}
+        if not any(l.split() and l.split()[0].isdigit() for l in out.strip().splitlines()):
+            res["note"] = f"job {job_id} is not pending (sprio only ranks waiting jobs)"
+        rc, out, err = self.run(["sshare", "-U", "-l"])
+        res |= {"shares": out.strip(), "sshare_exit_code": rc}
+        if rc != 0:
+            res["shares_error"] = err.strip() or "sshare failed"
+        return res
+
+    def update_job(self, job_id, field, value):
+        if re.search(r"[\s|;&><$`()\\]", value) or value.startswith("-"):
+            return {"error": f"invalid value {value!r} (no whitespace or shell characters allowed)"}
+        if not self._own_job(job_id):
+            return {"updated": False, "message": f"job {job_id} is not one of your queued or running jobs"}
+        rc, out, err = self.run(["scontrol", "update", f"JobId={job_id}", f"{field}={value}"])
+        if rc != 0:
+            return {"updated": False, "message": err.strip() or "scontrol update failed"}
+        return {"updated": True, "job_id": job_id, "field": field, "value": value}
+
+    def hold_job(self, job_id):
+        return self._scontrol_act("hold", job_id)
+
+    def release_job(self, job_id):
+        return self._scontrol_act("release", job_id)
+
+    def requeue_job(self, job_id):
+        return self._scontrol_act("requeue", job_id)
+
+    def _scontrol_act(self, action, job_id):
+        if not self._own_job(job_id):
+            return {action: False, "message": f"job {job_id} is not one of your queued or running jobs"}
+        rc, _, err = self.run(["scontrol", action, job_id])
+        past = {"hold": "held", "release": "released", "requeue": "requeued"}[action]
+        if rc != 0:
+            return {action: False, "message": err.strip() or f"scontrol {action} failed"}
+        return {action: True, "job_id": job_id, "message": f"Job {job_id} {past}"}
+
+    READONLY_OK = {"squeue", "sinfo", "sacct", "sstat", "sprio", "sshare"}
+    _SHELL_METACHARS = re.compile(r"[|;&><$`()\n]")
+
+    def run_readonly_command(self, command):
+        if self._SHELL_METACHARS.search(command):
+            return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed"}
+        try:
+            argv = shlex.split(command)
+        except ValueError as e:
+            return {"error": f"refused: cannot parse the command ({e})"}
+        if argv[:2] == ["scontrol", "show"] or argv[:2] == ["sacctmgr", "show"]:
+            ok = True
+        elif argv and argv[0] in self.READONLY_OK:
+            ok = True
+        else:
+            ok = False
+        if not ok:
+            return {"error": "refused: only read-only commands are allowed "
+                             "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)"}
+        rc, out, err = self.run(argv)
+        if len(out) > 8000:
+            out = out[:8000] + "[truncated]"
+        return {"command": command, "exit_code": rc, "stdout": out, "stderr": err}
+
     # --- helpers ---------------------------------------------------------------------------------
     def _sacct(self, job_id):
         fields = "JobID,JobName,State,ExitCode,Partition,Elapsed,Timelimit,NodeList,MaxRSS,TotalCPU,AllocCPUS,AllocTRES"
@@ -311,4 +438,12 @@ def describe(name, args):
     if name == "submit_job":
         head = [l for l in args.get("script", "").splitlines() if l.startswith("#SBATCH")][:6]
         return "submit this job:\n  " + "\n  ".join(head or ["(no #SBATCH lines)"])
+    if name == "update_job":
+        return f"set {args.get('field')}={args.get('value')} on job {args.get('job_id')} (scontrol update)"
+    if name == "hold_job":
+        return f"hold job {args.get('job_id')} so the scheduler does not start it (scontrol hold)"
+    if name == "release_job":
+        return f"release held job {args.get('job_id')} back to the scheduler (scontrol release)"
+    if name == "requeue_job":
+        return f"put job {args.get('job_id')} back in the queue to run again (scontrol requeue)"
     return f"{name} {json.dumps(args)}"

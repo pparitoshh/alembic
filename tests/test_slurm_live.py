@@ -1,5 +1,6 @@
 """Live Slurm backend: command construction and output parsing against recorded Slurm output (no cluster needed)."""
 import json
+import shlex
 from io import StringIO
 
 import pytest
@@ -29,9 +30,11 @@ def live(responses, confirm=lambda n, a: True):
     return SlurmLive(runner=fake, confirm=confirm, workdir="/w/jobs"), fake
 
 
-def test_live_schemas_are_the_trained_ones_plus_job_script():
+def test_live_schemas_are_the_trained_ones_plus_live_tools():
     assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
-    assert [t["function"]["name"] for t in slurm_live.openai_tools()][-1] == "job_script"
+    assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == \
+        ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
+         "run_readonly_command"]
 
 
 def test_job_status_running_pending_and_finished():
@@ -125,6 +128,94 @@ def test_invalid_calls():
     with pytest.raises(ToolError):
         s.execute("job_status", {})
     assert "invalid job id" in s.execute("job_status", {"job_id": "1; rm -rf ~"})["error"]
+
+
+def test_job_usage_argv_rows_and_error_for_non_running_jobs():
+    s, fake = live({"sstat&MaxVMSize": (0, "9|01:30:00|3145728K|1048576K|4194304K\n9.ext|01:00:00|||2097152K\n", "")})
+    r = s.execute("job_usage", {"job_id": "9"})
+    assert fake.calls[0][0] == ["sstat", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
+    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3145728K", "AveRSS": "1048576K",
+                             "MaxVMSize": "4194304K"} and r["steps"][1]["JobID"] == "9.ext"
+    s, _ = live({"sstat": (1, "", "error: Pending job")})
+    r = s.execute("job_usage", {"job_id": "9"})
+    assert "sstat has no live usage" in r["error"] and "job_accounting" in r["error"]
+
+
+def test_job_priority_sprio_and_sshare_outputs_with_exit_codes():
+    s, fake = live({"sprio&-j&9": (0, "JOBID PARTITION PRIORITY AGE FAIRSHARE\n9 p 100 90 10\n", ""),
+                    "sshare&-U&-l": (0, "ACCOUNT USER SHARE LEVELS\nuser 100\n", "")})
+    r = s.execute("job_priority", {"job_id": "9"})
+    assert [c[0] for c in fake.calls] == [["sprio", "-j", "9", "-l"], ["sshare", "-U", "-l"]]
+    assert "9 p 100" in r["priority"] and r["sprio_exit_code"] == 0 and "user 100" in r["shares"]
+    assert "note" not in r
+    s, _ = live({"sprio&-j&9": (0, "JOBID PARTITION PRIORITY AGE FAIRSHARE\n", "")})
+    r = s.execute("job_priority", {"job_id": "9"})
+    assert "not pending" in r["note"]
+
+
+def test_update_job_validates_the_value_and_uses_scontrol_update():
+    s, fake = live({"squeue&--me&-j": (0, "9\n", ""), "scontrol&update": (0, "", "")})
+    assert s.execute("update_job", {"job_id": "9", "field": "TimeLimit", "value": "2:00:00"}) == {
+        "updated": True, "job_id": "9", "field": "TimeLimit", "value": "2:00:00"}
+    assert fake.calls[-1][0] == ["scontrol", "update", "JobId=9", "TimeLimit=2:00:00"]
+    assert "invalid value" in s.execute("update_job", {"job_id": "9", "field": "TimeLimit", "value": "value 2"})["error"]
+
+
+def test_hold_release_and_requeue_use_scontrol_on_own_jobs():
+    s, fake = live({"squeue&--me&-j": (0, "9\n", ""), "scontrol&hold": (0, "", ""),
+                    "scontrol&release": (0, "", ""), "scontrol&requeue": (0, "", "")})
+    assert s.execute("hold_job", {"job_id": "9"}) == {"hold": True, "job_id": "9", "message": "Job 9 held"}
+    assert s.execute("release_job", {"job_id": "9"}) == {"release": True, "job_id": "9", "message": "Job 9 released"}
+    assert s.execute("requeue_job", {"job_id": "9"}) == {"requeue": True, "job_id": "9", "message": "Job 9 requeued"}
+    arc = [[c[0][0], c[0][1]] for c in fake.calls if c[0][0] == "scontrol"]
+    assert ["scontrol", "hold"] in arc and ["scontrol", "release"] in arc and ["scontrol", "requeue"] in arc
+    s, _ = live({"squeue&--me": (0, "", "")})  # not one of the user's own jobs: refused before any scontrol
+    s2fake = s._runner
+    r = s.execute("hold_job", {"job_id": "9"})
+    assert r == {"hold": False, "message": "job 9 is not one of your queued or running jobs"}
+    assert not any(c[0][0] == "scontrol" for c in s2fake.calls)
+
+
+@pytest.mark.parametrize(("command", "ok"), [("squeue --me", True), ("scontrol show job 123", True),
+                                             ("rm -rf /", False), ("scontrol update JobId=1 TimeLimit=1", False),
+                                             ("squeue | grep x", False), ("sinfo; ls", False)])
+def test_run_readonly_command_allowlist(command, ok):
+    s, fake = live({"squeue&--me": (0, "1 job\n", ""), "scontrol&show": (0, "JobId=123\n", "")})
+    r = s.execute("run_readonly_command", {"command": command})
+    if ok:
+        assert "error" not in r and r["exit_code"] == 0 and r["command"] == command
+        assert fake.calls[-1][0] == shlex.split(command)
+    else:
+        assert "refused" in r["error"]
+
+
+def test_run_readonly_command_truncates_long_output():
+    s, _ = live({"squeue": (0, "x" * 9000 + "\n", "")})
+    r = s.execute("run_readonly_command", {"command": "squeue --me"})
+    assert len(r["stdout"]) == 8011 and r["stdout"].endswith("[truncated]")
+
+
+def test_new_actions_call_confirm_and_return_the_decline_error():
+    for name, args in [("update_job", {"job_id": "9", "field": "TimeLimit", "value": "2:00:00"}),
+                       ("hold_job", {"job_id": "9"}), ("release_job", {"job_id": "9"}),
+                       ("requeue_job", {"job_id": "9"})]:
+        s, fake = live({}, confirm=lambda n, a: False)
+        r = s.execute(name, args)
+        assert r["error"] == "the user declined this action" and r["action"] == name
+        assert not fake.calls
+
+
+def test_round_limit_appends_a_stop_notice_with_the_last_call(monkeypatch, tmp_path):
+    s, _ = live({})
+    bot = assistant.Assistant(tmp_path, docs=False, slurm=s)
+    def stream(messages):  # always wants another tool round, never a final answer
+        yield {'tool_calls': [{'name': 'hold_job', 'arguments': '{"job_id": "9"}'}]}
+    monkeypatch.setattr(bot, "_stream", stream)
+    out = StringIO()
+    answer, _ = bot.ask("hold job 9", out=out, max_tool_rounds=1)
+    assert "stopped after 1 tool rounds" in out.getvalue() and "hold_job" in out.getvalue()
+    notice = bot.history[-1]
+    assert notice["role"] == "assistant" and "hold_job" in notice["content"] and '"job_id": "9"' in notice["content"]
 
 
 def test_agent_loop_runs_slurm_tools_and_returns_results(monkeypatch, tmp_path):
