@@ -3,7 +3,7 @@ held-out evaluation families and near-eval questions (3-gram Jaccard >= 0.5 with
 deduplicated, stratified by domain, each with the app's excerpts (retriever e) in the user turn.
 
 usage: build_prompts.py OUT.jsonl N [SEED]   (run from the repo root; RAG_VARIANT defaults to e; PROMPT_MIX=slurm,gpu_mpi_env,other
-shares, default 0.4,0.4,0.2)
+shares, default 0.4,0.4,0.2; BANK_GLOB=<pattern> limits the banks read)
 """
 import glob
 import json
@@ -55,7 +55,7 @@ def near_eval(q):
 
 
 seen, pool = set(), defaultdict(list)
-for f in sorted(glob.glob(BANKS + '/*.jsonl')):
+for f in sorted(glob.glob(BANKS + '/' + os.environ.get('BANK_GLOB', '*.jsonl'))):  # BANK_GLOB: one batch's bank only
     for line in open(f):
         r = json.loads(line)
         q = (r.get('question') or '').split('\n\nProvided input')[0].strip()

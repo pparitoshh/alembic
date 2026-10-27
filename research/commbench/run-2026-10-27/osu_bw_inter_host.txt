@@ -1,0 +1,29 @@
+### mpirun -np 2 --map-by ppr:1:node /leonardo/prod/spack/06/install/0.22/linux-rhel8-icelake/gcc-12.2.0/osu-micro-benchmarks-7.4-pv2jrgafgutwer6azn2uzksl6oyfmx7l/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_bw
+
+# OSU MPI Bandwidth Test v7.4
+# Datatype: MPI_CHAR.
+# Size      Bandwidth (MB/s)
+1                       5.28
+2                      10.64
+4                      21.31
+8                      42.67
+16                     85.09
+32                    170.05
+64                    316.19
+128                   618.40
+256                  1083.73
+512                  2136.46
+1024                 4750.84
+2048                 8429.02
+4096                 9855.32
+8192                10964.02
+16384               20830.23
+32768               22671.33
+65536               23642.38
+131072              24145.60
+262144              24412.77
+524288              24550.76
+1048576             24621.32
+2097152             24656.07
+4194304             24672.59
+### rc=0
