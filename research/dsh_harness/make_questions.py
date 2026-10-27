@@ -1,0 +1,50 @@
+import json
+from pathlib import Path
+
+Q = [
+("job_status","What state is job 12345 in right now?"),
+("job_status","Is job 12345 still pending? When will it start?"),
+("job_status","Tell me which node job 12345 runs on."),
+("list_queue","Show me all my jobs in the queue."),
+("list_queue","List only my pending jobs in partition gpu."),
+("list_queue","Which of my jobs are running at the moment?"),
+("submit_job","Validate this script without submitting it: #!/bin/bash\n#SBATCH -t 00:10:00\n#SBATCH -p gpu\nhostname"),
+("submit_job","Do a dry run (test only) of this batch script and tell me the estimated start time: #!/bin/bash\n#SBATCH -N 1\nsleep 60"),
+("cancel_job","Cancel job 12345 please."),
+("cancel_job","Kill my job 12345, it is stuck."),
+("read_job_log","Job 12345 failed. Show me the last lines of its stderr."),
+("read_job_log","Print the last 40 lines of stdout of job 12345."),
+("read_job_log","What does the output file of job 12345 say at the end?"),
+("job_accounting","How much memory and elapsed time did the finished job 12345 use? What was its exit code?"),
+("job_accounting","Give me the sacct summary for job 12345."),
+("gpu_availability","How many GPUs are free right now?"),
+("gpu_availability","Are there free GPUs in the gpu partition?"),
+("partition_info","What is the maximum wall time of the gpu partition?"),
+("partition_info","Show the limits of partition debug: nodes, CPUs, memory per node."),
+("job_script","Show me the batch script that job 12345 was submitted with."),
+("job_script","I want to fix and resubmit job 12345. What script did it use?"),
+("job_usage","How much CPU time and memory is running job 12345 using right now?"),
+("job_usage","What is the peak memory of my running job 12345 so far?"),
+("job_priority","Why is job 12345 still waiting? Show the priority factors."),
+("job_priority","What is the fairshare and age priority of job 12345?"),
+("update_job","Change the time limit of pending job 12345 to 02:00:00."),
+("update_job","Move pending job 12345 to partition debug."),
+("hold_job","Hold job 12345 so it does not start yet."),
+("hold_job","Please pause pending job 12345 in the queue until I say otherwise."),
+("release_job","Release the held job 12345."),
+("release_job","Let job 12345 start again, I no longer need it held."),
+("requeue_job","Requeue job 12345 so it runs again."),
+("requeue_job","Put the finished job 12345 back in the queue."),
+("run_readonly_command","Run sshare for my user and show the output."),
+("run_readonly_command","Run sinfo -N -l and show me the result."),
+("run_readonly_command","Show the Slurm accounts and QOS using sacctmgr show."),
+("run_readonly_command","Run sprio -l and show me the output."),
+("none","How do I limit a job array to 3 running tasks?"),
+("none","What is the difference between --ntasks and --cpus-per-task?"),
+("none","How do I request one GPU in an sbatch script?"),
+("none","What does the PENDING reason Resources mean in Slurm?"),
+]
+with open(Path(__file__).parent / "questions.jsonl", "w") as f:
+    for i, (t, q) in enumerate(Q, 1):
+        note = "knowledge question, no tool" if t == "none" else f"Expected first tool: {t}"
+        f.write(json.dumps({"id": f"q{i:02d}", "question": q, "expected_tool": t, "notes": note}) + "\n")
