@@ -2,7 +2,8 @@
 held-out evaluation families and near-eval questions (3-gram Jaccard >= 0.5 with any test question) excluded,
 deduplicated, stratified by domain, each with the app's excerpts (retriever e) in the user turn.
 
-usage: build_prompts.py OUT.jsonl N [SEED]   (run from the repo root; RAG_VARIANT defaults to e)
+usage: build_prompts.py OUT.jsonl N [SEED]   (run from the repo root; RAG_VARIANT defaults to e; PROMPT_MIX=slurm,gpu_mpi_env,other
+shares, default 0.4,0.4,0.2)
 """
 import glob
 import json
@@ -28,7 +29,7 @@ GPUMPI = re.compile(r'\b(gpu|gpus|cuda|nvcc|nccl|rocm|hip|openacc|mpi|mpirun|mpi
                     r'profil\w*|nsight|nsys|ncu|vtune|scaling|speedup|module|modules|lmod|spack|easybuild|conda|'
                     r'venv|pip|container|apptainer|singularity|compil\w+|gcc|nvhpc|linker|ld_library_path|scratch|'
                     r'lustre|filesystem|quota|i/o|hdf5|interactive|jupyter)\b', re.I)
-MIX = {'slurm': 0.4, 'gpu_mpi_env': 0.4, 'other': 0.2}
+MIX = dict(zip(('slurm', 'gpu_mpi_env', 'other'), map(float, os.environ.get('PROMPT_MIX', '0.4,0.4,0.2').split(','))))  # shares
 
 
 def grams(q):
