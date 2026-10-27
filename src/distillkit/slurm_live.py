@@ -257,14 +257,26 @@ class SlurmLive:
         rc, out, _ = self.run(["scontrol", "show", "job", job_id])
         if rc == 0 and (m := re.search(rf"\b{key}=(\S+)", out)):
             return m.group(1)
-        rc, out, _ = self.run(["sacct", "-n", "-P", "-X", "-j", job_id, f"--format={key},WorkDir"])
+        # Finished jobs: sacct keeps the unexpanded --output/--error patterns. An empty StdErr means stderr went to
+        # the StdOut file (no --error line); both empty means Slurm's default name in the working directory.
+        fields = ["StdOut", "StdErr", "WorkDir", "JobName", "User", "JobIDRaw"]
+        rc, out, _ = self.run(["sacct", "-n", "-P", "-X", "-j", job_id, f"--format={','.join(fields)}"])
         if rc == 0 and out.strip():
-            path, workdir = (out.strip().splitlines()[0].split("|") + [""])[:2]
-            if path:
-                return path.replace("%j", job_id.split("_")[0]).replace("%A", job_id.split("_")[0])
-            if workdir:
-                return f"{workdir}/slurm-{job_id}.out"
+            row = dict(zip(fields, out.strip().splitlines()[0].split("|") + [""] * len(fields)))
+            path = row[key] or row["StdOut"]
+            if not path:
+                return f"{row['WorkDir']}/slurm-{job_id}.out" if row["WorkDir"] else None
+            path = _expand(path, job_id, row)
+            return path if path.startswith("/") or not row["WorkDir"] else f"{row['WorkDir']}/{path}"
         return None
+
+
+def _expand(pattern, job_id, row):
+    """Slurm filename patterns (sbatch --output): %j job id, %A/%a array job id/index, %x job name, %u user, %% %."""
+    array, _, index = job_id.partition("_")
+    values = {"j": row.get("JobIDRaw") or array, "A": array, "a": index, "x": row.get("JobName", ""),
+              "u": row.get("User", ""), "%": "%"}
+    return re.sub(r"%(?:\d+)?([jAaxu%])", lambda m: values[m.group(1)], pattern)
 
 
 def _gpus(gres):

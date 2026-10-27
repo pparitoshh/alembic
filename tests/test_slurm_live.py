@@ -88,6 +88,26 @@ def test_read_job_log_uses_the_jobs_own_paths():
         s.execute("read_job_log", {"job_id": "8", "tail_lines": 500})
 
 
+def test_read_job_log_of_a_finished_job_expands_the_sacct_pattern():
+    # As on Leonardo (Slurm 25.05): --output=slurm/logs/%x-%j.out and no --error, so sacct's StdErr is empty.
+    sacct = "/w/repo/slurm/logs/%x-%j.out||/w/repo|dk-export|a08trc06|60340010\n"
+    s, fake = live({"scontrol&show&job": (1, "", "slurm_load_jobs error: Invalid job id specified"),
+                    "sacct&StdOut": (0, sacct, ""), "tail": (0, "done\n", "")})
+    r = s.execute("read_job_log", {"job_id": "60340010", "stream": "stderr", "tail_lines": 1})
+    assert r["file"] == "/w/repo/slurm/logs/dk-export-60340010.out" and r["lines"] == ["done"]
+    assert "same file" in r["note"]
+
+
+def test_read_job_log_patterns_for_array_tasks_relative_paths_and_defaults():
+    row = {"JobName": "sweep", "User": "u1", "JobIDRaw": "4249"}
+    assert slurm_live._expand("logs/%x_%A_%a_%j_%u_%%.out", "4242_7", row) == "logs/sweep_4242_7_4249_u1_%.out"
+    assert slurm_live._expand("out-%5j.log", "42", {}) == "out-42.log"
+    s, _ = live({"scontrol&show&job": (1, "", ""), "sacct&StdOut": (0, "logs/%j.out|logs/%j.err|/w|j|u|42\n", "")})
+    assert s._log_path("42", "stderr") == "/w/logs/42.err"
+    s, _ = live({"scontrol&show&job": (1, "", ""), "sacct&StdOut": (0, "||/w|j|u|42\n", "")})
+    assert s._log_path("42", "stdout") == "/w/slurm-42.out"
+
+
 def test_gpu_availability_counts_free_gpus_on_usable_nodes():
     out = ("lrdn0001 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:4(IDX:0-3) mixed\n"
            "lrdn0002 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:1(IDX:0) mixed\n"
