@@ -90,6 +90,31 @@ with base.
 
 The assistant has 8 Slurm tools (`src/distillkit/tools.py`): `job_status`, `list_queue`, `submit_job`, `cancel_job`, `read_job_log`, `job_accounting`, `gpu_availability`, `partition_info`. Calls use Qwen3's own Hermes format (`<tool_call>{"name": …, "arguments": …}</tool_call>`), which vLLM (`--tool-call-parser hermes`), llama-server (`--jinja`) and Ollama parse into OpenAI `tool_calls`, so no external agent framework is needed at runtime. For data generation and evaluation the tools run against a deterministic mock cluster. Generated traces are kept only if every call is valid and executable, every job id comes from the question or an earlier tool result, and calling (or not) fits the question.
 
+### Live agent mode
+
+`hpc-assistant --agent --ssh <host>` runs the tools against a real Slurm cluster (`SlurmLive` in `src/distillkit/slurm_live.py`) instead of the mock, over ssh to the given login node. The agent runs at most 12 tool rounds per question; at the limit it writes a final message that names its last call. Eight tools were added here and were not in the training data:
+
+| tool | command | changes the cluster |
+|---|---|---|
+| `job_script` | `scontrol write batch_script` (or `sacct --batch-script`) | no |
+| `job_usage` | `sstat` | no |
+| `job_priority` | `sprio` + `sshare` | no |
+| `update_job` | `scontrol update` (fields `TimeLimit`, `Partition`, `NumNodes`, `QOS`) | yes |
+| `hold_job` | `scontrol hold` | yes |
+| `release_job` | `scontrol release` | yes |
+| `requeue_job` | `scontrol requeue` | yes |
+| `run_readonly_command` | allowlist: `squeue`, `sinfo`, `sacct`, `sstat`, `sprio`, `sshare`, `scontrol show`, `sacctmgr show` | no |
+
+`run_readonly_command` refuses shell metacharacters and cuts the output at 8,000 characters. Actions (`submit_job` without `test_only`, `cancel_job`, `update_job`, `hold_job`, `release_job`, `requeue_job`) ask for confirmation first; `--yes` skips it; without a terminal, the agent declines them.
+
+Point `--ssh` at a login node and ask:
+
+```
+hpc-assistant --agent --ssh leonardo
+```
+
+Live test results are in `data/agent_live/results.md` (37 tasks on Leonardo, 2026-10-27).
+
 ## Pipeline
 
 ```
