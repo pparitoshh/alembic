@@ -6,7 +6,7 @@ Run the HPC assistant student model behind a local harness with a web UI. Regist
 
 ## Background
 
-dsh is open source (MIT) and in Developer Preview. Its settings file is `~/.dsh/settings.yaml`. dsh accepts any OpenAI-compatible endpoint as a custom provider through the llm-pi-ai plugin. Tools in dsh are plugins. A plugin is a tool form plus a `dsh-plugin.naming.json` manifest. Telemetry in dsh is built on the session log. The command `dsh --profile web --dump-config` prints the plugin tree.
+dsh is open source (MIT) and in Developer Preview. Its real config layer is a profile patch, for example `~/.dsh/profiles/web/cordis.patch.yml`. The file `~/.dsh/settings.yaml` is a legacy file. dsh accepts any OpenAI-compatible endpoint as a custom provider through the llm-pi-ai plugin. Tools in dsh are plugins. A plugin is a tool form plus a `dsh-plugin.naming.json` manifest. Telemetry in dsh is built on the session log. The command `dsh --profile web --dump-config` prints the plugin tree.
 
 Qwen3 uses the Hermes tool-call text format `<tool_call>{...}</tool_call>`. Hermes Agent is a different program. It needs the server to return structured `tool_calls`.
 
@@ -19,7 +19,7 @@ The Hugging Face model `hf.co/VaibhavKKM/hpc-assistant-qwen3-4b` has a thinking-
 3. Run `research/dsh_harness/test_toolcalls.py` against the Ollama endpoint `http://127.0.0.1:11434/v1` with model `hpc-assistant-vkkm-live:latest`. Check that replies contain real `tool_calls`.
 4. Install dsh (pin the version). Run `dsh --profile web --dump-config`.
 5. Read the `docs/` of the official repo `deepseek-ai/deepseek-harness` for tool registration and telemetry keys.
-6. Add a provider block in `~/.dsh/settings.yaml` for the endpoint `http://127.0.0.1:11434/v1`.
+6. Add provider rows in the profile patch `~/.dsh/profiles/web/cordis.patch.yml` (not in the legacy `~/.dsh/settings.yaml`) for the endpoint `http://127.0.0.1:11434/v1`.
 7. Write a dsh plugin that registers the 16 tools from `src/distillkit/slurm_live.py` (use `openai_tools()`). Actions that change jobs must ask for confirmation, same as the agent.
 8. Turn on telemetry and check that it stays local.
 9. Compare with Hermes Agent if dsh does not fit.
@@ -51,7 +51,7 @@ Sources: README of github.com/deepseek-ai/deepseek-harness, the npm registry ent
 | Tool form for a plugin | not found |
 | Telemetry settings keys | not found |
 | Telemetry data destination (local or remote) | not found |
-| Settings file | `~/.dsh/settings.yaml` (or `$DSH_HOME`). Secrets go in `.credentials.yaml`. Profiles are in `$DSH_HOME/profiles/<name>`. |
+| Settings file | The real config layer is the profile patch in `$DSH_HOME/profiles/<name>`. `~/.dsh/settings.yaml` (or `$DSH_HOME`) is a legacy file. Secrets go in `.credentials.yaml`. Profiles are in `$DSH_HOME/profiles/<name>`. |
 
 Other notes: dsh is a Developer Preview. The README warns of compatibility-breaking changes and asks you to read `SAFETY.md`.
 
@@ -67,6 +67,21 @@ Other notes: dsh is a Developer Preview. The README warns of compatibility-break
 
 Step 1 and step 2: SKIPPED by user decision. Steps 4 to 9 not started.
 
-Step 3 (test script): `test_toolcalls.py` is complete. The run on 2026-10-27 gave NO result. Ollama (version 0.32.3) hung. The first request ran for 5 minutes and returned HTTP 500. Later requests, even a tiny "hi", timed out. The Ollama runner process 50872 stays stuck. The unload call (keep_alive 0) did not free it. A restart of the Ollama service needs sudo, so the worker did not do it. Expected result from earlier tests: tool called 8/8, first tool correct 6/8. Run the test again after the user restarts Ollama.
+Step 3 (test script): `test_toolcalls.py` is complete. The tool-call test has 8 questions. It ran on `hpc-assistant-vkkm-live:latest`. The tool was called 8/8. The first tool was correct 6/8. Two misses:
 
-Host check, 2026-10-27: `which llama-server dsh` found neither program. Both are not installed.
+- "Which partitions does this cluster have?" used `run_readonly_command`.
+- "Why is job 12345 still pending?" used `job_priority`.
+
+MCP server: `research/dsh_harness/mcp_server.py` lists 16 tools by a direct tools/list call. 12 unit tests pass.
+
+dsh config: the real config layer is the profile patch `~/.dsh/profiles/web/cordis.patch.yml`. Its rows are `llm-pi-ai` (route `ollama-local` at http://127.0.0.1:11434/v1), `agent-default-model` and `mcp-hpc`. The file `~/.dsh/settings.yaml` is a legacy file.
+
+Start command: set `DSH_TELEMETRY_MODE=DISABLED` and `OLLAMA_API_KEY=<any dummy value>`. The Web UI is at http://127.0.0.1:3080. It needs an access token from the start log. No connection to deepseeksvc.com was seen.
+
+New Hugging Face weights: `hf.co/VaibhavKKM/hpc-assistant-qwen3-4b:latest` (ID 8205cb174cc9) are pulled. Test result: not available. The Ollama chat endpoint hung again on a small request.
+
+Web UI chat test "Show my queue": not tested yet.
+
+`src/distillkit/assistant.py` prompt-line removal: still uncommitted. It waits for the question-set review.
+
+Earlier host check, 2026-10-27 (before the dsh install): `which llama-server dsh` found neither program. Both are not installed.
