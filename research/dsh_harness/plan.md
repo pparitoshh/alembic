@@ -65,7 +65,7 @@ Other notes: dsh is a Developer Preview. The README warns of compatibility-break
 
 ## Status
 
-Step 1 and step 2: SKIPPED by user decision. Steps 4 to 9 not started.
+Step 1 and step 2: SKIPPED by user decision.
 
 Step 3 (test script): `test_toolcalls.py` is complete. The tool-call test has 8 questions. It ran on `hpc-assistant-vkkm-live:latest`. The tool was called 8/8. The first tool was correct 6/8. Two misses:
 
@@ -85,3 +85,16 @@ Web UI chat test "Show my queue": not tested yet.
 `src/distillkit/assistant.py` prompt-line removal: still uncommitted. It waits for the question-set review.
 
 Earlier host check, 2026-10-27 (before the dsh install): `which llama-server dsh` found neither program. Both are not installed.
+
+### Update, 2026-10-27
+
+- dsh web runs on http://127.0.0.1:3080.
+- The MCP server `hpc` lists 16 tools. It works on Leonardo with read-only calls. The calls `list_queue`, `partition_info` and `gpu_availability` return data.
+- The 41-question result with the base prompt: tool called 36/41, first tool correct 40/41. With the extra prompt line: tool called 35/41, first tool correct 38/41.
+- The dsh model route sets an output cap of 2048 tokens and a context window of 8192 tokens.
+
+CURRENT ISSUE: The first dsh request has about 8,600 tokens (system prompt plus 50 tool definitions). Ollama runs the model with 8,192 tokens of context. Ollama truncates the input to 4,098 tokens ("truncating input prompt limit=4098 prompt=8609"). The model does not see the Slurm tools. In the web UI, "Show my queue" got a text answer without a tool call.
+
+The fix in test is the dsh agent preset `minimal`. It is set in `~/.dsh/profiles/web/cordis.patch.yml`. It is not yet verified in the web UI.
+
+The model can loop without an output cap. The new weights do not prove a fix for this.
