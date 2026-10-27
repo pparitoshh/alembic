@@ -15,6 +15,6 @@ for q in Q8_0 Q6_K Q4_K_M; do
     [ -s $O/gguf/hpc-assistant-qwen3-4b-$q.gguf ] || $L/build/bin/llama-quantize $O/gguf/hpc-assistant-qwen3-4b-bf16.gguf $O/gguf/hpc-assistant-qwen3-4b-$q.gguf $q 32 > /dev/null
 done
 rm -f $O/gguf/hpc-assistant-qwen3-4b-bf16.gguf
-[ -s $HOME/cp/release/Modelfile ] && sed "1s/.*/# Ollama package for the HPC assistant (ClusterPilot-4B, $NAME: round 27 further distilled from Qwen3-235B on B300s; Q4_K_M)./" $HOME/cp/release/Modelfile > $O/gguf/Modelfile
+[ -s $HOME/cp/release/Modelfile ] && sed "1s/.*/# Ollama package for the HPC assistant ClusterPilot-4B (Q4_K_M)./" $HOME/cp/release/Modelfile > $O/gguf/Modelfile
 ls -la $O $O/gguf
 echo "BUILD READY $NAME"
