@@ -1,0 +1,63 @@
+# Example dsh profile patch for the HPC assistant (profile "web").
+#
+# Use:
+#   1. Copy this file to ~/.dsh/profiles/web/cordis.patch.yml.
+#   2. Replace <REPO> with the path of this repository.
+#   3. Start dsh from the folder where dsh is installed:
+#        DSH_TELEMETRY_MODE=DISABLED OLLAMA_API_KEY=ollama npx --no-install dsh web --no-open
+#      OLLAMA_API_KEY can have any value. Ollama does not check it, but dsh needs a key.
+#   4. Open the URL with the token that dsh prints. Start a NEW chat session.
+#
+# A patch entry replaces the whole config of the row with the same id.
+# Facts that explain the values:
+#   - Ollama runs the model with 8192 tokens of context. A larger dsh request is cut by Ollama and the
+#     model does not see the tools. The preset "minimal" keeps the request near 4.2K tokens.
+#   - The output cap of 2048 tokens stops a model loop. Without a cap, a loop blocks Ollama.
+#   - The MCP server declines all job-changing actions unless HPC_ALLOW_ACTIONS=1 is set in its env.
+#   - HPC_SSH is the login node. Leave it out to run the Slurm commands on this machine.
+#   - The preset "minimal" still has a bash tool. This is an open safety risk.
+
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      ollama-local:
+        displayName: Ollama Local
+        api: openai-completions
+        baseURL: http://127.0.0.1:11434/v1
+        apiKeyEnv: OLLAMA_API_KEY
+        defaultContextWindow: 8192
+        defaultMaxTokens: 2048
+        models:
+          - id: 'hpc-assistant-vkkm-live:latest'
+            name: HPC Assistant (Ollama)
+            contextWindow: 8192
+            maxTokens: 2048
+
+- id: agent-default-model
+  name: '@deepseek-ai/dsh-agent-default-model'
+  config:
+    provider: ollama-local
+    model: 'hpc-assistant-vkkm-live:latest'
+
+- insert:
+    - id: mcp-hpc
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: hpc
+        transport: stdio
+        command: <REPO>/.venv/bin/python3
+        args:
+          - <REPO>/research/dsh_harness/mcp_server.py
+        env:
+          PYTHONPATH: <REPO>/src
+          HPC_SSH: leonardo
+          # The login node needs an open ssh master (BatchMode ssh cannot ask for a password).
+          # Put a folder with an "ssh" wrapper first in PATH if the master uses a custom ControlPath.
+          PATH: /usr/local/bin:/usr/bin:/bin
+        toolCallTimeoutMs: 120000
+
+- id: agent-preset-registry
+  name: '@deepseek-ai/dsh-agent-preset-registry'
+  config:
+    default: minimal
