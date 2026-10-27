@@ -6,7 +6,8 @@ Slurm 23.11 container) to 30 tasks graded against Leonardo's real Slurm.
 - `tasks.jsonl`: his 10 prompts plus 20 new ones (arrays, requeue, signals, dependencies, GPU/MPI directives,
   `scontrol update`, `sacct`/`squeue` filters, OpenMP), each with required and forbidden patterns.
 - `answer_tasks.py`, `answer_task.sh`: every model answers with the evaluation system prompt, no documentation excerpts
-  (as in the sandbox eval), greedy (run on Curiosity, 8 × B300).
+  (as in the sandbox eval), greedy (run on Curiosity, 8 × B300). `answer_leonardo.sbatch` runs the same answering for
+  one model on a Leonardo GPU node.
 - `grade.py`: two checks per answer, on a Slurm login node.
   - **Rules:** every required pattern is in the answer's code; no forbidden pattern (e.g. `--array=1-10:3`) in the fenced code
     the user would run.
@@ -31,3 +32,14 @@ Slurm 23.11 container) to 30 tasks graded against Leonardo's real Slurm.
 gpt-oss-20b reasons before answering, and 2 of its answers were empty at the 1,024-token limit. Per-task ratings and
 Slurm's output for every answer are in `results/2026-10-26/`. Still wrong for most models: `scontrol requeuehold`
 (task 14) and the array throttle `ArrayTaskThrottle` (task 30).
+
+## Results (Oct 27, Leonardo, same 30 tasks and grader)
+
+| Model | Correct | Partly | Strict | Lenient | Wilson 95% (strict) | Slurm accepted |
+|---|---|---|---|---|---|---|
+| **ClusterPilot-4B 1.3 (HF main, `v13`)** | **21/30** | 5 | **0.70** | **0.78** | [0.52, 0.83] | 24/30 |
+| ClusterPilot-4B 1.2 (`kd2`) | 20/30 | 6 | 0.67 | 0.77 | [0.49, 0.81] | 24/30 |
+| B300 round `kd3` (not released) | 21/30 | 5 | 0.70 | 0.78 | [0.52, 0.83] | 23/30 |
+
+1.3 was answered on Leonardo (`answer_leonardo.sbatch`), 1.2 and `kd3` on Curiosity (`../curiosity_b300/slurm_exec_answers.sh`).
+The differences between versions are one task and within the Wilson intervals. Files: `results/2026-10-27/`.
