@@ -163,6 +163,12 @@ Safety tests in the dsh web UI (headless Chrome via Playwright):
 - Curiosity Reject test: the approval panel opened, Reject stopped the call, and no job appeared in the queue.
 - Curiosity Approve test: the approval panel opened, Approve (allow once) submitted job 12323 through the dsh UI. The job stayed PENDING with reason QOSGrpGRES (a teammate uses all 8 team GPUs).
 - Model faults in these runs: the model wrote "submission initiated" without a tool call (one run). It invented the partitions `gpu` and `all`.
+- Job 12323 then started on dgx13 at 06:22 (cluster time). It printed the B300 GPU line and `smoke test OK`. State COMPLETED.
+- User smoke test in the dsh UI (by hand, code after the merge with `dev`): the approval panel opened, and the user clicked Approve (`allowed-once`). This submitted job 12354 (`smoke_test`, 1 GPU, 5 min) on dgx17 at 06:59 (cluster time). It ran 5:00 and ended with state TIMEOUT (exit 0:0): the script prints one line each minute and runs longer than its 5-min limit. The output shows `Minute 1` and `Minute 2`. The approval path worked; the TIMEOUT is a fault of the script, not of the harness.
+
+Statistical note on the prompt line "Prefer a specific tool" (removed in agent mode): first tool correct was 40/41 without the line and 38/41 with it. The 95% Wilson intervals are [87.4, 99.6] and [80.6, 97.5]. They overlap, and the result comes from one temperature-0 run of in-house questions. The difference is not significant. Run several seeds or paraphrased questions before a new prompt decision depends on it.
+
+Review fixes after driftguard (commit `e205157`): `gpus_free_in_team_limit` uses both the team cap and the per-user cap. The GPU use comes from `tres-alloc`, so `--gpus=N` jobs count and typed GPUs do not count two times. A GPU request in the script stops the default `--gres`. CI installs node 20 and runs the approval plugin tests.
 
 Next steps:
 
