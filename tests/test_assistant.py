@@ -302,7 +302,10 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
         return subprocess.CompletedProcess(cmd, 0, 'NAME ID SIZE MODIFIED\n' + models[0], '')
 
     def download(url, dest):
-        fetched.append(dest.name)
+        if dest.suffix != '.sqlite':  # the docs index is fetched once, on the first setup
+            fetched.append(dest.name)
+        else:
+            assert url == assistant.HF_INDEX + dest.name
         dest.write_text(release[0])
     release = ['v1']
     monkeypatch.setattr(assistant.subprocess, 'run', run)

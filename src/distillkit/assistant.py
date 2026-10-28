@@ -41,8 +41,9 @@ export stage) or any OpenAI-compatible server such as llama-server (`--openai ht
     hpc-assistant --web                    # upload-and-chat page on http://127.0.0.1:8765
 
 `--setup` downloads the GGUF and Modelfile from the Hugging Face release and runs `ollama create`; the built-in
-documentation index is downloaded from HPC_ASSISTANT_INDEX_URL (a directory URL holding documents.sqlite and
-factory_docs.sqlite) when that is set, since the index is distributed separately from the model.
+documentation index (Slurm, LUMI and CSC docs, whose licences allow redistribution) is downloaded from the same
+repository's index/ folder, or from HPC_ASSISTANT_INDEX_URL (a directory URL holding documents.sqlite and
+factory_docs.sqlite) when that is set.
 """
 import argparse
 from datetime import date
@@ -67,6 +68,7 @@ SYSTEM_PROMPT = ("You are an HPC assistant. Use supplied source excerpts for sit
 DEFAULT_INDEX = Path(os.environ.get('HPC_ASSISTANT_INDEX', Path.home() / '.local/share/hpc-assistant'))
 HF_RELEASE = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/gguf/'
 GGUF_FILE = 'hpc-assistant-qwen3-4b-Q4_K_M.gguf'
+HF_INDEX = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/index/'  # Slurm, LUMI, CSC docs
 HF_TREE = 'https://huggingface.co/api/models/VaibhavKKM/hpc-assistant-qwen3-4b/tree/main/gguf'  # file ids of the release
 
 # Retrieval: kept identical to research/rag65/retrieve.py (tests/test_assistant.py checks they agree).
@@ -551,7 +553,7 @@ def _release_id():
 
 def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
     """Install the model from the Hugging Face release into Ollama, or update it when a newer release is out, and the
-    docs index if a URL is set. Run again at any time: it does nothing when everything is current."""
+    docs index. Run again at any time: it does nothing when everything is current."""
     if not shutil.which('ollama'):
         raise SystemExit('Ollama is not installed: get it from https://ollama.com, then run hpc-assistant --setup again')
     listed = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
@@ -578,14 +580,10 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
         stamp.write_text(latest or '')
     print(f'[hpc-assistant] model ready in Ollama: {model}' + ('' if latest else
           ' (Hugging Face not reachable: could not check for a newer release)'), file=sys.stderr)
-    url = os.environ.get('HPC_ASSISTANT_INDEX_URL')
+    url = os.environ.get('HPC_ASSISTANT_INDEX_URL') or HF_INDEX
     for name in ('documents.sqlite', 'factory_docs.sqlite'):
         if (index_dir / name).exists():
             continue
-        if not url:
-            print(f'[hpc-assistant] no built-in docs index in {index_dir}: set HPC_ASSISTANT_INDEX_URL and rerun --setup, '
-                  'or add your own manuals with --add', file=sys.stderr)
-            break
         print(f'[hpc-assistant] downloading {name}', file=sys.stderr)
         index_dir.mkdir(parents=True, exist_ok=True)
         _download(url.rstrip('/') + '/' + name, index_dir / name)
