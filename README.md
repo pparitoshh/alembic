@@ -2,6 +2,8 @@
 
 **Modular teacher–student distillation for local, domain-specific assistants.**
 
+**HPC Assistant Guide** (set up the HPC assistant in the dsh web UI, store your cluster password safely, run a first test): https://claude.ai/artifact/SsLqjVJ3zqxU1dm13KW5Hk
+
 DistillKit turns a large open-weight **teacher** model into a compact **student** that runs on a laptop. The student learns from teacher-generated question/answer text and tool-calling traces (sequence-level distillation), so any teacher that emits text works with any student. The teacher's top-20 logprobs are saved as well, so logit-level distillation can be added later without re-running the teacher.
 
 The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B-Instruct-2507** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM, as a streaming chat assistant (≥ 8 tok/s with 2,048 tokens of context; ≤ 3 s to the first token on follow-up questions).
@@ -163,6 +165,7 @@ Live test results are in `data/agent_live/results.md` (37 tasks on Leonardo, 202
 
 ## Documentation
 
+- **[HPC Assistant Guide](https://claude.ai/artifact/SsLqjVJ3zqxU1dm13KW5Hk):** how the dsh harness works (model, MCP server, approval of job actions) and a step-by-step setup, with safe password storage. Files: [research/dsh_harness/](research/dsh_harness/).
 - **[GOAL.md](GOAL.md):** mission, final model choices, goals, order of work, success metrics, deliverables, team roles and timeline.
 - **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (teacher serving and logprobs, tool-calling data, verification, QDoRA + FSDP, RAG, quantization, evaluation).
 - **[slurm/README.md](slurm/README.md):** running on Leonardo: setup, day-1 smoke tests, the job pipeline.
