@@ -732,3 +732,22 @@ def test_user_docs_match_needs_the_question_names(tmp_path):
     # shares "maximum wall time, GPUs per node, partition" with the guide, but names Leonardo's partition
     assert not bot._user_docs_match('What is the maximum wall time and how many GPUs per node does partition '
                                     'boost_usr_prod allow?')
+
+
+@pytest.mark.parametrize("text, promise", [
+    ("I'll submit your job for you on the Leonardo cluster.", True), ("I will cancel job 123 now.", True),
+    ("Submitting your job now.", True), ("I'll go ahead and submit it.", True),
+    ("To submit it yourself, run sbatch job.sh.", False), ("I cannot submit the job because you declined.", False),
+])
+def test_promise_pattern(text, promise):
+    from distillkit.assistant import PROMISE
+    assert bool(PROMISE.search(text)) is promise
+
+
+def test_promise_without_action_gets_a_note(tmp_path):
+    from distillkit.assistant import Assistant
+    bot = Assistant(tmp_path, docs=False, slurm=object())
+    bot._stream = lambda messages: iter(["I'll submit your job for you on the Leonardo cluster."])
+    out = io.StringIO()
+    bot.ask('Submit this job for me:\n#!/bin/bash\n#SBATCH -t 00:05:00\nhostname', out=out)
+    assert 'no action was run for this request' in out.getvalue()

@@ -317,6 +317,9 @@ def names(text):
     return {w for w in found if len(w) > 1}
 
 
+# "I'll submit it now" with no submit_job call (issue #113, rehearsal Oct 28): the app then says nothing happened
+PROMISE = re.compile(r"(?i)\bI(?:'ll| will| am going to)\s+(?:now\s+|go ahead and\s+)?(?:submit|resubmit|cancel|requeue|hold|"
+                     r"release|update)\b|\b(?:submitting|cancelling|canceling) (?:it|your job|the job|this job) now\b")
 USER_DOC_SHARE = 0.5  # share of the question's search words that the best excerpt of the user's manuals must contain
 
 
@@ -691,7 +694,9 @@ class Assistant:
                 if isinstance(piece, dict):
                     return text, piece['tool_calls']
                 text += piece
-                if len(text) > self.AGENT_PROBE_CHARS:
+                # repeating the user's job script before calling submit_job is not "answering from the docs": the
+                # model wrote the script back, passed 300 characters and the submit never came (rehearsal, Oct 28)
+                if len(text) > self.AGENT_PROBE_CHARS + (len(question) if SBATCH.search(question) else 0):
                     return None
         finally:
             gen.close()  # closing the stream stops the model server
@@ -728,7 +733,7 @@ class Assistant:
             del self.history[1:nxt]
 
     def _answer(self, question, sources, turn, first, out, max_tool_rounds):
-        last_call, declined = None, False
+        last_call, declined, acted = None, False, False
         for _ in range(max_tool_rounds + 1):
             answer, calls, checked = [], [], 0
             if first:  # the tool call from the probe above: no second request
@@ -784,6 +789,7 @@ class Assistant:
                         return str(e), sources
                     self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
                     if c['name'] in ACTIONS:
+                        acted = True
                         out.write(action_status(c['name'], result))
                         declined = declined or not_approved(result)
                     continue
@@ -808,6 +814,8 @@ class Assistant:
             out.write('\n' + notice + '\n')
             return notice, sources
         self.history.append({'role': 'assistant', 'content': ''.join(answer)})
+        if self.slurm and not acted and PROMISE.search(''.join(answer)):  # issue #113: a promise and no action
+            out.write('\n[hpc-assistant] note: no action was run for this request: nothing was submitted or changed.\n')
         if sources:
             out.write('\n\nSources:\n' + '\n'.join('- ' + u + (f' ({self.titles[u]})' if self.titles.get(u) else '')
                                                 for u in dict.fromkeys(sources)) + '\n')
