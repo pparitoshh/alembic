@@ -88,6 +88,7 @@ class SlurmLive:
         self._runner = runner  # tests: callable(argv, stdin) -> (rc, stdout, stderr)
         self._user = None
         self._mux = None
+        self._parts = None
 
     # --- command execution ---------------------------------------------------------------------
     def run(self, argv, stdin=None):
@@ -143,7 +144,40 @@ class SlurmLive:
             return {"error": f"invalid job id {args['job_id']!r}"}
         if name in ACTIONS and not (name == "submit_job" and args.get("test_only")) and not self.confirm(name, args):
             return {"error": "the user declined this action", "action": name}
-        return getattr(self, name)(**args)
+        note = None
+        if args.get("partition"):
+            args["partition"], note = self.resolve_partition(args["partition"], all_ok=name == "gpu_availability")
+            if args["partition"] is False:
+                return {"error": note}
+            if args["partition"] is None:
+                del args["partition"]
+        result = getattr(self, name)(**args)
+        if isinstance(result, dict) and "invalid partition" in str(result.get("error", "")).lower() and self.partitions():
+            result["error"] += "; partitions on this cluster: " + ", ".join(self.partitions())
+        if note and isinstance(result, dict):
+            result["note"] = note
+        return result
+
+    def partitions(self):
+        if self._parts is None:
+            rc, out, _ = self.run(["sinfo", "-h", "-o", "%R"])
+            self._parts = sorted(set(out.split())) if rc == 0 else []
+        return self._parts
+
+    def resolve_partition(self, name, all_ok=False):
+        """Models often guess a partition ("boost", "gpu", the cluster's name). Returns (partition, note): the exact
+        name; the one partition that contains the guess; None (all partitions) if all_ok; or False with an error that
+        lists the real partitions, so the model can retry."""
+        parts = self.partitions()
+        if not parts or name in parts:
+            return name, None
+        match = [p for p in parts if name.lower() in p.lower()]
+        if len(match) == 1:
+            return match[0], f"there is no partition {name!r}; used {match[0]!r}"
+        listed = ", ".join(parts)
+        if all_ok:
+            return None, f"{name!r} is not a partition name, so all partitions are shown (partitions: {listed})"
+        return False, f"there is no partition {name!r}; partitions on this cluster: {listed}"
 
     # --- tools -----------------------------------------------------------------------------------
     def job_status(self, job_id):

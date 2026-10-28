@@ -262,3 +262,18 @@ def test_ssh_reuses_one_connection_unless_the_host_has_its_own(monkeypatch):
     assert "ControlPath=~/.ssh/clusterpilot-%C" in seen[-1] and seen[-1][-2:] == ["plain", "id -un"]
     SlurmLive(ssh="own").run(["id", "-un"])
     assert not any("Control" in c for c in seen[-1])
+
+
+def test_guessed_partition_names_are_resolved_or_listed():
+    sinfo = (0, "lrdn0001  boost_usr_prod  gpu:a100:4(S:0-1)  gpu:a100:2(IDX:0-1)  mix\n", "")
+    s, fake = live({"sinfo&%R": (0, "boost_usr_prod\ndcgp_usr_prod\nlrd_all_serial\nboost_usr_prod\n", ""),
+                    "sinfo&-N": sinfo, "squeue&--me": (0, "", "")})
+    r = s.execute("gpu_availability", {"partition": "boost"})
+    assert r["partitions"][0]["partition"] == "boost_usr_prod" and "used 'boost_usr_prod'" in r["note"]
+    assert "-p" in fake.calls[-1][0] and "boost_usr_prod" in fake.calls[-1][0]
+    r = s.execute("gpu_availability", {"partition": "leonardo"})
+    assert "partitions" in r and "-p" not in fake.calls[-1][0] and "lrd_all_serial" in r["note"]
+    r = s.execute("list_queue", {"partition": "booster"})
+    assert r == {"error": "there is no partition 'booster'; partitions on this cluster: "
+                          "boost_usr_prod, dcgp_usr_prod, lrd_all_serial"}
+    assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": []}
