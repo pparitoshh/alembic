@@ -11,6 +11,7 @@ data, the same as `data/eval/`. Copy a case into a training set only when the me
 |---|---|
 | `lumi/` | Use cases from LUMI users |
 | `leonardo/` | Use cases from Leonardo users |
+| `curiosity/` | Curiosity copies of the Leonardo use cases, rewritten for the B300 cluster (held-out, same rules) |
 | `other/` | Use cases from other clusters (write the cluster name in the `cluster` field) |
 
 ## How to add a use case
