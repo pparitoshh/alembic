@@ -448,6 +448,7 @@ train = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "numpy" },
     { name = "pytest" },
 ]
 
@@ -476,7 +477,10 @@ requires-dist = [
 provides-extras = ["train", "assistant", "export"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.0" }]
+dev = [
+    { name = "numpy", specifier = ">=2.5.3" },
+    { name = "pytest", specifier = ">=8.0" },
+]
 
 [[package]]
 name = "fastapi"

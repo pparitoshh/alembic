@@ -57,3 +57,9 @@ def test_tool_parsers_and_prefix():
     assert 'TOOL_PARSER=hermes' in lib and 'TOOL_PARSER=openai' in lib
     assert '--tool-prefix mcp__hpc__' in (D / 'build.sh').read_text()
     assert '--enable-auto-tool-choice' in (D / 'collect.sh').read_text()
+
+
+def test_build_calls_build_tool_kd():
+    text = (D / 'build.sh').read_text()
+    # data_src.jsonl is the file build_agent_data.py writes; $STUDENT is the tokenizer, not a positional
+    assert '$MT/build_tool_kd.py $RUN/examples/data_src.jsonl $P --tokenizer $STUDENT --tool-prefix mcp__hpc__' in text

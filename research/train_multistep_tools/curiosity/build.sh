@@ -46,10 +46,10 @@ if [ ! -e $P/DONE ]; then
     rm -rf $P
     case $MODE in
         onehot)  extra=(--onehot) ;;
-        teacher) extra=(--teacher $TEACHER_DIR) ;;   # teacher scoring on GPUs 0-3 (TP 4)
+        teacher) extra=(--teacher $TEACHER_DIR) ;;   # one TP 4 job scores every row, so one part (no --part/--nparts)
         *) log "STOP: unknown MODE=$MODE"; exit 1 ;;
     esac
-    CUDA_VISIBLE_DEVICES=0,1,2,3 TP=4 python $MT/build_tool_kd.py $RUN/examples $P $STUDENT --tool-prefix mcp__hpc__ "${extra[@]}" \
+    CUDA_VISIBLE_DEVICES=0,1,2,3 TP=4 python $MT/build_tool_kd.py $RUN/examples/data_src.jsonl $P --tokenizer $STUDENT --tool-prefix mcp__hpc__ "${extra[@]}" \
         >> $LOGS/$TASK.build.log 2>&1 && touch $P/DONE || { log "STOP: build_tool_kd failed"; exit 1; }
 fi
 log "parts ($MODE): $(ls $P/part*.npz | wc -l)"
