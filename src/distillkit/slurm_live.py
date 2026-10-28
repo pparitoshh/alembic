@@ -147,6 +147,12 @@ class SlurmLive:
                 raise ToolError(f"{name}: argument {a!r} should be {props[a]['type']}")
             if "enum" in props[a] and v not in props[a]["enum"]:
                 raise ToolError(f"{name}: argument {a!r} must be one of {props[a]['enum']}")
+        pending = re.match(r"^([0-9]+)_\[[^\]]*\]$", args.get("job_id", ""))  # squeue shows pending array tasks so
+        if pending and name in ACTIONS:
+            return {"error": f"{args['job_id']} is a range of pending array tasks: use {pending.group(1)} for the "
+                             f"whole array or {pending.group(1)}_<index> for one task", "action": name}
+        if pending:  # read-only: report on the array
+            args["job_id"] = pending.group(1)
         if "job_id" in args and not _JOB_ID.match(args["job_id"]):
             return {"error": f"invalid job id {args['job_id']!r}"}
         if name in ("cancel_job", "hold_job", "release_job", "update_job"):  # before asking: is there anything to change?

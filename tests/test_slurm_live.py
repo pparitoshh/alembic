@@ -367,3 +367,11 @@ def test_run_readonly_command_allows_options_before_show(command, ok):
 def test_no_ssh_connection_sharing_on_windows(monkeypatch):
     monkeypatch.setattr(slurm_live.os, "name", "nt")  # Windows OpenSSH has no ControlMaster
     assert SlurmLive(ssh="host").mux_options() == []
+
+
+def test_pending_array_ranges_from_squeue_work_in_read_only_tools():
+    s, fake = live({"squeue&-j&12345": (0, "12345_[3-10%2]|sweep|PENDING|JobArrayTaskLimit|p|1|0:00|1:00:00||N/A\n", "")})
+    assert s.execute("job_status", {"job_id": "12345_[3-10%2]"})["state"] == "PENDING"
+    assert ["squeue", "-h", "-j", "12345"] == fake.calls[-1][0][:4]
+    r = s.execute("cancel_job", {"job_id": "12345_[3-10%2]"})
+    assert "use 12345 for the whole array or 12345_<index>" in r["error"] and not any(c[0][0] == "scancel" for c in fake.calls)
