@@ -326,3 +326,21 @@ def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
         t.join(5)
         assert expect in ask.wfile.getvalue()
     assert sum(c[0][0] == "scancel" for c in fake.calls) == 1
+
+
+def test_run_readonly_command_fills_in_the_user_name():
+    s, fake = live({"id&-un": (0, "alice\n", ""), "sacctmgr&show": (0, "acct|alice\n", "")})
+    r = s.execute("run_readonly_command", {"command": "sacctmgr show assoc user=$USER"})
+    assert r["exit_code"] == 0 and fake.calls[-1][0] == ["sacctmgr", "show", "assoc", "user=alice"]
+    assert "refused" in s.execute("run_readonly_command", {"command": "squeue -u $HOME"})["error"]
+
+
+@pytest.mark.parametrize(("command", "ok"), [("sacctmgr -P show assoc user=alice", True), ("scontrol -o show job 1", True),
+                                             ("sacctmgr -i delete user alice", False), ("sacctmgr -M show", True),
+                                             ("scontrol update show=1", False), ("man scontrol", False)])
+def test_run_readonly_command_allows_options_before_show(command, ok):
+    s, fake = live({"sacctmgr": (0, "x\n", ""), "scontrol": (0, "x\n", "")})
+    r = s.execute("run_readonly_command", {"command": command})
+    assert ("error" not in r) == ok
+    if not ok:
+        assert "search_docs" in r["error"]
