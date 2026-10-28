@@ -163,7 +163,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
     seen = {}
 
     def fake_stream(self, messages):  # the conftest blocks sockets, so the model server is stubbed
-        seen['messages'] = messages
+        seen['messages'] = [dict(m) for m in messages]  # as sent (the conversation keeps only the question)
         yield from ['Use ', '--gpus-per-node.']
 
     monkeypatch.setattr(assistant.Assistant, '_stream', fake_stream)
@@ -174,6 +174,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
     assert seen['messages'][0] == {'role': 'system', 'content': assistant.SYSTEM_PROMPT}
     assert '<quoted_source>' in seen['messages'][1]['content'] and 'standard-g' in seen['messages'][1]['content']
     assert 'Sources:\n- https://docs.lumi/gpu' in out.getvalue()
+    assert bot.history[1] == {'role': 'user', 'content': 'How do I request GPUs on LUMI?'}
 
 
 def test_user_manual_is_indexed_searched_first_and_replaced_on_readd(tmp_path):
@@ -385,7 +386,7 @@ def test_agent_mode_asks_without_excerpts_first(tmp_path, monkeypatch):
     monkeypatch.setattr(bot, '_stream', stream2)
     answer, sources = bot.ask('How do I request GPUs on LUMI?', out=StringIO())
     assert sent[0] == 'How do I request GPUs on LUMI?' and 'Quoted retrieval results' in sent[1]
-    assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == sent[1]
+    assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == 'How do I request GPUs on LUMI?'
 
 
 def test_setup_refreshes_only_an_index_it_installed(tmp_path, monkeypatch):
@@ -430,3 +431,18 @@ def test_download_replaces_an_existing_file_and_documents_read_as_utf8(tmp_path,
     doc = tmp_path / 'guide.md'
     doc.write_bytes('# Guide\n\nUse `--gpus-per-node` – not `--gpus` – on MyCluster → standard-g.'.encode())
     assert '– not `--gpus` – on MyCluster → standard-g' in assistant.read_document(doc)[0][1]  # explicit UTF-8
+
+
+def test_long_chats_keep_plain_questions_and_drop_the_oldest_turns(tmp_path, monkeypatch):
+    sent = []
+
+    def stream(self, messages):
+        sent.append(sum(len(m['content']) for m in messages))
+        yield 'A' * 3000
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    bot = assistant.Assistant(_indexes(tmp_path))
+    for i in range(12):
+        bot.ask(f'Question {i}: how do I request GPUs on LUMI with sbatch?', out=StringIO())
+    assert bot.history[0]['role'] == 'system' and 'Quoted retrieval' not in str(bot.history)
+    assert sum(len(m['content']) for m in bot.history[1:]) <= assistant.Assistant.HISTORY_CHARS + 3100
+    assert bot.history[-2]['content'].startswith('Question 11') and max(sent) < 40000

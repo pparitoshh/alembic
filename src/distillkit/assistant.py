@@ -504,7 +504,27 @@ class Assistant:
         max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
         first = self._agent_first(question) if self.slurm and self.docs else None
         user, sources = (question, []) if first else self.prompt(question)
-        self.history.append({'role': 'user', 'content': user})
+        self._trim_history()
+        turn = {'role': 'user', 'content': user}
+        self.history.append(turn)
+        try:
+            return self._answer(question, sources, turn, first, out, max_tool_rounds)
+        finally:  # the excerpts are only for this question: keep the plain question in the conversation
+            turn['content'] = question
+
+    HISTORY_CHARS = 24000  # earlier turns kept for follow-ups (~6K tokens), so the next excerpts fit in the 16K context
+
+    def _trim_history(self):
+        """Drop the oldest turns (from one user message to the next) when the conversation outgrows HISTORY_CHARS.
+        Measured: with the doc excerpts kept in every turn, a chat passed Ollama's 16K context at the third question
+        and Ollama silently dropped part of it (12,172 of ~17,500 prompt tokens evaluated)."""
+        def size():
+            return sum(len(m.get('content') or '') + len(json.dumps(m.get('tool_calls', ''))) for m in self.history[1:])
+        while size() > self.HISTORY_CHARS and len(self.history) > 1:
+            nxt = next((i for i in range(2, len(self.history)) if self.history[i]['role'] == 'user'), len(self.history))
+            del self.history[1:nxt]
+
+    def _answer(self, question, sources, turn, first, out, max_tool_rounds):
         last_call = None
         for _ in range(max_tool_rounds + 1):
             answer, calls, checked = [], [], 0
