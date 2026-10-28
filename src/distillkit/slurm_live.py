@@ -87,12 +87,13 @@ class SlurmLive:
         self.confirm = confirm or (lambda name, args: False)
         self._runner = runner  # tests: callable(argv, stdin) -> (rc, stdout, stderr)
         self._user = None
+        self._mux = None
 
     # --- command execution ---------------------------------------------------------------------
     def run(self, argv, stdin=None):
         if self._runner:
             return self._runner(argv, stdin)
-        cmd = ["ssh", "-o", "BatchMode=yes", self.ssh, shlex.join(argv)] if self.ssh else argv
+        cmd = ["ssh", "-o", "BatchMode=yes", *self.mux_options(), self.ssh, shlex.join(argv)] if self.ssh else argv
         try:
             p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, timeout=self.timeout)
         except FileNotFoundError:
@@ -100,6 +101,19 @@ class SlurmLive:
         except subprocess.TimeoutExpired:
             return 124, "", f"{argv[0]}: timed out after {self.timeout}s"
         return p.returncode, p.stdout, p.stderr
+
+    def mux_options(self):
+        """Reuse one ssh connection for all tool calls (a new connection through a jump host can take 20 s).
+        Hosts that already have a ControlPath in the user's ssh config keep their own setting."""
+        if self._mux is None:
+            try:
+                conf = subprocess.run(["ssh", "-G", self.ssh], capture_output=True, text=True, timeout=10).stdout
+            except (OSError, subprocess.TimeoutExpired):
+                conf = ""
+            own = re.search(r"^controlpath (?!none$)", conf, re.M | re.I)
+            self._mux = [] if own or not conf else [
+                "-o", "ControlMaster=auto", "-o", "ControlPath=~/.ssh/clusterpilot-%C", "-o", "ControlPersist=10m"]
+        return self._mux
 
     def user(self):
         if self._user is None:

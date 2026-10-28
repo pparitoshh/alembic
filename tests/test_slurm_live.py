@@ -244,3 +244,21 @@ def test_openai_history_links_tool_calls_and_results(monkeypatch, tmp_path):
     assert ids[0] == "chatcmpl-tool-1" and ids[1] and len(set(ids)) == 2
     assert all(isinstance(c["function"]["arguments"], str) for c in call_msg["tool_calls"])
     assert [r1["tool_call_id"], r2["tool_call_id"]] == ids and r1["role"] == r2["role"] == "tool"
+
+
+def test_ssh_reuses_one_connection_unless_the_host_has_its_own(monkeypatch):
+    class P:
+        def __init__(self, out):
+            self.stdout, self.stderr, self.returncode = out, "", 0
+    seen = []
+
+    def fake_run(cmd, **kw):
+        seen.append(cmd)
+        if cmd[:2] == ["ssh", "-G"]:
+            return P("user me\ncontrolpath /home/me/.ssh/cm-x\n" if cmd[2] == "own" else "user me\ncontrolmaster false\n")
+        return P("me\n")
+    monkeypatch.setattr(slurm_live.subprocess, "run", fake_run)
+    SlurmLive(ssh="plain").run(["id", "-un"])
+    assert "ControlPath=~/.ssh/clusterpilot-%C" in seen[-1] and seen[-1][-2:] == ["plain", "id -un"]
+    SlurmLive(ssh="own").run(["id", "-un"])
+    assert not any("Control" in c for c in seen[-1])
