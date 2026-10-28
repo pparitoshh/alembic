@@ -608,7 +608,8 @@ def main(argv=None):
             if args.yes:
                 return True
             if not sys.stdin.isatty():
-                return False
+                return ('not done: there is no terminal to ask the user for approval; they can rerun this in a '
+                        'terminal, or start clusterpilot with --yes')
             return input(f'\n[hpc-assistant] {describe(name, call)}\nProceed? [y/N] ').strip().lower() in ('y', 'yes')
         slurm = SlurmLive(ssh=args.ssh, workdir=args.jobs_dir, confirm=confirm)
     bot = Assistant(args.index, docs=not args.no_docs, k=args.k, model=args.model, openai=args.openai,
@@ -620,7 +621,7 @@ def main(argv=None):
         print(f'[hpc-assistant] no built-in index in {args.index}; only your own documents are searched', file=sys.stderr)
     if args.web:
         from distillkit.assistant_web import serve
-        serve(bot, port=args.port)
+        serve(bot, port=args.port, approve_in_page=bool(slurm) and not args.yes)
         return
     if args.question:
         bot.ask(' '.join(args.question))

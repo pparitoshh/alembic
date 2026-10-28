@@ -87,12 +87,14 @@ class SlurmLive:
         self.confirm = confirm or (lambda name, args: False)
         self._runner = runner  # tests: callable(argv, stdin) -> (rc, stdout, stderr)
         self._user = None
+        self._mux = None
+        self._parts = None
 
     # --- command execution ---------------------------------------------------------------------
     def run(self, argv, stdin=None):
         if self._runner:
             return self._runner(argv, stdin)
-        cmd = ["ssh", "-o", "BatchMode=yes", self.ssh, shlex.join(argv)] if self.ssh else argv
+        cmd = ["ssh", "-o", "BatchMode=yes", *self.mux_options(), self.ssh, shlex.join(argv)] if self.ssh else argv
         try:
             p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, timeout=self.timeout)
         except FileNotFoundError:
@@ -100,6 +102,19 @@ class SlurmLive:
         except subprocess.TimeoutExpired:
             return 124, "", f"{argv[0]}: timed out after {self.timeout}s"
         return p.returncode, p.stdout, p.stderr
+
+    def mux_options(self):
+        """Reuse one ssh connection for all tool calls (a new connection through a jump host can take 20 s).
+        Hosts that already have a ControlPath in the user's ssh config keep their own setting."""
+        if self._mux is None:
+            try:
+                conf = subprocess.run(["ssh", "-G", self.ssh], capture_output=True, text=True, timeout=10).stdout
+            except (OSError, subprocess.TimeoutExpired):
+                conf = ""
+            own = re.search(r"^controlpath (?!none$)", conf, re.M | re.I)
+            self._mux = [] if own or not conf else [
+                "-o", "ControlMaster=auto", "-o", "ControlPath=~/.ssh/clusterpilot-%C", "-o", "ControlPersist=10m"]
+        return self._mux
 
     def user(self):
         if self._user is None:
@@ -127,9 +142,50 @@ class SlurmLive:
                 raise ToolError(f"{name}: argument {a!r} must be one of {props[a]['enum']}")
         if "job_id" in args and not _JOB_ID.match(args["job_id"]):
             return {"error": f"invalid job id {args['job_id']!r}"}
-        if name in ACTIONS and not (name == "submit_job" and args.get("test_only")) and not self.confirm(name, args):
-            return {"error": "the user declined this action", "action": name}
-        return getattr(self, name)(**args)
+        if name in ("cancel_job", "hold_job", "release_job", "update_job"):  # before asking: is there anything to change?
+            rc, out, _ = self.run(["squeue", "--me", "-h", "-j", args["job_id"].split("_")[0], "-o", "%T"])
+            if rc != 0 or not out.strip():
+                state = self.job_status(args["job_id"]).get("state")
+                return {"error": f"job {args['job_id']} is not one of your queued or running jobs"
+                                 + (f" (state: {state})" if state else " (not found)"), "action": name}
+        if name in ACTIONS and not (name == "submit_job" and args.get("test_only")):
+            ok = self.confirm(name, args)  # True, or False / a reason string when not approved
+            if ok is not True:
+                return {"error": ok if isinstance(ok, str) and ok else "the user declined this action", "action": name}
+        note = None
+        if args.get("partition"):
+            args["partition"], note = self.resolve_partition(args["partition"], all_ok=name == "gpu_availability")
+            if args["partition"] is False:
+                return {"error": note}
+            if args["partition"] is None:
+                del args["partition"]
+        result = getattr(self, name)(**args)
+        if isinstance(result, dict) and "invalid partition" in str(result.get("error", "")).lower() and self.partitions():
+            result["error"] += "; partitions on this cluster: " + ", ".join(self.partitions())
+        if note and isinstance(result, dict):
+            result["note"] = note
+        return result
+
+    def partitions(self):
+        if self._parts is None:
+            rc, out, _ = self.run(["sinfo", "-h", "-o", "%R"])
+            self._parts = sorted(set(out.split())) if rc == 0 else []
+        return self._parts
+
+    def resolve_partition(self, name, all_ok=False):
+        """Models often guess a partition ("boost", "gpu", the cluster's name). Returns (partition, note): the exact
+        name; the one partition that contains the guess; None (all partitions) if all_ok; or False with an error that
+        lists the real partitions, so the model can retry."""
+        parts = self.partitions()
+        if not parts or name in parts:
+            return name, None
+        match = [p for p in parts if name.lower() in p.lower()]
+        if len(match) == 1:
+            return match[0], f"there is no partition {name!r}; used {match[0]!r}"
+        listed = ", ".join(parts)
+        if all_ok:
+            return None, f"{name!r} is not a partition name, so all partitions are shown (partitions: {listed})"
+        return False, f"there is no partition {name!r}; partitions on this cluster: {listed}"
 
     # --- tools -----------------------------------------------------------------------------------
     def job_status(self, job_id):
@@ -435,6 +491,8 @@ def _mem_gb(v):
 
 def describe(name, args):
     """One line for the confirmation prompt."""
+    if name == "cancel_job":
+        return f"cancel job {args.get('job_id')} (scancel)"
     if name == "submit_job":
         head = [l for l in args.get("script", "").splitlines() if l.startswith("#SBATCH")][:6]
         return "submit this job:\n  " + "\n  ".join(head or ["(no #SBATCH lines)"])

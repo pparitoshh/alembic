@@ -73,9 +73,14 @@ def test_actions_need_confirmation_and_cancel_only_own_jobs():
     s, fake = live({"sbatch": (0, "1\n", "")}, confirm=lambda n, a: False)
     assert s.execute("submit_job", {"script": "#!/bin/bash\n"})["error"] == "the user declined this action"
     assert not any("sbatch" in " ".join(c[0]) for c in fake.calls)
-    s, fake = live({"squeue&--me": (0, "", "")})
-    assert s.execute("cancel_job", {"job_id": "5"})["cancelled"] is False
+    asked = []
+    s, fake = live({"squeue&--me": (0, "", ""), "squeue&-j&5": (0, "", ""), "sacct": (0, "5|x|COMPLETED|0:0|p|00:01:00|"
+                    "01:00:00|n1|||1|\n", "")}, confirm=lambda n, a: asked.append(n) or True)
+    r = s.execute("cancel_job", {"job_id": "5"})  # finished: refused before the user is asked
+    assert r["error"] == "job 5 is not one of your queued or running jobs (state: COMPLETED)" and not asked
     assert not any(c[0][0] == "scancel" for c in fake.calls)
+    s, _ = live({"squeue&--me&-j&5": (0, "PENDING\n", "")}, confirm=lambda n, a: "no terminal to ask")
+    assert s.execute("cancel_job", {"job_id": "5"}) == {"error": "no terminal to ask", "action": "cancel_job"}
     s, _ = live({"squeue&--me&%i": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
                  "scancel": (0, "", "")})
     assert s.execute("cancel_job", {"job_id": "5"}) == {"cancelled": True, "message": "Job 5 cancelled (was PENDING)"}
@@ -172,7 +177,7 @@ def test_hold_release_and_requeue_use_scontrol_on_own_jobs():
     s, _ = live({"squeue&--me": (0, "", "")})  # not one of the user's own jobs: refused before any scontrol
     s2fake = s._runner
     r = s.execute("hold_job", {"job_id": "9"})
-    assert r == {"hold": False, "message": "job 9 is not one of your queued or running jobs"}
+    assert r == {"error": "job 9 is not one of your queued or running jobs (not found)", "action": "hold_job"}
     assert not any(c[0][0] == "scontrol" for c in s2fake.calls)
 
 
@@ -199,10 +204,10 @@ def test_new_actions_call_confirm_and_return_the_decline_error():
     for name, args in [("update_job", {"job_id": "9", "field": "TimeLimit", "value": "2:00:00"}),
                        ("hold_job", {"job_id": "9"}), ("release_job", {"job_id": "9"}),
                        ("requeue_job", {"job_id": "9"})]:
-        s, fake = live({}, confirm=lambda n, a: False)
+        s, fake = live({"squeue&--me&-j&9": (0, "PENDING\n", "")}, confirm=lambda n, a: False)
         r = s.execute(name, args)
         assert r["error"] == "the user declined this action" and r["action"] == name
-        assert not fake.calls
+        assert all(c[0][0] == "squeue" for c in fake.calls)  # only the check that the job is still queued
 
 
 def test_round_limit_appends_a_stop_notice_with_the_last_call(monkeypatch, tmp_path):
@@ -244,3 +249,80 @@ def test_openai_history_links_tool_calls_and_results(monkeypatch, tmp_path):
     assert ids[0] == "chatcmpl-tool-1" and ids[1] and len(set(ids)) == 2
     assert all(isinstance(c["function"]["arguments"], str) for c in call_msg["tool_calls"])
     assert [r1["tool_call_id"], r2["tool_call_id"]] == ids and r1["role"] == r2["role"] == "tool"
+
+
+def test_ssh_reuses_one_connection_unless_the_host_has_its_own(monkeypatch):
+    class P:
+        def __init__(self, out):
+            self.stdout, self.stderr, self.returncode = out, "", 0
+    seen = []
+
+    def fake_run(cmd, **kw):
+        seen.append(cmd)
+        if cmd[:2] == ["ssh", "-G"]:
+            return P("user me\ncontrolpath /home/me/.ssh/cm-x\n" if cmd[2] == "own" else "user me\ncontrolmaster false\n")
+        return P("me\n")
+    monkeypatch.setattr(slurm_live.subprocess, "run", fake_run)
+    SlurmLive(ssh="plain").run(["id", "-un"])
+    assert "ControlPath=~/.ssh/clusterpilot-%C" in seen[-1] and seen[-1][-2:] == ["plain", "id -un"]
+    SlurmLive(ssh="own").run(["id", "-un"])
+    assert not any("Control" in c for c in seen[-1])
+
+
+def test_guessed_partition_names_are_resolved_or_listed():
+    sinfo = (0, "lrdn0001  boost_usr_prod  gpu:a100:4(S:0-1)  gpu:a100:2(IDX:0-1)  mix\n", "")
+    s, fake = live({"sinfo&%R": (0, "boost_usr_prod\ndcgp_usr_prod\nlrd_all_serial\nboost_usr_prod\n", ""),
+                    "sinfo&-N": sinfo, "squeue&--me": (0, "", "")})
+    r = s.execute("gpu_availability", {"partition": "boost"})
+    assert r["partitions"][0]["partition"] == "boost_usr_prod" and "used 'boost_usr_prod'" in r["note"]
+    assert "-p" in fake.calls[-1][0] and "boost_usr_prod" in fake.calls[-1][0]
+    r = s.execute("gpu_availability", {"partition": "leonardo"})
+    assert "partitions" in r and "-p" not in fake.calls[-1][0] and "lrd_all_serial" in r["note"]
+    r = s.execute("list_queue", {"partition": "booster"})
+    assert r == {"error": "there is no partition 'booster'; partitions on this cluster: "
+                          "boost_usr_prod, dcgp_usr_prod, lrd_all_serial"}
+    assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": []}
+
+
+def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
+    import re
+    import threading
+    import time
+    from io import BytesIO
+    from distillkit import assistant_web
+    from distillkit.assistant_web import make_handler
+
+    monkeypatch.setattr(assistant_web, "APPROVAL_WAIT", 5)
+
+    class Bot:  # stands in for Assistant: one cancel_job call per question
+        model, builtin, history = "m", False, [{}]
+
+        def __init__(self, slurm):
+            self.slurm = slurm
+
+        def ask(self, question, out):
+            out.write(json.dumps(self.slurm.execute("cancel_job", {"job_id": "5"})))
+
+    s, fake = live({"squeue&--me": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
+                    "scancel": (0, "", "")})
+    handler = make_handler(Bot(s), approve_in_page=True)
+
+    class Fake(handler):
+        def __init__(self, path, body):
+            self.path, self.rfile, self.wfile = path, BytesIO(body), BytesIO()
+            self.headers = {"Content-Length": str(len(body))}
+            self.request_version, self.requestline, self.command = "HTTP/1.1", f"POST {path} HTTP/1.1", "POST"
+
+    for approve, expect in ((True, b'"cancelled": true'), (False, b"did not approve")):
+        ask = Fake("/api/ask", b'{"question": "cancel 5"}')
+        t = threading.Thread(target=ask.do_POST)
+        t.start()
+        for _ in range(200):
+            if m := re.search(rb"\[\[approve (\w+) (.*)\]\]", ask.wfile.getvalue()):
+                break
+            time.sleep(0.01)
+        assert b"cancel job 5" in m.group(2).lower()
+        Fake("/api/approve", json.dumps({"id": m.group(1).decode(), "approve": approve}).encode()).do_POST()
+        t.join(5)
+        assert expect in ask.wfile.getvalue()
+    assert sum(c[0][0] == "scancel" for c in fake.calls) == 1
