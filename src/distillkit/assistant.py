@@ -66,6 +66,11 @@ from distillkit.tools import ToolError
 SYSTEM_PROMPT = ("You are an HPC assistant. Use supplied source excerpts for site-specific facts and tool results "
                  "for live state. Name the applicable cluster and ask for missing required details. Give a complete, "
                  "clear answer without inventing commands, flags or cluster defaults. Put scripts in fenced code blocks.")
+# Agent mode only. The training prompt says nothing about the cluster tools: after one answer in plain text the model
+# (Q4 GGUF in Ollama) replied "I don't have the ability to run sbatch on your behalf" and skipped submit_job, so the
+# Approve/Deny step never came (demo rehearsal, Oct 28).
+AGENT_PROMPT = (" In this session you are connected to the user's Slurm cluster through the tools: call them for live "
+                "state and for every action the user asks for. The user approves each action before it runs.")
 DEFAULT_INDEX = Path(os.environ.get('HPC_ASSISTANT_INDEX', Path.home() / '.local/share/hpc-assistant'))
 HF_RELEASE = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/gguf/'
 GGUF_FILE = 'hpc-assistant-qwen3-4b-Q4_K_M.gguf'
@@ -480,7 +485,7 @@ class Assistant:
         self.slurm = slurm  # agent mode: a slurm_live.SlurmLive whose tools the model can call
         self.extra_body = {}  # merged into OpenAI-compatible requests, e.g. {'chat_template_kwargs': {'enable_thinking': False}}
         self.retriever = retriever  # 'e' (default): b + relevance header; 'f': d + relevance header (the default with a general index); 'b': improved; 'd': b + general index; 'classic': the original 3
-        self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+        self.history = [{'role': 'system', 'content': SYSTEM_PROMPT + (AGENT_PROMPT if slurm else '')}]
         self.titles = {}  # source url -> page title, for the Sources list
 
     # --- documents -----------------------------------------------------------------------------
