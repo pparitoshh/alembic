@@ -337,7 +337,13 @@ class SlurmLive:
         rc, out, err2 = self.run(["sacct", "-n", "-j", job_id, "--batch-script"])
         if rc == 0 and out.strip().startswith(("#!", "Batch Script")):
             return {"job_id": job_id, "script": re.sub(r"^Batch Script for \S+\n-+\n", "", out)}
-        return {"error": (err.strip() or err2.strip() or f"no batch script stored for job {job_id}")}
+        if rc == 0 and out.strip() == "NONE":  # the job exists, but this cluster does not keep finished jobs' scripts
+            return {"job_id": job_id, "error": f"job {job_id} has finished and this cluster does not keep the batch "
+                    "scripts of finished jobs (Slurm AccountingStoreFlags without job_script); a script is "
+                    "available only while its job is queued or running"}
+        if rc == 0 and not out.strip():
+            return {"job_id": job_id, "error": f"no job {job_id} found"}
+        return {"error": (err2.strip() or err.strip() or f"no batch script stored for job {job_id}")}
 
     # --- own-jobs guard (same as cancel_job) -------------------------------------------------------
     def _own_job(self, job_id):
@@ -347,10 +353,13 @@ class SlurmLive:
 
     def job_usage(self, job_id):
         fields = ["JobID", "AveCPU", "MaxRSS", "AveRSS", "MaxVMSize"]
-        rc, out, _ = self.run(["sstat", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
+        # --allsteps: a job that runs its programs without srun has only a batch step, which plain `sstat -j` skips
+        # (checked on Curiosity: `sstat -j` empty, `sstat --allsteps -j` shows the batch step)
+        rc, out, _ = self.run(["sstat", "--allsteps", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
         rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()] if rc == 0 else []
+        rows = [r for r in rows if not r["JobID"].endswith(".extern")]  # the extern step has no useful numbers
         if not rows:
-            return {"error": f"sstat has no live usage for job {job_id} (it only covers running jobs). "
+            return {"error": f"no live usage for job {job_id}: it is not running (sstat only covers running jobs). "
                              "For finished jobs use job_accounting."}
         return {"job_id": job_id, "steps": rows}
 
