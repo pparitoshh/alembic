@@ -3,17 +3,19 @@
 # compare it question by question with round 27 + e. usage (inside the agent job): eval.sh NAME MODEL_DIR
 # GPUs: 0 candidate | 1 gpt-oss-20b | 2 Gemma 4 26B | 4-7 Qwen3-235B (FP8, TP4). Writes runs/NAME/RESULT.json.
 NAME=$1; MODEL=$2
-source $HOME/cp/bin/lib.sh; TASK=eval-$NAME; cd $REPO; wait_models || exit 1
-RUN=$CP/runs/$NAME; A=$RUN/answers; mkdir -p $A
+# env (defaults = team folder): EVAL_LIB (helper lib to source), EVAL_RUNS (output root), EVAL_LOGS, EVAL_BIN (answer.py dir)
+source ${EVAL_LIB:-$HOME/cp/bin/lib.sh}; TASK=eval-$NAME; cd $REPO; wait_models || exit 1
+RUNS=${EVAL_RUNS:-$CP/runs}; LOGS=${EVAL_LOGS:-$CP/logs}; BIN=${EVAL_BIN:-$CP/bin}
+RUN=$RUNS/$NAME; A=$RUN/answers; mkdir -p $A
 for l in v2 v3 d1; do
     cp -n $CP/data/lb1536e/answers/${l}__base_closed.jsonl $A/
     cp -n $CP/data/r27e/answers/${l}__base_rag.jsonl $A/${l}__r27e.jsonl
 done
 # round 27's verdicts, judged once on this cluster, are reused so only the candidate is judged
-for j in judged judged_gemma judged_qwen; do mkdir -p $RUN/$j; cp -n $CP/runs/ref_r27e/$j/*__r27e__*.jsonl $RUN/$j/ 2>/dev/null; done
+for j in judged judged_gemma judged_qwen; do mkdir -p $RUN/$j; cp -n $RUNS/ref_r27e/$j/*__r27e__*.jsonl $RUN/$j/ 2>/dev/null || cp -n $CP/runs/ref_r27e/$j/*__r27e__*.jsonl $RUN/$j/ 2>/dev/null; done
 log "answering with $MODEL"
 serve 0 8100 "$MODEL" cand --max-model-len 16384 --gpu-memory-utilization 0.85 || exit 1
-python $CP/bin/answer.py http://127.0.0.1:8100/v1 cand $A cand | tee -a $CP/logs/tasks.log
+python $BIN/answer.py http://127.0.0.1:8100/v1 cand $A cand | tee -a $LOGS/tasks.log
 stop_all
 log "judging"
 J1=1 J2=2 JQ=4,5,6,7; [ $NGPU = 4 ] && J1=0 J2=1 JQ=2,3  # 4 GPUs: Qwen3-235B FP8 on TP2
@@ -33,7 +35,7 @@ python research/rag65/majority.py $RUN > /dev/null
 for j in judged judged_gemma judged_qwen judged_majority; do
     python research/rag65/paired.py $RUN/$j $RUN/PAIRED_$j.json cand:r27e > /dev/null
 done
-python - $RUN <<'PY' | tee -a $CP/logs/tasks.log
+python - $RUN <<'PY' | tee -a $LOGS/tasks.log
 import json, sys
 run = sys.argv[1]
 res = {j: json.load(open(f'{run}/PAIRED_{j}.json')) for j in ('judged', 'judged_gemma', 'judged_qwen', 'judged_majority')}
@@ -47,5 +49,5 @@ json.dump(out, open(f'{run}/RESULT.json', 'w'), indent=1)
 print('RESULT', json.dumps(out))
 PY
 # keep round 27's verdicts for the next evaluations (they then judge only the candidate)
-for j in judged judged_gemma judged_qwen; do mkdir -p $CP/runs/ref_r27e/$j; cp -n $RUN/$j/*__r27e__*.jsonl $CP/runs/ref_r27e/$j/ 2>/dev/null; done
+for j in judged judged_gemma judged_qwen; do mkdir -p $RUNS/ref_r27e/$j; cp -n $RUN/$j/*__r27e__*.jsonl $RUNS/ref_r27e/$j/ 2>/dev/null; done
 log "DONE: $(cat $RUN/RESULT.json | tr -d '\n ' | cut -c1-300)"
