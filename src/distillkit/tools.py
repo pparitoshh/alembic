@@ -101,6 +101,28 @@ PARTITIONS = {
     "boost_qos_lprod": {"max_time": "4-00:00:00", "nodes": 3, "gpus_per_node": 4, "gpu_type": "A100-64GB", "cpus_per_node": 32, "mem_per_node": "494G"},
     "dcgp_usr_prod": {"max_time": "24:00:00", "nodes": 1536, "gpus_per_node": 0, "gpu_type": None, "cpus_per_node": 112, "mem_per_node": "494G"},
 }
+# Mock v2 (opt-in, issues #114 and #112): Leonardo's real partitions, each with its QOS list (leonardo_basics.md,
+# sacctmgr on Leonardo, Oct 2026). v1 above lists two QOS names as partitions and is kept unchanged for archived runs.
+PARTITIONS_V2 = {
+    "boost_usr_prod": {"max_time": "24:00:00", "nodes": 3456, "gpus_per_node": 4, "gpu_type": "A100-64GB", "cpus_per_node": 32,
+                       "mem_per_node": "494G", "default_qos": "normal",
+                       "qos": [{"qos": "normal", "max_time": "24:00:00", "max_nodes": 64},
+                               {"qos": "boost_qos_dbg", "max_time": "00:30:00", "max_nodes": 8, "max_running_jobs_per_user": 2},
+                               {"qos": "boost_qos_bprod", "max_time": "24:00:00", "min_nodes": 65, "max_nodes": 256},
+                               {"qos": "boost_qos_lprod", "max_time": "4-00:00:00", "max_nodes": 8, "limit": "per account"}]},
+    "dcgp_usr_prod": {"max_time": "24:00:00", "nodes": 1536, "gpus_per_node": 0, "gpu_type": None, "cpus_per_node": 112,
+                      "mem_per_node": "494G", "default_qos": "normal",
+                      "qos": [{"qos": "normal", "max_time": "24:00:00", "max_nodes": 16},
+                              {"qos": "dcgp_qos_dbg", "max_time": "00:30:00", "max_nodes": None},
+                              {"qos": "dcgp_qos_lprod", "max_time": "4-00:00:00", "max_nodes": None}]},
+    "lrd_all_serial": {"max_time": "04:00:00", "nodes": 1, "gpus_per_node": 0, "gpu_type": None, "cpus_per_node": 4,
+                       "mem_per_node": None, "default_qos": "normal", "default_partition": True,
+                       "qos": [{"qos": "normal", "max_time": "04:00:00", "max_nodes": 1}]},
+}
+NODE_CONFIG_ERROR = "sbatch: error: Batch job submission failed: Requested node configuration is not available"
+QOS_POLICY_ERROR = ("sbatch: error: {reason}\nsbatch: error: Batch job submission failed: Job violates accounting/QOS policy "
+                    "(job submit limit, user's size and/or time limits)")
+
 STATES = ["PENDING", "RUNNING", "COMPLETED", "FAILED", "TIMEOUT", "OUT_OF_MEMORY", "CANCELLED"]
 PENDING_REASONS = ["Priority", "Resources", "QOSMaxGRESPerUser", "AssocGrpGRESMinutes", "Dependency", "ReqNodeNotAvail"]
 
@@ -113,13 +135,18 @@ _STDERR = {
 _STDOUT = ["epoch 1/10 loss 2.31", "epoch 2/10 loss 1.87", "epoch 3/10 loss 1.52", "checkpoint saved to $SCRATCH/run/ckpt_3.pt"]
 
 MOCK_VERSION = "isolated-actions-v1"
+MOCK_VERSION_V2 = "leonardo-qos-v2"  # mock_session(mock_version=MOCK_VERSION_V2); every other entry point stays v1
 CATALOG_VERSION = "closed-job-catalog-v1"
 _SESSION: ContextVar[dict | None] = ContextVar("distillkit_mock_session", default=None)
 
 
 @contextmanager
-def mock_session(valid_flags=None, *, job_ids=None):
-    """Fresh deterministic state, isolated across threads and reset even when a request fails."""
+def mock_session(valid_flags=None, *, job_ids=None, mock_version=MOCK_VERSION):
+    """Fresh deterministic state, isolated across threads and reset even when a request fails. mock_version selects the
+    cluster model: MOCK_VERSION (v1, the default, unchanged) or MOCK_VERSION_V2 (Leonardo partitions with QOS lists and
+    node-size, time and node-count limits on submit_job)."""
+    if mock_version not in (MOCK_VERSION, MOCK_VERSION_V2):
+        raise ValueError(f"unknown mock_version {mock_version!r}")
     # Optional closed catalog is explicit experiment state. Default fixtures stay unchanged.
     if job_ids is not None and (not isinstance(job_ids, list) or
             any(not isinstance(j, str) or not re.fullmatch(r"[0-9]+(?:_[0-9]+)?", j) for j in job_ids) or
@@ -127,11 +154,20 @@ def mock_session(valid_flags=None, *, job_ids=None):
         raise ValueError("mock job_ids must be a list of unique numeric job IDs")
     flags = valid_flags if valid_flags is not None else _VALID_FLAGS
     token = _SESSION.set({"jobs": {}, "observed_ids": set(), "catalog": None if job_ids is None else frozenset(job_ids),
-                          "flags": frozenset(flags if flags is not None else load_flags())})
+                          "flags": frozenset(flags if flags is not None else load_flags()), "version": mock_version})
     try:
         yield
     finally:
         _SESSION.reset(token)
+
+
+def _v2() -> bool:
+    session = _SESSION.get()
+    return session is not None and session.get("version") == MOCK_VERSION_V2
+
+
+def _partitions() -> dict:
+    return PARTITIONS_V2 if _v2() else PARTITIONS
 
 
 class ToolError(ValueError):
@@ -163,6 +199,8 @@ def _job(job_id: str) -> dict:
     limit = {"boost_qos_dbg": "00:30:00"}.get(part, r.choice(["04:00:00", "12:00:00", "24:00:00"]))
     gpus = 0 if part.startswith("dcgp") else r.choice([1, 2, 4])
     job = {"job_id": job_id, "name": r.choice(["train_llm", "md_sim", "cfd_run", "preprocess", "eval"]), "state": state, "partition": part, "time_limit": limit, "nodes": 1, "gpus": gpus}
+    if _v2() and part == "boost_qos_dbg":  # v2: a QOS on boost_usr_prod, not a partition
+        job |= {"partition": "boost_usr_prod", "qos": "boost_qos_dbg"}
     if state == "PENDING":
         job |= {"reason": r.choice(PENDING_REASONS), "elapsed": "00:00:00", "est_start": "2026-10-12T14:30:00"}
     else:
@@ -225,6 +263,8 @@ def _submit_job(script: str, test_only: bool = False) -> dict:
     if not res["bash_ok"]:
         return {"error": "sbatch: error: batch script has a shell syntax error"}
     part = re.search(r"^\s*#SBATCH\s+(?:--partition[= ]|-p\s*)(\S+)", script, re.MULTILINE)
+    if _v2():
+        return _submit_job_v2(script, test_only, part.group(1) if part else None, session)
     if part and part.group(1) not in PARTITIONS:
         return {"error": "sbatch: error: invalid partition specified: " + part.group(1)}
     partition = part.group(1) if part else "boost_usr_prod"  # this mock's default
@@ -240,6 +280,88 @@ def _submit_job(script: str, test_only: bool = False) -> dict:
             jid = str(int(jid) + 1)
         session["jobs"][jid] = {"job_id": jid, "name": "submitted_mock_job", "state": "PENDING",
                                 "partition": partition, "elapsed": "00:00:00", "time_limit": None,
+                                "reason": "mock submission: scheduling not simulated", "usage_recorded": False,
+                                "submitted_script": script}
+    return {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}"}
+
+
+_SBATCH_OPT = {  # option -> regex for its value on an #SBATCH line
+    "nodes": r"(?:--nodes[= ]|-N\s*)(\S+)", "ntasks": r"(?:--ntasks[= ]|-n\s*)(\d+)",
+    "ntasks_per_node": r"--ntasks-per-node[= ](\d+)", "cpus_per_task": r"(?:--cpus-per-task[= ]|-c\s*)(\d+)",
+    "mem": r"--mem[= ](\S+)", "mem_per_cpu": r"--mem-per-cpu[= ](\S+)", "time": r"(?:--time[= ]|-t\s*)(\S+)",
+    "qos": r"(?:--qos[= ]|-q\s*)(\S+)", "gres": r"--gres[= ]\S*?gpu(?::[\w.-]+)?:(\d+)",
+    "gpus_per_node": r"--gpus-per-node[= ](?:[\w.-]+:)?(\d+)", "gpus": r"(?:--gpus[= ]|-G\s*)(?:[\w.-]+:)?(\d+)",
+}
+
+
+def _sbatch_opts(script: str) -> dict:
+    lines = [l for l in script.splitlines() if re.match(r"\s*#SBATCH\s", l)]
+    found = {}
+    for key, pat in _SBATCH_OPT.items():
+        for l in lines:
+            if m := re.search(r"#SBATCH\s+(?:.*\s)?" + pat + r"(?:\s|$)", l):
+                found[key] = m.group(1)
+    return found
+
+
+def _minutes(t: str) -> float | None:
+    """Slurm time formats: MM, MM:SS, HH:MM:SS, D-HH, D-HH:MM, D-HH:MM:SS."""
+    m = re.fullmatch(r"(?:(\d+)-)?(\d+)(?::(\d+))?(?::(\d+))?", t or "")
+    if not m:
+        return None
+    d, a, b, c = (int(x) if x else None for x in m.groups())
+    if d is not None:  # D-HH[:MM[:SS]]
+        return d * 1440 + a * 60 + (b or 0) + (c or 0) / 60
+    if c is not None:  # HH:MM:SS
+        return a * 60 + b + c / 60
+    return a + (b or 0) / 60  # MM or MM:SS
+
+
+def _megabytes(v: str) -> float | None:
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)([KMGT]?)B?", (v or "").upper())
+    return float(m.group(1)) * {"K": 1 / 1024, "": 1, "M": 1, "G": 1024, "T": 1024 ** 2}[m.group(2)] if m else None
+
+
+def _submit_job_v2(script: str, test_only: bool, partition: str | None, session) -> dict:
+    """v2 submit: Leonardo's partitions and QOS, and the limits a real sbatch enforces at submit time (#112, #114)."""
+    if partition is None:
+        partition = next(p for p, v in PARTITIONS_V2.items() if v.get("default_partition"))
+    if partition not in PARTITIONS_V2:  # boost_qos_dbg is a QOS: `-p boost_qos_dbg` fails on Leonardo too
+        return {"error": "sbatch: error: invalid partition specified: " + partition}
+    part, o = PARTITIONS_V2[partition], _sbatch_opts(script)
+    qos_name = o.get("qos", part["default_qos"])
+    qos = next((q for q in part["qos"] if q["qos"] == qos_name), None)
+    if qos is None:
+        return {"error": "sbatch: error: Batch job submission failed: Invalid qos specification"}
+    nodes = int(re.match(r"\d+", o.get("nodes", "1")).group()) if re.match(r"\d+", o.get("nodes", "1")) else 1
+    per_node = int(o["ntasks_per_node"]) if "ntasks_per_node" in o else -(-int(o.get("ntasks", 1)) // nodes)
+    cpus = per_node * int(o.get("cpus_per_task", 1))
+    gpus = int(o.get("gres") or o.get("gpus_per_node") or 0) or -(-int(o.get("gpus", 0)) // nodes)
+    if gpus and not part["gpus_per_node"]:
+        return {"error": "sbatch: error: Invalid generic resource (gres) specification"}
+    mem = _megabytes(o["mem"]) if "mem" in o else (_megabytes(o["mem_per_cpu"]) * cpus if "mem_per_cpu" in o and _megabytes(o["mem_per_cpu"]) else None)
+    if cpus > part["cpus_per_node"] or gpus > part["gpus_per_node"] or (
+            mem is not None and part["mem_per_node"] and mem > _megabytes(part["mem_per_node"])):
+        return {"error": NODE_CONFIG_ERROR}
+    if qos.get("max_nodes") is not None and nodes > qos["max_nodes"]:
+        reason = {"lrd_all_serial": "QOSMaxNodePerUserLimit"}.get(partition,
+                  "MaxNodePerAccount" if qos.get("limit") == "per account" else "QOSMaxNodePerJobLimit")
+        return {"error": QOS_POLICY_ERROR.format(reason=reason)}
+    asked = _minutes(o["time"]) if "time" in o else None
+    if asked is not None and asked > _minutes(qos["max_time"]):
+        return {"error": QOS_POLICY_ERROR.format(reason="QOSMaxWallDurationPerJobLimit")}
+    jid = str(4000000 + int(hashlib.sha256(script.encode()).hexdigest(), 16) % 1000000)
+    if test_only:
+        return {"valid": True, "message": f"sbatch: Job {jid} to start at 2026-10-12T14:30:00 in partition {partition}",
+                "validation_scope": ["flag_names", "bash_syntax", "partition_name", "qos_name", "cpus_mem_gpus_per_node",
+                                     "nodes_per_qos", "wall_time_per_qos"]}
+    if session is not None:
+        _list_queue()
+        existing_ids = session["observed_ids"] | session["jobs"].keys()
+        while jid in existing_ids:
+            jid = str(int(jid) + 1)
+        session["jobs"][jid] = {"job_id": jid, "name": "submitted_mock_job", "state": "PENDING", "partition": partition,
+                                "qos": qos_name, "elapsed": "00:00:00", "time_limit": o.get("time"),
                                 "reason": "mock submission: scheduling not simulated", "usage_recorded": False,
                                 "submitted_script": script}
     return {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}"}
@@ -266,7 +388,7 @@ def _read_job_log(job_id: str, stream: str = "stderr", tail_lines: int = 20) -> 
     if j["state"] == "PENDING" or j.get("usage_recorded") is False:
         return {"error": f"slurm-{job_id}.out does not exist yet: the job has not started"}
     if stream == "stdout":
-        devices = f"Using {j['gpus']} GPUs: {PARTITIONS[j['partition']]['gpu_type']}" if j["gpus"] else "CPU-only job; no GPUs allocated"
+        devices = f"Using {j['gpus']} GPUs: {_partitions()[j['partition']]['gpu_type']}" if j["gpus"] else "CPU-only job; no GPUs allocated"
         lines = [devices, *_STDOUT]
     elif j["state"] == "OUT_OF_MEMORY" and not j["gpus"]:
         lines = _STDERR["OUT_OF_MEMORY"][1:]  # host OOM kill only, no CUDA error
@@ -292,11 +414,12 @@ def _job_accounting(job_id: str) -> dict:
 
 
 def _gpu_availability(partition: str | None = None) -> dict:
-    parts = {p: v for p, v in PARTITIONS.items() if v["gpus_per_node"]}
+    table = _partitions()
+    parts = {p: v for p, v in table.items() if v["gpus_per_node"]}
     if partition:
-        if partition not in PARTITIONS:
+        if partition not in table:
             return {"error": f"sinfo: error: invalid partition specified: {partition}"}
-        parts = {partition: PARTITIONS[partition]} if PARTITIONS[partition]["gpus_per_node"] else {}
+        parts = {partition: table[partition]} if table[partition]["gpus_per_node"] else {}
     out = []
     for p, v in parts.items():
         r = _rng("gpus", p)
@@ -309,11 +432,12 @@ def _gpu_availability(partition: str | None = None) -> dict:
 
 
 def _partition_info(partition: str | None = None) -> dict:
+    table = _partitions()
     if partition:
-        if partition not in PARTITIONS:
-            return {"error": f"invalid partition {partition!r}; known: {sorted(PARTITIONS)}"}
-        return {"partition": partition, **PARTITIONS[partition]}
-    return {"partitions": [{"partition": p, **v} for p, v in PARTITIONS.items()]}
+        if partition not in table:
+            return {"error": f"invalid partition {partition!r}; known: {sorted(table)}"}
+        return {"partition": partition, **deepcopy(table[partition])}
+    return {"partitions": [{"partition": p, **deepcopy(v)} for p, v in table.items()]}
 
 
 _IMPL = {

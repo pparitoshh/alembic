@@ -33,13 +33,13 @@
       ],
       "local_fixture_evidence": {
         "path": "src/distillkit/tools.py",
-        "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+        "sha256": "0115e481582ac1fc76e0b50ad65320ef077e1b9b411a40647b98a7e0c1a8255e",
         "symbols": [
           "SCHEMAS/job_accounting",
           "_job_accounting"
         ],
         "origin": "User-supplied deterministic mock contract and pre-existing tool_trace.json call/result; not real cluster observations.",
-        "review_note": "Model review: opt-in closed catalog and job_status unknown-result contract leave default job_accounting fixture unchanged. Existing exact gold replay regression remains required; original source provenance remains unresolved."
+        "review_note": "Model review: opt-in closed catalog and job_status unknown-result contract leave default job_accounting fixture unchanged. Existing exact gold replay regression remains required; original source provenance remains unresolved. Oct 28: mock v2 (Leonardo partitions with QOS lists, submit-time node/time/QOS limits; issues #114, #112) added as opt-in via mock_session(mock_version=MOCK_VERSION_V2); the default v1, including job_accounting, is unchanged (tests/test_mock_v2.py replays a v1 call battery against its recorded hash)."
       },
       "derivation": "Retains the supplied question, plan, call and synthetic result. Narrows the final answer to record fields supported by the training source and supplied fixture; removes ungrounded diagnosis and remedies."
     }

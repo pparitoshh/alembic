@@ -432,7 +432,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/tools.py",
-      "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+      "sha256": "0115e481582ac1fc76e0b50ad65320ef077e1b9b411a40647b98a7e0c1a8255e"
     },
     {
       "root": "repository",
@@ -824,6 +824,29 @@
       "pre_binding_validation": {
         "full_failed": 1,
         "full_failure": "Strict151 release validation refused prior config.py hash."
+      },
+      "validation_scope": "Metadata-only binding update is followed by the full suite."
+    },
+    {
+      "version": "mock-v2-binding-v1",
+      "created_utc": "2026-10-28T21:49:32.632481+00:00",
+      "base_revision": "32d511ece0f4afab2fb29bd8a0eb27c6ff62b5b4",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "9d1ca63417a98f20b0ce00c5e024c72909903533e38d9da109c6c4d02d143612",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/tools.py",
+          "before": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990",
+          "after": "0115e481582ac1fc76e0b50ad65320ef077e1b9b411a40647b98a7e0c1a8255e"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Issues #114 and #112: add mock cluster v2 (Leonardo partitions boost_usr_prod, dcgp_usr_prod and lrd_all_serial with QOS lists; submit_job rejects QOS names as partitions and requests above node size, QOS wall time or QOS node limits with the real sbatch errors) as an opt-in selected with mock_session(mock_version=MOCK_VERSION_V2). Only the tools.py code binding changes.",
+      "compatibility": "MOCK_VERSION, PARTITIONS, SCHEMAS and every v1 code path are unchanged; mock_session defaults to v1, so generate, toolcheck, verify and evaluation replay archived traces exactly as before (a v1 call battery reproduces its recorded hash in tests/test_mock_v2.py). No questions, references, tool items, scoring fixtures or teacher sets are modified; the rows that use boost_qos_* as a partition are listed for an eval dataset v2.",
+      "pre_binding_validation": {
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused prior tools.py hash."
       },
       "validation_scope": "Metadata-only binding update is followed by the full suite."
     }
