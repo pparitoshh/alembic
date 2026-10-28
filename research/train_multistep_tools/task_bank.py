@@ -20,9 +20,14 @@ Rules this bank follows (PLAN.md step 2 and Rules):
   A request without {JOB_ID} has fixture null and needs no job.
 - Cluster facts in requests come only from: Curiosity (partition hackathon, 8x B300 per node, QOS eai-team04,
   enroot+pyxis, no debug QOS) and Leonardo (partitions boost_usr_prod, dcgp_usr_prod, lrd_all_serial; 4x A100
-  64 GB per boost node). Limits are never hard-coded in a request; the model must get them from tools.
+  64 GB per boost node). dcgp_usr_prod and lrd_all_serial take no GPU requests on Leonardo: GPU tasks
+  (gpu_availability, GPU counts) name boost_usr_prod only. Limits are never hard-coded in a request; the model
+  must get them from tools.
 - Action tools (submit_job, cancel_job, update_job, hold_job, release_job, requeue_job) appear only when the
   request asks for the action in plain words.
+- Multi-step requests come in two registers: at least 70% state only the goal (no step words such as
+  first/then/afterwards, no tool-like words such as check/list/pull; see is_implicit), at most 30% spell the
+  steps out. The mix is fixed per family by a quota, and the implicit pool is self-checked with is_implicit.
 - Every task is checked against the mentor use cases (data/mentor_usecases/, held-out test data) for word
   5-gram overlap; a task whose maximum overlap over the mentor requests is above 0.3 is dropped, and identical
   requests are deduplicated (a duplicate retry draws another wording instead).
@@ -34,6 +39,7 @@ rows each, so multi-step tasks stay the majority (they must be at least 50%). Th
 """
 import argparse
 import json
+import math
 import random
 import re
 from collections import Counter
@@ -51,11 +57,12 @@ FIX_FAIL = ["failed_oom", "failed_time", "failed_error"]
 ROW_KEYS = {"id", "cluster", "family", "user_request", "expected_tools", "needs_tool", "multi_step", "fixture"}
 
 # Cluster facts that templates may use, and nothing else. "gpu_short" is the plural-friendly GPU name.
+# dcgp_usr_prod and lrd_all_serial are CPU partitions on Leonardo: gpu_partitions drives every GPU request.
 CLUSTERS = {
     "curiosity": {"partitions": ["hackathon"], "gpu_partitions": ["hackathon"], "gpu": "B300",
                   "gpu_short": "B300", "gpus_per_node": "8x B300", "qos": "eai-team04"},
     "leonardo": {"partitions": ["boost_usr_prod", "dcgp_usr_prod", "lrd_all_serial"],
-                 "gpu_partitions": ["boost_usr_prod", "dcgp_usr_prod"], "gpu": "A100 64GB",
+                 "gpu_partitions": ["boost_usr_prod"], "gpu": "A100 64GB",
                  "gpu_short": "A100", "gpus_per_node": "4x A100 64GB", "qos": None},
 }
 
@@ -67,7 +74,7 @@ HOURS = [2, 4, 6, 8, 12, 24]
 TAILS = [20, 50, 100]
 DAYS = [3, 7, 14]
 WHEN = ["last night", "yesterday", "this morning", "two days ago", "over the weekend", "late on Friday"]
-UNTIL = ["this evening", "tomorrow", "the weekend", "Friday", "next week"]
+UNTIL = ["this evening", "tomorrow", "the weekend", "Friday", "Monday morning"]
 
 
 def jname(rng):
@@ -82,153 +89,203 @@ def pick(rng, templates, **slots):
     return req
 
 
-# ---- multi-step families: the user needs two tool calls, in the listed order --------------------------------------
-def f_gpu_then_partition(rng, cl):
+# A multi-step request states only the goal when it names no step ("first", "then", "afterwards", ...) and no
+# tool-like word ("check", "list", "pull", ...): it says what the user wants, not how to find it.
+IMPLICIT_SHARE = 0.7
+STEP_WORDS = re.compile(r"\b(first|then|after that|afterwards|next|once you|also|two things)\b", re.I)
+TOOL_WORDS = re.compile(
+    r"\b(check|look( up)?|pull|fetch|list|show|read|query|confirm|verify|inspect|examine|diagnose|monitor"
+    r"|grep|get me|give me)\b", re.I)
+
+
+def is_implicit(request):
+    """True when the request states only the goal: no step words, no tool-like words."""
+    return not STEP_WORDS.search(request) and not TOOL_WORDS.search(request)
+
+
+# ---- multi-step families: the user needs two tool calls, in the listed order. The implicit pool states only
+# the goal (is_implicit must hold), the explicit pool spells the steps out; build_tasks mixes them 70/30.
+def f_gpu_then_partition(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Check how many {gpu}s are idle on {part} at the moment, and also get me that partition's limits "
+            "before I write my job script.",
+            "First tell me whether GPUs are free on {part}, then pull the partition's time and resource "
+            "limits for my {n}-GPU run.",
+            "Two things about {part} for my {m} evaluation as a {n}-GPU job: are GPUs free right now, and "
+            "what does the partition allow?",
+        ], part=rng.choice(cl["gpu_partitions"]), gpu=cl["gpu_short"], n=rng.choice(GPU_COUNTS),
+            m=rng.choice(MODELS)), None
     return pick(rng, [
-        "I want to run {m} as a {n}-GPU job on {part} soon. Are there free GPUs on that partition right now, and "
-        "what limits (wall time, resources per job) does it have?",
-        "Check how many {gpu}s are idle on {part} at the moment, and also get me that partition's limits "
-        "before I write the job script for my {m} run.",
-        "Before I submit a {n}-GPU job for {m} to {part}: is anything free there right now, and what are the "
-        "partition's time and resource limits?",
-        "How is GPU availability on {part} looking, and what does the partition allow in terms of time and "
-        "resources? I want to plan a {n}-GPU run of {m} on it.",
-        "Two things about {part} for my {m} evaluation as a {n}-GPU job: are GPUs free right now, and what does "
-        "the partition allow?",
+        "Is there room for a {n}-GPU {h}-hour run on {part} today?",
+        "Would a {n}-GPU {h}-hour {m} job fit on {part} right now?",
+        "Can {part} take a {n}-GPU {m} run this week?",
+        "Do {n} free {gpu}s on {part} sound realistic for a {h}-hour job tomorrow?",
     ], part=rng.choice(cl["gpu_partitions"]), gpu=cl["gpu_short"], n=rng.choice(GPU_COUNTS),
-        m=rng.choice(MODELS)), None
+        h=rng.choice(HOURS), m=rng.choice(MODELS)), None
 
 
-def f_status_then_log(rng, cl):
+def f_status_then_log(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Can you check the state of job {JOB_ID} and then show me the last {t} lines of its output log?",
+            "First tell me the current state of my {jn} job {JOB_ID}, then read its log and summarize where it stands.",
+            "Please check my {m} job {JOB_ID}'s state, then pull the last {t} lines of its output for me.",
+        ], t=rng.choice(TAILS), jn=jname(rng)), rng.choice(["failed_error", "completed", "running"])
     return pick(rng, [
-        "Can you check the state of job {JOB_ID} and then show me the last {t} lines of its output log?",
-        "Look at job {JOB_ID} for me: what state is it in, and what has it printed so far (last lines of its log)?",
-        "First tell me the current state of job {JOB_ID}, then read its log and summarize where it stands.",
-        "My {jn} job {JOB_ID}: please check its state and pull the last {t} lines of its output.",
-        "Please check job {JOB_ID}'s state, then pull the tail of its log ({t} lines) for me.",
-        "I care about two things for job {JOB_ID}: its exact state now, and what the end of its log shows.",
-    ], t=rng.choice(TAILS), jn=jname(rng)), rng.choice(["failed_error", "completed", "running"])
+        "Did job {JOB_ID} run cleanly? I never saw any output from it.",
+        "What did my {jn} job {JOB_ID} produce in the end?",
+        "Is something wrong with job {JOB_ID}? Its results have not appeared.",
+        "Did my {m} job {JOB_ID} get to the end without trouble?",
+    ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["failed_error", "completed", "running"])
 
 
-def f_why_failed(rng, cl):
+def f_why_failed(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Job {JOB_ID} did not succeed. Look at its final state and its accounting record, then tell me "
+            "why it died.",
+            "My {jn} job {JOB_ID} is gone from the queue. Check its final state and pull its accounting "
+            "record so we know what killed it.",
+            "Check what state job {JOB_ID} ended in, then use its accounting record to explain the failure "
+            "to me.",
+        ], jn=jname(rng)), rng.choice(FIX_FAIL)
     return pick(rng, [
-        "Why did job {JOB_ID} fail? Check the state it ended in and use the accounting data to name the cause.",
-        "Job {JOB_ID} did not succeed. Look at its final state and its accounting record, then tell me why it died.",
-        "My {jn} job {JOB_ID} is gone from the queue. Check its final state and pull its accounting record so "
-        "we know what killed it.",
-        "My {m} job {JOB_ID} did not make it. Get its final state and its accounting record and tell me the "
-        "reason it died.",
-        "Check what state job {JOB_ID} ended in, then use its accounting record to explain the failure to me.",
-        "Job {JOB_ID} (the run called {jn}) is dead. Find out from its state and its accounting what happened.",
-    ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(FIX_FAIL)
+        "Why did job {JOB_ID} fail?",
+        "My {m} job {JOB_ID} died {when} — what happened there?",
+        "What was the reason my {jn} job {JOB_ID} never made it to the end?",
+        "How come my {m} run {JOB_ID} is no longer among my jobs?",
+    ], jn=jname(rng), m=rng.choice(MODELS), when=rng.choice(WHEN)), rng.choice(FIX_FAIL)
 
 
-def f_why_pending(rng, cl):
+def f_why_pending(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Job {JOB_ID} has been waiting for {h} hours. Confirm that it is still pending, then use its "
+            "priority data to explain why it is not starting.",
+            "My {jn} job {JOB_ID} will not start. First check its state, then look at its priority and tell "
+            "me what makes it wait.",
+            "Check job {JOB_ID}: is it still pending? If yes, get its priority breakdown and explain the wait.",
+        ], h=rng.choice([1, 2, 3, 5, 8]), jn=jname(rng)), "pending"
     return pick(rng, [
-        "Job {JOB_ID} has been waiting for {h} hours. Confirm that it is still pending, then use its priority "
-        "data to explain why it is not starting.",
-        "My {jn} job {JOB_ID} will not start. First check its state, then look at its priority and tell me "
-        "what makes it wait.",
-        "Check job {JOB_ID}: is it still pending? If yes, get its priority breakdown and explain the wait.",
-        "For {h} hours my job {JOB_ID} has not started. Check its state, then get its priority data and tell "
-        "me why it must wait.",
-        "Is job {JOB_ID} still pending? Check, and if it is, look at its priority to explain the delay.",
-        "My {m} run {JOB_ID} (job name {jn}) sits in the queue. Confirm its state, then pull its priority and "
-        "explain the wait.",
-    ], h=rng.choice([1, 2, 3, 5, 8]), jn=jname(rng), m=rng.choice(MODELS)), "pending"
+        "Why does job {JOB_ID} still wait?",
+        "Why has my {jn} job {JOB_ID} not started for {h} hours?",
+        "My {m} run {JOB_ID} has been in the queue since {when} — what is the holdup?",
+    ], h=rng.choice([1, 2, 3, 5, 8]), jn=jname(rng), m=rng.choice(MODELS), when=rng.choice(WHEN)), "pending"
 
 
-def f_queue_then_status(rng, cl):
+def f_queue_then_status(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "I have a few jobs in the queue right now, my {jn} job {JOB_ID} among them. Show me my whole queue and "
+            "then check the exact state of {JOB_ID}.",
+            "List my queued jobs, then give me the detailed state of {JOB_ID} (my {m} run) in particular.",
+            "What do I have in the queue at the moment? Afterwards, look up the exact state of job {JOB_ID} "
+            "(the {jn} run) for me.",
+        ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["running", "pending"])
     return pick(rng, [
-        "I have a few jobs in the queue right now, {JOB_ID} among them. Show me my whole queue and then check "
-        "the exact state of {JOB_ID}.",
-        "List my queued jobs, then give me the detailed state of {JOB_ID} in particular.",
-        "What do I have in the queue at the moment? Afterwards, look up the exact state of {JOB_ID} for me.",
-        "Show me everything of mine that is queued right now, and then the exact state of my {jn} job {JOB_ID}.",
-        "My {m} job {JOB_ID} should be in the queue. List the queue and then check that job's detailed state.",
-        "First show me my current queue, then look up the state of job {JOB_ID} (the one named {jn}).",
+        "Where does my {jn} job {JOB_ID} stand in the queue right now?",
+        "Will my queued {m} job {JOB_ID} start soon?",
+        "Is my {jn} job {JOB_ID} still far from its turn in the queue?",
+        "How is the position of my {m} job {JOB_ID} in the queue looking?",
     ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["running", "pending"])
 
 
-def f_fix_failed_job(rng, cl):
+def f_fix_failed_job(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "My {jn} job {JOB_ID} failed. Get its batch script and read its log, find the mistake and tell me "
+            "exactly what to change.",
+            "Fetch the script of my failed {m} job {JOB_ID} and look at its log as well, then work out why it broke.",
+            "Please pull up both the script and the output log of job {JOB_ID} (the {jn} run) and tell me "
+            "what in the script went wrong.",
+        ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(FIX_FAIL)
     return pick(rng, [
-        "Job {JOB_ID} failed. Get its batch script and read its log, find the mistake and tell me exactly "
-        "what to change.",
-        "Fetch the script of my failed job {JOB_ID} and look at its log as well, then work out why it broke.",
-        "Please pull up both the script and the output log of job {JOB_ID} and tell me what in the script "
-        "went wrong.",
-        "My {jn} job {JOB_ID} failed overnight. Get its script, read its log, and tell me what to fix.",
-        "Take the batch script of job {JOB_ID} and its log, and pin down the mistake for me.",
-        "My {m} job {JOB_ID} (name {jn}) died. Look at its script and its log and tell me what is wrong.",
+        "What in my {jn} job {JOB_ID} is broken?",
+        "My {m} job {JOB_ID} has failed twice in a row now — what is wrong with it?",
+        "Why does the script of job {JOB_ID} keep dying?",
+        "What is wrong with job {JOB_ID}? It should have been done hours ago.",
     ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(FIX_FAIL)
 
 
-def f_recent_then_accounting(rng, cl):
+def f_recent_then_accounting(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "In the last {d} days I ran job {JOB_ID} and a few others. List my recent jobs, then give me the "
+            "accounting record (state, elapsed time, memory) for {JOB_ID}.",
+            "Look up my jobs from the past {d} days, then pull the accounting details for my {m} job "
+            "{JOB_ID}: I want its elapsed time and memory use.",
+            "Show my recent jobs (about {d} days back) and then the accounting record of the {jn} run "
+            "{JOB_ID} in particular.",
+        ], d=rng.choice(DAYS), jn=jname(rng)), rng.choice(["completed", "failed_error", "failed_time"])
     return pick(rng, [
-        "In the last {d} days I ran job {JOB_ID} and a few others. List my recent jobs, then give me the "
-        "accounting record (state, elapsed time, memory) for {JOB_ID}.",
-        "Look up my jobs from the past {d} days, then pull the accounting details for {JOB_ID}: I want its "
-        "elapsed time and memory use.",
-        "Show my recent jobs (about {d} days back) and then the accounting record of {JOB_ID} in particular.",
-        "My {m} run {JOB_ID} was submitted within the last {d} days. Find it in my recent jobs, then get its "
-        "accounting record.",
-        "List what I submitted over the last {d} days, and then pull time and memory numbers for job {JOB_ID} "
-        "(the {jn} run).",
-        "Check my recent jobs for the last {d} days and give me the accounting record of {JOB_ID}: state, "
-        "elapsed, memory.",
+        "How expensive was my {m} run {JOB_ID} from the last {d} days, in time and memory?",
+        "What are the time and memory numbers of my {jn} job {JOB_ID} from the past {d} days?",
+        "Did my {d}-day-old {m} job {JOB_ID} leave a reasonable footprint?",
     ], d=rng.choice(DAYS), jn=jname(rng), m=rng.choice(MODELS)), rng.choice(
         ["completed", "failed_error", "failed_time"])
 
 
-def f_partition_then_reservation(rng, cl):
+def f_partition_then_reservation(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Get me the details and limits of partition {part}, then check whether any reservation will "
+            "take nodes away from it soon.",
+            "First pull the properties of partition {part}, then list the current reservations on this "
+            "cluster for me.",
+            "I need two things for my {h}-hour plan on {part}: the partition's limits, and any reservations "
+            "that could block nodes.",
+        ], part=rng.choice(cl["partitions"]), h=rng.choice(HOURS)), None
     return pick(rng, [
-        "Get me the details and limits of partition {part}, then check whether any reservation will take "
-        "nodes away from it soon.",
-        "First pull the properties of partition {part}, then list the current reservations on this cluster "
-        "for me.",
-        "I need the limits of {part} and, separately, whether any reservation is active or scheduled right now.",
-        "I plan a {n}-GPU job of {h} hours on {part}. Get me that partition's limits, then check the "
-        "reservations that could take nodes away.",
-        "Two lookups for my {h}-hour {n}-GPU plan on {part}: the partition's limits, and any reservations "
-        "currently blocking nodes.",
-        "Pull the partition details for {part}, then show me the reservations so I know when nodes might "
-        "disappear from it.",
-    ], part=rng.choice(cl["partitions"]), n=rng.choice(GPU_COUNTS), h=rng.choice(HOURS)), None
+        "Can I count on {part} staying usable for a {h}-hour job this week?",
+        "Is {part} a safe bet for my {h}-hour run tomorrow?",
+        "Will maintenance or reservations get in the way of a {h}-hour job on {part}?",
+        "Does {part} have what my {h}-hour job needs, and will reservations stay out of the way this week?",
+    ], part=rng.choice(cl["partitions"]), h=rng.choice(HOURS)), None
 
 
-def f_usage_then_log(rng, cl):
+def f_usage_then_log(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Check how much CPU and memory my {jn} job {JOB_ID} actually used, then show me the last {t} lines "
+            "of its log so I can see where the time went.",
+            "Pull the resource usage of my {m} job {JOB_ID} and then the tail of its output ({t} lines).",
+            "Get the usage numbers of job {JOB_ID} (the {jn} run), then read the last {t} lines of its log.",
+        ], t=rng.choice(TAILS), jn=jname(rng)), rng.choice(["completed", "failed_error"])
     return pick(rng, [
-        "Check how much CPU and memory job {JOB_ID} actually used, then show me the last {t} lines of its "
-        "log so I can see where the time went.",
-        "Pull the resource usage of job {JOB_ID} and then the tail of its output ({t} lines).",
-        "I want to know whether job {JOB_ID} ran lean: get its usage numbers and read the end of its log.",
-        "My {jn} job {JOB_ID}: get its CPU and memory usage, then show me how its log ends.",
-        "Get the usage numbers of job {JOB_ID}, then read the last {t} lines of its log for me.",
-        "For my {m} job {JOB_ID}, tell me how much CPU and memory it really used, and what the end of its "
-        "log shows.",
-    ], t=rng.choice(TAILS), jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["completed", "failed_error"])
+        "Did my {jn} job {JOB_ID} use its resources sensibly?",
+        "Was job {JOB_ID} oversized for what it actually did?",
+        "Is my {m} job {JOB_ID} wasting CPU or memory, judging by its output?",
+    ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["completed", "failed_error"])
 
 
-def f_status_then_hold(rng, cl):
+def f_status_then_hold(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Please check the state of my {jn} job {JOB_ID}; if it has not started yet, put it on hold for me.",
+            "First confirm that job {JOB_ID} is still pending, then hold it for me until {until}.",
+            "Check my {m} job {JOB_ID}'s state and, if it is still waiting, hold the job for me now.",
+        ], until=rng.choice(UNTIL), jn=jname(rng)), "pending"
     return pick(rng, [
-        "Please check the state of job {JOB_ID}; if it has not started yet, put it on hold for me.",
-        "First confirm that job {JOB_ID} is still pending, then hold it for me until {until}.",
-        "Check job {JOB_ID}'s state and, if it is still waiting, hold the job for me now.",
-        "My {jn} job {JOB_ID}: check whether it started, and if it did not, hold it until {until}.",
-        "Verify that job {JOB_ID} has not started, then put it on hold; I want to resume it {until}.",
-        "Check the state of job {JOB_ID} (name {jn}) and hold it for me if it is still pending.",
+        "Keep job {JOB_ID} from starting until {until}, please.",
+        "Job {JOB_ID} should not start until {until} — please make that happen.",
+        "I need my {jn} job {JOB_ID} to stay unstarted until {until}.",
     ], until=rng.choice(UNTIL), jn=jname(rng)), "pending"
 
 
-def f_status_then_update(rng, cl):
+def f_status_then_update(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Check the state of my {jn} job {JOB_ID} for me. It will need longer than planned: please raise its "
+            "time limit to {h} hours.",
+            "Look at my {m} job {JOB_ID}; if it is running or waiting, change its wall time limit to {h} hours for me.",
+            "First tell me the state of job {JOB_ID} (the {jn} run), then update its time limit to {h} hours.",
+        ], h=rng.choice(HOURS), jn=jname(rng)), rng.choice(["pending", "running"])
     return pick(rng, [
-        "Check the state of job {JOB_ID} for me. It will need longer than planned: please raise its time "
-        "limit to {h} hours.",
-        "Look at job {JOB_ID}; if it is running or waiting, change its wall time limit to {h} hours for me.",
-        "Tell me the state of job {JOB_ID}, then update its time limit to {h} hours.",
-        "My {m} job {JOB_ID} needs more time: check its state, then set its limit to {h} hours.",
-        "First check job {JOB_ID}'s state, then raise its time limit to {h} hours (the {jn} run).",
-        "The {jn} job {JOB_ID} will hit its limit. Check its state and then update the limit to {h} hours.",
+        "My {m} job {JOB_ID} will not fit into its current time budget — it needs {h} hours.",
+        "Job {JOB_ID} deserves {h} hours instead of what it has now.",
+        "Raise job {JOB_ID} to {h} hours so it can finish.",
+        "My {jn} job {JOB_ID} needs {h} hours rather than its current limit.",
     ], h=rng.choice(HOURS), jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["pending", "running"])
 
 
@@ -296,9 +353,9 @@ def f_single_partition_info(rng, cl):
         "Tell me the properties of partition {part}: what nodes does it have and what are its limits?",
         "Before I write my script: what does partition {part} allow, and what defaults does it set?",
         "I plan to run {m} there: what are the limits and defaults of partition {part}?",
-        "For a {n}-GPU job, what does partition {part} allow (time, resources, defaults)?",
+        "For a longer job, what does partition {part} allow (time, resources, defaults)?",
         "What kind of nodes and limits does partition {part} have?",
-    ], part=rng.choice(cl["partitions"]), m=rng.choice(MODELS), n=rng.choice(GPU_COUNTS)), None
+    ], part=rng.choice(cl["partitions"]), m=rng.choice(MODELS)), None
 
 
 def f_single_recent_jobs(rng, cl):
@@ -361,7 +418,9 @@ def f_single_reservation_info(rng, cl):
         "Are there any reservations on the cluster at the moment that could block {part}?",
         "List the current reservations and who owns them, please.",
         "Show me upcoming reservations; I want to know when nodes might be reserved away from {part}.",
-        "Before I plan my {h}-hour {n}-GPU run: are there reservations that touch {part}?",
+        "Before I plan my {h}-hour run: are there reservations that touch {part}?",
+        "Is a reservation going to take nodes away from {part} this week?",
+        "Do any reservations overlap with {part} right now?",
         "List the active and future reservations on this cluster, with their owners.",
     ], part=rng.choice(cl["partitions"]), h=rng.choice(HOURS), n=rng.choice(GPU_COUNTS)), None
 
@@ -487,17 +546,24 @@ def validate_row(row):
 
 def build_tasks(seed, n_per_family, mentor_requests):
     """The task bank: rows per family (multi-step families get n_per_family, the rest max(1, n_per_family//2)),
-    mixed order, checked for mentor overlap and duplicates. Deterministic for a given seed."""
+    mixed order, checked for mentor overlap and duplicates. Deterministic for a given seed. Multi-step families
+    place IMPLICIT_SHARE of their rows as goal-only requests (is_implicit) and the rest as step-naming ones."""
     rng = random.Random(seed)
     tasks, seen = [], set()
     dropped_overlap = duplicate_retries = 0
     for family, (expected, gen) in FAMILIES.items():
-        target = n_per_family if len(expected) >= 2 else max(1, n_per_family // 2)
+        multi = len(expected) >= 2
+        target = n_per_family if multi else max(1, n_per_family // 2)
+        impl_left = math.ceil(IMPLICIT_SHARE * target) if multi else 0
         placed, attempts = 0, 0
         while placed < target and attempts < 60 * target:
             attempts += 1
             cluster = rng.choice(sorted(CLUSTERS))
-            request, fixture = gen(rng, CLUSTERS[cluster])
+            explicit = multi and impl_left <= 0  # implicit rows first, then the explicit quota
+            request, fixture = (gen(rng, CLUSTERS[cluster], explicit) if multi
+                                else gen(rng, CLUSTERS[cluster]))
+            if multi and not explicit:
+                assert is_implicit(request), request  # the implicit pool must stay free of step/tool words
             if request in seen:  # identical user_request: draw another wording instead
                 duplicate_retries += 1
                 continue
@@ -505,9 +571,11 @@ def build_tasks(seed, n_per_family, mentor_requests):
                 dropped_overlap += 1
                 continue
             seen.add(request)
+            if multi:
+                impl_left -= 1  # goes negative for explicit rows, never below the explicit tail
             tasks.append({"id": "", "cluster": cluster, "family": family, "user_request": request,
                           "expected_tools": list(expected), "needs_tool": bool(expected),
-                          "multi_step": len(expected) >= 2, "fixture": fixture})
+                          "multi_step": multi, "fixture": fixture})
             placed += 1
     rng.shuffle(tasks)  # mix families and clusters for training order
     for i, task in enumerate(tasks):
@@ -531,7 +599,10 @@ def print_summary(tasks, stats):
         print(f"{cluster:<12} {len(rows):>5} {multi:>11.1%} {notool:>9.1%}")
     multi = sum(t["multi_step"] for t in tasks) / len(tasks) if tasks else 0.0
     notool = sum(not t["needs_tool"] for t in tasks) / len(tasks) if tasks else 0.0
-    print(f"\nmulti_step share: {multi:.1%}   no_tool share: {notool:.1%}")
+    multi_rows = [t for t in tasks if t["multi_step"]]
+    implicit = sum(is_implicit(t["user_request"]) for t in multi_rows) / len(multi_rows) if multi_rows else 0.0
+    print(f"\nmulti_step share: {multi:.1%}   no_tool share: {notool:.1%}"
+          f"   implicit multi-step share: {implicit:.1%}")
     print(f"dropped: overlap={stats['dropped_overlap']}  duplicate_retries={stats['duplicate_retries']}")
 
 

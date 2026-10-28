@@ -4,6 +4,7 @@ Hermetic: no cluster, no network, tmp dirs only. The mentor requests for the ove
 function argument or from a small fake usecases.jsonl in tmp_path, never from data/mentor_usecases/.
 """
 import json
+import random
 import re
 import sys
 from pathlib import Path
@@ -16,7 +17,8 @@ if str(ROOT) not in sys.path:
 
 from research.train_multistep_tools.task_bank import (
     ACTION_TOOLS, CLUSTERS, FAMILIES, READ_ONLY_TOOLS, ROW_KEYS, TOOL_NAMES,
-    build_tasks, load_mentor_requests, main, max_overlap,
+    build_tasks, f_gpu_then_partition, f_single_gpu_availability, is_implicit,
+    load_mentor_requests, main, max_overlap,
 )
 
 FIXTURES = {None, "running", "pending", "completed", "failed_oom", "failed_time", "failed_error"}
@@ -65,6 +67,37 @@ def test_cluster_facts_stay_on_their_cluster():
     for row in tasks:
         for fact in OTHER_CLUSTER_FACTS["leonardo" if row["cluster"] == "curiosity" else "curiosity"]:
             assert fact not in row["user_request"]
+
+
+def test_dcgp_is_never_a_gpu_request():
+    assert CLUSTERS["leonardo"]["gpu_partitions"] == ["boost_usr_prod"]  # dcgp_usr_prod is CPU-only
+    rng = random.Random(0)
+    for _ in range(300):  # direct generator scan, many draws
+        request, _ = f_gpu_then_partition(rng, CLUSTERS["leonardo"], False)
+        assert "dcgp_usr_prod" not in request
+        request, _ = f_single_gpu_availability(rng, CLUSTERS["leonardo"])
+        assert "dcgp_usr_prod" not in request
+    tasks, _ = bank(n=8)  # whole-bank scan: no GPU count may pair with dcgp_usr_prod
+    for row in tasks:
+        gpu_request = "gpu_availability" in row["expected_tools"] or re.search(r"\d+-GPU", row["user_request"])
+        if gpu_request:
+            assert "dcgp_usr_prod" not in row["user_request"]
+
+
+def test_implicit_share_of_multi_step_requests():
+    tasks, _ = bank(n=8)
+    multi = [row for row in tasks if row["multi_step"]]
+    implicit = sum(is_implicit(row["user_request"]) for row in multi) / len(multi)
+    assert implicit >= 0.7  # at most 30% spell the steps out
+
+
+def test_is_implicit_detector():
+    assert is_implicit("Why does job 4711 still wait?")
+    assert is_implicit("Is there room for a 4-GPU 12 h run on hackathon today?")
+    assert is_implicit("Keep job 4711 from starting until tomorrow, please.")
+    assert not is_implicit("First show me my queue, then look up the state of job 4711.")
+    assert not is_implicit("Check the state of job 4711 and pull its accounting record.")
+    assert not is_implicit("List my recent jobs, then give me the accounting record for job 4711.")
 
 
 def test_multi_step_share_at_least_half():
