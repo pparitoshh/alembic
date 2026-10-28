@@ -31,13 +31,13 @@ JOB_USAGE_SCHEMA = {
 }
 JOB_PRIORITY_SCHEMA = {
     "name": "job_priority",
-    "description": "Why a job is waiting: priority factors (age, fairness, size, QOS) and the shares behind them.",
+    "description": "Why a pending job is waiting and when it may start: its priority factors (age, fairshare, size, QOS; like `sprio -j`) and the user's fairshare values (`sshare`). Use it for questions about priority, fairshare or a long wait.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 UPDATE_JOB_SCHEMA = {
     "name": "update_job",
-    "description": "Change one setting of a pending job (time limit, partition, node count or QOS).",
+    "description": "Change one setting of the user's pending job, like `scontrol update JobId=<id> TimeLimit=...`: give it more or less wall time (TimeLimit, e.g. 06:00:00), move it to another partition (Partition), change its node count (NumNodes) or QOS. Use it whenever the user asks to extend, shorten, move or change a job. The user is asked to confirm before anything changes.",
     "parameters": {"type": "object", "properties": {
         "job_id": {"type": "string", "description": "Slurm job id"},
         "field": {"type": "string", "enum": ["TimeLimit", "Partition", "NumNodes", "QOS"], "description": "Field to change"},
@@ -46,25 +46,25 @@ UPDATE_JOB_SCHEMA = {
 }
 HOLD_JOB_SCHEMA = {
     "name": "hold_job",
-    "description": "Hold a pending job so the scheduler does not start it (release it later).",
+    "description": "Hold the user's pending job so the scheduler does not start it, like `scontrol hold` (undo with release_job). The user is asked to confirm first.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 RELEASE_JOB_SCHEMA = {
     "name": "release_job",
-    "description": "Release a held job so the scheduler can start it again.",
+    "description": "Release the user's held job so the scheduler can start it again, like `scontrol release`. Call it directly when the user asks to release a job; the user is asked to confirm first.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 REQUEUE_JOB_SCHEMA = {
     "name": "requeue_job",
-    "description": "Put a finished or running job back in the queue to run again.",
+    "description": "Requeue the user's job: put it back in the queue to run again with the same job id, like `scontrol requeue`. Use it when the user asks to requeue, rerun or restart a job (for example after a node failure). The user is asked to confirm first.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 RUN_READONLY_COMMAND_SCHEMA = {
     "name": "run_readonly_command",
-    "description": "Run a read-only Slurm command (squeue, sinfo, sacct, sstat, sprio, sshare, sacctmgr show, scontrol show) and return its output.",
+    "description": "Run one short read-only Slurm command and return its output, for anything the other tools do not cover. Examples: account and QOS limits `sacctmgr -P show assoc user=$USER format=account,qos,grptres,maxwall`; fairshare `sshare -U`; drained or down nodes `sinfo -R`; one node `scontrol show node lrdn0001`; reservations `scontrol show reservation`; the whole queue by priority `squeue --sort=-p`. Allowed: squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show. Run it yourself instead of telling the user to run it.",
     "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
                    "required": ["command"]},
 }
@@ -393,6 +393,8 @@ class SlurmLive:
     _SHELL_METACHARS = re.compile(r"[|;&><$`()\n]")
 
     def run_readonly_command(self, command):
+        if re.search(r"\$\{?USER\b", command) and self.user():  # the only variable allowed: the user's own name
+            command = re.sub(r"\$\{USER\}|\$USER\b", self.user(), command)
         if self._SHELL_METACHARS.search(command):
             return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed" + DOCS_HINT}
         try:
