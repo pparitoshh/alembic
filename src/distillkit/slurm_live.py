@@ -109,6 +109,13 @@ def _script_opts(script):
     return names
 
 
+def _looks_like_path(script):
+    """True for a one-line script that looks like a file path or URL (a common model mistake: sbatch needs the text)."""
+    s = script.strip()
+    return "\n" not in s and (s.startswith(("/", "~", "./", "http://", "https://"))
+                              or s.endswith((".sh", ".py", ".slurm", ".sbatch")))
+
+
 def openai_tools(include_script=True):
     """The tool list in OpenAI/Ollama format."""
     return [{"type": "function", "function": s} for s in (LIVE_SCHEMAS if include_script else SCHEMAS)]
@@ -209,6 +216,10 @@ class SlurmLive:
 
     def submit_job(self, script, test_only=False):
         if not script.lstrip().startswith("#!"):
+            if _looks_like_path(script):
+                return {"error": "script must be the full text of the batch script, starting with #! and #SBATCH "
+                                 "lines. A path or URL does not work: the server cannot read your files. "
+                                 "Ask the user for the script text."}
             return {"error": "sbatch: error: This does not look like a batch script. The first line must start with "
                              "#! followed by the path to an interpreter."}
         # command-line options win over #SBATCH lines, so only add the defaults the script does not set itself

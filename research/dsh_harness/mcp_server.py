@@ -6,7 +6,9 @@ Transport: JSON-RPC 2.0, one JSON message per line on stdin and stdout. Logs go 
 Safety: the approval modes of dsh and Hermes do not cover MCP tools, so this server is the safety gate. Actions that
 change the cluster (submit_job without test_only, cancel_job, update_job, hold_job, release_job, requeue_job) go
 through the `confirm(name, args)` callback of SlurmLive. The callback returns True only if HPC_ALLOW_ACTIONS is "1".
-Otherwise it declines and nothing changes on the cluster.
+Otherwise it declines and nothing changes on the cluster. Without the flag the action tools (except submit_job, which
+stays listed for test_only) are also hidden from tools/list, and every refused call answers with a clear "do not
+retry" message, so a small model does not burn rounds on a tool it cannot use.
 
 Environment:
   HPC_CLUSTER        cluster name from the clusters file (default empty: use HPC_SSH/HPC_REMOTE_SETUP directly)
@@ -28,6 +30,14 @@ from distillkit.tools import ToolError
 
 PROTOCOL_VERSION = "2025-06-18"
 SERVER_INFO = {"name": "hpc-slurm-tools", "version": "0.1.0"}
+# Job-changing tools hidden from tools/list while HPC_ALLOW_ACTIONS != "1" (submit_job stays: test_only works)
+HIDDEN_TOOLS = ("cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
+# The reply for a refused action (declined by confirm, or a call to a hidden tool): tell the model to stop retrying
+ACTIONS_DISABLED = ("Job actions are disabled on this server. Do not retry. Tell the user what you wanted to do and "
+                    "show them the command or script, so they can run it themselves.")
+# Added to the submit_job description while actions are disabled (test_only=true still works)
+TEST_ONLY_NOTE = " Only test_only=true works on this server: actions are disabled, so a real submission is refused."
+_DECLINED = "the user declined this action"  # the decline result of SlurmLive.execute (kept there for other callers)
 
 
 def log(*parts):
@@ -51,9 +61,15 @@ def make_slurm(env=None):
                      job_defaults=profile.get("defaults"), confirm=confirm)
 
 
-def list_tools():
-    return [{"name": t["function"]["name"], "description": t["function"]["description"],
-             "inputSchema": t["function"]["parameters"]} for t in openai_tools()]
+def list_tools(allow=False):
+    """The MCP tool list. Without the allow flag the job-changing tools stay hidden and submit_job says that only
+    test_only=true works, so the model does not plan calls it cannot make."""
+    tools = [{"name": t["function"]["name"], "description": t["function"]["description"],
+              "inputSchema": t["function"]["parameters"]} for t in openai_tools()]
+    if allow:
+        return tools
+    return [{**t, "description": t["description"] + TEST_ONLY_NOTE} if t["name"] == "submit_job" else t
+            for t in tools if t["name"] not in HIDDEN_TOOLS]
 
 
 def call_tool(slurm, params):
@@ -63,6 +79,8 @@ def call_tool(slurm, params):
         # and a required one fails with the normal missing-argument error.
         arguments = {k: v for k, v in (params.get("arguments") or {}).items() if v is not None}
         result = slurm.execute(params.get("name"), arguments)
+        if isinstance(result, dict) and result.get("error") == _DECLINED:
+            return {"content": [{"type": "text", "text": ACTIONS_DISABLED}], "isError": True}
         return {"content": [{"type": "text", "text": json.dumps(result)}], "isError": False}
     except ToolError as e:
         text = str(e)
@@ -75,8 +93,9 @@ def _error(msg_id, code, message):
     return {"jsonrpc": "2.0", "id": msg_id, "error": {"code": code, "message": message}}
 
 
-def handle_message(msg, slurm):
-    """One decoded JSON-RPC message in, one reply dict out (None for notifications)."""
+def handle_message(msg, slurm, allow=False):
+    """One decoded JSON-RPC message in, one reply dict out (None for notifications). The allow flag is the
+    HPC_ALLOW_ACTIONS value this server started with: it decides which tools the list shows."""
     if not isinstance(msg, dict):
         return _error(None, -32600, "invalid request")
     method, msg_id, params = msg.get("method"), msg.get("id"), msg.get("params") or {}
@@ -87,7 +106,7 @@ def handle_message(msg, slurm):
     elif method == "ping":
         result = {}
     elif method == "tools/list":
-        result = {"tools": list_tools()}
+        result = {"tools": list_tools(allow)}
     elif method == "tools/call":
         result = call_tool(slurm, params if isinstance(params, dict) else {})
     else:
@@ -95,12 +114,12 @@ def handle_message(msg, slurm):
     return {"jsonrpc": "2.0", "id": msg_id, "result": result}
 
 
-def handle_line(line, slurm):
+def handle_line(line, slurm, allow=False):
     try:
         msg = json.loads(line)
     except json.JSONDecodeError as e:
         return _error(None, -32700, f"parse error: {e}")
-    return handle_message(msg, slurm)
+    return handle_message(msg, slurm, allow)
 
 
 def main():
@@ -109,13 +128,14 @@ def main():
     except ToolError as e:  # a bad clusters file or an unknown cluster: never start with wrong settings
         log(str(e))
         sys.exit(1)
+    allow = os.environ.get("HPC_ALLOW_ACTIONS", "0") == "1"
     cluster = os.environ.get("HPC_CLUSTER") or "(none)"
     log(f"ready; cluster = {cluster}; ssh = {slurm.ssh or '(local)'}; "
-        f"remote setup = {'yes' if slurm.remote_setup else 'no'}")
+        f"remote setup = {'yes' if slurm.remote_setup else 'no'}; actions {'allowed' if allow else 'hidden'}")
     for line in sys.stdin:
         if not line.strip():
             continue
-        reply = handle_line(line, slurm)
+        reply = handle_line(line, slurm, allow)
         if reply is not None:
             print(json.dumps(reply), flush=True)
 

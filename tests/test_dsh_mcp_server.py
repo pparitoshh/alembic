@@ -52,8 +52,16 @@ def test_ping():
     assert srv.handle_message(req("ping", id=7), SlurmLive())["result"] == {}
 
 
-def test_tools_list_has_17_tools():
-    tools = srv.handle_message(req("tools/list"), SlurmLive())["result"]["tools"]
+def test_tools_list_hides_actions_without_the_flag():
+    tools = srv.handle_message(req("tools/list"), SlurmLive(), allow=False)["result"]["tools"]
+    names = [t["name"] for t in tools]
+    assert len(names) == 12 and not set(srv.HIDDEN_TOOLS) & set(names)
+    submit = next(t for t in tools if t["name"] == "submit_job")
+    assert "test_only=true" in submit["description"]
+
+
+def test_tools_list_keeps_all_17_tools_with_the_flag():
+    tools = srv.handle_message(req("tools/list"), SlurmLive(), allow=True)["result"]["tools"]
     assert len(tools) == 17
     for t in tools:
         assert t["name"] and t["description"] and t["inputSchema"]["type"] == "object"
@@ -109,13 +117,37 @@ def test_unknown_method():
 def test_action_declined_by_default():
     slurm, calls = fake_slurm({})
     r = srv.handle_message(req("tools/call", name="cancel_job", arguments={"job_id": "42"}), slurm)["result"]
-    assert "declined" in r["content"][0]["text"]
+    assert r["isError"] is True and r["content"][0]["text"] == srv.ACTIONS_DISABLED
     assert not any(c[0] == "scancel" for c in calls)
+
+
+def test_call_hidden_tool_is_refused_without_touching_the_runner():
+    slurm, calls = fake_slurm({})
+    r = srv.handle_message(req("tools/call", name="hold_job", arguments={"job_id": "42"}), slurm)["result"]
+    assert r["isError"] is True and r["content"][0]["text"] == srv.ACTIONS_DISABLED
+    assert calls == []
+
+
+def test_submit_real_without_the_flag_is_refused_without_touching_the_runner():
+    slurm, calls = fake_slurm({})
+    r = srv.handle_message(req("tools/call", name="submit_job",
+                               arguments={"script": "#!/bin/bash\necho hi\n", "test_only": False}), slurm)["result"]
+    assert r["isError"] is True and r["content"][0]["text"] == srv.ACTIONS_DISABLED
+    assert calls == []
+
+
+def test_submit_test_only_still_runs_without_the_flag():
+    slurm, calls = fake_slurm({})
+    r = srv.handle_message(req("tools/call", name="submit_job",
+                               arguments={"script": "#!/bin/bash\n", "test_only": True}), slurm)["result"]
+    assert r["isError"] is False and json.loads(r["content"][0]["text"])["valid"] is True
+    assert any("sbatch" in " ".join(c) and "--test-only" in " ".join(c) for c in calls)
 
 
 def test_action_declined_when_flag_is_zero():
     slurm, calls = fake_slurm({"HPC_ALLOW_ACTIONS": "0"})
-    srv.handle_message(req("tools/call", name="cancel_job", arguments={"job_id": "42"}), slurm)
+    r = srv.handle_message(req("tools/call", name="cancel_job", arguments={"job_id": "42"}), slurm)["result"]
+    assert r["isError"] is True and r["content"][0]["text"] == srv.ACTIONS_DISABLED
     assert not any(c[0] == "scancel" for c in calls)
 
 
@@ -161,13 +193,28 @@ def test_make_slurm_env_values_win_over_the_profile(tmp_path):
     assert slurm.ssh == "other" and slurm.remote_setup == "custom"
 
 
+def _stdio_replies(env):
+    lines = [json.dumps(req("initialize", id=1)), json.dumps(req("tools/list", id=2))]
+    p = subprocess.run([sys.executable, str(ROOT / "research" / "dsh_harness" / "mcp_server.py")],
+                       input="\n".join(lines) + "\n", capture_output=True, text=True, timeout=20, env=env)
+    return [json.loads(x) for x in p.stdout.splitlines()]
+
+
 def test_end_to_end_over_stdio():
     env = {k: v for k, v in os.environ.items()
            if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS", "HPC_CLUSTER", "HPC_CLUSTERS_FILE")}
     env["PYTHONPATH"] = str(ROOT / "src")
-    lines = [json.dumps(req("initialize", id=1)), json.dumps(req("tools/list", id=2))]
-    p = subprocess.run([sys.executable, str(ROOT / "research" / "dsh_harness" / "mcp_server.py")],
-                       input="\n".join(lines) + "\n", capture_output=True, text=True, timeout=20, env=env)
-    replies = [json.loads(x) for x in p.stdout.splitlines()]
+    env["HPC_ALLOW_ACTIONS"] = "1"
+    replies = _stdio_replies(env)
     assert [r["id"] for r in replies] == [1, 2]
     assert len(replies[1]["result"]["tools"]) == 17
+
+
+def test_end_to_end_over_stdio_without_the_flag_hides_the_actions():
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS", "HPC_CLUSTER", "HPC_CLUSTERS_FILE")}
+    env["PYTHONPATH"] = str(ROOT / "src")
+    replies = _stdio_replies(env)
+    tools = replies[1]["result"]["tools"]
+    names = [t["name"] for t in tools]
+    assert len(names) == 12 and not set(srv.HIDDEN_TOOLS) & set(names)

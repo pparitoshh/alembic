@@ -82,6 +82,22 @@ def test_submit_writes_the_script_then_sbatch_and_test_only():
     assert "error" in s.execute("submit_job", {"script": "echo no shebang"})
 
 
+def test_submit_job_rejects_a_path_or_url_as_the_script():
+    for script in ["/home/me/job.sh", "~/job.sbatch", "./run.py", "job.slurm",
+                   "http://example.com/job.sh", "https://example.com/job.sh"]:
+        s, fake = live({})
+        r = s.execute("submit_job", {"script": script})
+        assert r["error"] == ("script must be the full text of the batch script, starting with #! and #SBATCH lines. "
+                              "A path or URL does not work: the server cannot read your files. "
+                              "Ask the user for the script text."), script
+        assert fake.calls == []  # nothing written or run
+    # a one-line script that is none of those shapes keeps the old sbatch error
+    s, fake = live({})
+    r = s.execute("submit_job", {"script": "echo no shebang"})
+    assert "This does not look like a batch script" in r["error"]
+    assert fake.calls == []
+
+
 def test_actions_need_confirmation_and_cancel_only_own_jobs():
     s, fake = live({"sbatch": (0, "1\n", "")}, confirm=lambda n, a: False)
     assert s.execute("submit_job", {"script": "#!/bin/bash\n"})["error"] == "the user declined this action"
