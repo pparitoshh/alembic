@@ -128,12 +128,42 @@ def test_action_reaches_runner_when_allowed():
 
 def test_make_slurm_passes_ssh_and_remote_setup_through():
     slurm = srv.make_slurm({"HPC_SSH": "c1", "HPC_REMOTE_SETUP": "x"})
-    assert slurm.ssh == "c1" and slurm.remote_setup == "x"
+    assert slurm.ssh == "c1" and slurm.remote_setup == "x" and slurm.job_defaults == {}
     assert srv.make_slurm({}).ssh is None and srv.make_slurm({}).remote_setup is None
 
 
+CLUSTER_YAML = """
+clusters:
+  c1:
+    ssh: c1host
+    remote_setup: module load slurm
+    defaults:
+      account: acc1
+"""
+
+
+def cluster_file(tmp_path):
+    f = tmp_path / "clusters.yaml"
+    f.write_text(CLUSTER_YAML)
+    return str(f)
+
+
+def test_make_slurm_uses_the_cluster_profile(tmp_path):
+    slurm = srv.make_slurm({"HPC_CLUSTER": "c1", "HPC_CLUSTERS_FILE": cluster_file(tmp_path)})
+    assert slurm.ssh == "c1host" and slurm.remote_setup == "module load slurm"
+    assert slurm.job_defaults == {"account": "acc1"}
+
+
+def test_make_slurm_env_values_win_over_the_profile(tmp_path):
+    env = {"HPC_CLUSTER": "c1", "HPC_CLUSTERS_FILE": cluster_file(tmp_path),
+           "HPC_SSH": "other", "HPC_REMOTE_SETUP": "custom"}
+    slurm = srv.make_slurm(env)
+    assert slurm.ssh == "other" and slurm.remote_setup == "custom"
+
+
 def test_end_to_end_over_stdio():
-    env = {k: v for k, v in os.environ.items() if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS")}
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS", "HPC_CLUSTER", "HPC_CLUSTERS_FILE")}
     env["PYTHONPATH"] = str(ROOT / "src")
     lines = [json.dumps(req("initialize", id=1)), json.dumps(req("tools/list", id=2))]
     p = subprocess.run([sys.executable, str(ROOT / "research" / "dsh_harness" / "mcp_server.py")],

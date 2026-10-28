@@ -14,7 +14,8 @@
 #     model does not see the tools. The preset "minimal" keeps the request near 4.2K tokens.
 #   - The output cap of 2048 tokens stops a model loop. Without a cap, a loop blocks Ollama.
 #   - The MCP server declines all job-changing actions unless HPC_ALLOW_ACTIONS=1 is set in its env.
-#   - HPC_SSH is the login node. Leave it out to run the Slurm commands on this machine.
+#   - HPC_CLUSTER picks a profile from the clusters file (ssh, remote setup, job defaults). HPC_SSH and
+#     HPC_REMOTE_SETUP win over the profile when set. Leave HPC_SSH out to run the commands on this machine.
 #   - The preset "minimal" still has a bash tool. This is an open safety risk.
 
 - id: llm-pi-ai
@@ -51,8 +52,11 @@
           - <REPO>/research/dsh_harness/mcp_server.py
         env:
           PYTHONPATH: <REPO>/src
-          HPC_SSH: leonardo
-          # Clusters that only put Slurm on PATH after a module load get a setup snippet, for example on Curiosity:
+          HPC_CLUSTER: leonardo
+          # Optional path of the clusters file (default ~/.config/hpc-assistant/clusters.yaml):
+          # HPC_CLUSTERS_FILE: ~/.config/hpc-assistant/clusters.yaml
+          # Optional per-cluster overrides, they win over the cluster profile:
+          # HPC_SSH: leonardo
           # HPC_REMOTE_SETUP: ". /etc/profile.d/modules.sh && module load slurm/slurm/25.05"
           # The login node needs an open ssh master (BatchMode ssh cannot ask for a password).
           # Put a folder with an "ssh" wrapper first in PATH if the master uses a custom ControlPath.

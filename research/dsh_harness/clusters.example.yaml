@@ -1,0 +1,21 @@
+# Cluster profiles for the HPC assistant. No secrets in this file.
+# Copy to ~/.config/hpc-assistant/clusters.yaml and edit.
+clusters:
+  leonardo:
+    ssh: leonardo                      # alias in ~/.ssh/config
+    login: password                    # askpass.sh reads LEONARDO_PASSWORD from .env
+    remote_setup: ""                   # Slurm is already on PATH
+    defaults:
+      account: EUHPC_D30_031
+      partition: boost_usr_prod
+      reservation: auto:s_tra_ncc      # the ACTIVE reservation whose name starts with s_tra_ncc (TASK 5)
+      gres: gpu:1
+  curiosity:
+    ssh: curiosity
+    login: one-time-key                # key from the Axis portal
+    remote_setup: ". /etc/profile.d/modules.sh && module load slurm/slurm/25.05"
+    defaults:
+      account: eai-hackathon
+      partition: hackathon
+      qos: eai-team04
+      reservation: null

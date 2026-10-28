@@ -84,6 +84,52 @@ def test_actions_need_confirmation_and_cancel_only_own_jobs():
     assert s.execute("cancel_job", {"job_id": "5"}) == {"cancelled": True, "message": "Job 5 cancelled (was PENDING)"}
 
 
+def test_submit_job_applies_the_cluster_defaults():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1", "partition": "part1", "reservation": "auto:x"},
+                  confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH -t 5\n"})
+    assert r["submitted"] and r["note"] == "reservation auto: not resolved yet"
+    sbatch = " ".join(fake.calls[1][0])
+    assert "--account=acc1" in sbatch and "--partition=part1" in sbatch and "--reservation" not in sbatch
+
+
+def test_submit_job_the_scripts_own_sbatch_lines_block_the_defaults():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "other", "partition": "part1"}, confirm=lambda n, a: True)
+    script = "#!/bin/bash\n#SBATCH --account=mine\n#SBATCH -p dbg\necho hi\n"
+    r = s.execute("submit_job", {"script": script})
+    sbatch = " ".join(fake.calls[1][0])
+    assert r["submitted"] and "defaults_applied" not in r
+    assert "--account" not in sbatch and "--partition" not in sbatch
+
+
+def test_submit_job_adds_the_defaults_the_script_does_not_set():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1", "partition": "part1", "time": "30"},
+                  confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --time=10\necho hi\n"})
+    sbatch = " ".join(fake.calls[1][0])
+    assert r["submitted"] and r["defaults_applied"] == ["--account=acc1", "--partition=part1"]
+    assert "--account=acc1" in sbatch and "--partition=part1" in sbatch and "--time" not in sbatch
+
+
+def test_submit_job_ignores_sbatch_lines_after_the_first_command():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"partition": "part1"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n#SBATCH -p dbg\n"})
+    assert r["defaults_applied"] == ["--partition=part1"]
+    assert "--partition=part1" in " ".join(fake.calls[1][0])
+
+
+def test_submit_job_with_defaults_still_needs_confirmation():
+    fake = FakeSlurm({"mkdir": (0, "", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1"})  # the default confirm declines
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n"})
+    assert r["error"] == "the user declined this action"
+    assert not any("sbatch" in " ".join(c[0]) for c in fake.calls)
+
+
 def test_read_job_log_uses_the_jobs_own_paths():
     s, fake = live({"scontrol&show&job": (0, "JobId=8 StdErr=/w/slurm-8.out StdIn=/dev/null StdOut=/w/slurm-8.out\n", ""),
                     "tail": (0, "line1\nline2\n", "")})

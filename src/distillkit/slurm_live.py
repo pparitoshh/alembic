@@ -74,6 +74,29 @@ ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", 
 # change the cluster: confirmed first (submit_job only without test_only)
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
 _TYPES = {"string": str, "integer": int, "boolean": bool}
+# cluster default -> sbatch option (submit_job adds the ones the script does not set itself)
+_SBATCH_OPTS = {"account": "--account", "partition": "--partition", "qos": "--qos", "reservation": "--reservation",
+                "gres": "--gres", "time": "--time"}
+_SHORT_OPTS = {"A": "account", "p": "partition", "q": "qos", "t": "time"}
+
+
+def _script_opts(script):
+    """The sbatch options the script sets itself in its #SBATCH lines. Like sbatch, only read lines before the
+    first non-comment line. Long (--account=x, --account x) and short (-A x, -Ax) forms map to the same keys."""
+    names = set()
+    for line in script.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            break
+        if not stripped.upper().startswith("#SBATCH"):
+            continue
+        for token in stripped[7:].split():
+            if token.startswith("--"):
+                if (name := token[2:].split("=")[0]) in _SBATCH_OPTS:
+                    names.add(name)
+            elif token.startswith("-") and len(token) > 1 and token[1] in _SHORT_OPTS:
+                names.add(_SHORT_OPTS[token[1]])
+    return names
 
 
 def openai_tools(include_script=True):
@@ -82,9 +105,11 @@ def openai_tools(include_script=True):
 
 
 class SlurmLive:
-    def __init__(self, ssh=None, workdir="~/.hpc-agent/jobs", confirm=None, timeout=60, runner=None, remote_setup=None):
+    def __init__(self, ssh=None, workdir="~/.hpc-agent/jobs", confirm=None, timeout=60, runner=None, remote_setup=None,
+                 job_defaults=None):
         self.ssh, self.workdir, self.timeout = ssh, workdir, timeout
         self.remote_setup = remote_setup  # shell snippet (module load ...) to run before each remote command
+        self.job_defaults = job_defaults or {}  # sbatch defaults from the cluster profile
         self.confirm = confirm or (lambda name, args: False)
         self._runner = runner  # tests: callable(cmd, stdin) -> (rc, stdout, stderr)
         self._user = None
@@ -176,20 +201,39 @@ class SlurmLive:
         if not script.lstrip().startswith("#!"):
             return {"error": "sbatch: error: This does not look like a batch script. The first line must start with "
                              "#! followed by the path to an interpreter."}
+        # command-line options win over #SBATCH lines, so only add the defaults the script does not set itself
+        given, opts, applied, notes = _script_opts(script), "", [], []
+        for key, opt in _SBATCH_OPTS.items():
+            value = self.job_defaults.get(key)
+            if value is None or key in given:
+                continue
+            if key == "reservation" and str(value).startswith("auto:"):
+                notes.append("reservation auto: not resolved yet")
+                continue
+            opts += f" {opt}={shlex.quote(str(value))}"
+            applied.append(f"{opt}={shlex.quote(str(value))}")
         path = f"{self.workdir.rstrip('/')}/job_{time.strftime('%Y%m%d_%H%M%S')}_{abs(hash(script)) % 10**6:06d}.sh"
         rc, _, err = self.run(["bash", "-c", f'mkdir -p {self.workdir} && cat > {path}'], stdin=script)
         if rc != 0:
             return {"error": f"could not write the script: {err.strip()}"}
         workdir = path.rsplit("/", 1)[0]
-        argv = ["bash", "-c", f"cd {workdir} && sbatch --parsable {'--test-only ' if test_only else ''}{path}"]
+        argv = ["bash", "-c", f"cd {workdir} && sbatch --parsable{opts} {'--test-only ' if test_only else ''}{path}"]
         rc, out, err = self.run(argv)
         if test_only:  # sbatch --test-only reports on stderr
             msg = (err or out).strip()
-            return {"valid": rc == 0, "message": msg, "script_file": path} if rc == 0 else {"error": msg}
-        if rc != 0:
-            return {"error": err.strip() or out.strip() or "sbatch failed"}
-        jid = out.strip().split(";")[0]
-        return {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}", "script_file": path}
+            if rc != 0:
+                return {"error": msg}
+            res = {"valid": True, "message": msg, "script_file": path}
+        else:
+            if rc != 0:
+                return {"error": err.strip() or out.strip() or "sbatch failed"}
+            jid = out.strip().split(";")[0]
+            res = {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}", "script_file": path}
+        if applied:
+            res["defaults_applied"] = applied
+        if notes:
+            res["note"] = "; ".join(notes)
+        return res
 
     def cancel_job(self, job_id):
         rc, out, _ = self.run(["squeue", "--me", "-h", "-j", job_id.split("_")[0], "-o", "%i"])

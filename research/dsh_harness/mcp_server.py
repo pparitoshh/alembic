@@ -9,8 +9,11 @@ through the `confirm(name, args)` callback of SlurmLive. The callback returns Tr
 Otherwise it declines and nothing changes on the cluster.
 
 Environment:
-  HPC_SSH            login node for ssh (default empty: run the commands locally)
-  HPC_REMOTE_SETUP   shell snippet to run before each remote command, e.g. "module load slurm" (default empty: none)
+  HPC_CLUSTER        cluster name from the clusters file (default empty: use HPC_SSH/HPC_REMOTE_SETUP directly)
+  HPC_CLUSTERS_FILE  path of the clusters file (default ~/.config/hpc-assistant/clusters.yaml)
+  HPC_SSH            login node for ssh (default: the cluster profile's 'ssh', else run the commands locally)
+  HPC_REMOTE_SETUP   shell snippet to run before each remote command (default: the profile's 'remote_setup');
+                     both HPC_SSH and HPC_REMOTE_SETUP win over the profile when set
   HPC_ALLOW_ACTIONS  "1" to allow actions (default "0")
 
 Run: PYTHONPATH=src python research/dsh_harness/mcp_server.py
@@ -19,6 +22,7 @@ import json
 import os
 import sys
 
+from distillkit.clusters import CLUSTERS_FILE, get_cluster
 from distillkit.slurm_live import SlurmLive, openai_tools
 from distillkit.tools import ToolError
 
@@ -31,7 +35,8 @@ def log(*parts):
 
 
 def make_slurm(env=None):
-    """Build the SlurmLive object from the environment."""
+    """Build the SlurmLive object from the environment. HPC_CLUSTER picks a profile from the clusters file;
+    explicit HPC_SSH / HPC_REMOTE_SETUP values win over the profile. Raises ToolError for a bad file or name."""
     env = os.environ if env is None else env
     allow = env.get("HPC_ALLOW_ACTIONS", "0") == "1"
 
@@ -39,7 +44,11 @@ def make_slurm(env=None):
         log(f"action {name} {'allowed' if allow else 'declined'} (HPC_ALLOW_ACTIONS)")
         return allow
 
-    return SlurmLive(ssh=env.get("HPC_SSH") or None, remote_setup=env.get("HPC_REMOTE_SETUP") or None, confirm=confirm)
+    profile = get_cluster(env["HPC_CLUSTER"], env.get("HPC_CLUSTERS_FILE") or CLUSTERS_FILE) \
+        if env.get("HPC_CLUSTER") else {}
+    return SlurmLive(ssh=env.get("HPC_SSH") or profile.get("ssh"),
+                     remote_setup=env.get("HPC_REMOTE_SETUP") or profile.get("remote_setup") or None,
+                     job_defaults=profile.get("defaults"), confirm=confirm)
 
 
 def list_tools():
@@ -95,8 +104,14 @@ def handle_line(line, slurm):
 
 
 def main():
-    slurm = make_slurm()
-    log(f"ready; ssh = {slurm.ssh or '(local)'}; remote setup = {'yes' if slurm.remote_setup else 'no'}")
+    try:
+        slurm = make_slurm()
+    except ToolError as e:  # a bad clusters file or an unknown cluster: never start with wrong settings
+        log(str(e))
+        sys.exit(1)
+    cluster = os.environ.get("HPC_CLUSTER") or "(none)"
+    log(f"ready; cluster = {cluster}; ssh = {slurm.ssh or '(local)'}; "
+        f"remote setup = {'yes' if slurm.remote_setup else 'no'}")
     for line in sys.stdin:
         if not line.strip():
             continue

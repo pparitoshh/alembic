@@ -97,6 +97,8 @@ Web UI result: "Show my queue" PASSED with the preset `minimal`. The tool `list_
 
 The earlier run with the preset `standard` failed. The first request had 8,609 tokens. Ollama truncated it to 4,098 tokens ("truncating input prompt limit=4098 prompt=8609"). The model did not see the Slurm tools.
 
+Cluster profiles: `src/distillkit/clusters.py` reads one YAML file, default `~/.config/hpc-assistant/clusters.yaml` (example: `research/dsh_harness/clusters.example.yaml`). The MCP row sets only `HPC_CLUSTER=<name>`; explicit `HPC_SSH` and `HPC_REMOTE_SETUP` env values still win over the profile. `submit_job` fills the sbatch options from the profile defaults; `auto:` reservations are not resolved yet.
+
 OPEN issues:
 
 1. Only one web UI question was tested. The questions for `partition_info`, `job_status`, `read_job_log` and the action tools with confirmation are not tested in the UI.
