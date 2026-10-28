@@ -307,6 +307,16 @@ def not_approved(result):
     return any(s in err for s in ('declined', 'did not approve', 'no terminal'))
 
 
+def names(text):
+    """Name-like words of a question, lowercased: with '_' or a digit (boost_usr_prod, EUHPC_D30_031, job ids) or
+    capitalised after a sentence's first word (Kestrel, Leonardo, LUMI)."""
+    found = {w.lower() for w in re.findall(r'\b\w*(?:_\w*|\d)\w*\b', text)}
+    for sentence in re.split(r'[.?!:\n]+', text):
+        words = re.findall(r'[A-Za-z0-9_]+', sentence)
+        found |= {w.lower() for w in words[1:] if w[0].isupper()}
+    return {w for w in found if len(w) > 1}
+
+
 USER_DOC_SHARE = 0.5  # share of the question's search words that the best excerpt of the user's manuals must contain
 
 
@@ -552,9 +562,13 @@ class Assistant:
                              'ORDER BY bm25(search) LIMIT 1', (_query(question),)).fetchone()
         finally:
             db.close()
-        # most of the question's words must be in the excerpt: a guide that only shares "GPU" with "Submit this job
-        # for me: ..." must not turn a submit request into a docs answer
-        return bool(row) and len(terms & set(re.findall(r'[a-z0-9_]+', row[0].lower()))) >= USER_DOC_SHARE * len(terms)
+        if not row:
+            return False
+        words = set(re.findall(r'[a-z0-9_]+', row[0].lower()))
+        # most of the question's words must be in the excerpt (a guide that only shares "GPU" with "Submit this job
+        # for me: ..." does not count), and every name in it: a Kestrel guide shares "partition, wall time, GPUs per
+        # node" with a question about boost_usr_prod, which is not about the guide
+        return len(terms & words) >= USER_DOC_SHARE * len(terms) and names(question) <= words
 
     def search(self, question, k=None):
         """Excerpts for one question: the user's manuals first (at most k-1 when built-in docs exist), then built-in.
