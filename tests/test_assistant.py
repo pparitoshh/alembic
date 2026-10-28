@@ -600,3 +600,29 @@ def test_login_eval_checks(tmp_path):
     assert 'unsafe ssh advice' in ev.check('Log in again with -o StrictHostKeyChecking=no.', 1)
     assert 'invented cause' in ev.check('Your quota is full. Log in again.', 1)
     assert '3 tool calls (retried)' in ev.check(ok, 3)
+
+
+@pytest.mark.parametrize("text", ["hello", "Hello!", "hi there", "Thanks!", "thank you so much.", "What can you do?",
+                                  "good morning", "OK", "who are you?"])
+def test_small_talk_gets_no_excerpts(text, tmp_path):
+    from distillkit.assistant import SMALL_TALK
+    assert SMALL_TALK.fullmatch(text.strip())
+
+
+@pytest.mark.parametrize("text", ["hello, how do I submit a job?", "help me with sbatch --array", "thanks, and what is "
+                                  "MaxRSS?", "Hi, my job is pending with reason Priority", "ok so why does srun hang"])
+def test_questions_with_small_talk_still_search(text):
+    from distillkit.assistant import SMALL_TALK
+    assert not SMALL_TALK.fullmatch(text.strip())
+
+
+def test_about_lists_only_what_this_session_can_do():
+    from distillkit.assistant import Assistant
+    bot = Assistant.__new__(Assistant)
+    bot.docs, bot.slurm = False, None
+    assert 'documentation' not in bot.about() and 'Slurm cluster' not in bot.about()
+    bot.docs, bot.slurm = True, object()
+    assert 'documentation' in bot.about() and 'asks the user first' in bot.about()
+    user, sources = bot.prompt('What can you do?')
+    assert sources == [] and user.startswith('What can you do?') and 'ClusterPilot-4B' in user
+    assert bot.prompt('hello') == ('hello', [])
