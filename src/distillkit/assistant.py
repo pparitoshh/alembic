@@ -304,6 +304,14 @@ def excerpt_budget(question):
     return max(8000, min(VARIANT_BUDGET, int((11000 - 0.7 * len(question)) / 0.3)))
 
 
+class ModelServerError(OSError):
+    """The model server answered with an error instead of text."""
+
+    def __init__(self, reason):
+        super().__init__(reason)
+        self.server_reason = str(reason)
+
+
 def written_tool_call(text):
     """A tool call the model wrote as JSON text instead of calling it (live test: 'Is my last job still running?' ->
     a ```json {"name": "list_queue", "arguments": {...}}``` block and no call): [call] when the text holds exactly one
@@ -529,7 +537,10 @@ class Assistant:
                 if self.openai:
                     if not line.startswith('data:') or line == 'data: [DONE]':
                         continue
-                    delta = json.loads(line[5:])['choices'][0]['delta']
+                    chunk = json.loads(line[5:])
+                    if 'error' in chunk:  # an error in the middle of the answer
+                        raise ModelServerError(chunk['error'].get('message') if isinstance(chunk['error'], dict) else chunk['error'])
+                    delta = chunk['choices'][0]['delta']
                     for tc in delta.get('tool_calls') or []:  # streamed in fragments, keyed by index
                         c = calls.setdefault(tc.get('index', 0), {'name': '', 'arguments': ''})
                         c['id'] = c.get('id') or tc.get('id')
@@ -537,7 +548,10 @@ class Assistant:
                         c['arguments'] += (tc.get('function') or {}).get('arguments') or ''
                     yield delta.get('content') or ''
                 elif line:
-                    msg = json.loads(line).get('message', {})
+                    chunk = json.loads(line)
+                    if 'error' in chunk:  # Ollama reports a failure in the middle of a stream as {"error": "..."}
+                        raise ModelServerError(chunk['error'])
+                    msg = chunk.get('message', {})
                     for i, tc in enumerate(msg.get('tool_calls') or [], len(calls)):
                         calls[i] = {'name': tc['function']['name'], 'arguments': tc['function'].get('arguments', {})}
                     yield msg.get('content', '')
@@ -675,6 +689,15 @@ class Assistant:
     def explain(self, error):
         """A plain-language message for a failed request to the model server (no traceback for the user)."""
         server = self.openai or self.ollama
+        reason = getattr(error, 'server_reason', None)
+        if reason is None and isinstance(error, urllib.error.HTTPError) and error.code != 404:
+            try:  # Ollama and vLLM put the reason in the body: {"error": "..."}
+                body = json.loads(error.read() or b'{}')
+                reason = body.get('error') if isinstance(body.get('error'), str) else (body.get('error') or {}).get('message')
+            except (ValueError, OSError, AttributeError):
+                reason = None
+        if reason:
+            return f"the model server at {server} refused the request: {reason}"
         if isinstance(error, urllib.error.HTTPError) and error.code == 404:
             return (f"the model '{self.model}' is not available at {server}: install it with `clusterpilot --setup`"
                     f"{'' if self.openai else ' (see `ollama list`)'}, or choose another with --model")
