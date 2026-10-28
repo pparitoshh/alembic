@@ -65,7 +65,7 @@ REQUEUE_JOB_SCHEMA = {
 }
 RUN_READONLY_COMMAND_SCHEMA = {
     "name": "run_readonly_command",
-    "description": "Run one short read-only Slurm command and return its output, for anything the other tools do not cover. Examples: account and QOS limits `sacctmgr -P show assoc user=$USER format=account,qos,grptres,maxwall`; fairshare `sshare -U`; drained or down nodes `sinfo -R`; one node `scontrol show node lrdn0001`; reservations `scontrol show reservation`; the whole queue by priority `squeue --sort=-p`. Allowed: squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show. Run it yourself instead of telling the user to run it.",
+    "description": "Run one short read-only Slurm command and return its output, for anything the other tools do not cover. Use it for the user's recent or last jobs when no job id is given: `sacct -X -S now-7days -o jobid,jobname,state,exitcode,elapsed,end`. Other examples: account and QOS limits `sacctmgr -P show assoc user=$USER format=account,qos,grptres,maxwall`; fairshare `sshare -U`; drained or down nodes `sinfo -R`; one node `scontrol show node lrdn0001`; reservations `scontrol show reservation`; the whole queue by priority `squeue --sort=-p`. Allowed: squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show. Run it yourself instead of telling the user to run it.",
     "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
                    "required": ["command"]},
 }
