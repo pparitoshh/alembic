@@ -8,7 +8,29 @@ The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B
 
 > **Status:** working prototype, built for the [European AI Hackathon](https://www.openhackathons.org/s/siteevent/a0CUP00003yKxcX2AS/se000475) (Oct 6–29, 2026). `generate → verify → train → evaluate → export` runs end to end on a laptop (RTX 2060 6 GB), including tool-calling traces against a mock Slurm cluster and an Ollama package whose tool calls Ollama parses. Slurm scripts for Leonardo are ready; laptop speed/RAM benchmarks of the 4B are in [research/](research/README.md).
 
-## Quick start
+## Use ClusterPilot (the HPC assistant)
+
+ClusterPilot-4B answers supercomputer questions with sources from the documentation and, in agent mode, works on your
+real Slurm cluster (queue, GPUs, logs, accounting, test submissions; anything that changes a job asks first). It runs
+offline on a laptop with [Ollama](https://ollama.com) (its tests run on macOS, Linux and Windows). Model and docs index:
+[VaibhavKKM/hpc-assistant-qwen3-4b](https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b).
+
+```bash
+git clone https://github.com/pparitoshh/alembic && cd alembic
+uv run clusterpilot --setup                      # model + docs index from Hugging Face into Ollama; rerun to update
+uv run clusterpilot "How do I run 100 array tasks, at most 10 at a time?"
+uv run clusterpilot --web                        # chat page on http://127.0.0.1:8765; drop your own manuals in
+uv run clusterpilot --agent --ssh <login node>   # agent mode on your cluster (or --agent on a login node)
+```
+
+Only the model, in Ollama: `ollama pull hf.co/VaibhavKKM/hpc-assistant-qwen3-4b:Q4_K_M`. On a cluster without Ollama,
+serve the model with vLLM or llama-server and add `--openai http://127.0.0.1:PORT/v1 --model <name>`.
+Covered: Slurm in general and European systems (Leonardo, LUMI and the EuroHPC AI Factories); for other sites add
+their user guide with `--add FILE` or in the web page.
+
+## Train your own (DistillKit pipeline)
+
+### Quick start
 
 ```bash
 uv sync --extra train --extra export   # plain `uv sync` removes torch/trl/peft
