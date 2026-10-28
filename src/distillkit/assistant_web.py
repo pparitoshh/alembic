@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import re
 import threading
+import uuid
 
 ALLOWED = {'.pdf', '.md', '.markdown', '.txt', '.text', '.html', '.htm', '.rst'}
 MAX_UPLOAD = 200 * 1024 * 1024
@@ -33,7 +34,11 @@ def save_upload(bot, name, data):
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / name
     path.write_bytes(data)
-    return name, bot.add(path)
+    n = bot.add(path)
+    if not n:  # nothing to search: say so instead of listing an empty document
+        path.unlink()
+        raise ValueError(f'no text found in {name} (for a scanned PDF install tesseract and poppler)')
+    return name, n
 
 
 def user_documents(bot):
@@ -62,8 +67,24 @@ class _Stream:
         self.wfile.flush()
 
 
-def make_handler(bot):
+def make_handler(bot, approve_in_page=False):
     lock = threading.Lock()  # one conversation, one question at a time
+    pending = {}  # agent actions waiting for the Approve/Deny buttons: id -> [threading.Event, approved]
+    stream = [None]  # the answer being streamed, where approval requests are written
+
+    def confirm(name, args):
+        """Agent mode in the browser: show the action with Approve/Deny buttons and wait for the click."""
+        from distillkit.slurm_live import describe
+        cid = uuid.uuid4().hex[:12]
+        pending[cid] = [threading.Event(), False]
+        stream[0].write(f'\n[[approve {cid} {json.dumps(describe(name, args))}]]\n')
+        stream[0].flush()
+        approved = pending[cid][0].wait(APPROVAL_WAIT) and pending[cid][1]
+        del pending[cid]
+        return True if approved else 'the user did not approve this action'
+
+    if approve_in_page and bot.slurm is not None:
+        bot.slurm.confirm = confirm
 
     class Handler(BaseHTTPRequestHandler):
         protocol_version = 'HTTP/1.1'
@@ -102,6 +123,15 @@ def make_handler(bot):
                     with lock:
                         name, n = save_upload(bot, unquote(self.headers.get('X-Filename', 'document')), data)
                     self._send(200, {'file': name, 'excerpts': n})
+                elif self.path == '/api/approve':  # no lock: the question that asked is holding it
+                    req = json.loads(self._body(1 << 10) or b'{}')
+                    item = pending.get(req.get('id'))
+                    if item is None:
+                        self._send(404, {'error': 'no such pending action'})
+                        return
+                    item[1] = req.get('approve') is True
+                    item[0].set()
+                    self._send(200, {'ok': True})
                 elif self.path == '/api/reset':
                     with lock:
                         bot.reset()
@@ -117,12 +147,8 @@ def make_handler(bot):
                     self.end_headers()
                     out = _Stream(self.wfile)
                     with lock:
-                        try:
-                            bot.ask(question, out)
-                        except OSError as e:  # model server not reachable
-                            if len(bot.history) > 1 and bot.history[-1]['role'] == 'user':
-                                bot.history.pop()  # keep the conversation consistent for the next question
-                            out.write(f'\n\n[The model is not reachable: {e}. Is Ollama running?]')
+                        stream[0] = out
+                        bot.safe_ask(question, out)
                     self.wfile.write(b'0\r\n\r\n')
                 else:
                     self._send(404, {'error': 'not found'})
@@ -132,8 +158,15 @@ def make_handler(bot):
     return Handler
 
 
-def serve(bot, host='127.0.0.1', port=8765):
-    server = ThreadingHTTPServer((host, port), make_handler(bot))
+APPROVAL_WAIT = 600  # seconds an action waits for a click before it counts as not approved
+
+
+def serve(bot, host='127.0.0.1', port=8765, approve_in_page=False):
+    try:
+        server = ThreadingHTTPServer((host, port), make_handler(bot, approve_in_page))
+    except OSError as e:  # most often another program (or an earlier clusterpilot --web) already uses the port
+        raise SystemExit(f'[hpc-assistant] cannot open the web page on port {port} ({e.strerror}): '
+                         f'stop the other program, or choose another port with --port')
     print(f'[hpc-assistant] web page on http://{host}:{port} (Ctrl+C to stop)')
     try:
         server.serve_forever()
@@ -184,6 +217,10 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; white-space: nowrap; }
 .msg.bot blockquote { margin: 8px 0; padding: 6px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
 .sources { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
 .sources a { color: var(--accent); text-decoration: none; }
+.tool { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); margin: 4px 0; }
+.approve { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+.approve pre { margin: 6px 0; background: transparent; padding: 0; white-space: pre-wrap; }
+.approve button { padding: 6px 14px; margin-right: 6px; }
 .empty { color: var(--muted); text-align: center; padding: 30px 10px; }
 form { position: fixed; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); padding: 20px 16px 16px; }
 .bar { max-width: 920px; margin: 0 auto; display: flex; gap: 8px; }
@@ -232,6 +269,9 @@ function render(md) {
   parts.forEach((part, i) => {
     if (i % 2) { out.push('<pre><code>' + esc(part.replace(/\n$/, '')) + '</code></pre>'); return; }
     for (const line of part.split('\n')) {
+      const ap = line.match(/^\[\[approve (\w+) (.*)\]\]$/), tool = line.match(/^\[(\w+ \{.*\}|searched: .*)\]$/);
+      if (ap) { out.push(approval(ap[1], JSON.parse(ap[2]))); continue; }
+      if (tool) { out.push('<div class="tool">⚙ ' + esc(tool[1]) + '</div>'); continue; }
       const h = line.match(/^#{1,4}\s+(.*)/), li = line.match(/^\s*[-*]\s+(.*)/), q = line.match(/^\s*>\s?(.*)/);
       if (li) { if (!list) { out.push('<ul>'); list = true; } out.push('<li>' + inline(li[1]) + '</li>'); continue; }
       if (list) { out.push('</ul>'); list = false; }
@@ -244,6 +284,18 @@ function render(md) {
   });
   return out.join('');
 }
+const decided = {};  // approval id -> true/false once clicked
+function approval(id, text) {
+  const state = id in decided ? `<strong>${decided[id] ? 'Approved' : 'Denied'}</strong>`
+    : `<button type="button" data-approve="${id}" data-ok="1">Approve</button><button type="button" class="ghost" data-approve="${id}" data-ok="0">Deny</button>`;
+  return `<div class="approve">The assistant wants to <pre>${esc(text)}</pre>${state}</div>`;
+}
+$('chat').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-approve]'); if (!b) return;
+  const id = b.dataset.approve, ok = b.dataset.ok === '1';
+  decided[id] = ok; b.parentElement.innerHTML = `The assistant wants to <pre>${esc(b.parentElement.querySelector('pre').textContent)}</pre><strong>${ok ? 'Approved' : 'Denied'}</strong>`;
+  await fetch('/api/approve', {method: 'POST', body: JSON.stringify({id, approve: ok})});
+});
 function bubble(cls, html) {
   $('empty')?.remove();
   const d = document.createElement('div'); d.className = 'msg ' + cls; d.innerHTML = html;
@@ -294,7 +346,8 @@ $('file').onchange = async e => { for (const f of e.target.files) await upload(f
 ['dragenter', 'dragover'].forEach(t => $('drop').addEventListener(t, e => { e.preventDefault(); $('drop').classList.add('over'); }));
 ['dragleave', 'drop'].forEach(t => $('drop').addEventListener(t, e => { e.preventDefault(); $('drop').classList.remove('over'); }));
 $('drop').addEventListener('drop', async e => { for (const f of e.dataTransfer.files) await upload(f); });
-$('form').onsubmit = e => { e.preventDefault(); const q = $('q').value.trim(); if (q) { $('q').value = ''; ask(q); } };
+$('form').onsubmit = e => {  // Enter while an answer is streaming must not queue another question
+  e.preventDefault(); const q = $('q').value.trim(); if (q && !$('send').disabled) { $('q').value = ''; ask(q); } };
 $('q').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('form').requestSubmit(); } };
 $('reset').onclick = async () => { await fetch('/api/reset', {method: 'POST'}); $('chat').innerHTML = '<div class="empty" id="empty">New conversation.</div>'; };
 loadDocs();

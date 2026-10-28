@@ -106,7 +106,13 @@ def call_tool(slurm, params):
         # A null argument from the model means "not given": drop it, so an optional argument passes
         # and a required one fails with the normal missing-argument error.
         arguments = {k: v for k, v in (params.get("arguments") or {}).items() if v is not None}
-        result = slurm.execute(params.get("name"), arguments)
+        name = params.get("name")
+        # SlurmLive.execute checks the cluster (squeue) before its confirm gate, so a refused action would touch it:
+        # ask the same confirm here first, so a disabled action is refused without any cluster contact.
+        if name in ACTIONS and not (name == "submit_job" and arguments.get("test_only")) \
+                and slurm.confirm(name, arguments) is not True:
+            return {"content": [{"type": "text", "text": ACTIONS_DISABLED}], "isError": True}
+        result = slurm.execute(name, arguments)
         if isinstance(result, dict) and result.get("error") == _DECLINED:
             return {"content": [{"type": "text", "text": ACTIONS_DISABLED}], "isError": True}
         return {"content": [{"type": "text", "text": json.dumps(result)}], "isError": False}

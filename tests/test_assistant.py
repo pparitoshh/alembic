@@ -1,7 +1,9 @@
 """hpc-assistant: built-in retrieval must give the student the exact prompts it was evaluated with."""
 import importlib.util
+import io
 import json
 import sqlite3
+import subprocess
 from io import StringIO
 from pathlib import Path
 
@@ -161,7 +163,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
     seen = {}
 
     def fake_stream(self, messages):  # the conftest blocks sockets, so the model server is stubbed
-        seen['messages'] = messages
+        seen['messages'] = [dict(m) for m in messages]  # as sent (the conversation keeps only the question)
         yield from ['Use ', '--gpus-per-node.']
 
     monkeypatch.setattr(assistant.Assistant, '_stream', fake_stream)
@@ -172,6 +174,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
     assert seen['messages'][0] == {'role': 'system', 'content': assistant.SYSTEM_PROMPT}
     assert '<quoted_source>' in seen['messages'][1]['content'] and 'standard-g' in seen['messages'][1]['content']
     assert 'Sources:\n- https://docs.lumi/gpu' in out.getvalue()
+    assert bot.history[1] == {'role': 'user', 'content': 'How do I request GPUs on LUMI?'}
 
 
 def test_user_manual_is_indexed_searched_first_and_replaced_on_readd(tmp_path):
@@ -286,5 +289,224 @@ def test_web_failed_question_leaves_history_clean(tmp_path, monkeypatch):
 
     req = Fake(b'{"question": "How do I request GPUs on LUMI?"}')
     req.do_POST()
-    assert b'not reachable' in req.wfile.getvalue()
+    assert b'cannot reach the model server' in req.wfile.getvalue() and b'start Ollama' in req.wfile.getvalue()
     assert [m['role'] for m in bot.history] == ['system']
+
+
+def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
+    models, created, fetched = [''], [], []
+
+    def run(cmd, **kw):
+        if cmd[:2] == ['ollama', 'create']:
+            created.append((cmd[2], (kw['cwd'] / assistant.GGUF_FILE).read_text()))
+            models[0] = cmd[2] + ':latest  abc  2.5 GB  now\n'
+        return subprocess.CompletedProcess(cmd, 0, 'NAME ID SIZE MODIFIED\n' + models[0], '')
+
+    def download(url, dest):
+        if dest.suffix != '.sqlite':  # the docs index is fetched once, on the first setup
+            fetched.append(dest.name)
+        else:
+            assert url == assistant.HF_INDEX + dest.name
+        dest.write_text(release[0])
+    release = ['g1:m1']
+    monkeypatch.setattr(assistant.subprocess, 'run', run)
+    monkeypatch.setattr(assistant, '_download', download)
+    monkeypatch.setattr(assistant, '_release_id', lambda: release[0])
+    monkeypatch.setattr(assistant, '_file_ids', lambda url: {})  # index side: offline
+    assistant.setup(tmp_path, 'cp')
+    assert created == [('cp', 'g1:m1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
+    assistant.setup(tmp_path, 'cp')  # nothing new: nothing downloaded or created
+    assert len(created) == 1 and len(fetched) == 2
+    release[0] = 'g2:m2'
+    assistant.setup(tmp_path, 'cp')  # a new release replaces the cached files and the Ollama model
+    assert created[-1] == ('cp', 'g2:m2') and len(fetched) == 4
+    release[0] = 'g2:m3'  # only the Modelfile changed: the GGUF is not downloaded again
+    assistant.setup(tmp_path, 'cp')
+    assert len(created) == 3 and fetched[-1] == 'Modelfile' and len(fetched) == 5
+    monkeypatch.setattr(assistant, '_release_id', lambda: None)
+    assistant.setup(tmp_path, 'cp')  # offline: the installed model stays
+    assert len(created) == 3
+
+
+def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
+    spec = importlib.util.spec_from_file_location('add_notes', Path(__file__).resolve().parent.parent / 'scripts/add_notes_to_index.py')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    index = _indexes(tmp_path)
+    for _ in range(2):  # running it again replaces the notes instead of adding copies
+        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 8
+    docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
+                              index / 'factory_docs.sqlite', variant='e')
+    assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
+
+
+def test_a_looping_answer_is_stopped(tmp_path, monkeypatch):
+    bot = assistant.Assistant(tmp_path, docs=False)
+    produced = []
+
+    def stream(messages):
+        yield 'Options:\n--requeue : Allow requeue.\n'
+        for _ in range(500):  # the model repeats two lines until something stops it
+            produced.append(1)
+            yield '--no-requeue : Do not requeue.\n--no-kill : Do not kill.\n'
+    monkeypatch.setattr(bot, '_stream', stream)
+    out = StringIO()
+    answer, _ = bot.ask('list every sbatch option', out=out)
+    assert 'started repeating' in answer and len(produced) < 20
+    assert not assistant.Assistant.repeating('#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --time=01:00:00\n' * 2)
+    assert not assistant.Assistant.repeating('srun --exact -n 1 ./step &\n' * 5 + 'wait\n')  # a real script
+
+
+def test_agent_mode_asks_without_excerpts_first(tmp_path, monkeypatch):
+    from distillkit.slurm_live import SlurmLive
+
+    def runner(argv, stdin=None):
+        return 0, '', ''  # an empty queue
+    bot = assistant.Assistant(_indexes(tmp_path), slurm=SlurmLive(runner=runner))
+    sent = []
+
+    def stream(messages):  # live question: a tool call, then the final answer
+        sent.append(messages[-1]['content'] if messages[-1]['role'] == 'user' else messages[-1]['role'])
+        if messages[-1]['role'] == 'user':
+            yield {'tool_calls': [{'name': 'list_queue', 'arguments': {}}]}
+        else:
+            yield 'You have no jobs in the queue.'
+    monkeypatch.setattr(bot, '_stream', stream)
+    answer, sources = bot.ask('Show my jobs in the queue on Leonardo', out=StringIO())
+    assert sent == ['Show my jobs in the queue on Leonardo', 'tool'] and sources == []  # one request, no excerpts
+    assert answer == 'You have no jobs in the queue.'
+
+    bot.reset()
+    sent.clear()
+
+    def stream2(messages):  # knowledge question: plain text, so it is asked again with the excerpts
+        sent.append(messages[-1]['content'])
+        yield 'Use --gpus-per-node in the standard-g partition. ' * 10
+    monkeypatch.setattr(bot, '_stream', stream2)
+    answer, sources = bot.ask('How do I request GPUs on LUMI?', out=StringIO())
+    assert sent[0] == 'How do I request GPUs on LUMI?' and 'Quoted retrieval results' in sent[1]
+    assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == 'How do I request GPUs on LUMI?'
+
+
+def test_setup_refreshes_only_an_index_it_installed(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
+    monkeypatch.setattr(assistant.subprocess, 'run', lambda cmd, **kw: subprocess.CompletedProcess(
+        cmd, 0, 'NAME\ncp:latest x 2.5 GB now\n', ''))
+    monkeypatch.setattr(assistant, '_release_id', lambda: None)  # model side: offline, nothing to do
+    ids, fetched = {'documents.sqlite': 'd1', 'factory_docs.sqlite': 'f1'}, []
+    monkeypatch.setattr(assistant, '_file_ids', lambda url: dict(ids))
+
+    def download(url, dest):
+        fetched.append(dest.name)
+        dest.write_text(ids[dest.name])
+    monkeypatch.setattr(assistant, '_download', download)
+    own = tmp_path / 'own'
+    own.mkdir()
+    (own / 'documents.sqlite').write_text('hand-built')
+    (own / 'factory_docs.sqlite').write_text('hand-built')
+    assistant.setup(tmp_path, 'cp')  # fresh install: both files
+    assert sorted(fetched) == ['documents.sqlite', 'factory_docs.sqlite']
+    assistant.setup(tmp_path, 'cp')  # unchanged: nothing
+    assert len(fetched) == 2
+    ids['documents.sqlite'] = 'd2'
+    assistant.setup(tmp_path, 'cp')  # the published documents index changed: only that file
+    assert fetched[2:] == ['documents.sqlite'] and (tmp_path / 'documents.sqlite').read_text() == 'd2'
+    assistant.setup(own, 'cp')  # a hand-built index (no stamp) is never replaced
+    assert len(fetched) == 3 and (own / 'documents.sqlite').read_text() == 'hand-built'
+
+
+def test_download_replaces_an_existing_file_and_documents_read_as_utf8(tmp_path, monkeypatch):
+    class Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+    monkeypatch.setattr(assistant.urllib.request, 'urlopen', lambda url, timeout=0: Resp(b'new index'))
+    dest = tmp_path / 'documents.sqlite'
+    dest.write_text('old index')
+    assistant._download('https://example/documents.sqlite', dest)  # an update: os.replace, not rename
+    assert dest.read_text() == 'new index' and not (tmp_path / 'documents.sqlite.part').exists()
+    doc = tmp_path / 'guide.md'
+    doc.write_bytes('# Guide\n\nUse `--gpus-per-node` – not `--gpus` – on MyCluster → standard-g.'.encode())
+    assert '– not `--gpus` – on MyCluster → standard-g' in assistant.read_document(doc)[0][1]  # explicit UTF-8
+
+
+def test_long_chats_keep_plain_questions_and_drop_the_oldest_turns(tmp_path, monkeypatch):
+    sent = []
+
+    def stream(self, messages):
+        sent.append(sum(len(m['content']) for m in messages))
+        yield 'A' * 3000
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    bot = assistant.Assistant(_indexes(tmp_path))
+    for i in range(12):
+        bot.ask(f'Question {i}: how do I request GPUs on LUMI with sbatch?', out=StringIO())
+    assert bot.history[0]['role'] == 'system' and 'Quoted retrieval' not in str(bot.history)
+    assert sum(len(m['content']) for m in bot.history[1:]) <= assistant.Assistant.HISTORY_CHARS + 3100
+    assert bot.history[-2]['content'].startswith('Question 11') and max(sent) < 40000
+
+
+def test_community_pages_only_for_their_community():
+    page = {'url': 'https://docs.hpc.cineca.it/specific_users/specific_users.html', 'text': 'qos_fualowprio ...'}
+    assert not assistant.community_ok(page, 'Which QOS should I use on Leonardo for a long job?')
+    assert assistant.community_ok(page, 'I am a EUROfusion user: which QOS do I use on Leonardo?')
+    assert assistant.community_ok({'url': 'https://docs.hpc.cineca.it/hpc/leonardo.html', 'text': ''}, 'QOS on Leonardo?')
+
+
+def test_model_errors_become_messages_and_agent_mode_needs_slurm(tmp_path, monkeypatch):
+    import urllib.error
+
+    def missing(self, messages):
+        raise urllib.error.HTTPError('http://127.0.0.1:11434/api/chat', 404, 'Not Found', {}, None)
+        yield  # pragma: no cover
+    monkeypatch.setattr(assistant.Assistant, '_stream', missing)
+    bot = assistant.Assistant(_indexes(tmp_path), model='no-such-model')
+    out = StringIO()
+    assert bot.safe_ask('hi', out) is None and len(bot.history) == 1
+    assert "the model 'no-such-model' is not available" in out.getvalue() and 'ollama list' in out.getvalue()
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
+    try:
+        assistant.main(['--agent', '--index', str(tmp_path), 'show my jobs'])
+    except SystemExit as e:
+        assert 'no Slurm' in str(e) and '--ssh' in str(e)
+    else:
+        raise AssertionError('agent mode without Slurm must stop')
+
+
+def test_short_documents_are_indexed_and_empty_uploads_are_refused(tmp_path):
+    from distillkit import assistant_web as web
+    assert assistant.chunks('Cluster X storage: scratch is purged after 30 days.') == [
+        'Cluster X storage: scratch is purged after 30 days.']
+    assert assistant.chunks('p. 3') == []  # too short to be useful
+    long = '\n\n'.join(['header'] + ['word ' * 60] * 3)
+    assert all(len(c) >= 80 for c in assistant.chunks(long))  # stray fragments of long manuals are still dropped
+    bot = assistant.Assistant(_indexes(tmp_path))
+    assert web.save_upload(bot, 'notes.txt', b'Cluster X storage: scratch is purged after 30 days.') == ('notes.txt', 1)
+    try:
+        web.save_upload(bot, 'empty.txt', b'   \n')
+    except ValueError as e:
+        assert 'no text found in empty.txt' in str(e) and not (tmp_path / 'uploads' / 'empty.txt').exists()
+    else:
+        raise AssertionError('an empty upload must be refused')
+
+
+def test_long_pasted_text_fits_the_context(tmp_path, monkeypatch):
+    log = 'Why did my job fail?\n' + '[rank0] step 1230/20000 loss 2.3651 lr 2.0e-05 tokens/s 41230\n' * 800 + 'CUDA out of memory\n'
+    text, cut = assistant.fit_question(log)
+    assert cut and text.startswith('Why did my job fail?') and text.endswith('CUDA out of memory\n')
+    assert len(text) < assistant.QUESTION_HEAD + assistant.QUESTION_TAIL + 100
+    assert assistant.fit_question('How do I use job arrays?') == ('How do I use job arrays?', 0)
+    assert assistant.excerpt_budget('short question') == assistant.VARIANT_BUDGET
+    assert assistant.excerpt_budget(text) < 10000  # room for the log, the excerpts and the answer
+    sent = []
+
+    def stream(self, messages):
+        sent.append(messages[-1]['content'])
+        yield 'Out of memory.'
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    out = StringIO()
+    bot = assistant.Assistant(_indexes(tmp_path))
+    bot.ask(log, out=out)
+    assert 'left out' in out.getvalue() and len(sent[0]) < 25000 and bot.history[1]['content'] == text

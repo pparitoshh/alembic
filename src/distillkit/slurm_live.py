@@ -10,6 +10,7 @@ One tool beyond the trained schemas: `job_script` returns a job's batch script (
 `sacct --batch-script` for finished jobs), so the agent can fix and resubmit (retrigger) a job.
 """
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -31,13 +32,13 @@ JOB_USAGE_SCHEMA = {
 }
 JOB_PRIORITY_SCHEMA = {
     "name": "job_priority",
-    "description": "Why a job is waiting: priority factors (age, fairness, size, QOS) and the shares behind them.",
+    "description": "Why a pending job is waiting and when it may start: its priority factors (age, fairshare, size, QOS; like `sprio -j`) and the user's fairshare values (`sshare`). Use it for questions about priority, fairshare or a long wait.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 UPDATE_JOB_SCHEMA = {
     "name": "update_job",
-    "description": "Change one setting of a pending job (time limit, partition, node count or QOS).",
+    "description": "Change one setting of the user's pending job, like `scontrol update JobId=<id> TimeLimit=...`: give it more or less wall time (TimeLimit, e.g. 06:00:00), move it to another partition (Partition), change its node count (NumNodes) or QOS. Use it whenever the user asks to extend, shorten, move or change a job. The user is asked to confirm before anything changes.",
     "parameters": {"type": "object", "properties": {
         "job_id": {"type": "string", "description": "Slurm job id"},
         "field": {"type": "string", "enum": ["TimeLimit", "Partition", "NumNodes", "QOS"], "description": "Field to change"},
@@ -46,25 +47,25 @@ UPDATE_JOB_SCHEMA = {
 }
 HOLD_JOB_SCHEMA = {
     "name": "hold_job",
-    "description": "Hold a pending job so the scheduler does not start it (release it later).",
+    "description": "Hold the user's pending job so the scheduler does not start it, like `scontrol hold` (undo with release_job). The user is asked to confirm first.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 RELEASE_JOB_SCHEMA = {
     "name": "release_job",
-    "description": "Release a held job so the scheduler can start it again.",
+    "description": "Release the user's held job so the scheduler can start it again, like `scontrol release`. Call it directly when the user asks to release a job; the user is asked to confirm first.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 REQUEUE_JOB_SCHEMA = {
     "name": "requeue_job",
-    "description": "Put a finished or running job back in the queue to run again.",
+    "description": "Requeue the user's job: put it back in the queue to run again with the same job id, like `scontrol requeue`. Use it when the user asks to requeue, rerun or restart a job (for example after a node failure). The user is asked to confirm first.",
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
 RUN_READONLY_COMMAND_SCHEMA = {
     "name": "run_readonly_command",
-    "description": "Run a read-only Slurm command (squeue, sinfo, sacct, sstat, sprio, sshare, sacctmgr show, scontrol show) and return its output.",
+    "description": "Run one short read-only Slurm command and return its output, for anything the other tools do not cover. Examples: account and QOS limits `sacctmgr -P show assoc user=$USER format=account,qos,grptres,maxwall`; fairshare `sshare -U`; drained or down nodes `sinfo -R`; one node `scontrol show node lrdn0001`; reservations `scontrol show reservation`; the whole queue by priority `squeue --sort=-p`. Allowed: squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show. Run it yourself instead of telling the user to run it.",
     "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
                    "required": ["command"]},
 }
@@ -87,6 +88,7 @@ LIVE_SCHEMAS = [_GPU_SCHEMA | {"description": _GPU_SCHEMA["description"] +
                 for s in LIVE_SCHEMAS]
 ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
 # change the cluster: confirmed first (submit_job only without test_only)
+DOCS_HINT = "; to read documentation (man pages, options), call search_docs instead"
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
 _TYPES = {"string": str, "integer": int, "boolean": bool}
 # cluster default -> sbatch option (submit_job adds the ones the script does not set itself)
@@ -136,21 +138,41 @@ class SlurmLive:
         self._runner = runner  # tests: callable(cmd, stdin) -> (rc, stdout, stderr)
         self._user = None
         self._assoc_cache = None  # the user's sacctmgr associations, fetched once per instance
+        self._mux = None
+        self._parts = None
 
     # --- command execution ---------------------------------------------------------------------
     def run(self, argv, stdin=None):
-        cmd = ["ssh", "-o", "BatchMode=yes", self.ssh, shlex.join(argv)] if self.ssh else argv
+        cmd = ["ssh", "-o", "BatchMode=yes", *self.mux_options(), self.ssh, shlex.join(argv)] if self.ssh else argv
         if self.ssh and self.remote_setup:  # per-cluster setup, e.g. ". /etc/profile.d/modules.sh && module load slurm"
             cmd[-1] = self.remote_setup + " && " + cmd[-1]
         if self._runner:
             return self._runner(cmd, stdin)
         try:
-            p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, timeout=self.timeout)
+            p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               timeout=self.timeout)  # cluster output is UTF-8, whatever the local code page
         except FileNotFoundError:
+            if self.ssh:
+                return 127, "", "ssh: command not found (install an OpenSSH client to reach the cluster)"
             return 127, "", f"{argv[0]}: command not found (is this a Slurm login node?)"
         except subprocess.TimeoutExpired:
             return 124, "", f"{argv[0]}: timed out after {self.timeout}s"
         return p.returncode, p.stdout, p.stderr
+
+    def mux_options(self):
+        """Reuse one ssh connection for all tool calls (a new connection through a jump host can take 20 s).
+        Hosts that already have a ControlPath in the user's ssh config keep their own setting."""
+        if self._mux is None and os.name == "nt":  # Windows OpenSSH has no connection sharing (ControlMaster)
+            self._mux = []
+        if self._mux is None:
+            try:
+                conf = subprocess.run(["ssh", "-G", self.ssh], capture_output=True, text=True, timeout=10).stdout
+            except (OSError, subprocess.TimeoutExpired):
+                conf = ""
+            own = re.search(r"^controlpath (?!none$)", conf, re.M | re.I)
+            self._mux = [] if own or not conf else [
+                "-o", "ControlMaster=auto", "-o", "ControlPath=~/.ssh/clusterpilot-%C", "-o", "ControlPersist=10m"]
+        return self._mux
 
     def user(self):
         if self._user is None:
@@ -178,9 +200,50 @@ class SlurmLive:
                 raise ToolError(f"{name}: argument {a!r} must be one of {props[a]['enum']}")
         if "job_id" in args and not _JOB_ID.match(args["job_id"]):
             return {"error": f"invalid job id {args['job_id']!r}"}
-        if name in ACTIONS and not (name == "submit_job" and args.get("test_only")) and not self.confirm(name, args):
-            return {"error": "the user declined this action", "action": name}
-        return getattr(self, name)(**args)
+        if name in ("cancel_job", "hold_job", "release_job", "update_job"):  # before asking: is there anything to change?
+            rc, out, _ = self.run(["squeue", "--me", "-h", "-j", args["job_id"].split("_")[0], "-o", "%T"])
+            if rc != 0 or not out.strip():
+                state = self.job_status(args["job_id"]).get("state")
+                return {"error": f"job {args['job_id']} is not one of your queued or running jobs"
+                                 + (f" (state: {state})" if state else " (not found)"), "action": name}
+        if name in ACTIONS and not (name == "submit_job" and args.get("test_only")):
+            ok = self.confirm(name, args)  # True, or False / a reason string when not approved
+            if ok is not True:
+                return {"error": ok if isinstance(ok, str) and ok else "the user declined this action", "action": name}
+        note = None
+        if args.get("partition"):
+            args["partition"], note = self.resolve_partition(args["partition"], all_ok=name == "gpu_availability")
+            if args["partition"] is False:
+                return {"error": note}
+            if args["partition"] is None:
+                del args["partition"]
+        result = getattr(self, name)(**args)
+        if isinstance(result, dict) and "invalid partition" in str(result.get("error", "")).lower() and self.partitions():
+            result["error"] += "; partitions on this cluster: " + ", ".join(self.partitions())
+        if note and isinstance(result, dict):
+            result["note"] = note
+        return result
+
+    def partitions(self):
+        if self._parts is None:
+            rc, out, _ = self.run(["sinfo", "-h", "-o", "%R"])
+            self._parts = sorted(set(out.split())) if rc == 0 else []
+        return self._parts
+
+    def resolve_partition(self, name, all_ok=False):
+        """Models often guess a partition ("boost", "gpu", the cluster's name). Returns (partition, note): the exact
+        name; the one partition that contains the guess; None (all partitions) if all_ok; or False with an error that
+        lists the real partitions, so the model can retry."""
+        parts = self.partitions()
+        if not parts or name in parts:
+            return name, None
+        match = [p for p in parts if name.lower() in p.lower()]
+        if len(match) == 1:
+            return match[0], f"there is no partition {name!r}; used {match[0]!r}"
+        listed = ", ".join(parts)
+        if all_ok:
+            return None, f"{name!r} is not a partition name, so all partitions are shown (partitions: {listed})"
+        return False, f"there is no partition {name!r}; partitions on this cluster: {listed}"
 
     # --- tools -----------------------------------------------------------------------------------
     def job_status(self, job_id):
@@ -330,7 +393,10 @@ class SlurmLive:
                 p["idle_nodes"] += f[4].startswith("idle")
         if partition and not parts:
             return {"error": f"no GPU nodes in partition {partition} (or the partition does not exist)"}
-        res = {"partitions": list(parts.values())}
+        by_type = {}  # the model added A100 and Quadro GPUs together when asked for free A100s: give the sums per type
+        for p in parts.values():
+            by_type[p["gpu_type"] or "gpu"] = by_type.get(p["gpu_type"] or "gpu", 0) + p["gpus_free"]
+        res = {"partitions": list(parts.values()), "free_gpus_by_type": by_type}
         self._add_your_limits(res)
         return res
 
@@ -376,7 +442,13 @@ class SlurmLive:
         rc, out, err2 = self.run(["sacct", "-n", "-j", job_id, "--batch-script"])
         if rc == 0 and out.strip().startswith(("#!", "Batch Script")):
             return {"job_id": job_id, "script": re.sub(r"^Batch Script for \S+\n-+\n", "", out)}
-        return {"error": (err.strip() or err2.strip() or f"no batch script stored for job {job_id}")}
+        if rc == 0 and out.strip() == "NONE":  # the job exists, but this cluster does not keep finished jobs' scripts
+            return {"job_id": job_id, "error": f"job {job_id} has finished and this cluster does not keep the batch "
+                    "scripts of finished jobs (Slurm AccountingStoreFlags without job_script); a script is "
+                    "available only while its job is queued or running"}
+        if rc == 0 and not out.strip():
+            return {"job_id": job_id, "error": f"no job {job_id} found"}
+        return {"error": (err2.strip() or err.strip() or f"no batch script stored for job {job_id}")}
 
     # --- own-jobs guard (same as cancel_job) -------------------------------------------------------
     def _own_job(self, job_id):
@@ -386,10 +458,17 @@ class SlurmLive:
 
     def job_usage(self, job_id):
         fields = ["JobID", "AveCPU", "MaxRSS", "AveRSS", "MaxVMSize"]
-        rc, out, _ = self.run(["sstat", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
+        # --allsteps: a job that runs its programs without srun has only a batch step, which plain `sstat -j` skips
+        # (checked on Curiosity: `sstat -j` empty, `sstat --allsteps -j` shows the batch step)
+        rc, out, _ = self.run(["sstat", "--allsteps", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
         rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()] if rc == 0 else []
+        rows = [r for r in rows if not r["JobID"].endswith(".extern")]  # the extern step has no useful numbers
+        for r in rows:  # '5918748772K' was read as 5.9 GB (it is 5.6 TB): give memory in GB, like job_accounting
+            for k in ("MaxRSS", "AveRSS", "MaxVMSize"):
+                if r.get(k):
+                    r[k] = f"{_mem_gb(r[k]):.1f}G"
         if not rows:
-            return {"error": f"sstat has no live usage for job {job_id} (it only covers running jobs). "
+            return {"error": f"no live usage for job {job_id}: it is not running (sstat only covers running jobs). "
                              "For finished jobs use job_accounting."}
         return {"job_id": job_id, "steps": rows}
 
@@ -438,13 +517,16 @@ class SlurmLive:
     _SHELL_METACHARS = re.compile(r"[|;&><$`()\n]")
 
     def run_readonly_command(self, command):
+        if re.search(r"\$\{?USER\b", command) and self.user():  # the only variable allowed: the user's own name
+            command = re.sub(r"\$\{USER\}|\$USER\b", self.user(), command)
         if self._SHELL_METACHARS.search(command):
-            return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed"}
+            return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed" + DOCS_HINT}
         try:
             argv = shlex.split(command)
         except ValueError as e:
             return {"error": f"refused: cannot parse the command ({e})"}
-        if argv[:2] == ["scontrol", "show"] or argv[:2] == ["sacctmgr", "show"]:
+        words = [a for a in argv[1:] if not a.startswith("-")]  # `sacctmgr -P show ...`: options may come first
+        if argv[:1] in (["scontrol"], ["sacctmgr"]) and words[:1] == ["show"]:
             ok = True
         elif argv and argv[0] in self.READONLY_OK:
             ok = True
@@ -452,7 +534,7 @@ class SlurmLive:
             ok = False
         if not ok:
             return {"error": "refused: only read-only commands are allowed "
-                             "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)"}
+                             "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)" + DOCS_HINT}
         rc, out, err = self.run(argv)
         if len(out) > 8000:
             out = out[:8000] + "[truncated]"
@@ -584,9 +666,16 @@ class SlurmLive:
                 "time_limit": main["Timelimit"], "node_list": main["NodeList"]}
         if rss:
             acct["max_rss"] = f"{max(rss):.1f}G"
+        mem = re.search(r"\bmem=([\d.]+[KMGT]?)", main["AllocTRES"])
+        if mem:  # requested vs used, like seff: a job that asked for 120G and used 4G should ask for less
+            acct["memory_requested"] = f"{_mem_gb(mem.group(1)):.1f}G"
+            if rss and _mem_gb(mem.group(1)):
+                acct["memory_efficiency"] = f"{100 * max(rss) / _mem_gb(mem.group(1)):.0f}%"
         el, cpu, n = _secs(main["Elapsed"]), _secs(main["TotalCPU"]), int(main["AllocCPUS"] or 0)
         if el and n:
             acct["cpu_efficiency"] = f"{100 * cpu / (el * n):.0f}%"
+        if el and _secs(main["Timelimit"]):
+            acct["time_limit_used"] = f"{100 * el / _secs(main['Timelimit']):.0f}%"
         g = re.search(r"gres/gpu(?::[^=,]+)?=(\d+)", main["AllocTRES"])
         acct["gpus"] = int(g.group(1)) if g else 0
         if acct["gpus"]:
@@ -667,6 +756,8 @@ def _mem_gb(v):
 
 def describe(name, args):
     """One line for the confirmation prompt."""
+    if name == "cancel_job":
+        return f"cancel job {args.get('job_id')} (scancel)"
     if name == "submit_job":
         head = [l for l in args.get("script", "").splitlines() if l.startswith("#SBATCH")][:6]
         return "submit this job:\n  " + "\n  ".join(head or ["(no #SBATCH lines)"])

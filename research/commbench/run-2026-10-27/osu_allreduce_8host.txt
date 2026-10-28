@@ -1,0 +1,15 @@
+### mpirun -np 8 --map-by ppr:4:node /leonardo/prod/spack/06/install/0.22/linux-rhel8-icelake/gcc-12.2.0/osu-micro-benchmarks-7.4-pv2jrgafgutwer6azn2uzksl6oyfmx7l/libexec/osu-micro-benchmarks/mpi/pt2pt/../collective/osu_allreduce -m 1048576:268435456
+
+# OSU MPI Allreduce Latency Test v7.4
+# Datatype: MPI_CHAR.
+# Size       Avg Latency(us)
+1048576               325.31
+2097152               592.36
+4194304              1193.52
+8388608              2871.31
+16777216             7416.43
+33554432            23986.82
+67108864            49459.84
+134217728           99732.76
+268435456          199262.17
+### rc=0

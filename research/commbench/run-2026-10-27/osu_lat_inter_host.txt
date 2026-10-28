@@ -1,0 +1,29 @@
+### mpirun -np 2 --map-by ppr:1:node /leonardo/prod/spack/06/install/0.22/linux-rhel8-icelake/gcc-12.2.0/osu-micro-benchmarks-7.4-pv2jrgafgutwer6azn2uzksl6oyfmx7l/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_latency
+
+# OSU MPI Latency Test v7.4
+# Datatype: MPI_CHAR.
+# Size       Avg Latency(us)
+1                       1.37
+2                       1.37
+4                       1.37
+8                       1.38
+16                      1.38
+32                      1.41
+64                      1.50
+128                     1.52
+256                     1.81
+512                     1.78
+1024                    1.91
+2048                    2.51
+4096                    3.50
+8192                    4.56
+16384                   6.17
+32768                   8.14
+65536                   9.21
+131072                 14.49
+262144                 16.19
+524288                 26.99
+1048576                48.31
+2097152                91.25
+4194304               176.30
+### rc=0

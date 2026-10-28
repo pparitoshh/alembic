@@ -1,5 +1,7 @@
 # Shared helpers for Curiosity tasks (sourced). One 8-GPU node; tasks start and stop their own vLLM servers.
 CP=$HOME/cp; REPO=$CP/alembic; M=$CP/models
+# GPUs of the agent job (8, or 4 when the team share is split); training keeps 64 sequences per step
+export NGPU=${NGPU:-8}
 source $CP/venv/bin/activate
 # CUDA 13 toolkit from the venv (matches torch cu130) for FlashInfer / DeepGEMM JIT kernels
 export CUDA_HOME=$CP/venv/lib/python3.12/site-packages/nvidia/cu13 CUDA_PATH=$CP/venv/lib/python3.12/site-packages/nvidia/cu13

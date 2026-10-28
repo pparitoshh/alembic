@@ -71,10 +71,11 @@ def test_job_status_running_pending_and_finished():
 
 
 def test_job_accounting_efficiency_memory_and_gpus():
-    s, _ = live({"sacct": (0, "7|job|COMPLETED|0:0|p|01:00:00|02:00:00|n1||02:00:00|4|cpu=4,gres/gpu:a100=2,node=1\n"
+    s, _ = live({"sacct": (0, "7|job|COMPLETED|0:0|p|01:00:00|02:00:00|n1||02:00:00|4|cpu=4,gres/gpu:a100=2,mem=12G,node=1\n"
                               "7.batch|batch|COMPLETED|0:0||01:00:00||n1|3145728K|02:00:00|4|\n", "")})
     a = s.execute("job_accounting", {"job_id": "7"})
     assert a["cpu_efficiency"] == "50%" and a["max_rss"] == "3.0G" and a["gpus"] == 2
+    assert a["memory_requested"] == "12.0G" and a["memory_efficiency"] == "25%" and a["time_limit_used"] == "50%"
 
 
 def test_submit_writes_the_script_then_sbatch_and_test_only():
@@ -108,9 +109,14 @@ def test_actions_need_confirmation_and_cancel_only_own_jobs():
     s, fake = live({"sbatch": (0, "1\n", "")}, confirm=lambda n, a: False)
     assert s.execute("submit_job", {"script": "#!/bin/bash\n"})["error"] == "the user declined this action"
     assert not any("sbatch" in " ".join(c[0]) for c in fake.calls)
-    s, fake = live({"squeue&--me": (0, "", "")})
-    assert s.execute("cancel_job", {"job_id": "5"})["cancelled"] is False
+    asked = []
+    s, fake = live({"squeue&--me": (0, "", ""), "squeue&-j&5": (0, "", ""), "sacct": (0, "5|x|COMPLETED|0:0|p|00:01:00|"
+                    "01:00:00|n1|||1|\n", "")}, confirm=lambda n, a: asked.append(n) or True)
+    r = s.execute("cancel_job", {"job_id": "5"})  # finished: refused before the user is asked
+    assert r["error"] == "job 5 is not one of your queued or running jobs (state: COMPLETED)" and not asked
     assert not any(c[0][0] == "scancel" for c in fake.calls)
+    s, _ = live({"squeue&--me&-j&5": (0, "PENDING\n", "")}, confirm=lambda n, a: "no terminal to ask")
+    assert s.execute("cancel_job", {"job_id": "5"}) == {"error": "no terminal to ask", "action": "cancel_job"}
     s, _ = live({"squeue&--me&%i": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
                  "scancel": (0, "", "")})
     assert s.execute("cancel_job", {"job_id": "5"}) == {"cancelled": True, "message": "Job 5 cancelled (was PENDING)"}
@@ -297,6 +303,7 @@ def test_gpu_availability_counts_free_gpus_marks_allowed_partitions_and_shows_qo
              "allowed_for_you": True},
             {"partition": "maint", "gpu_type": "a100", "gpus_total": 4, "gpus_free": 3, "idle_nodes": 0,
              "allowed_for_you": False}],
+        "free_gpus_by_type": {"h100": 8, "a100": 3},
         "your_limits": {"qos": "eai-team04", "gpu_limit": 8, "cpu_limit": 256, "max_wall": "30-12:00:00",
                         "team_gpus_in_use": 4, "your_gpus_in_use": 4, "gpus_free_in_team_limit": 4,
                         "note": "4 of 8 team GPUs are free now. The limit is shared by your team."}}
@@ -333,6 +340,7 @@ def test_gpu_availability_keeps_the_result_when_sacctmgr_fails():
     r = s.execute("gpu_availability", {})
     assert r == {"partitions": [{"partition": "hackathon", "gpu_type": "h100", "gpus_total": 8, "gpus_free": 8,
                                  "idle_nodes": 1}],
+                 "free_gpus_by_type": {"h100": 8},
                  "your_limits": {"error": "sacctmgr: error: slurmdbd not responding"}}
 
 
@@ -425,6 +433,19 @@ def test_list_queue_empty_queue_reports_it_with_a_message():
     s, _ = live({"squeue": (0, "42|train|RUNNING|p|0:10|1:00:00|None\n", "")})
     assert s.execute("list_queue", {}) == {"jobs": [{"job_id": "42", "name": "train", "state": "RUNNING",
                                                      "partition": "p", "elapsed": "0:10", "time_limit": "1:00:00"}]}
+def test_gpu_availability_counts_free_gpus_on_usable_nodes():
+    out = ("lrdn0001 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:4(IDX:0-3) mixed\n"
+           "lrdn0002 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:1(IDX:0) mixed\n"
+           "lrdn0003 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) idle\n"
+           "lrdn0004 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) drained\n")
+    s, _ = live({"sinfo": (0, out, "")})
+    r = s.execute("gpu_availability", {})
+    assert r["partitions"] == [
+        {"partition": "boost_usr_prod", "gpu_type": "a100", "gpus_total": 16, "gpus_free": 7, "idle_nodes": 1}]
+    assert r["free_gpus_by_type"] == {"a100": 7}
+    viz = out + "lrdn5001 lrd_all_viz gpu:quadro:2(S:0) gpu:quadro:0(IDX:N/A) idle\n"
+    s, _ = live({"sinfo": (0, viz, "")})
+    assert s.execute("gpu_availability", {})["free_gpus_by_type"] == {"a100": 7, "quadro": 2}
 
 
 def test_invalid_calls():
@@ -440,14 +461,15 @@ def test_remote_setup_is_prepended_to_ssh_commands():
     fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
     s = SlurmLive(ssh="c1", remote_setup="module load slurm", runner=fake)
     assert s.execute("list_queue", {"state": "RUNNING"})["jobs"][0]["job_id"] == "42"
-    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", "c1", "module load slurm && " + shlex.join(QUEUE_ARGV)]
+    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", *s.mux_options(), "c1",
+                                "module load slurm && " + shlex.join(QUEUE_ARGV)]
 
 
 def test_without_remote_setup_the_ssh_command_stays_as_before():
     fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
     s = SlurmLive(ssh="c1", runner=fake)
     s.execute("list_queue", {"state": "RUNNING"})
-    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", "c1", shlex.join(QUEUE_ARGV)]
+    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", *s.mux_options(), "c1", shlex.join(QUEUE_ARGV)]
 
 
 def test_remote_setup_is_ignored_for_local_runs():
@@ -460,12 +482,22 @@ def test_remote_setup_is_ignored_for_local_runs():
 def test_job_usage_argv_rows_and_error_for_non_running_jobs():
     s, fake = live({"sstat&MaxVMSize": (0, "9|01:30:00|3145728K|1048576K|4194304K\n9.ext|01:00:00|||2097152K\n", "")})
     r = s.execute("job_usage", {"job_id": "9"})
-    assert fake.calls[0][0] == ["sstat", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
-    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3145728K", "AveRSS": "1048576K",
-                             "MaxVMSize": "4194304K"} and r["steps"][1]["JobID"] == "9.ext"
+    assert fake.calls[0][0] == ["sstat", "--allsteps", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
+    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3.0G", "AveRSS": "1.0G",
+                             "MaxVMSize": "4.0G"} and r["steps"][1]["JobID"] == "9.ext"
     s, _ = live({"sstat": (1, "", "error: Pending job")})
     r = s.execute("job_usage", {"job_id": "9"})
-    assert "sstat has no live usage" in r["error"] and "job_accounting" in r["error"]
+    assert "not running" in r["error"] and "job_accounting" in r["error"]
+    s, _ = live({"sstat": (0, "9.extern|9-00:00:00||\n9.batch|06:02:55|133615688K|1|2\n", "")})  # Curiosity's output
+    assert [x["JobID"] for x in s.execute("job_usage", {"job_id": "9"})["steps"]] == ["9.batch"]
+
+
+def test_job_script_of_a_finished_job_explains_why_it_is_missing():
+    gone = (1, "", "job script retrieval failed: Invalid job id specified")
+    s, _ = live({"scontrol&write": gone, "sacct&--batch-script": (0, "NONE\n", "")})
+    assert "does not keep the batch scripts" in s.execute("job_script", {"job_id": "5"})["error"]
+    s, _ = live({"scontrol&write": gone, "sacct&--batch-script": (0, "", "")})
+    assert s.execute("job_script", {"job_id": "5"})["error"] == "no job 5 found"
 
 
 def test_job_priority_sprio_and_sshare_outputs_with_exit_codes():
@@ -499,7 +531,7 @@ def test_hold_release_and_requeue_use_scontrol_on_own_jobs():
     s, _ = live({"squeue&--me": (0, "", "")})  # not one of the user's own jobs: refused before any scontrol
     s2fake = s._runner
     r = s.execute("hold_job", {"job_id": "9"})
-    assert r == {"hold": False, "message": "job 9 is not one of your queued or running jobs"}
+    assert r == {"error": "job 9 is not one of your queued or running jobs (not found)", "action": "hold_job"}
     assert not any(c[0][0] == "scontrol" for c in s2fake.calls)
 
 
@@ -526,10 +558,10 @@ def test_new_actions_call_confirm_and_return_the_decline_error():
     for name, args in [("update_job", {"job_id": "9", "field": "TimeLimit", "value": "2:00:00"}),
                        ("hold_job", {"job_id": "9"}), ("release_job", {"job_id": "9"}),
                        ("requeue_job", {"job_id": "9"})]:
-        s, fake = live({}, confirm=lambda n, a: False)
+        s, fake = live({"squeue&--me&-j&9": (0, "PENDING\n", "")}, confirm=lambda n, a: False)
         r = s.execute(name, args)
         assert r["error"] == "the user declined this action" and r["action"] == name
-        assert not fake.calls
+        assert all(c[0][0] == "squeue" for c in fake.calls)  # only the check that the job is still queued
 
 
 def test_round_limit_appends_a_stop_notice_with_the_last_call(monkeypatch, tmp_path):
@@ -571,3 +603,108 @@ def test_openai_history_links_tool_calls_and_results(monkeypatch, tmp_path):
     assert ids[0] == "chatcmpl-tool-1" and ids[1] and len(set(ids)) == 2
     assert all(isinstance(c["function"]["arguments"], str) for c in call_msg["tool_calls"])
     assert [r1["tool_call_id"], r2["tool_call_id"]] == ids and r1["role"] == r2["role"] == "tool"
+
+
+def test_ssh_reuses_one_connection_unless_the_host_has_its_own(monkeypatch):
+    class P:
+        def __init__(self, out):
+            self.stdout, self.stderr, self.returncode = out, "", 0
+    seen = []
+
+    def fake_run(cmd, **kw):
+        seen.append(cmd)
+        if cmd[:2] == ["ssh", "-G"]:
+            return P("user me\ncontrolpath /home/me/.ssh/cm-x\n" if cmd[2] == "own" else "user me\ncontrolmaster false\n")
+        return P("me\n")
+    monkeypatch.setattr(slurm_live.subprocess, "run", fake_run)
+    monkeypatch.setattr(slurm_live.os, "name", "posix")  # connection sharing is off on Windows (tested below)
+    SlurmLive(ssh="plain").run(["id", "-un"])
+    assert "ControlPath=~/.ssh/clusterpilot-%C" in seen[-1] and seen[-1][-2:] == ["plain", "id -un"]
+    SlurmLive(ssh="own").run(["id", "-un"])
+    assert not any("Control" in c for c in seen[-1])
+
+
+def test_guessed_partition_names_are_resolved_or_listed():
+    sinfo = (0, "lrdn0001  boost_usr_prod  gpu:a100:4(S:0-1)  gpu:a100:2(IDX:0-1)  mix\n", "")
+    s, fake = live({"sinfo&%R": (0, "boost_usr_prod\ndcgp_usr_prod\nlrd_all_serial\nboost_usr_prod\n", ""),
+                    "sinfo&-N": sinfo, "squeue&--me": (0, "", "")})
+    r = s.execute("gpu_availability", {"partition": "boost"})
+    assert r["partitions"][0]["partition"] == "boost_usr_prod" and "used 'boost_usr_prod'" in r["note"]
+    sinfo_argv = next(c[0] for c in reversed(fake.calls) if c[0][0] == "sinfo")  # your_limits queried sacctmgr after it
+    assert "-p" in sinfo_argv and "boost_usr_prod" in sinfo_argv
+    r = s.execute("gpu_availability", {"partition": "leonardo"})
+    assert "partitions" in r and "-p" not in fake.calls[-1][0] and "lrd_all_serial" in r["note"]
+    r = s.execute("list_queue", {"partition": "booster"})
+    assert r == {"error": "there is no partition 'booster'; partitions on this cluster: "
+                          "boost_usr_prod, dcgp_usr_prod, lrd_all_serial"}
+    assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": [],
+                                                                        "message": "You have no running or pending jobs."}
+
+
+def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
+    import re
+    import threading
+    import time
+    from io import BytesIO
+    from distillkit import assistant_web
+    from distillkit.assistant_web import make_handler
+
+    monkeypatch.setattr(assistant_web, "APPROVAL_WAIT", 5)
+
+    class Bot:  # stands in for Assistant: one cancel_job call per question
+        model, builtin, history = "m", False, [{}]
+
+        def __init__(self, slurm):
+            self.slurm = slurm
+
+        def ask(self, question, out):
+            out.write(json.dumps(self.slurm.execute("cancel_job", {"job_id": "5"})))
+
+        safe_ask = ask
+
+    s, fake = live({"squeue&--me": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
+                    "scancel": (0, "", "")})
+    handler = make_handler(Bot(s), approve_in_page=True)
+
+    class Fake(handler):
+        def __init__(self, path, body):
+            self.path, self.rfile, self.wfile = path, BytesIO(body), BytesIO()
+            self.headers = {"Content-Length": str(len(body))}
+            self.request_version, self.requestline, self.command = "HTTP/1.1", f"POST {path} HTTP/1.1", "POST"
+
+    for approve, expect in ((True, b'"cancelled": true'), (False, b"did not approve")):
+        ask = Fake("/api/ask", b'{"question": "cancel 5"}')
+        t = threading.Thread(target=ask.do_POST)
+        t.start()
+        for _ in range(200):
+            if m := re.search(rb"\[\[approve (\w+) (.*)\]\]", ask.wfile.getvalue()):
+                break
+            time.sleep(0.01)
+        assert b"cancel job 5" in m.group(2).lower()
+        Fake("/api/approve", json.dumps({"id": m.group(1).decode(), "approve": approve}).encode()).do_POST()
+        t.join(5)
+        assert expect in ask.wfile.getvalue()
+    assert sum(c[0][0] == "scancel" for c in fake.calls) == 1
+
+
+def test_run_readonly_command_fills_in_the_user_name():
+    s, fake = live({"id&-un": (0, "alice\n", ""), "sacctmgr&show": (0, "acct|alice\n", "")})
+    r = s.execute("run_readonly_command", {"command": "sacctmgr show assoc user=$USER"})
+    assert r["exit_code"] == 0 and fake.calls[-1][0] == ["sacctmgr", "show", "assoc", "user=alice"]
+    assert "refused" in s.execute("run_readonly_command", {"command": "squeue -u $HOME"})["error"]
+
+
+@pytest.mark.parametrize(("command", "ok"), [("sacctmgr -P show assoc user=alice", True), ("scontrol -o show job 1", True),
+                                             ("sacctmgr -i delete user alice", False), ("sacctmgr -M show", True),
+                                             ("scontrol update show=1", False), ("man scontrol", False)])
+def test_run_readonly_command_allows_options_before_show(command, ok):
+    s, fake = live({"sacctmgr": (0, "x\n", ""), "scontrol": (0, "x\n", "")})
+    r = s.execute("run_readonly_command", {"command": command})
+    assert ("error" not in r) == ok
+    if not ok:
+        assert "search_docs" in r["error"]
+
+
+def test_no_ssh_connection_sharing_on_windows(monkeypatch):
+    monkeypatch.setattr(slurm_live.os, "name", "nt")  # Windows OpenSSH has no ControlMaster
+    assert SlurmLive(ssh="host").mux_options() == []

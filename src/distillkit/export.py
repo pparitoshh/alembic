@@ -101,7 +101,10 @@ def generation_prefix(tokenizer) -> str:
 
 def modelfile(gguf_name: str, system_prompt: str, gen_prefix: str, num_ctx: int, sampling: dict) -> str:
     template = OLLAMA_TEMPLATE.replace("@GEN_PREFIX@", gen_prefix)
-    params = {"stop": ["<|im_start|>", "<|im_end|>"], "num_ctx": [num_ctx], **{k: [v] for k, v in sampling.items()}}
+    # num_predict: Ollama's default is no limit, so a looping answer never ended and blocked the server (seen in the
+    # dsh harness); answers are trained at about 1,536 tokens, so 4,096 never cuts a normal one
+    params = {"stop": ["<|im_start|>", "<|im_end|>"], "num_ctx": [num_ctx], "num_predict": [4096],
+              **{k: [v] for k, v in sampling.items()}}
     lines = [f"FROM ./{gguf_name}", f'TEMPLATE """{template}"""', f'SYSTEM """{system_prompt}"""']
     lines += [f"PARAMETER {k} {v}" for k, vs in params.items() for v in vs]
     return "\n".join(lines) + "\n"

@@ -67,9 +67,24 @@ card = card.replace(f'`main` is now {old}, see Latest update', f'`main` is now {
 card = card.replace(f'| **ClusterPilot-4B {old}** (`main`) |', f'| ClusterPilot-4B {old} ([`{keep}`]({B}{keep})) |')  # leaderboard row: the new version gets its own row once scored
 assert not re.search(r'\bkd\d|kdall', card), 'internal run name on the card'
 (d / 'README.md').write_text(card)
+# Ollama's hf.co pulls ignore gguf/Modelfile and fall back to the stock qwen3 template, which puts tool calls into the
+# thinking field (agent mode answers empty); template, system and params at the repo root carry the Modelfile's own
+mf_path = d / 'gguf' / 'Modelfile'
+if mf_path.exists():
+    mf = mf_path.read_text()
+    (d / 'template').write_text(re.search(r'TEMPLATE """(.*?)"""', mf, re.S).group(1))
+    (d / 'system').write_text(re.search(r'SYSTEM """(.*?)"""', mf, re.S).group(1))
+    params = {}
+    for k, v in re.findall(r'^PARAMETER (\S+) (.+)$', mf, re.M):
+        v = v.strip().strip('"')
+        if k == 'stop':
+            params.setdefault('stop', []).append(v)
+        else:
+            params[k] = float(v) if '.' in v else int(v)
+    (d / 'params').write_text(json.dumps(params, indent=2))
 if dry:
     print('DRY card written', d / 'README.md', 'version', new, 'keep', keep)
     sys.exit(0)
 c = api.upload_folder(repo_id=REPO, folder_path=str(d), commit_message=f'ClusterPilot-4B {new}: B300 full-parameter distillation from Qwen3-235B',
-                      allow_patterns=['*.safetensors', '*.json', '*.jinja', 'README.md', 'gguf/*'])
+                      allow_patterns=['*.safetensors', '*.json', '*.jinja', 'README.md', 'gguf/*', 'template', 'system', 'params'])
 print('PUSHED', c)

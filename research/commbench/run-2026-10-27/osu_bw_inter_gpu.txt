@@ -1,0 +1,30 @@
+### mpirun -np 2 --map-by ppr:1:node -x UCX_TLS /leonardo/prod/spack/06/install/0.22/linux-rhel8-icelake/gcc-12.2.0/osu-micro-benchmarks-7.4-pv2jrgafgutwer6azn2uzksl6oyfmx7l/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_bw -d cuda D D
+[lrdn0561.leonardo.local:797878] Warning: could not find environment variable "UCX_TLS"
+
+# OSU MPI-CUDA Bandwidth Test v7.4
+# Datatype: MPI_CHAR.
+# Size      Bandwidth (MB/s)
+1                       4.35
+2                       8.72
+4                      17.21
+8                      34.93
+16                     68.77
+32                    138.63
+64                    200.76
+128                   495.65
+256                   941.40
+512                  1695.55
+1024                 2963.59
+2048                 5018.46
+4096                 7629.00
+8192                 9995.17
+16384               11085.43
+32768               11675.19
+65536               11999.66
+131072              12170.10
+262144              12256.93
+524288              12301.17
+1048576             12323.70
+2097152             12334.60
+4194304             12340.35
+### rc=0
