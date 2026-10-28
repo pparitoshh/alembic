@@ -65,6 +65,9 @@ class GenerateCfg(_Section):
     job_status_discovery: Literal['clarify_first', 'allow_readonly'] | None = None
     # Explicit opt-in: archived configs keep their original request-parser semantics.
     job_status_policy_version: Literal['job-status-policy-v2', 'job-status-policy-v3', 'job-status-policy-v4'] = 'job-status-policy-v2'
+    # Explicit opt-in: the mock cluster tool traces run against. v2 has Leonardo's partitions with QOS lists and rejects
+    # what Leonardo rejects (issue #114); archived configs keep v1 and their results.
+    mock_version: Literal['isolated-actions-v1', 'leonardo-qos-v2'] = 'isolated-actions-v1'
 
 
 class VerifyCfg(_Section):
