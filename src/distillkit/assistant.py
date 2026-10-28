@@ -469,13 +469,23 @@ class Assistant:
         if calls:
             yield {'tool_calls': [calls[i] for i in sorted(calls)]}
 
+    @staticmethod
+    def repeating(text, times=6):
+        """True when the answer ends with the same block (20 to 400 characters) at least `times` times in a row: a
+        small model at temperature 0 can loop like this until the output limit (seen with long option lists)."""
+        tail = text[-400 * times:]
+        for p in range(20, min(400, len(tail) // times) + 1):
+            if tail[-p:].strip() and tail[-p * times:] == tail[-p:] * times:
+                return True
+        return False
+
     def ask(self, question, out=sys.stdout, max_tool_rounds=None):
         max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
         user, sources = self.prompt(question)
         self.history.append({'role': 'user', 'content': user})
         last_call = None
         for _ in range(max_tool_rounds + 1):
-            answer, calls = [], []
+            answer, calls, checked = [], [], 0
             for piece in self._stream(self.history):
                 if isinstance(piece, dict):
                     calls = piece['tool_calls']
@@ -483,6 +493,13 @@ class Assistant:
                 answer.append(piece)
                 out.write(piece)
                 out.flush()
+                checked += len(piece)
+                if checked >= 200:  # stop a looping answer early (closing the stream stops the model server)
+                    checked = 0
+                    if self.repeating(''.join(answer)):
+                        answer.append('\n\n[stopped: the answer started repeating itself]')
+                        out.write(answer[-1])
+                        break
             if not calls:
                 break
             for i, c in enumerate(calls):  # OpenAI-compatible servers (vLLM) require ids linking calls and results
@@ -565,9 +582,11 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
     latest = _release_id()
     current = stamp.read_text().strip() if stamp.exists() else None
     outdated = latest is not None and latest != current
-    if outdated:
-        for name in (GGUF_FILE, 'Modelfile'):  # files of an older release
-            (cache / name).unlink(missing_ok=True)
+    if outdated:  # replace only the files that changed (a Modelfile fix does not re-download the 2.5 GB GGUF)
+        old = dict(zip((GGUF_FILE, 'Modelfile'), (current or ':').split(':')))
+        for name, new in zip((GGUF_FILE, 'Modelfile'), latest.split(':')):
+            if old.get(name) != new:
+                (cache / name).unlink(missing_ok=True)
     if not installed or outdated:
         if installed:
             print(f'[hpc-assistant] a newer model release is out: updating {model}', file=sys.stderr)
