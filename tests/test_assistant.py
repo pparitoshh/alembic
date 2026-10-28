@@ -649,3 +649,17 @@ def test_agent_prompt_only_in_agent_mode(tmp_path):
     agent.history.append({'role': 'user', 'content': 'x'})
     agent.reset()
     assert agent.history[0]['content'].endswith(AGENT_PROMPT)
+
+
+
+def test_user_docs_match_needs_most_of_the_question(tmp_path):
+    from distillkit.assistant import Assistant
+    guide = tmp_path / 'kestrel_guide.md'
+    guide.write_text('# Kestrel cluster guide\n\nThe Kestrel GPU partition is called `kgpu`. Each kgpu node has 4 H100 '
+                     'GPUs. The maximum wall time on kgpu is 36 hours.\n')
+    bot = Assistant(tmp_path, docs=True)
+    bot.add(guide)
+    assert bot._user_docs_match('On Kestrel, what is the GPU partition called and what is its maximum wall time?')
+    assert not bot._user_docs_match('Submit this job for me:\n#!/bin/bash\n#SBATCH -p boost_usr_prod\n'
+                                    '#SBATCH --gres=gpu:1\n#SBATCH -t 00:05:00\nnvidia-smi')
+    assert not bot._user_docs_match('How many GPUs are free right now?')
