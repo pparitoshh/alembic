@@ -336,3 +336,20 @@ def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
     docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
                               index / 'factory_docs.sqlite', variant='e')
     assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
+
+
+def test_a_looping_answer_is_stopped(tmp_path, monkeypatch):
+    bot = assistant.Assistant(tmp_path, docs=False)
+    produced = []
+
+    def stream(messages):
+        yield 'Options:\n--requeue : Allow requeue.\n'
+        for _ in range(500):  # the model repeats two lines until something stops it
+            produced.append(1)
+            yield '--no-requeue : Do not requeue.\n--no-kill : Do not kill.\n'
+    monkeypatch.setattr(bot, '_stream', stream)
+    out = StringIO()
+    answer, _ = bot.ask('list every sbatch option', out=out)
+    assert 'started repeating' in answer and len(produced) < 20
+    assert not assistant.Assistant.repeating('#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --time=01:00:00\n' * 2)
+    assert not assistant.Assistant.repeating('srun --exact -n 1 ./step &\n' * 5 + 'wait\n')  # a real script
