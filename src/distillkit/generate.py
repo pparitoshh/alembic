@@ -28,6 +28,11 @@ from .job_status_guard import (WORKFLOW_RULES, WORKFLOW_VERSION, JobStatusPolicy
                                clarification_response, guard_result, target_error)
 from .tools import MOCK_VERSION, PARTITIONS, SCHEMAS, ToolError, execute, mock_session, parse_arguments, set_valid_flags
 
+def _mock_version(cfg) -> str:
+    """The mock cluster for tool traces: generate.mock_version (issue #114 v2 is opt-in), v1 when it is not set."""
+    return getattr(cfg.generate, 'mock_version', MOCK_VERSION)
+
+
 PROMPT_VERSION = "ai-factory-pilot-v1-complete-supported-answer"
 CONTEXT_PROMPT_VERSION = "ai-factory-pilot-v1-bound-source-context"
 QUESTION_CHECK_VERSION = "question-code-fence-v1"
@@ -269,7 +274,7 @@ def tool_trace(teacher: Teacher, cfg: Config, chunk: str, question: str, gold: s
         raise ValueError("tool_trace gold must match the configured, provenance-checked tool_trace example")
     gold = checked_gold
     # Each concurrent conversation and its verifier replay start from the same isolated state.
-    with mock_session(load_flags(cfg.verify.flag_list), job_ids=mock_job_ids):
+    with mock_session(load_flags(cfg.verify.flag_list), job_ids=mock_job_ids, mock_version=_mock_version(cfg)):
         policy = tool_policy or (JobStatusPolicy(
             cfg.generate.job_status_discovery or 'clarify_first', cfg.generate.job_status_policy_version
         ) if job_status_workflow else None)
@@ -475,7 +480,7 @@ def run(cfg: Config) -> Path:
             'question_system': Q_SYSTEM, 'question': Q_PROMPT,
             'answer_system': A_SYSTEM, 'answer': A_PROMPT, 'modes': MODE_RULES,
             'tool_rules': TOOL_RULES, 'workflow_rules': WORKFLOW_RULES,
-            'scenario': scenario_plan.SCENARIO_PROMPT, 'mock_version': MOCK_VERSION,
+            'scenario': scenario_plan.SCENARIO_PROMPT, 'mock_version': _mock_version(cfg),
             'input_context': {'version': scenario_plan.CONTEXT_VERSION,
                               'question_capture_version': scenario_plan.QUESTION_CAPTURE_VERSION,
                               'prompt_version': CONTEXT_PROMPT_VERSION,
@@ -513,7 +518,7 @@ def run(cfg: Config) -> Path:
         if q:
             row = {**j, "question": scenario_plan.compose_question(j, q.question), "scenario": scenario,
                    "prompt_version": _prompt_version(j),
-                   "mock_version": MOCK_VERSION}
+                   "mock_version": _mock_version(cfg)}
             if 'scenario_context' in j:
                 row['question_generation'] = scenario_plan.question_capture(j, q.question, raw)
             if reason := _captured_question_issue(row):
@@ -550,7 +555,7 @@ def run(cfg: Config) -> Path:
         q, k = item
         meta = {k_: q[k_] for k_ in ("doc_id", "chunk_id", "persona", "task", "mode")}
         head = {"id": f"{q['id']}/s{k}"}
-        tail = {"sample": k, "teacher": teacher.model, "prompt_version": _prompt_version(q), "mock_version": MOCK_VERSION}
+        tail = {"sample": k, "teacher": teacher.model, "prompt_version": _prompt_version(q), "mock_version": _mock_version(cfg)}
         for field in (*scenario_plan.SOURCE_FIELDS, *scenario_plan.SCENARIO_FIELDS, *scenario_plan.CONTEXT_FIELDS):
             if field in q:
                 tail[field] = q[field]
@@ -593,7 +598,7 @@ def _check_cached_questions(cfg: Config, jobs: list[dict], questions: list[dict]
             if question.get(field) != value:
                 raise ValueError(f'cached question {qid!r} has stale {field}; use a fresh run directory')
         scenario_plan.check_question_context(planned[qid], question)
-        if question.get('prompt_version') != _prompt_version(planned[qid]) or question.get('mock_version') != MOCK_VERSION:
+        if question.get('prompt_version') != _prompt_version(planned[qid]) or question.get('mock_version') != _mock_version(cfg):
             raise ValueError(f'cached question {qid!r} has stale prompt/mock version; use a fresh run directory')
         if question.get('scenario') != _scenario(planned[qid]):
             raise ValueError(f'cached question {qid!r} has stale simulated scenario; use a fresh run directory')

@@ -13,7 +13,7 @@ import re
 from .records import final_answer, messages
 from .job_status_guard import (WORKFLOW_VERSION, JobStatusPolicy, blocked_batch,
                                clarification_response, guard_result, response_issues, target_error)
-from .tools import CATALOG_VERSION, MOCK_VERSION, ToolError, execute, mock_session, parse_arguments, validate_call
+from .tools import CATALOG_VERSION, MOCK_VERSION, MOCK_VERSION_V2, ToolError, execute, mock_session, parse_arguments, validate_call
 
 # what the assistant must do for each question mode. "ask" has no fixed decision: asking back and
 # looking the job up (list_queue, then calls on the ids it returned) are both fine; grounding
@@ -99,7 +99,10 @@ def check_trace(row: dict, valid_flags=None) -> dict:
         if ("mock_job_ids" in row or "mock_catalog_version" in row) and (
                 catalog is None or row.get("mock_catalog_version") != CATALOG_VERSION):
             raise ValueError("closed mock catalog requires its explicit supported version and job_ids")
-        with mock_session(valid_flags, job_ids=catalog):
+        # each trace is replayed against the mock it was made with (v1, or the opt-in v2 of issue #114)
+        version = row.get("mock_version", MOCK_VERSION)
+        with mock_session(valid_flags, job_ids=catalog,
+                          mock_version=version if version in (MOCK_VERSION, MOCK_VERSION_V2) else MOCK_VERSION):
             return _check_trace(row)
     except (ValueError, TypeError) as exc:
         # Malformed experiment metadata is a per-record hard failure, not an aborted run.
@@ -122,7 +125,7 @@ def _check_trace(row: dict) -> dict:
     policy = JobStatusPolicy(**row['tool_policy']) if row.get('tool_policy') is not None else None
     if row.get('workflow_version') == WORKFLOW_VERSION and policy is None:
         trace_errors.append('current job-status workflow requires its deployment-visible tool_policy')
-    if row.get("mock_version", MOCK_VERSION) != MOCK_VERSION:
+    if row.get("mock_version", MOCK_VERSION) not in (MOCK_VERSION, MOCK_VERSION_V2):
         trace_errors.append(f"mock version {row['mock_version']!r} requires its archived implementation; current: {MOCK_VERSION}")
     transcript = messages(row)
     if not isinstance(transcript, list):
