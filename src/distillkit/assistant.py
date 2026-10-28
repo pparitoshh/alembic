@@ -287,6 +287,23 @@ def excerpt_budget(question):
     return max(8000, min(VARIANT_BUDGET, int((11000 - 0.7 * len(question)) / 0.3)))
 
 
+def written_tool_call(text):
+    """A tool call the model wrote as JSON text instead of calling it (live test: 'Is my last job still running?' ->
+    a ```json {"name": "list_queue", "arguments": {...}}``` block and no call): [call] when the text holds exactly one
+    such object naming a live Slurm tool, else []."""
+    from .slurm_live import LIVE_SCHEMAS
+    names = {s['name'] for s in LIVE_SCHEMAS}
+    found = []
+    for m in re.finditer(r'\{\s*"name"\s*:\s*"(\w+)"\s*,\s*"arguments"\s*:\s*(\{.*?\})\s*\}', text, re.S):
+        try:
+            args = json.loads(m.group(2))
+        except ValueError:
+            continue
+        if m.group(1) in names:
+            found.append({'name': m.group(1), 'arguments': args})
+    return found if len(found) == 1 else []
+
+
 def with_context(question, docs, relevance=False):
     """relevance=True: the header of retriever e (RAG_VARIANT=e), otherwise the trained format."""
     if not docs:
@@ -589,6 +606,8 @@ class Assistant:
                         answer.append('\n\n[stopped: the answer started repeating itself]')
                         out.write(answer[-1])
                         break
+            if not calls and self.slurm:
+                calls = written_tool_call(''.join(answer))
             if not calls:
                 break
             for i, c in enumerate(calls):  # OpenAI-compatible servers (vLLM) require ids linking calls and results
