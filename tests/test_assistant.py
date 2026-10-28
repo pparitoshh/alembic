@@ -353,3 +353,34 @@ def test_a_looping_answer_is_stopped(tmp_path, monkeypatch):
     assert 'started repeating' in answer and len(produced) < 20
     assert not assistant.Assistant.repeating('#SBATCH --nodes=1\n#SBATCH --ntasks=4\n#SBATCH --time=01:00:00\n' * 2)
     assert not assistant.Assistant.repeating('srun --exact -n 1 ./step &\n' * 5 + 'wait\n')  # a real script
+
+
+def test_agent_mode_asks_without_excerpts_first(tmp_path, monkeypatch):
+    from distillkit.slurm_live import SlurmLive
+
+    def runner(argv, stdin=None):
+        return 0, '', ''  # an empty queue
+    bot = assistant.Assistant(_indexes(tmp_path), slurm=SlurmLive(runner=runner))
+    sent = []
+
+    def stream(messages):  # live question: a tool call, then the final answer
+        sent.append(messages[-1]['content'] if messages[-1]['role'] == 'user' else messages[-1]['role'])
+        if messages[-1]['role'] == 'user':
+            yield {'tool_calls': [{'name': 'list_queue', 'arguments': {}}]}
+        else:
+            yield 'You have no jobs in the queue.'
+    monkeypatch.setattr(bot, '_stream', stream)
+    answer, sources = bot.ask('Show my jobs in the queue on Leonardo', out=StringIO())
+    assert sent == ['Show my jobs in the queue on Leonardo', 'tool'] and sources == []  # one request, no excerpts
+    assert answer == 'You have no jobs in the queue.'
+
+    bot.reset()
+    sent.clear()
+
+    def stream2(messages):  # knowledge question: plain text, so it is asked again with the excerpts
+        sent.append(messages[-1]['content'])
+        yield 'Use --gpus-per-node in the standard-g partition. ' * 10
+    monkeypatch.setattr(bot, '_stream', stream2)
+    answer, sources = bot.ask('How do I request GPUs on LUMI?', out=StringIO())
+    assert sent[0] == 'How do I request GPUs on LUMI?' and 'Quoted retrieval results' in sent[1]
+    assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == sent[1]

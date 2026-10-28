@@ -479,14 +479,38 @@ class Assistant:
                 return True
         return False
 
+    AGENT_PROBE_CHARS = 300  # agent mode: this much plain text without a tool call means "answer from the docs"
+
+    def _agent_first(self, question):
+        """Agent mode with docs: ask without the excerpts first. Measured on the 37 live agent tasks, the excerpts
+        pulled the model into answering from documentation instead of calling a tool (right first tool 18/37 with
+        excerpts, 28/37 without). Returns the text and tool calls when the model calls a tool, else None (the
+        question is then asked again with the excerpts)."""
+        text, gen = '', self._stream(self.history + [{'role': 'user', 'content': question}])
+        try:
+            for piece in gen:
+                if isinstance(piece, dict):
+                    return text, piece['tool_calls']
+                text += piece
+                if len(text) > self.AGENT_PROBE_CHARS:
+                    return None
+        finally:
+            gen.close()  # closing the stream stops the model server
+        return None
+
     def ask(self, question, out=sys.stdout, max_tool_rounds=None):
         max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
-        user, sources = self.prompt(question)
+        first = self._agent_first(question) if self.slurm and self.docs else None
+        user, sources = (question, []) if first else self.prompt(question)
         self.history.append({'role': 'user', 'content': user})
         last_call = None
         for _ in range(max_tool_rounds + 1):
             answer, calls, checked = [], [], 0
-            for piece in self._stream(self.history):
+            if first:  # the tool call from the probe above: no second request
+                (text, calls), first = first, None
+                answer.append(text)
+                out.write(text)
+            for piece in ([] if calls else self._stream(self.history)):
                 if isinstance(piece, dict):
                     calls = piece['tool_calls']
                     continue
