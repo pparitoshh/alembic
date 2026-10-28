@@ -1,0 +1,20 @@
+# The ClusterPilot app (assistant, agent tools, web page, setup) on the systems users run it on.
+name: app tests
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: tests
+        run: uv run --python 3.12 --with pytest pytest -q tests/test_assistant.py tests/test_slurm_live.py tests/test_export.py
+      - name: the clusterpilot command starts
+        run: uv run --python 3.12 clusterpilot --help
