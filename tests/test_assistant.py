@@ -510,3 +510,24 @@ def test_long_pasted_text_fits_the_context(tmp_path, monkeypatch):
     bot = assistant.Assistant(_indexes(tmp_path))
     bot.ask(log, out=out)
     assert 'left out' in out.getvalue() and len(sent[0]) < 25000 and bot.history[1]['content'] == text
+
+
+def test_a_tool_call_written_as_json_text_is_run(tmp_path, monkeypatch):
+    from distillkit.slurm_live import SlurmLive
+    ran = []
+
+    def runner(argv, stdin=None):
+        ran.append(argv)
+        return 0, '77|train|RUNNING|p|0:10|1:00:00|None\n', ''
+    bot = assistant.Assistant(tmp_path, docs=False, slurm=SlurmLive(runner=runner))
+
+    def stream(messages):
+        if messages[-1]['role'] == 'user':
+            yield 'I will check.\n```json\n{"name": "list_queue", "arguments": {"state": "RUNNING"}}\n```'
+        else:
+            yield 'Job 77 is running.'
+    monkeypatch.setattr(bot, '_stream', stream)
+    answer, _ = bot.ask('Is my last job still running?', out=StringIO())
+    assert answer == 'Job 77 is running.' and ran and ran[0][0] == 'squeue'
+    assert assistant.written_tool_call('{"name": "rm_rf", "arguments": {}}') == []
+    assert assistant.written_tool_call('use {"name": "list_queue", "arguments": {}} or {"name": "job_status", "arguments": {"job_id": "1"}}') == []
