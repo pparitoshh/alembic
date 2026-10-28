@@ -2,6 +2,7 @@
 import importlib.util
 import json
 import sqlite3
+import subprocess
 from io import StringIO
 from pathlib import Path
 
@@ -288,3 +289,47 @@ def test_web_failed_question_leaves_history_clean(tmp_path, monkeypatch):
     req.do_POST()
     assert b'not reachable' in req.wfile.getvalue()
     assert [m['role'] for m in bot.history] == ['system']
+
+
+def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
+    models, created, fetched = [''], [], []
+
+    def run(cmd, **kw):
+        if cmd[:2] == ['ollama', 'create']:
+            created.append((cmd[2], (kw['cwd'] / assistant.GGUF_FILE).read_text()))
+            models[0] = cmd[2] + ':latest  abc  2.5 GB  now\n'
+        return subprocess.CompletedProcess(cmd, 0, 'NAME ID SIZE MODIFIED\n' + models[0], '')
+
+    def download(url, dest):
+        if dest.suffix != '.sqlite':  # the docs index is fetched once, on the first setup
+            fetched.append(dest.name)
+        else:
+            assert url == assistant.HF_INDEX + dest.name
+        dest.write_text(release[0])
+    release = ['v1']
+    monkeypatch.setattr(assistant.subprocess, 'run', run)
+    monkeypatch.setattr(assistant, '_download', download)
+    monkeypatch.setattr(assistant, '_release_id', lambda: release[0])
+    assistant.setup(tmp_path, 'cp')
+    assert created == [('cp', 'v1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
+    assistant.setup(tmp_path, 'cp')  # nothing new: nothing downloaded or created
+    assert len(created) == 1 and len(fetched) == 2
+    release[0] = 'v2'
+    assistant.setup(tmp_path, 'cp')  # a new release replaces the cached files and the Ollama model
+    assert created[-1] == ('cp', 'v2') and len(fetched) == 4
+    monkeypatch.setattr(assistant, '_release_id', lambda: None)
+    assistant.setup(tmp_path, 'cp')  # offline: the installed model stays
+    assert len(created) == 2
+
+
+def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
+    spec = importlib.util.spec_from_file_location('add_notes', Path(__file__).resolve().parent.parent / 'scripts/add_notes_to_index.py')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    index = _indexes(tmp_path)
+    for _ in range(2):  # running it again replaces the notes instead of adding copies
+        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 3
+    docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
+                              index / 'factory_docs.sqlite', variant='e')
+    assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
