@@ -33,7 +33,7 @@ def live(responses, confirm=lambda n, a: True):
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
     assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
     assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == \
-        ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
+        ["recent_jobs", "job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
          "run_readonly_command"]
 
 
@@ -384,3 +384,11 @@ def test_pipes_are_applied_in_python_not_in_a_shell():
     assert r["stdout"] == "3|c|TIMEOUT\n" and fake.calls[-1][0] == ["sacct", "-X", "-n", "-P", "-S", "now-7days"]
     r = s.execute("run_readonly_command", {"command": "sacct -X | sh -c 'rm -rf /'"})
     assert "skipped: sh -c 'rm -rf /'" in r["note"] and all(c[0][0] == "sacct" for c in fake.calls)
+
+
+def test_recent_jobs_newest_first():
+    out = ("10|old|COMPLETED|0:0|00:10:00|2026-10-26T10:00:00|p\n12|run|RUNNING|0:0|00:05:00|Unknown|p\n"
+           "11|bad|FAILED|1:0|00:01:00|2026-10-27T09:00:00|p\n")
+    s, fake = live({"sacct&now-7days": (0, out, "")})
+    r = s.execute("recent_jobs", {})
+    assert [j["job_id"] for j in r["jobs"]] == ["12", "11", "10"] and r["jobs"][1]["state"] == "FAILED"

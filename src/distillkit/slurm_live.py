@@ -69,7 +69,15 @@ RUN_READONLY_COMMAND_SCHEMA = {
     "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
                    "required": ["command"]},
 }
-LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
+RECENT_JOBS_SCHEMA = {
+    "name": "recent_jobs",
+    "description": "The user's most recent jobs (running, finished or failed), newest first, with state, exit code and "
+                   "run time, like `sacct -X -S now-7days`. Use it when the user asks about their last, latest or "
+                   "recent job or jobs without giving a job id, then look at the job it finds.",
+    "parameters": {"type": "object", "properties": {"days": {"type": "integer", "description": "How many days back (default 7)"}},
+                   "required": []},
+}
+LIVE_SCHEMAS = SCHEMAS + [RECENT_JOBS_SCHEMA, JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
                           HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA]
 ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
 # change the cluster: confirmed first (submit_job only without test_only)
@@ -353,6 +361,19 @@ class SlurmLive:
         if rc == 0 and not out.strip():
             return {"job_id": job_id, "error": f"no job {job_id} found"}
         return {"error": (err2.strip() or err.strip() or f"no batch script stored for job {job_id}")}
+
+    def recent_jobs(self, days=7):
+        fields = ["JobID", "JobName", "State", "ExitCode", "Elapsed", "End", "Partition"]
+        rc, out, err = self.run(["sacct", "-X", "-n", "-P", "-S", f"now-{max(1, min(days, 60))}days",
+                                 f"--format={','.join(fields)}"])
+        if rc != 0:
+            return {"error": err.strip() or "sacct failed"}
+        rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()]
+        # newest first: running jobs (End 'Unknown') on top, then by end time
+        rows.sort(key=lambda r: ("9999" if not r["End"][:1].isdigit() else r["End"]), reverse=True)
+        jobs = [{"job_id": r["JobID"], "name": r["JobName"], "state": r["State"].split()[0], "exit_code": r["ExitCode"],
+                 "elapsed": r["Elapsed"], "end": r["End"], "partition": r["Partition"]} for r in rows[:10]]
+        return {"jobs": jobs, "days": days} if jobs else {"jobs": [], "note": f"no jobs in the last {days} days"}
 
     # --- own-jobs guard (same as cancel_job) -------------------------------------------------------
     def _own_job(self, job_id):
