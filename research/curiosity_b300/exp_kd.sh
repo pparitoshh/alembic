@@ -17,8 +17,8 @@ if [ ! -s $D/prompts.jsonl ]; then
         || { log "STOP: prompt build failed"; exit 1; }
 fi
 log "prompts: $(wc -l < $D/prompts.jsonl)"
-G=${TEACHER_REPLICAS:-4}; TPG=$(( 8 / G ))  # teacher replicas x GPUs each (4 x TP2 by default; not GROUPS, a bash builtin)
-P=$(( (N + 3999) / 4000 )); P=$(( (P + G - 1) / G * G ))  # ~4,000 prompts per part, a multiple of G parts
+G=${TEACHER_REPLICAS:-$(( NGPU / 2 ))}; TPG=$(( NGPU / G ))  # teacher replicas x GPUs each (4 x TP2 by default; not GROUPS, a bash builtin)
+P=$(( (N + 3999) / 4000 )); P=${TEACHER_PARTS:-$(( (P + G - 1) / G * G ))}  # TEACHER_PARTS: resume a split made with other G  # ~4,000 prompts per part, a multiple of G parts
 for g in $(seq 0 $((G - 1))); do
     gpus=$(seq -s, $((g * TPG)) $((g * TPG + TPG - 1)))
     ( for k in $(seq $g $G $((P - 1))); do
@@ -31,7 +31,7 @@ n=$(ls $D/teacher/part*.npz 2>/dev/null | wc -l)
 [ "$n" = "$P" ] || { log "STOP: teacher parts $n of $P"; exit 1; }
 log "teacher: $(cat $D/teacher/part*.jsonl | wc -l) answers kept"
 if [ ! -s $D/model/model.safetensors ] && ! ls $D/model/model-*.safetensors > /dev/null 2>&1; then
-    torchrun --standalone --nproc_per_node 8 $CP/bin/train_kd.py $STUDENT $D/teacher $D/model >> $CP/logs/$NAME.train.log 2>&1 \
+    ACCUM=${ACCUM:-$(( 64 / NGPU ))} torchrun --standalone --nproc_per_node $NGPU $CP/bin/train_kd.py $STUDENT $D/teacher $D/model >> $CP/logs/$NAME.train.log 2>&1 \
         || { log "STOP: training failed (logs/$NAME.train.log)"; exit 1; }
 fi
 log "trained: $(cat $D/model/KD_TRAIN.json | tr -d '\n ')"

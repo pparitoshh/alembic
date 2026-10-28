@@ -1,0 +1,8 @@
+### env NCCL_ALGO=Tree
+allreduce     1 MiB  time     0.18 ms  busbw    10.0 GB/s  ranks 8
+allreduce     4 MiB  time     0.44 ms  busbw    16.5 GB/s  ranks 8
+allreduce    16 MiB  time     0.75 ms  busbw    39.3 GB/s  ranks 8
+allreduce    64 MiB  time     1.76 ms  busbw    66.7 GB/s  ranks 8
+allreduce   256 MiB  time     5.85 ms  busbw    80.3 GB/s  ranks 8
+allreduce  1024 MiB  time    22.25 ms  busbw    84.4 GB/s  ranks 8
+### rc=0

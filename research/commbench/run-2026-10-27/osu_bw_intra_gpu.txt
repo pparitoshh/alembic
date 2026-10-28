@@ -1,0 +1,29 @@
+### mpirun -np 2 --host lrdn0561:2 /leonardo/prod/spack/06/install/0.22/linux-rhel8-icelake/gcc-12.2.0/osu-micro-benchmarks-7.4-pv2jrgafgutwer6azn2uzksl6oyfmx7l/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_bw -d cuda D D
+
+# OSU MPI-CUDA Bandwidth Test v7.4
+# Datatype: MPI_CHAR.
+# Size      Bandwidth (MB/s)
+1                       1.01
+2                       1.14
+4                       2.29
+8                       4.62
+16                      9.49
+32                     19.00
+64                     37.89
+128                    74.19
+256                   148.87
+512                   207.92
+1024                  350.26
+2048                  696.41
+4096                 1371.63
+8192                 2651.89
+16384                5165.84
+32768                9817.60
+65536               16149.01
+131072              27989.46
+262144              42221.32
+524288              57755.03
+1048576             71661.89
+2097152             81186.79
+4194304             87110.41
+### rc=0
