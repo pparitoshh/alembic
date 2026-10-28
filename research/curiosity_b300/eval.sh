@@ -16,9 +16,10 @@ serve 0 8100 "$MODEL" cand --max-model-len 16384 --gpu-memory-utilization 0.85 |
 python $CP/bin/answer.py http://127.0.0.1:8100/v1 cand $A cand | tee -a $CP/logs/tasks.log
 stop_all
 log "judging"
-serve 1 8101 $M/gptoss20 openai/gpt-oss-20b --max-model-len 32768 --gpu-memory-utilization 0.85 &
-serve 2 8102 $M/gemma4 google/gemma-4-26B-A4B-it --max-model-len 32768 --gpu-memory-utilization 0.85 --limit-mm-per-prompt '{"image":0}' &
-serve 4,5,6,7 8103 $M/q235fp8 qwen3-235b --max-model-len 16384 --gpu-memory-utilization 0.90 &
+J1=1 J2=2 JQ=4,5,6,7; [ $NGPU = 4 ] && J1=0 J2=1 JQ=2,3  # 4 GPUs: Qwen3-235B FP8 on TP2
+serve $J1 8101 $M/gptoss20 openai/gpt-oss-20b --max-model-len 32768 --gpu-memory-utilization 0.85 &
+serve $J2 8102 $M/gemma4 google/gemma-4-26B-A4B-it --max-model-len 32768 --gpu-memory-utilization 0.85 --limit-mm-per-prompt '{"image":0}' &
+serve $JQ 8103 $M/q235fp8 qwen3-235b --max-model-len 16384 --gpu-memory-utilization 0.90 &
 wait
 for p in 8101 8102 8103; do curl -sf http://127.0.0.1:$p/v1/models > /dev/null || { log "STOP: judge server $p not ready"; exit 1; }; done
 export EVAL_DIR=$REPO/data/eval/clean

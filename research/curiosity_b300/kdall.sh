@@ -14,7 +14,7 @@ for e in ${SETS:-kd1 kd2 kd3}; do
 done > $D/prompts.jsonl
 log "union teacher data (${SETS:-kd1 kd2 kd3}): $(ls $D/teacher/*.npz | wc -l) parts, $(cat $D/teacher/*.jsonl | wc -l) answers; student $STUDENT"
 if [ ! -s $D/model/model.safetensors ] && ! ls $D/model/model-*.safetensors > /dev/null 2>&1; then
-    torchrun --standalone --nproc_per_node 8 $CP/bin/train_kd.py $STUDENT $D/teacher $D/model >> $CP/logs/$NAME.train.log 2>&1 \
+    ACCUM=${ACCUM:-$(( 64 / NGPU ))} torchrun --standalone --nproc_per_node $NGPU $CP/bin/train_kd.py $STUDENT $D/teacher $D/model >> $CP/logs/$NAME.train.log 2>&1 \
         || { log "STOP: training failed (logs/$NAME.train.log)"; exit 1; }
 fi
 log "trained: $(cat $D/model/KD_TRAIN.json | tr -d '\n ')"
