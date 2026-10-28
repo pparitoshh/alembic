@@ -162,7 +162,11 @@ APPROVAL_WAIT = 600  # seconds an action waits for a click before it counts as n
 
 
 def serve(bot, host='127.0.0.1', port=8765, approve_in_page=False):
-    server = ThreadingHTTPServer((host, port), make_handler(bot, approve_in_page))
+    try:
+        server = ThreadingHTTPServer((host, port), make_handler(bot, approve_in_page))
+    except OSError as e:  # most often another program (or an earlier clusterpilot --web) already uses the port
+        raise SystemExit(f'[hpc-assistant] cannot open the web page on port {port} ({e.strerror}): '
+                         f'stop the other program, or choose another port with --port')
     print(f'[hpc-assistant] web page on http://{host}:{port} (Ctrl+C to stop)')
     try:
         server.serve_forever()
