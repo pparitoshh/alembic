@@ -67,6 +67,7 @@ SYSTEM_PROMPT = ("You are an HPC assistant. Use supplied source excerpts for sit
 DEFAULT_INDEX = Path(os.environ.get('HPC_ASSISTANT_INDEX', Path.home() / '.local/share/hpc-assistant'))
 HF_RELEASE = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/gguf/'
 GGUF_FILE = 'hpc-assistant-qwen3-4b-Q4_K_M.gguf'
+HF_TREE = 'https://huggingface.co/api/models/VaibhavKKM/hpc-assistant-qwen3-4b/tree/main/gguf'  # file ids of the release
 
 # Retrieval: kept identical to research/rag65/retrieve.py (tests/test_assistant.py checks they agree).
 STOP = {'the', 'and', 'for', 'this', 'that', 'with', 'from', 'does', 'what', 'how', 'can', 'are', 'you', 'your',
@@ -538,22 +539,45 @@ def _download(url, dest):
     tmp.rename(dest)
 
 
+def _release_id():
+    """Version of the published model (git ids of the GGUF and the Modelfile), or None when Hugging Face is unreachable."""
+    try:
+        with urllib.request.urlopen(HF_TREE, timeout=20) as resp:
+            ids = {f['path'].rsplit('/', 1)[-1]: f['oid'] for f in json.load(resp)}
+        return ids[GGUF_FILE] + ':' + ids['Modelfile']
+    except (OSError, ValueError, KeyError):
+        return None
+
+
 def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
-    """One-time install: the model from the Hugging Face release into Ollama, and the docs index if a URL is set."""
+    """Install the model from the Hugging Face release into Ollama, or update it when a newer release is out, and the
+    docs index if a URL is set. Run again at any time: it does nothing when everything is current."""
     if not shutil.which('ollama'):
         raise SystemExit('Ollama is not installed: get it from https://ollama.com, then run hpc-assistant --setup again')
     listed = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
     if listed.returncode != 0:
         raise SystemExit('Ollama is installed but not running: start it (`ollama serve` or the Ollama app) and retry')
-    if not re.search(r'^' + re.escape(model) + r'(:\S+)?\s', listed.stdout, re.M):
-        cache = index_dir / 'model'
+    installed = re.search(r'^' + re.escape(model) + r'(:\S+)?\s', listed.stdout, re.M)
+    cache = index_dir / 'model'
+    stamp = cache / 'RELEASE'  # the release the cached files and the Ollama model were made from
+    latest = _release_id()
+    current = stamp.read_text().strip() if stamp.exists() else None
+    outdated = latest is not None and latest != current
+    if outdated:
+        for name in (GGUF_FILE, 'Modelfile'):  # files of an older release
+            (cache / name).unlink(missing_ok=True)
+    if not installed or outdated:
+        if installed:
+            print(f'[hpc-assistant] a newer model release is out: updating {model}', file=sys.stderr)
         cache.mkdir(parents=True, exist_ok=True)
         for name in (GGUF_FILE, 'Modelfile'):
             if not (cache / name).exists():
                 print(f'[hpc-assistant] downloading {name} (the model is about 2.5 GB)', file=sys.stderr)
                 _download(HF_RELEASE + name, cache / name)
         subprocess.run(['ollama', 'create', model, '-f', 'Modelfile'], cwd=cache, check=True)
-    print(f'[hpc-assistant] model ready in Ollama: {model}', file=sys.stderr)
+        stamp.write_text(latest or '')
+    print(f'[hpc-assistant] model ready in Ollama: {model}' + ('' if latest else
+          ' (Hugging Face not reachable: could not check for a newer release)'), file=sys.stderr)
     url = os.environ.get('HPC_ASSISTANT_INDEX_URL')
     for name in ('documents.sqlite', 'factory_docs.sqlite'):
         if (index_dir / name).exists():
@@ -589,7 +613,8 @@ def main(argv=None):
     ap.add_argument('--add', action='append', default=[], metavar='FILE', help='index a manual (PDF, md, txt, html)')
     ap.add_argument('--tools', action='store_true',
                     help='offer the model a search_docs tool (only for releases trained with tool calls)')
-    ap.add_argument('--setup', action='store_true', help='one-time install of the model (and docs index), then exit')
+    ap.add_argument('--setup', action='store_true',
+                    help='install the model (and docs index), or update it to the latest release, then exit')
     ap.add_argument('--web', action='store_true', help='open the upload-and-chat page on http://127.0.0.1:PORT')
     ap.add_argument('--port', type=int, default=8765)
     ap.add_argument('--agent', action='store_true',
