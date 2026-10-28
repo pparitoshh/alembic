@@ -1,5 +1,6 @@
 """hpc-assistant: built-in retrieval must give the student the exact prompts it was evaluated with."""
 import importlib.util
+import io
 import json
 import sqlite3
 import subprocess
@@ -412,3 +413,20 @@ def test_setup_refreshes_only_an_index_it_installed(tmp_path, monkeypatch):
     assert fetched[2:] == ['documents.sqlite'] and (tmp_path / 'documents.sqlite').read_text() == 'd2'
     assistant.setup(own, 'cp')  # a hand-built index (no stamp) is never replaced
     assert len(fetched) == 3 and (own / 'documents.sqlite').read_text() == 'hand-built'
+
+
+def test_download_replaces_an_existing_file_and_documents_read_as_utf8(tmp_path, monkeypatch):
+    class Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+    monkeypatch.setattr(assistant.urllib.request, 'urlopen', lambda url, timeout=0: Resp(b'new index'))
+    dest = tmp_path / 'documents.sqlite'
+    dest.write_text('old index')
+    assistant._download('https://example/documents.sqlite', dest)  # an update: os.replace, not rename
+    assert dest.read_text() == 'new index' and not (tmp_path / 'documents.sqlite.part').exists()
+    doc = tmp_path / 'guide.md'
+    doc.write_bytes('# Guide\n\nUse `--gpus-per-node` – not `--gpus` – on MyCluster → standard-g.'.encode())
+    assert '– not `--gpus` – on MyCluster → standard-g' in assistant.read_document(doc)[0][1]  # explicit UTF-8

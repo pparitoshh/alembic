@@ -264,6 +264,7 @@ def test_ssh_reuses_one_connection_unless_the_host_has_its_own(monkeypatch):
             return P("user me\ncontrolpath /home/me/.ssh/cm-x\n" if cmd[2] == "own" else "user me\ncontrolmaster false\n")
         return P("me\n")
     monkeypatch.setattr(slurm_live.subprocess, "run", fake_run)
+    monkeypatch.setattr(slurm_live.os, "name", "posix")  # connection sharing is off on Windows (tested below)
     SlurmLive(ssh="plain").run(["id", "-un"])
     assert "ControlPath=~/.ssh/clusterpilot-%C" in seen[-1] and seen[-1][-2:] == ["plain", "id -un"]
     SlurmLive(ssh="own").run(["id", "-un"])
@@ -345,3 +346,8 @@ def test_run_readonly_command_allows_options_before_show(command, ok):
     assert ("error" not in r) == ok
     if not ok:
         assert "search_docs" in r["error"]
+
+
+def test_no_ssh_connection_sharing_on_windows(monkeypatch):
+    monkeypatch.setattr(slurm_live.os, "name", "nt")  # Windows OpenSSH has no ControlMaster
+    assert SlurmLive(ssh="host").mux_options() == []

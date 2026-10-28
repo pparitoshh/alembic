@@ -290,7 +290,8 @@ def _ocr_page(path, page):
         images = sorted(Path(tmp).glob('p*.png'))
         if not images:
             return ''
-        return subprocess.run(['tesseract', str(images[0]), '-'], capture_output=True, text=True, check=False).stdout
+        return subprocess.run(['tesseract', str(images[0]), '-'], capture_output=True, text=True, encoding='utf-8',
+                              errors='replace', check=False).stdout
 
 
 def read_document(path):
@@ -305,6 +306,7 @@ def read_document(path):
             if not shutil.which('pdftotext'):
                 raise SystemExit('reading PDFs needs `pip install pypdf` (or the pdftotext tool)')
             pages = subprocess.run(['pdftotext', '-layout', str(path), '-'], capture_output=True, text=True,
+                                   encoding='utf-8', errors='replace',
                                    check=True).stdout.split('\f')
         else:
             pages = [page.extract_text() or '' for page in PdfReader(str(path)).pages]
@@ -313,7 +315,7 @@ def read_document(path):
             print(f'[hpc-assistant] {path.name}: no text found; for scanned PDFs install tesseract and poppler',
                   file=sys.stderr)
         return [(f'{path.name}#page={i}', t) for i, t in enumerate(pages, 1) if t.strip()]
-    text = path.read_text(errors='replace')
+    text = path.read_text(encoding='utf-8', errors='replace')  # not the Windows code page
     if path.suffix.lower() in ('.html', '.htm'):
         parser = _Text()
         parser.feed(text)
@@ -579,7 +581,7 @@ def _download(url, dest):
     tmp = Path(str(dest) + '.part')
     with urllib.request.urlopen(url, timeout=60) as resp, open(tmp, 'wb') as f:
         shutil.copyfileobj(resp, f, length=1 << 20)
-    tmp.rename(dest)
+    os.replace(tmp, dest)  # rename() fails on Windows when dest exists (updates)
 
 
 def _file_ids(tree_url):
@@ -602,7 +604,7 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
     docs index. Run again at any time: it does nothing when everything is current."""
     if not shutil.which('ollama'):
         raise SystemExit('Ollama is not installed: get it from https://ollama.com, then run hpc-assistant --setup again')
-    listed = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
+    listed = subprocess.run(['ollama', 'list'], capture_output=True, text=True, encoding='utf-8', errors='replace')
     if listed.returncode != 0:
         raise SystemExit('Ollama is installed but not running: start it (`ollama serve` or the Ollama app) and retry')
     installed = re.search(r'^' + re.escape(model) + r'(:\S+)?\s', listed.stdout, re.M)
@@ -678,6 +680,9 @@ def main(argv=None):
     ap.add_argument('--yes', action='store_true', help='agent mode: submit and cancel without asking for confirmation')
     ap.add_argument('--jobs-dir', default='~/.hpc-agent/jobs', help='agent mode: where submitted scripts are written')
     args = ap.parse_args(argv)
+    for stream in (sys.stdout, sys.stderr):  # a Windows console with a legacy code page cannot print every character
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(errors='replace')
     if args.setup:
         setup(Path(args.index), args.model)
         return
