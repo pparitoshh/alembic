@@ -490,3 +490,23 @@ def test_short_documents_are_indexed_and_empty_uploads_are_refused(tmp_path):
         assert 'no text found in empty.txt' in str(e) and not (tmp_path / 'uploads' / 'empty.txt').exists()
     else:
         raise AssertionError('an empty upload must be refused')
+
+
+def test_long_pasted_text_fits_the_context(tmp_path, monkeypatch):
+    log = 'Why did my job fail?\n' + '[rank0] step 1230/20000 loss 2.3651 lr 2.0e-05 tokens/s 41230\n' * 800 + 'CUDA out of memory\n'
+    text, cut = assistant.fit_question(log)
+    assert cut and text.startswith('Why did my job fail?') and text.endswith('CUDA out of memory\n')
+    assert len(text) < assistant.QUESTION_HEAD + assistant.QUESTION_TAIL + 100
+    assert assistant.fit_question('How do I use job arrays?') == ('How do I use job arrays?', 0)
+    assert assistant.excerpt_budget('short question') == assistant.VARIANT_BUDGET
+    assert assistant.excerpt_budget(text) < 10000  # room for the log, the excerpts and the answer
+    sent = []
+
+    def stream(self, messages):
+        sent.append(messages[-1]['content'])
+        yield 'Out of memory.'
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    out = StringIO()
+    bot = assistant.Assistant(_indexes(tmp_path))
+    bot.ask(log, out=out)
+    assert 'left out' in out.getvalue() and len(sent[0]) < 25000 and bot.history[1]['content'] == text

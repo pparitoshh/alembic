@@ -263,6 +263,30 @@ def community_ok(doc, question):
     return all(not doc['url'].startswith(prefix) or asks.search(question) for prefix, asks in COMMUNITY_PAGES.items())
 
 
+# Long pasted logs: Ollama cuts a prompt longer than the context (16K tokens) down to its last 8K tokens, dropping
+# the system prompt and the question at the top (measured: up to ~21,600 characters of log the whole prompt was
+# evaluated; at 36,000 and 50,000 characters only 8,194 tokens). Logs take about 0.7 tokens per character.
+QUESTION_HEAD, QUESTION_TAIL = 2000, 10000
+
+
+def fit_question(question):
+    """The question, with the middle of a very long pasted text left out (the question is usually at the top, the
+    error at the bottom); returns (text, number of characters left out)."""
+    if len(question) <= QUESTION_HEAD + QUESTION_TAIL:
+        return question, 0
+    cut = len(question) - QUESTION_HEAD - QUESTION_TAIL
+    return (question[:QUESTION_HEAD] + f'\n[... {cut:,} characters of the pasted text left out ...]\n'
+            + question[-QUESTION_TAIL:]), cut
+
+
+def excerpt_budget(question):
+    """Characters of doc excerpts that still fit with this question and an answer in a 16K-token context: the usual
+    40,000 for normal questions, less next to a long pasted text (about 11,000 prompt tokens in all)."""
+    if len(question) <= 4000:
+        return VARIANT_BUDGET
+    return max(8000, min(VARIANT_BUDGET, int((11000 - 0.7 * len(question)) / 0.3)))
+
+
 def with_context(question, docs, relevance=False):
     """relevance=True: the header of retriever e (RAG_VARIANT=e), otherwise the trained format."""
     if not docs:
@@ -427,8 +451,9 @@ class Assistant:
             found += [d for d in retrieve(question, self.pilot, self.factory, variant=self.retriever,
                                           general_db=self.general) if community_ok(d, question)]
             kept, used = [], 0  # the same 40,000-character excerpt budget as the evaluation, manuals first
+            budget = excerpt_budget(question)
             for d in found:
-                if used + len(d['text']) <= VARIANT_BUDGET:
+                if used + len(d['text']) <= budget:
                     kept.append(d)
                     used += len(d['text'])
             found = kept
@@ -515,6 +540,10 @@ class Assistant:
         return None
 
     def ask(self, question, out=sys.stdout, max_tool_rounds=None):
+        question, cut = fit_question(question)
+        if cut:
+            out.write(f'[hpc-assistant: the pasted text is long; its beginning and its last {QUESTION_TAIL:,} characters '
+                      f'are used, {cut:,} characters in the middle are left out]\n\n')
         max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
         first = self._agent_first(question) if self.slurm and self.docs else None
         user, sources = (question, []) if first else self.prompt(question)
