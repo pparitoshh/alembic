@@ -30,6 +30,27 @@ serve the model with vLLM or llama-server and add `--openai http://127.0.0.1:POR
 Covered: Slurm in general and European systems (Leonardo, LUMI and the EuroHPC AI Factories); for other sites add
 their user guide with `--add FILE` or in the web page.
 
+### Logging in to the cluster (agent mode)
+
+The assistant never asks for passwords or one-time codes: ssh does the login, outside the model. Agent mode checks
+the login once at start and, if it is not valid, says so instead of calling tools.
+
+- **ssh keys:** nothing to do.
+- **Certificate logins (Leonardo):** renew the certificate first (`step ssh login`, valid 12 hours), then start the
+  agent.
+- **One-time codes (2FA):** start `clusterpilot --agent --ssh <host>` in a terminal. It offers to open a shared ssh
+  connection; ssh asks for your code, and the agent reuses that connection for 8 hours. If `~/.ssh/config` already
+  has a `ControlPath` for the host, the agent uses your own shared connection instead:
+
+  ```
+  Host mycluster
+      ControlMaster auto
+      ControlPath ~/.ssh/cm-%C
+      ControlPersist 8h
+  ```
+
+- **When the login expires** during a session, the agent stops with one message: log in again, then ask again.
+
 ### In the dsh web UI, with approval of job actions
 
 The HPC assistant also runs in the DeepSeek Harness (dsh) web UI. An MCP server gives the model the Slurm tools,
