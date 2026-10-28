@@ -345,3 +345,8 @@ def test_run_readonly_command_allows_options_before_show(command, ok):
     assert ("error" not in r) == ok
     if not ok:
         assert "search_docs" in r["error"]
+
+
+def test_no_ssh_connection_sharing_on_windows(monkeypatch):
+    monkeypatch.setattr(slurm_live.os, "name", "nt")  # Windows OpenSSH has no ControlMaster
+    assert SlurmLive(ssh="host").mux_options() == []

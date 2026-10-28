@@ -10,6 +10,7 @@ One tool beyond the trained schemas: `job_script` returns a job's batch script (
 `sacct --batch-script` for finished jobs), so the agent can fix and resubmit (retrigger) a job.
 """
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -97,8 +98,11 @@ class SlurmLive:
             return self._runner(argv, stdin)
         cmd = ["ssh", "-o", "BatchMode=yes", *self.mux_options(), self.ssh, shlex.join(argv)] if self.ssh else argv
         try:
-            p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, timeout=self.timeout)
+            p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               timeout=self.timeout)  # cluster output is UTF-8, whatever the local code page
         except FileNotFoundError:
+            if self.ssh:
+                return 127, "", "ssh: command not found (install an OpenSSH client to reach the cluster)"
             return 127, "", f"{argv[0]}: command not found (is this a Slurm login node?)"
         except subprocess.TimeoutExpired:
             return 124, "", f"{argv[0]}: timed out after {self.timeout}s"
@@ -107,6 +111,8 @@ class SlurmLive:
     def mux_options(self):
         """Reuse one ssh connection for all tool calls (a new connection through a jump host can take 20 s).
         Hosts that already have a ControlPath in the user's ssh config keep their own setting."""
+        if self._mux is None and os.name == "nt":  # Windows OpenSSH has no connection sharing (ControlMaster)
+            self._mux = []
         if self._mux is None:
             try:
                 conf = subprocess.run(["ssh", "-G", self.ssh], capture_output=True, text=True, timeout=10).stdout
