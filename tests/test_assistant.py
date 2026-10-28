@@ -638,3 +638,14 @@ def test_about_lists_only_what_this_session_can_do():
 def test_action_status_line(result, line):
     from distillkit.assistant import action_status
     assert action_status("submit_job", result).strip() == "[hpc-assistant] " + line
+
+
+def test_agent_prompt_only_in_agent_mode(tmp_path):
+    from distillkit.assistant import AGENT_PROMPT, SYSTEM_PROMPT, Assistant
+    chat = Assistant(tmp_path, docs=False)
+    agent = Assistant(tmp_path, docs=False, slurm=object())
+    assert chat.history[0]['content'] == SYSTEM_PROMPT  # the training prompt, unchanged outside agent mode
+    assert agent.history[0]['content'] == SYSTEM_PROMPT + AGENT_PROMPT
+    agent.history.append({'role': 'user', 'content': 'x'})
+    agent.reset()
+    assert agent.history[0]['content'].endswith(AGENT_PROMPT)
