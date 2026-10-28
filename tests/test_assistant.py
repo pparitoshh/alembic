@@ -321,3 +321,15 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
     monkeypatch.setattr(assistant, '_release_id', lambda: None)
     assistant.setup(tmp_path, 'cp')  # offline: the installed model stays
     assert len(created) == 2
+
+
+def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
+    spec = importlib.util.spec_from_file_location('add_notes', Path(__file__).resolve().parent.parent / 'scripts/add_notes_to_index.py')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    index = _indexes(tmp_path)
+    for _ in range(2):  # running it again replaces the notes instead of adding copies
+        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 3
+    docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
+                              index / 'factory_docs.sqlite', variant='e')
+    assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
