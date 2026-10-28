@@ -87,6 +87,23 @@ FACTORY_SITES = {
 }
 
 
+# Site names the app adds to the evaluation's routing (FACTORY_SITES stays as research/rag65/retrieve.py has it):
+# the index holds these sites' documentation, but questions naming them got only generic Slurm pages (Oct 28 sweep).
+EXTRA_SITES = {
+    'alps': 'HEARTS', 'cscs': 'HEARTS', 'daint': 'HEARTS', 'eiger': 'HEARTS', 'clariden': 'HEARTS',
+    'archer2': 'UKAIFA', 'cirrus': 'UKAIFA', 'eidf': 'UKAIFA',
+    'plgrid': 'Gaia AI Factory', 'cyfronet': 'Gaia AI Factory', 'athena': 'Gaia AI Factory', 'helios': 'Gaia AI Factory',
+    'ares': 'Gaia AI Factory', 'devana': 'SKAIAT', 'musica': 'AI:AT', 'vsc-5': 'AI:AT', 'komondor': 'HunAIFA',
+    'cyclone': 'Pharos-CY', 'finisterrae': '1HealthAI', 'cesga': '1HealthAI', 'hortense': 'BE-AIFA',
+}
+
+
+def _site(low):
+    """The documentation set a question names: the evaluation's routing first, then the app's extra names."""
+    return (next((name for key, name in FACTORY_SITES.items() if re.search(r'\b' + key + r'\b', low)), None)
+            or next((name for key, name in EXTRA_SITES.items() if re.search(r'\b' + re.escape(key) + r'\b', low)), None))
+
+
 def _query(question):
     terms = [t for t in re.findall(r'[a-z0-9_]+', question.lower()) if len(t) > 2 and t not in STOP]
     return ' OR '.join('"' + t + '"' for t in dict.fromkeys(terms))
@@ -101,7 +118,7 @@ def retrieve(question, pilot_db, factory_db, k=3, variant='', general_db=None):
     query = _query(question)
     if not query:
         return []
-    factory = next((name for key, name in FACTORY_SITES.items() if re.search(r'\b' + key + r'\b', low)), None)
+    factory = _site(low)
     if factory and 'lumi' not in low:
         db = sqlite3.connect('file:' + str(factory_db) + '?mode=ro', uri=True)
         rows = db.execute('SELECT c.url, c.factories, c.title, c.text, c.retrieved_at FROM search '
@@ -191,7 +208,7 @@ def _retrieve_variant(question, pilot_db, factory_db, variant, general_db=None):
     if not query:
         return []
     wide = VARIANT_K * 4
-    factory = next((name for key, name in FACTORY_SITES.items() if re.search(r'\b' + key + r'\b', low)), None)
+    factory = _site(low)
     out = []
     if factory and 'lumi' not in low:
         db = sqlite3.connect('file:' + str(factory_db) + '?mode=ro', uri=True)
