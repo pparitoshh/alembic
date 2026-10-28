@@ -3,7 +3,8 @@ held-out evaluation families and near-eval questions (3-gram Jaccard >= 0.5 with
 deduplicated, stratified by domain, each with the app's excerpts (retriever e) in the user turn.
 
 usage: build_prompts.py OUT.jsonl N [SEED]   (run from the repo root; RAG_VARIANT defaults to e; PROMPT_MIX=slurm,gpu_mpi_env,other
-shares, default 0.4,0.4,0.2; BANK_GLOB=<pattern> limits the banks read)
+shares, default 0.4,0.4,0.2; BANK_GLOB=<pattern> limits the banks read;
+PROMPT_REGEX=<regex> keeps only matching questions, all domains, up to N)
 """
 import glob
 import json
@@ -29,6 +30,7 @@ GPUMPI = re.compile(r'\b(gpu|gpus|cuda|nvcc|nccl|rocm|hip|openacc|mpi|mpirun|mpi
                     r'profil\w*|nsight|nsys|ncu|vtune|scaling|speedup|module|modules|lmod|spack|easybuild|conda|'
                     r'venv|pip|container|apptainer|singularity|compil\w+|gcc|nvhpc|linker|ld_library_path|scratch|'
                     r'lustre|filesystem|quota|i/o|hdf5|interactive|jupyter)\b', re.I)
+TOPIC = re.compile(os.environ['PROMPT_REGEX'], re.I) if os.environ.get('PROMPT_REGEX') else None  # topic round: matching questions only
 MIX = dict(zip(('slurm', 'gpu_mpi_env', 'other'), map(float, os.environ.get('PROMPT_MIX', '0.4,0.4,0.2').split(','))))  # shares
 
 
@@ -64,12 +66,16 @@ for f in sorted(glob.glob(BANKS + '/' + os.environ.get('BANK_GLOB', '*.jsonl')))
         where = ' '.join(str(r.get(k) or '') for k in ('doc_id', 'source_url', 'source_site', 'source_family')).lower()
         if any(h in where for h in HELD):
             continue
+        if TOPIC and not TOPIC.search(q):
+            continue
         seen.add(q)
         ref = next((m['content'] for m in r.get('messages', []) if m['role'] == 'assistant'), '')
         dom = 'slurm' if SLURM.search(q) else 'gpu_mpi_env' if GPUMPI.search(q) else 'other'
         pool[dom].append((r['id'], q, ref))
 rng = random.Random(seed)
 picked = []
+if TOPIC:  # take every matching question, whatever its domain, then cap at N
+    MIX = {d: 1.0 for d in MIX}
 for dom, share in MIX.items():
     c = pool[dom]
     rng.shuffle(c)
@@ -81,6 +87,8 @@ for dom, share in MIX.items():
             continue
         picked.append({'id': rid, 'domain': dom, 'question': q, 'reference': ref})
         k += 1
+rng.shuffle(picked)
+picked = picked[:N]
 print('candidates', {d: len(v) for d, v in pool.items()}, 'picked', Counter(p['domain'] for p in picked), flush=True)
 P, F = 'runs/rag65/indexes/documents.sqlite', 'runs/rag65/indexes/factory_docs.sqlite'
 
