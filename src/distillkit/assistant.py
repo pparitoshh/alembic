@@ -59,7 +59,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from distillkit.slurm_live import SlurmLive, describe, openai_tools
+from distillkit.slurm_live import LoginRequired, SlurmLive, describe, openai_tools
 from distillkit.tools import ToolError
 
 # Same text as the training configs' student.system_prompt.
@@ -665,6 +665,12 @@ class Assistant:
                         result = self.slurm.execute(c['name'], c['arguments'])
                     except ToolError as e:
                         result = {'error': str(e)}
+                    except LoginRequired as e:  # the user has to log in again: stop here, no retries (issue #101)
+                        self.history.append({'role': 'tool', 'tool_call_id': c['id'],
+                                             'content': json.dumps({'error': 'auth_required'})})
+                        self.history.append({'role': 'assistant', 'content': str(e)})
+                        out.write(f'\n{e}\n')
+                        return str(e), sources
                     self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
                     continue
                 try:
@@ -797,6 +803,28 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
     print('[hpc-assistant] ready: hpc-assistant "your question"', file=sys.stderr)
 
 
+def ensure_login(slurm):
+    """Check the ssh login once before the first question (issue #101). In a terminal, offer to open the shared
+    connection so that ssh itself asks for the password or one-time code (issue #102); otherwise stop with the
+    message. The model never sees a credential."""
+    try:
+        slurm.check_login()
+        return
+    except LoginRequired as e:
+        message = str(e)
+    if not sys.stdin.isatty():
+        raise SystemExit(f'[hpc-assistant] {message}')
+    print(f'[hpc-assistant] {message}', file=sys.stderr)
+    if input('Open the connection now? ssh asks for your password or code itself [Y/n] ').strip().lower() not in ('', 'y', 'yes'):
+        raise SystemExit(1)
+    if not slurm.open_connection():
+        raise SystemExit(f'[hpc-assistant] could not open the ssh connection to {slurm.ssh}')
+    try:
+        slurm.check_login()
+    except LoginRequired as e:
+        raise SystemExit(f'[hpc-assistant] {e}')
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog=Path(sys.argv[0]).name if Path(sys.argv[0]).name in ('clusterpilot', 'hpc-assistant') else 'clusterpilot',
                                  description='ClusterPilot: local HPC assistant with built-in documentation search and an agent mode for your Slurm jobs.')
@@ -848,6 +876,8 @@ def main(argv=None):
                         'terminal, or start clusterpilot with --yes')
             return input(f'\n[hpc-assistant] {describe(name, call)}\nProceed? [y/N] ').strip().lower() in ('y', 'yes')
         slurm = SlurmLive(ssh=args.ssh, workdir=args.jobs_dir, confirm=confirm)
+        if args.ssh:
+            ensure_login(slurm)
     bot = Assistant(args.index, docs=not args.no_docs, k=args.k, model=args.model, openai=args.openai,
                     tools=args.tools, retriever=args.retriever,
                     general_index=args.general_index, slurm=slurm)

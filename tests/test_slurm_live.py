@@ -840,3 +840,58 @@ def test_pipeline_split_respects_quotes(command, stages):
 def test_unsupported_pipe_stages_are_named_and_not_run():
     out, note = slurm_live._apply_filters(OUT12, ["sort -r", "head -1", "xargs rm"])
     assert out == "1|job1|COMPLETED\n" and note.endswith("skipped: sort -r | xargs rm")
+
+
+@pytest.mark.parametrize("stderr", [
+    "a08trc09@login02-ext.leonardo.cineca.it: Permission denied (publickey).",
+    "Received disconnect from 1.2.3.4 port 22:2: Too many authentication failures",
+    "Certificate invalid: expired",
+    "Host key verification failed.",
+])
+def test_expired_ssh_login_stops_with_one_message(monkeypatch, stderr):
+    class P:
+        returncode, stdout = 255, ""
+
+    P.stderr = stderr
+    monkeypatch.setattr(slurm_live.subprocess, "run", lambda cmd, **kw: P())
+    s = SlurmLive(ssh="leonardo")
+    s._mux = []
+    with pytest.raises(slurm_live.LoginRequired) as e:
+        s.execute("list_queue", {})
+    assert "log in again" in str(e.value).lower() and "never asks for passwords" in str(e.value)
+
+
+def test_network_errors_and_timeouts_after_login_are_not_login_errors(monkeypatch):
+    class P:
+        returncode, stdout, stderr = 255, "", "ssh: connect to host x port 22: Connection refused"
+    monkeypatch.setattr(slurm_live.subprocess, "run", lambda cmd, **kw: P())
+    s = SlurmLive(ssh="x")
+    s._mux = []
+    assert s.run(["squeue"])[0] == 255  # a network problem: reported as an error, the model may explain it
+
+    def slow(cmd, **kw):
+        raise slurm_live.subprocess.TimeoutExpired(cmd, 60)
+    monkeypatch.setattr(slurm_live.subprocess, "run", slow)
+    with pytest.raises(slurm_live.LoginRequired):  # first call never answered: a login that waits (browser, code)
+        s.run(["squeue"])
+    s._logged_in = True
+    assert s.run(["squeue"])[0] == 124  # after a working call, a slow command is just slow
+
+
+def test_agent_stops_at_the_first_login_error(tmp_path, monkeypatch):
+    calls = []
+
+    def runner(argv, stdin=None):
+        calls.append(argv)
+        raise slurm_live.LoginRequired("The ssh login to leonardo is not valid any more (expired). Log in again.")
+    bot = assistant.Assistant(tmp_path, docs=False, slurm=SlurmLive(runner=runner))
+    rounds = []
+
+    def stream(messages):
+        rounds.append(1)
+        yield {"tool_calls": [{"name": "list_queue", "arguments": {}}]}  # the model would retry every round
+    monkeypatch.setattr(bot, "_stream", stream)
+    out = StringIO()
+    answer, _ = bot.ask("Show my jobs", out=out)
+    assert len(rounds) == 1 and len(calls) == 1 and "Log in again" in answer
+    assert bot.history[-1] == {"role": "assistant", "content": answer}

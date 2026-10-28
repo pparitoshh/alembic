@@ -97,6 +97,17 @@ LIVE_SCHEMAS = [_GPU_SCHEMA | {"description": _GPU_SCHEMA["description"] +
 ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
 # change the cluster: confirmed first (submit_job only without test_only)
 DOCS_HINT = "; to read documentation (man pages, options), call search_docs instead"
+# ssh exits with 255 when it cannot log in; these stderr texts mean the login itself failed (expired certificate,
+# no key, a closed one-time-code connection), not the network or the cluster (issue #101)
+_AUTH_FAILED = re.compile(r"Permission denied|Too many authentication failures|certificate|expired|"
+                          r"Authentication failed|Host key verification failed", re.I)
+PERSIST = "8h"  # a shared connection outlives a working session, so one-time-code clusters ask once (issue #102)
+
+
+class LoginRequired(Exception):
+    """The ssh login to the cluster is not valid: the user has to log in again; the model must not retry."""
+
+
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
 _TYPES = {"string": str, "integer": int, "boolean": bool}
 # cluster default -> sbatch option (submit_job adds the ones the script does not set itself)
@@ -155,6 +166,7 @@ class SlurmLive:
         self._user = None
         self._assoc_cache = None  # the user's sacctmgr associations, fetched once per instance
         self._mux = None
+        self._logged_in = False
         self._parts = None
 
     # --- command execution ---------------------------------------------------------------------
@@ -172,8 +184,31 @@ class SlurmLive:
                 return 127, "", "ssh: command not found (install an OpenSSH client to reach the cluster)"
             return 127, "", f"{argv[0]}: command not found (is this a Slurm login node?)"
         except subprocess.TimeoutExpired:
+            if self.ssh and not self._logged_in:  # e.g. a Match exec line that waits for a browser login
+                raise LoginRequired(self.login_message(f"no answer within {self.timeout} s"))
             return 124, "", f"{argv[0]}: timed out after {self.timeout}s"
+        if self.ssh and p.returncode == 255 and _AUTH_FAILED.search(p.stderr):
+            raise LoginRequired(self.login_message(p.stderr.strip().splitlines()[-1].rstrip(".")))
+        if self.ssh and p.returncode != 255:
+            self._logged_in = True
         return p.returncode, p.stdout, p.stderr
+
+    def login_message(self, reason):
+        return (f"The ssh login to {self.ssh} is not valid any more ({reason}). Log in again in a terminal (for "
+                f"example `step ssh login` for Leonardo's certificate, or `ssh {self.ssh}` and your one-time code), "
+                "then ask again. ClusterPilot never asks for passwords or codes.")
+
+    def check_login(self):
+        """One cheap call before the first question: raises LoginRequired when the login is not valid."""
+        self.run(["true"])
+
+    def open_connection(self):
+        """Open the shared ssh connection in the user's terminal, so that ssh itself asks for the password or code
+        (never the model); the agent's calls then reuse it for PERSIST."""
+        if self._mux is None:
+            self.mux_options()
+        own = ["-o", "ControlMaster=yes", "-o", "ControlPath=~/.ssh/clusterpilot-%C", "-o", f"ControlPersist={PERSIST}"]
+        return subprocess.run(["ssh", *(own if self._mux else []), "-fN", self.ssh]).returncode == 0
 
     def mux_options(self):
         """Reuse one ssh connection for all tool calls (a new connection through a jump host can take 20 s).
@@ -187,7 +222,7 @@ class SlurmLive:
                 conf = ""
             own = re.search(r"^controlpath (?!none$)", conf, re.M | re.I)
             self._mux = [] if own or not conf else [
-                "-o", "ControlMaster=auto", "-o", "ControlPath=~/.ssh/clusterpilot-%C", "-o", "ControlPersist=10m"]
+                "-o", "ControlMaster=auto", "-o", "ControlPath=~/.ssh/clusterpilot-%C", "-o", f"ControlPersist={PERSIST}"]
         return self._mux
 
     def user(self):
