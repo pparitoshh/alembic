@@ -298,9 +298,10 @@ def test_gpu_availability_counts_free_gpus_marks_allowed_partitions_and_shows_qo
             {"partition": "maint", "gpu_type": "a100", "gpus_total": 4, "gpus_free": 3, "idle_nodes": 0,
              "allowed_for_you": False}],
         "your_limits": {"qos": "eai-team04", "gpu_limit": 8, "cpu_limit": 256, "max_wall": "30-12:00:00",
-                        "gpus_in_use": 4, "gpus_you_can_request": 4}}
+                        "team_gpus_in_use": 4, "your_gpus_in_use": 4, "gpus_free_in_team_limit": 4,
+                        "note": "4 of 8 team GPUs are free now. The limit is shared by your team."}}
     r2 = s.execute("gpu_availability", {})
-    assert r2["your_limits"]["gpus_you_can_request"] == 4
+    assert r2["your_limits"]["gpus_free_in_team_limit"] == 4
     assoc = [c for c in fake.calls if c[0][0] == "sacctmgr" and "assoc" in " ".join(c[0])]
     assert len(assoc) == 1 and len([c for c in fake.calls if c[0][0] == "id"]) == 1  # cached per instance
 
@@ -319,9 +320,10 @@ def test_gpu_availability_empty_assoc_partition_allows_all_and_lists_several_qos
     limits = r["your_limits"]
     assert [l["qos"] for l in limits] == ["boost_qos_bprod", "boost_qos_dbg", "boost_qos_lprod", "normal"]
     assert limits[0] == {"qos": "boost_qos_bprod", "gpu_limit": 16, "cpu_limit": 512, "max_wall": "30-12:00:00",
-                         "gpus_in_use": 0, "gpus_you_can_request": 16}
+                         "team_gpus_in_use": 0, "your_gpus_in_use": 0, "gpus_free_in_team_limit": 16,
+                         "note": "16 of 16 team GPUs are free now. The limit is shared by your team."}
     assert limits[3] == {"qos": "normal", "gpu_limit": None, "cpu_limit": 32, "max_wall": "7-00:00:00",
-                         "gpus_in_use": 0, "gpus_you_can_request": None,
+                         "team_gpus_in_use": 0, "your_gpus_in_use": 0, "gpus_free_in_team_limit": None,
                          "note": "no group GPU limit in this QOS"}
 
 
@@ -334,19 +336,19 @@ def test_gpu_availability_keeps_the_result_when_sacctmgr_fails():
                  "your_limits": {"error": "sacctmgr: error: slurmdbd not responding"}}
 
 
-def test_gpu_availability_gpus_in_use_sums_tres_times_nodes_and_is_null_when_unparseable():
+def test_gpu_availability_team_gpus_in_use_sums_tres_times_nodes_and_is_null_when_unparseable():
     base = {"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
             "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
             "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", "")}
     s, fake = live({**base, "squeue&-t&RUNNING": (0, "cpu=4|1\ngres/gpu=2|2\n", ""),
                     "squeue&-q": (0, "gres/gpu=8|1\n", "")})  # a pending job: only served without -t RUNNING
     limits = s.execute("gpu_availability", {})["your_limits"]
-    assert limits["gpus_in_use"] == 4 and limits["gpus_you_can_request"] == 4  # 2 GPUs per node times 2 nodes
-    sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-q" in argv)
+    assert limits["team_gpus_in_use"] == 4 and limits["gpus_free_in_team_limit"] == 4  # 2 GPUs per node times 2 nodes
+    sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-q" in argv and "-u" not in argv)
     assert sq[sq.index("-t") + 1] == "RUNNING"  # pending jobs do not hold GPUs yet, so they are not counted
     s, _ = live({**base, "squeue&-q": (0, "cpu=4|not-a-node-count\n", "")})
     limits = s.execute("gpu_availability", {})["your_limits"]
-    assert limits["gpus_in_use"] is None and limits["gpus_you_can_request"] is None
+    assert limits["team_gpus_in_use"] is None and limits["gpus_free_in_team_limit"] is None
 
 
 def test_gpu_availability_reports_max_gpu_per_user_when_the_qos_sets_it():
@@ -355,8 +357,64 @@ def test_gpu_availability_reports_max_gpu_per_user_when_the_qos_sets_it():
                  "show&qos": (0, "q1|cpu=16,gres/gpu=4|gres/gpu=2|1:00:00\n", ""),
                  "squeue&-q": (0, "gres/gpu=1|1\n", "")})
     limits = s.execute("gpu_availability", {})["your_limits"]
-    assert limits == {"qos": "q1", "gpu_limit": 4, "cpu_limit": 16, "max_wall": "1:00:00", "gpus_in_use": 1,
-                      "gpus_you_can_request": 1, "max_gpu_per_user": 2}
+    assert limits == {"qos": "q1", "gpu_limit": 4, "cpu_limit": 16, "max_wall": "1:00:00", "team_gpus_in_use": 1,
+                      "your_gpus_in_use": 1, "gpus_free_in_team_limit": 1, "max_gpu_per_user": 2,
+                      "note": "1 of 4 team GPUs are free now. The limit is shared by your team."}
+
+
+def test_gpu_availability_your_gpus_in_use_counts_only_the_current_users_jobs():
+    s, fake = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                    "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                    "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", ""),
+                    "squeue&-q&-u": (0, "gres/gpu=2|1\n", ""),  # must win over the shorter team key below
+                    "squeue&-q": (0, "gres/gpu=4|1\ngres/gpu=4|1\n", "")})  # the whole team: a teammate holds 6
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] == 2 and limits["gpus_free_in_team_limit"] == 0
+    user_sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-u" in argv)
+    assert user_sq[user_sq.index("-u") + 1] == "u04"  # the own sum filters squeue by the user
+    assert limits["note"] == ("Your team uses all 8 GPUs of QOS q1 now (2 of them are yours). Slurm still accepts a "
+                              "new GPU job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs are free. "
+                              "sbatch --test-only does not check this limit.")
+
+
+def test_gpu_availability_gpus_free_in_team_limit_is_clamped_to_zero_and_own_use_may_be_unknown():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16,gres/gpu=4||1:00:00\n", ""),
+                 "squeue&-q&-u": (1, "", "squeue: error"), "squeue&-q": (0, "gres/gpu=8|1\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] is None
+    assert limits["gpus_free_in_team_limit"] == 0  # 4 - 8, clamped with max(0, ...)
+    assert limits["note"] == ("Your team uses all 4 GPUs of QOS q1 now (unknown of them are yours). Slurm still "
+                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs "
+                              "are free. sbatch --test-only does not check this limit.")
+
+
+def test_gpu_availability_your_gpus_in_use_is_unknown_when_the_user_name_is_unreadable():
+    s, fake = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                    "id": (1, "", "id: cannot find user name"), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                    "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", ""),
+                    "squeue&-q": (0, "gres/gpu=8|1\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] is None  # not the team total
+    assert limits["gpus_free_in_team_limit"] == 0
+    assert all("-u" not in argv for argv, _ in fake.calls if argv[0] == "squeue")  # no squeue call filtered by user
+    assert limits["note"] == ("Your team uses all 8 GPUs of QOS q1 now (unknown of them are yours). Slurm still "
+                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs "
+                              "are free. sbatch --test-only does not check this limit.")
+
+
+def test_gpu_availability_note_reports_the_free_share_of_the_team_limit_and_skips_it_when_unreadable():
+    base = {"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+            "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+            "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", "")}
+    s, _ = live({**base, "squeue&-q&-u": (0, "gres/gpu=1|1\n", ""), "squeue&-q": (0, "gres/gpu=3|1\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpus_free_in_team_limit"] == 5
+    assert limits["note"] == "5 of 8 team GPUs are free now. The limit is shared by your team."
+    s, _ = live({**base, "squeue&-q": (0, "cpu=4|not-a-node-count\n", "")})  # team use unreadable: no free share
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpus_free_in_team_limit"] is None and "note" not in limits
 
 
 def test_list_queue_empty_queue_reports_it_with_a_message():

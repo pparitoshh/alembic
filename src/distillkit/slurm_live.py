@@ -499,9 +499,10 @@ class SlurmLive:
         return self._assoc_cache
 
     def _qos_limit(self, qos):
-        """The limits of one QOS plus the GPUs its jobs use now (gpus_in_use, null when they cannot be parsed)."""
-        limit = {"qos": qos, "gpu_limit": None, "cpu_limit": None, "max_wall": None, "gpus_in_use": None,
-                 "gpus_you_can_request": None}
+        """The limits of one QOS plus the GPUs its jobs use now: team_gpus_in_use counts the RUNNING jobs of all
+        users in the QOS and your_gpus_in_use only the current user's (each null when it cannot be parsed)."""
+        limit = {"qos": qos, "gpu_limit": None, "cpu_limit": None, "max_wall": None, "team_gpus_in_use": None,
+                 "your_gpus_in_use": None, "gpus_free_in_team_limit": None}
         rc, out, err = self.run(["sacctmgr", "-nP", "show", "qos", qos, "format=name,grptres,maxtresperuser,maxwall"])
         if rc != 0:
             limit["error"] = err.strip() or "sacctmgr failed"
@@ -517,16 +518,32 @@ class SlurmLive:
         else:
             limit["gpu_limit"] = grp["gpu"]
         used = self._gpus_in_use(qos)
-        limit["gpus_in_use"] = used
+        limit["team_gpus_in_use"] = used
+        user = self.user()
+        yours = self._gpus_in_use(qos, user=user) if user else None
+        limit["your_gpus_in_use"] = yours
         caps = [c for c in (grp.get("gpu"), per_user.get("gpu")) if c is not None]
         if caps and used is not None:
-            limit["gpus_you_can_request"] = min(caps) - used
+            limit["gpus_free_in_team_limit"] = max(0, min(caps) - used)
+        if limit["gpu_limit"] is not None and limit["gpus_free_in_team_limit"] is not None:
+            free = limit["gpus_free_in_team_limit"]
+            if free == 0:
+                note = (f"Your team uses all {limit['gpu_limit']} GPUs of QOS {qos} now "
+                        f"({'unknown' if yours is None else yours} of them are yours). Slurm still accepts a new GPU "
+                        "job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs are free. "
+                        "sbatch --test-only does not check this limit.")
+            else:
+                note = f"{free} of {limit['gpu_limit']} team GPUs are free now. The limit is shared by your team."
+            limit["note"] = f"{limit['note']} {note}" if "note" in limit else note
         return limit
 
-    def _gpus_in_use(self, qos):
-        """GPUs in use by the RUNNING jobs of one QOS (pending jobs hold no GPUs yet): TRES per node (%b) times
-        nodes (%D), summed over the jobs."""
-        rc, out, _ = self.run(["squeue", "-h", "-q", qos, "-t", "RUNNING", "-o", "%b|%D"])
+    def _gpus_in_use(self, qos, user=None):
+        """GPUs in use by the RUNNING jobs of one QOS (pending jobs hold no GPUs yet), of all its users or only of
+        user: TRES per node (%b) times nodes (%D), summed over the jobs; null when they cannot be parsed."""
+        cmd = ["squeue", "-h", "-q", qos, "-t", "RUNNING"]
+        if user:
+            cmd += ["-u", user]
+        rc, out, _ = self.run(cmd + ["-o", "%b|%D"])
         if rc != 0:
             return None
         total = 0
