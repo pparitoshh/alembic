@@ -423,6 +423,12 @@ class SlurmLive:
     def run_readonly_command(self, command):
         if re.search(r"\$\{?USER\b", command) and self.user():  # the only variable allowed: the user's own name
             command = re.sub(r"\$\{USER\}|\$USER\b", self.user(), command)
+        # The model adds `| tail -5` or `| grep FAILED` and looped on the refusal (live test, Oct 28). Nothing runs in a
+        # shell: only the command before the first pipe runs; head, tail, grep and wc -l are applied here in Python.
+        stages = _pipeline(command)
+        if stages is None:
+            return {"error": "refused: cannot parse the command (unbalanced quotes)"}
+        command, filters = stages[0], stages[1:]
         if self._SHELL_METACHARS.search(command):
             return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed" + DOCS_HINT}
         try:
@@ -440,9 +446,10 @@ class SlurmLive:
             return {"error": "refused: only read-only commands are allowed "
                              "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)" + DOCS_HINT}
         rc, out, err = self.run(argv)
+        out, note = _apply_filters(out, filters)
         if len(out) > 8000:
             out = out[:8000] + "[truncated]"
-        return {"command": command, "exit_code": rc, "stdout": out, "stderr": err}
+        return {"command": command, "exit_code": rc, "stdout": out, "stderr": err, **({"note": note} if note else {})}
 
     # --- helpers ---------------------------------------------------------------------------------
     def _sacct(self, job_id):
@@ -499,6 +506,55 @@ def _expand(pattern, job_id, row):
     values = {"j": row.get("JobIDRaw") or array, "A": array, "a": index, "x": row.get("JobName", ""),
               "u": row.get("User", ""), "%": "%"}
     return re.sub(r"%(?:\d+)?([jAaxu%])", lambda m: values[m.group(1)], pattern)
+
+
+def _pipeline(command):
+    """Split a command line at the pipes that are outside quotes: ['sacct ...', 'grep -E A|B', ...], or None."""
+    stages, cur, quote = [], "", None
+    for ch in command:
+        if quote:
+            quote = None if ch == quote else quote
+        elif ch in "'\"":
+            quote = ch
+        elif ch == "|":
+            stages.append(cur.strip())
+            cur = ""
+            continue
+        cur += ch
+    return None if quote else stages + [cur.strip()]
+
+
+def _apply_filters(out, filters):
+    """head/tail [-n] N, grep [-i] [-v] [-E] PATTERN and wc -l on command output, in Python (no shell); other
+    stages are skipped and named in the returned note."""
+    lines, skipped = out.splitlines(), []
+    for f in filters:
+        try:
+            argv = shlex.split(f)
+        except ValueError:
+            skipped.append(f)
+            continue
+        cmd, opts = (argv[0] if argv else ""), argv[1:]
+        nums = [int(x.lstrip("-")) for x in opts if x.lstrip("-").isdigit()]
+        if cmd in ("head", "tail") and all(x in ("-n",) or x.lstrip("-").isdigit() for x in opts):
+            n = nums[-1] if nums else 10
+            lines = lines[:n] if cmd == "head" else lines[-n:]
+        elif cmd in ("grep", "egrep") and opts and not opts[-1].startswith("-"):
+            flags = re.I if "-i" in opts else 0
+            pattern = opts[-1].replace("\\|", "|")
+            try:
+                rx = re.compile(pattern, flags)
+            except re.error:
+                rx = re.compile(re.escape(pattern), flags)
+            keep = "-v" not in opts
+            lines = [l for l in lines if bool(rx.search(l)) == keep]
+        elif cmd == "wc" and opts == ["-l"]:
+            lines = [str(len(lines))]
+        else:
+            skipped.append(f)
+    note = (f"only head, tail, grep and wc -l are applied after a pipe; skipped: {' | '.join(skipped)}"
+            if skipped else None)
+    return "\n".join(lines) + ("\n" if lines else ""), note
 
 
 def _gpus(gres):
