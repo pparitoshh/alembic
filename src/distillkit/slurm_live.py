@@ -430,9 +430,16 @@ class SlurmLive:
                 "time_limit": main["Timelimit"], "node_list": main["NodeList"]}
         if rss:
             acct["max_rss"] = f"{max(rss):.1f}G"
+        mem = re.search(r"\bmem=([\d.]+[KMGT]?)", main["AllocTRES"])
+        if mem:  # requested vs used, like seff: a job that asked for 120G and used 4G should ask for less
+            acct["memory_requested"] = f"{_mem_gb(mem.group(1)):.1f}G"
+            if rss and _mem_gb(mem.group(1)):
+                acct["memory_efficiency"] = f"{100 * max(rss) / _mem_gb(mem.group(1)):.0f}%"
         el, cpu, n = _secs(main["Elapsed"]), _secs(main["TotalCPU"]), int(main["AllocCPUS"] or 0)
         if el and n:
             acct["cpu_efficiency"] = f"{100 * cpu / (el * n):.0f}%"
+        if el and _secs(main["Timelimit"]):
+            acct["time_limit_used"] = f"{100 * el / _secs(main['Timelimit']):.0f}%"
         g = re.search(r"gres/gpu(?::[^=,]+)?=(\d+)", main["AllocTRES"])
         acct["gpus"] = int(g.group(1)) if g else 0
         if acct["gpus"]:

@@ -52,10 +52,11 @@ def test_job_status_running_pending_and_finished():
 
 
 def test_job_accounting_efficiency_memory_and_gpus():
-    s, _ = live({"sacct": (0, "7|job|COMPLETED|0:0|p|01:00:00|02:00:00|n1||02:00:00|4|cpu=4,gres/gpu:a100=2,node=1\n"
+    s, _ = live({"sacct": (0, "7|job|COMPLETED|0:0|p|01:00:00|02:00:00|n1||02:00:00|4|cpu=4,gres/gpu:a100=2,mem=12G,node=1\n"
                               "7.batch|batch|COMPLETED|0:0||01:00:00||n1|3145728K|02:00:00|4|\n", "")})
     a = s.execute("job_accounting", {"job_id": "7"})
     assert a["cpu_efficiency"] == "50%" and a["max_rss"] == "3.0G" and a["gpus"] == 2
+    assert a["memory_requested"] == "12.0G" and a["memory_efficiency"] == "25%" and a["time_limit_used"] == "50%"
 
 
 def test_submit_writes_the_script_then_sbatch_and_test_only():
