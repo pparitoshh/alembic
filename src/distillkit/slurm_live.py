@@ -36,6 +36,11 @@ JOB_PRIORITY_SCHEMA = {
     "parameters": {"type": "object", "properties": {"job_id": {"type": "string", "description": "Slurm job id"}},
                    "required": ["job_id"]},
 }
+ACCOUNT_INFO_SCHEMA = {
+    "name": "account_info",
+    "description": "The user's Slurm accounts and the QOS they may use, with each QOS's limits (max wall time, GPU and CPU limits, GPUs in use now) and the user's fairshare (like `sacctmgr show assoc` and `sshare -U`). Use it for questions about the user's account, QOS, limits or fairshare when no job id is given.",
+    "parameters": {"type": "object", "properties": {}, "required": []},
+}
 UPDATE_JOB_SCHEMA = {
     "name": "update_job",
     "description": "Change one setting of the user's pending job, like `scontrol update JobId=<id> TimeLimit=...`: give it more or less wall time (TimeLimit, e.g. 06:00:00), move it to another partition (Partition), change its node count (NumNodes) or QOS. Use it whenever the user asks to extend, shorten, move or change a job. The user is asked to confirm before anything changes.",
@@ -88,7 +93,7 @@ RESERVATION_INFO_SCHEMA = {
 }
 LIVE_SCHEMAS = SCHEMAS + [RECENT_JOBS_SCHEMA, JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
                           HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA,
-                          RESERVATION_INFO_SCHEMA]
+                          RESERVATION_INFO_SCHEMA, ACCOUNT_INFO_SCHEMA]
 # the live gpu_availability also reports the user's team limits; the trained SCHEMAS stay byte-identical
 _GPU_SCHEMA = next(s for s in SCHEMAS if s["name"] == "gpu_availability")
 LIVE_SCHEMAS = [_GPU_SCHEMA | {"description": _GPU_SCHEMA["description"] +
@@ -541,6 +546,21 @@ class SlurmLive:
             return {"error": f"no live usage for job {job_id}: it is not running (sstat only covers running jobs). "
                              "For finished jobs use job_accounting."}
         return {"job_id": job_id, "steps": rows}
+
+    def account_info(self):
+        """Accounts, usable QOS with limits, and fairshare in one call: asked "what is my fairshare and which QOS can I
+        use?", the model ran only `sshare` and then invented QOS limits (QA sweeps on curiosity, Oct 28)."""
+        rc, out, err = self.run(["sacctmgr", "-nP", "show", "assoc", f"user={self.user()}", "format=account,partition,qos"])
+        if rc != 0:
+            return {"error": err.strip() or "sacctmgr failed"}
+        accounts = sorted({line.split("|")[0].strip() for line in out.strip().splitlines() if line.strip()} - {""})
+        _, assoc = self._assoc()
+        allowed, all_parts, qoses = assoc if isinstance(assoc, tuple) else (set(), True, [])
+        res = {"accounts": accounts, "partitions": "all" if all_parts else sorted(allowed),
+               "qos": [self._qos_limit(q) for q in qoses]}
+        rc, out, err = self.run(["sshare", "-U"])
+        res["fairshare"] = out.strip() if rc == 0 else {"error": err.strip() or "sshare failed"}
+        return res
 
     def job_priority(self, job_id):
         rc, out, err = self.run(["sprio", "-j", job_id, "-l"])

@@ -45,7 +45,7 @@ ReservationName=s_tra_ncc3 StartTime=2026-10-29T08:00:00 EndTime=2026-10-29T15:0
 
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
     extras = ["recent_jobs", "job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job",
-              "requeue_job", "run_readonly_command", "reservation_info"]
+              "requeue_job", "run_readonly_command", "reservation_info", "account_info"]
     assert [t["name"] for t in slurm_live.LIVE_SCHEMAS] == [t["name"] for t in SCHEMAS] + extras
     gpu = next(t for t in slurm_live.LIVE_SCHEMAS if t["name"] == "gpu_availability")
     trained = next(t for t in SCHEMAS if t["name"] == "gpu_availability")
@@ -905,3 +905,25 @@ def test_agent_stops_at_the_first_login_error(tmp_path, monkeypatch):
 def test_memory_names_its_unit(raw, text):
     from distillkit.slurm_live import _mem_gb, _mem_text
     assert _mem_text(_mem_gb(raw)) == text
+
+
+def test_account_info_gives_accounts_qos_limits_and_fairshare():
+    """Asked "what is my fairshare and which QOS can I use?" the model ran only sshare and invented QOS limits."""
+    s, fake = live({"id": (0, "u04\n", ""),
+                    "assoc&user=": (0, "eai-hackathon|hackathon|eai-team04\n", ""),
+                    "show&qos": (0, "eai-team04|cpu=256,gres/gpu=8||30-12:00:00\n", ""),
+                    "squeue&-q": (0, "cpu=8,gres/gpu=4|N/A|1|\n", ""),
+                    "sshare&-U": (0, "Account User RawShares FairShare\neai-hackathon u04 1 0.122973\n", "")})
+    r = s.execute("account_info", {})
+    assert r["accounts"] == ["eai-hackathon"] and r["partitions"] == ["hackathon"]
+    assert r["qos"][0]["qos"] == "eai-team04" and r["qos"][0]["gpu_limit"] == 8 and r["qos"][0]["max_wall"] == "30-12:00:00"
+    assert "0.122973" in r["fairshare"]
+
+
+@pytest.mark.parametrize("failing, key", [("assoc&user=", "error"), ("sshare&-U", "fairshare")])
+def test_account_info_reports_failures(failing, key):
+    responses = {"id": (0, "u04\n", ""), "assoc&user=": (0, "acct||normal\n", ""),
+                 "show&qos": (0, "normal|||1-00:00:00\n", ""), "squeue&-q": (0, "", ""), "sshare&-U": (0, "x\n", "")}
+    responses[failing] = (1, "", "slurmdbd not responding")
+    r = live(responses)[0].execute("account_info", {})
+    assert "slurmdbd not responding" in json.dumps(r[key])
