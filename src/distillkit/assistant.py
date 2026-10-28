@@ -301,7 +301,32 @@ def action_status(name, result):
     return f"\n[hpc-assistant] {name}: done" + (f" (job {result['job_id']})" if result.get('job_id') else '') + '\n'
 
 
+def not_approved(result):
+    """The user said no (terminal y/N, the web page's Deny, or no terminal to ask in)."""
+    err = str(result.get('error', '')) if isinstance(result, dict) else ''
+    return any(s in err for s in ('declined', 'did not approve', 'no terminal'))
+
+
 USER_DOC_SHARE = 0.5  # share of the question's search words that the best excerpt of the user's manuals must contain
+
+
+SBATCH = re.compile(r'^\s*#SBATCH\s+(.+?)\s*$', re.M)
+
+
+def script_changes(question, arguments):
+    """A note when the script to submit differs from the #SBATCH lines the user gave: the model once copied
+    `-t 00:05:00` as `-t 00:00:05` (rehearsal, Oct 28). Shown before the approval request."""
+    mine = SBATCH.findall(question)
+    try:
+        args = arguments if isinstance(arguments, dict) else json.loads(arguments or '{}')
+    except json.JSONDecodeError:
+        return ''
+    theirs = SBATCH.findall(str(args.get('script', '')))
+    if not mine or not theirs or mine == theirs:
+        return ''
+    gone, new = [l for l in mine if l not in theirs], [l for l in theirs if l not in mine]
+    return ('\n[hpc-assistant] note: this is not exactly your script. '
+            + '; '.join(['yours: #SBATCH ' + l for l in gone] + ['now: #SBATCH ' + l for l in new]) + '\n')
 
 
 def community_ok(doc, question):
@@ -689,7 +714,7 @@ class Assistant:
             del self.history[1:nxt]
 
     def _answer(self, question, sources, turn, first, out, max_tool_rounds):
-        last_call = None
+        last_call, declined = None, False
         for _ in range(max_tool_rounds + 1):
             answer, calls, checked = [], [], 0
             if first:  # the tool call from the probe above: no second request
@@ -727,8 +752,14 @@ class Assistant:
             for c in calls:
                 if c['name'] != 'search_docs' and self.slurm:
                     out.write(f"\n[{c['name']} {c['arguments'] if isinstance(c['arguments'], str) else json.dumps(c['arguments'])}]\n")
+                    if c['name'] == 'submit_job':
+                        out.write(script_changes(question, c['arguments']))
                     try:
-                        result = self.slurm.execute(c['name'], c['arguments'])
+                        if declined and c['name'] in ACTIONS:  # after a Deny the model retried with another account
+                            result = {'error': 'the user declined an action for this request; ask the user before '
+                                               'trying anything else', 'action': c['name']}
+                        else:
+                            result = self.slurm.execute(c['name'], c['arguments'])
                     except ToolError as e:
                         result = {'error': str(e)}
                     except LoginRequired as e:  # the user has to log in again: stop here, no retries (issue #101)
@@ -740,6 +771,7 @@ class Assistant:
                     self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
                     if c['name'] in ACTIONS:
                         out.write(action_status(c['name'], result))
+                        declined = declined or not_approved(result)
                     continue
                 try:
                     args = c['arguments'] if isinstance(c['arguments'], dict) else json.loads(c['arguments'] or '{}')

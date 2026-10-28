@@ -651,6 +651,23 @@ def test_agent_prompt_only_in_agent_mode(tmp_path):
     assert agent.history[0]['content'].endswith(AGENT_PROMPT)
 
 
+def test_script_changes_names_changed_lines():
+    from distillkit.assistant import script_changes
+    q = 'Submit this job for me:\n#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\nnvidia-smi'
+    same = {'script': '#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\n\nnvidia-smi'}
+    assert script_changes(q, same) == ''
+    note = script_changes(q, json.dumps({'script': '#!/bin/bash\n#SBATCH -A other\n#SBATCH -t 00:00:05\nnvidia-smi'}))
+    assert 'yours: #SBATCH -A proj' in note and 'now: #SBATCH -t 00:00:05' in note
+    assert script_changes('Write a job that prints hello and submit it', same) == ''  # no script of the user's
+
+
+@pytest.mark.parametrize("error, no", [("the user declined this action", True), ("the user did not approve this action", True),
+                                       ("not done: there is no terminal to ask the user for approval", True),
+                                       ("sbatch: error: Invalid account", False)])
+def test_not_approved(error, no):
+    from distillkit.assistant import not_approved
+    assert not_approved({"error": error, "action": "submit_job"}) is no
+
 
 def test_user_docs_match_needs_most_of_the_question(tmp_path):
     from distillkit.assistant import Assistant
@@ -663,3 +680,30 @@ def test_user_docs_match_needs_most_of_the_question(tmp_path):
     assert not bot._user_docs_match('Submit this job for me:\n#!/bin/bash\n#SBATCH -p boost_usr_prod\n'
                                     '#SBATCH --gres=gpu:1\n#SBATCH -t 00:05:00\nnvidia-smi')
     assert not bot._user_docs_match('How many GPUs are free right now?')
+
+
+def test_no_second_action_after_a_deny(tmp_path):
+    """Rehearsal, Oct 28: after Deny the model looked up accounts and called submit_job again with another account."""
+    from distillkit.assistant import Assistant
+    script = '#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\nnvidia-smi'
+    turns = iter([
+        [{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': script.replace('00:05:00', '00:00:05')}}]}],
+        [{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': script.replace('proj', 'other')}}]}],
+        ['Not submitted.'],
+    ])
+
+    class Slurm:
+        asked = []
+
+        def execute(self, name, args):
+            self.asked.append(args['script'])
+            return {'error': 'the user declined this action', 'action': name}
+
+    bot = Assistant(tmp_path, docs=False, slurm=Slurm())
+    bot._stream = lambda messages: iter(next(turns))
+    out = io.StringIO()
+    bot.ask('Submit this job for me:\n' + script, out=out)
+    assert len(Slurm.asked) == 1  # the user was asked once; the retry was not run
+    text = out.getvalue()
+    assert 'yours: #SBATCH -t 00:05:00' in text and 'now: #SBATCH -t 00:00:05' in text  # shown before the approval
+    assert 'declined an action for this request' in text
