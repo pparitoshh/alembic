@@ -283,3 +283,46 @@ def test_guessed_partition_names_are_resolved_or_listed():
                           "boost_usr_prod, dcgp_usr_prod, lrd_all_serial"}
     assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": []}
 
+
+def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
+    import re
+    import threading
+    import time
+    from io import BytesIO
+    from distillkit import assistant_web
+    from distillkit.assistant_web import make_handler
+
+    monkeypatch.setattr(assistant_web, "APPROVAL_WAIT", 5)
+
+    class Bot:  # stands in for Assistant: one cancel_job call per question
+        model, builtin, history = "m", False, [{}]
+
+        def __init__(self, slurm):
+            self.slurm = slurm
+
+        def ask(self, question, out):
+            out.write(json.dumps(self.slurm.execute("cancel_job", {"job_id": "5"})))
+
+    s, fake = live({"squeue&--me": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
+                    "scancel": (0, "", "")})
+    handler = make_handler(Bot(s), approve_in_page=True)
+
+    class Fake(handler):
+        def __init__(self, path, body):
+            self.path, self.rfile, self.wfile = path, BytesIO(body), BytesIO()
+            self.headers = {"Content-Length": str(len(body))}
+            self.request_version, self.requestline, self.command = "HTTP/1.1", f"POST {path} HTTP/1.1", "POST"
+
+    for approve, expect in ((True, b'"cancelled": true'), (False, b"did not approve")):
+        ask = Fake("/api/ask", b'{"question": "cancel 5"}')
+        t = threading.Thread(target=ask.do_POST)
+        t.start()
+        for _ in range(200):
+            if m := re.search(rb"\[\[approve (\w+) (.*)\]\]", ask.wfile.getvalue()):
+                break
+            time.sleep(0.01)
+        assert b"cancel job 5" in m.group(2).lower()
+        Fake("/api/approve", json.dumps({"id": m.group(1).decode(), "approve": approve}).encode()).do_POST()
+        t.join(5)
+        assert expect in ask.wfile.getvalue()
+    assert sum(c[0][0] == "scancel" for c in fake.calls) == 1

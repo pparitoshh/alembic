@@ -491,6 +491,8 @@ def _mem_gb(v):
 
 def describe(name, args):
     """One line for the confirmation prompt."""
+    if name == "cancel_job":
+        return f"cancel job {args.get('job_id')} (scancel)"
     if name == "submit_job":
         head = [l for l in args.get("script", "").splitlines() if l.startswith("#SBATCH")][:6]
         return "submit this job:\n  " + "\n  ".join(head or ["(no #SBATCH lines)"])

@@ -621,7 +621,7 @@ def main(argv=None):
         print(f'[hpc-assistant] no built-in index in {args.index}; only your own documents are searched', file=sys.stderr)
     if args.web:
         from distillkit.assistant_web import serve
-        serve(bot, port=args.port)
+        serve(bot, port=args.port, approve_in_page=bool(slurm) and not args.yes)
         return
     if args.question:
         bot.ask(' '.join(args.question))
