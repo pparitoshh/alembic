@@ -28,6 +28,13 @@ serve the model with vLLM or llama-server and add `--openai http://127.0.0.1:POR
 Covered: Slurm in general and European systems (Leonardo, LUMI and the EuroHPC AI Factories); for other sites add
 their user guide with `--add FILE` or in the web page.
 
+### In the dsh web UI, with approval of job actions
+
+The HPC assistant also runs in the DeepSeek Harness (dsh) web UI. An MCP server gives the model the Slurm tools,
+and a dsh plugin asks you to approve each job action. The setup, the safe storage of your cluster password and a
+first test are in the [HPC Assistant Guide](https://claude.ai/artifact/SsLqjVJ3zqxU1dm13KW5Hk). The files are in
+[`research/dsh_harness/`](research/dsh_harness/).
+
 ## Train your own (DistillKit pipeline)
 
 ### Quick start
