@@ -202,13 +202,25 @@ class SlurmLive:
             return {"error": "sbatch: error: This does not look like a batch script. The first line must start with "
                              "#! followed by the path to an interpreter."}
         # command-line options win over #SBATCH lines, so only add the defaults the script does not set itself
-        given, opts, applied, notes = _script_opts(script), "", [], []
+        defaults, given = dict(self.job_defaults), _script_opts(script)
+        reservation = defaults.pop("reservation", None)
+        if reservation is not None and "reservation" not in given:
+            if str(reservation).startswith("auto:"):  # the name changes daily: use the one ACTIVE match of auto:<prefix>
+                prefix = str(reservation)[5:]
+                names, error = self._active_reservation(prefix)
+                if not error and not names:
+                    error = f"no ACTIVE reservation that starts with {prefix}; the job was not submitted"
+                if not error and len(names) > 1:
+                    error = (f"more than one ACTIVE reservation starts with {prefix} ({', '.join(names)}); "
+                             "the job was not submitted")
+                if error:  # resolve before anything is written on the cluster
+                    return {"error": error}
+                reservation = names[0]
+            defaults["reservation"] = reservation
+        opts, applied = "", []
         for key, opt in _SBATCH_OPTS.items():
-            value = self.job_defaults.get(key)
+            value = defaults.get(key)
             if value is None or key in given:
-                continue
-            if key == "reservation" and str(value).startswith("auto:"):
-                notes.append("reservation auto: not resolved yet")
                 continue
             opts += f" {opt}={shlex.quote(str(value))}"
             applied.append(f"{opt}={shlex.quote(str(value))}")
@@ -231,8 +243,6 @@ class SlurmLive:
             res = {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}", "script_file": path}
         if applied:
             res["defaults_applied"] = applied
-        if notes:
-            res["note"] = "; ".join(notes)
         return res
 
     def cancel_job(self, job_id):
@@ -404,6 +414,21 @@ class SlurmLive:
         return {"command": command, "exit_code": rc, "stdout": out, "stderr": err}
 
     # --- helpers ---------------------------------------------------------------------------------
+    def _active_reservation(self, prefix):
+        """The names of the ACTIVE reservations whose name starts with prefix, or an error string in the second slot."""
+        rc, out, err = self.run(["scontrol", "show", "reservation"])
+        if rc != 0:
+            return [], f"scontrol show reservation failed: {(err or out).strip() or 'scontrol failed'}"
+        out = out.strip()
+        if not out or "no reservations in the system" in out.lower():
+            return [], None
+        names = []
+        for record in out.split("\n\n"):  # records are separated by blank lines
+            fields = dict(f.split("=", 1) for f in record.split() if "=" in f)
+            if fields.get("State") == "ACTIVE" and fields.get("ReservationName", "").startswith(prefix):
+                names.append(fields["ReservationName"])
+        return names, None
+
     def _sacct(self, job_id):
         fields = "JobID,JobName,State,ExitCode,Partition,Elapsed,Timelimit,NodeList,MaxRSS,TotalCPU,AllocCPUS,AllocTRES"
         rc, out, _ = self.run(["sacct", "-n", "-P", "-j", job_id, f"--format={fields}"])

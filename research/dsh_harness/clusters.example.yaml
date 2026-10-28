@@ -8,7 +8,7 @@ clusters:
     defaults:
       account: EUHPC_D30_031
       partition: boost_usr_prod
-      reservation: auto:s_tra_ncc      # the ACTIVE reservation whose name starts with s_tra_ncc (TASK 5)
+      reservation: auto:s_tra_ncc      # the ACTIVE reservation whose name starts with s_tra_ncc
       gres: gpu:1
   curiosity:
     ssh: curiosity

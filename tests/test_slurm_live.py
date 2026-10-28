@@ -32,6 +32,16 @@ def live(responses, confirm=lambda n, a: True):
 
 QUEUE_ARGV = ["squeue", "--me", "-h", "-o", "%i|%j|%T|%P|%M|%l|%r", "-t", "RUNNING"]
 
+RESERVATIONS = """
+ReservationName=s_tra_ncc2 StartTime=2026-10-28T08:00:00 EndTime=2026-10-28T22:00:00 Duration=14:00:00
+   Nodes=lrdn[0066,0083] NodeCnt=32 CoreCnt=1024 Features=(null) PartitionName=boost_usr_prod Flags=
+   Users=(null) Groups=(null) Accounts=EUHPC_D30_031 Licenses=(null) State=ACTIVE BurstBuffer=(null)
+
+ReservationName=s_tra_ncc3 StartTime=2026-10-29T08:00:00 EndTime=2026-10-29T15:00:00 Duration=07:00:00
+   Nodes=lrdn[0066,0083] NodeCnt=32 CoreCnt=1024 Features=(null) PartitionName=boost_usr_prod Flags=
+   Users=(null) Groups=(null) Accounts=EUHPC_D30_031 Licenses=(null) State=INACTIVE BurstBuffer=(null)
+"""
+
 
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
     assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
@@ -84,14 +94,67 @@ def test_actions_need_confirmation_and_cancel_only_own_jobs():
     assert s.execute("cancel_job", {"job_id": "5"}) == {"cancelled": True, "message": "Job 5 cancelled (was PENDING)"}
 
 
-def test_submit_job_applies_the_cluster_defaults():
-    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
-    s = SlurmLive(runner=fake, job_defaults={"account": "acc1", "partition": "part1", "reservation": "auto:x"},
+def test_submit_job_resolves_the_auto_reservation_to_the_one_active_match():
+    responses = {"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", ""),
+                 "scontrol&show&reservation": (0, RESERVATIONS, "")}
+    fake = FakeSlurm(responses)
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1", "partition": "part1", "reservation": "auto:s_tra_ncc"},
                   confirm=lambda n, a: True)
     r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH -t 5\n"})
-    assert r["submitted"] and r["note"] == "reservation auto: not resolved yet"
-    sbatch = " ".join(fake.calls[1][0])
-    assert "--account=acc1" in sbatch and "--partition=part1" in sbatch and "--reservation" not in sbatch
+    assert r["submitted"] and "note" not in r
+    assert r["defaults_applied"] == ["--account=acc1", "--partition=part1", "--reservation=s_tra_ncc2"]
+    assert "--reservation=s_tra_ncc2" in " ".join(fake.calls[2][0])  # scontrol, mkdir, then sbatch
+
+
+def test_submit_job_auto_reservation_with_no_active_match_is_an_error():
+    fake = FakeSlurm({"scontrol&show&reservation": (0, RESERVATIONS.replace("State=ACTIVE", "State=INACTIVE"), "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert r == {"error": "no ACTIVE reservation that starts with s_tra_ncc; the job was not submitted"}
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]  # no sbatch and no script write
+
+
+def test_submit_job_auto_reservation_with_two_actives_lists_them():
+    fake = FakeSlurm({"scontrol&show&reservation": (0, RESERVATIONS.replace("State=INACTIVE", "State=ACTIVE"), "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert "s_tra_ncc2, s_tra_ncc3" in r["error"]
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_submit_job_auto_reservation_with_no_reservations_at_all_is_an_error():
+    fake = FakeSlurm({"scontrol&show&reservation": (0, "No reservations in the system\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert r == {"error": "no ACTIVE reservation that starts with s_tra_ncc; the job was not submitted"}
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_submit_job_failing_scontrol_is_an_error():
+    fake = FakeSlurm({"scontrol&show&reservation": (1, "", "scontrol: error: something broke")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert "scontrol show reservation failed" in r["error"] and "something broke" in r["error"]
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_submit_job_test_only_resolves_the_auto_reservation_the_same_way():
+    responses = {"mkdir": (0, "", ""), "sbatch&--test-only": (0, "", "sbatch: Job 9 to start at 2026-10-28T09:00:00"),
+                 "scontrol&show&reservation": (0, RESERVATIONS, "")}
+    fake = FakeSlurm(responses)
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n", "test_only": True})
+    assert r["valid"] and r["defaults_applied"] == ["--reservation=s_tra_ncc2"]
+    assert "--reservation=s_tra_ncc2" in " ".join(fake.calls[2][0])
+
+
+def test_submit_job_the_scripts_own_reservation_skips_the_lookup():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --reservation=x\necho hi\n"})
+    assert r["submitted"] and "defaults_applied" not in r
+    assert not any("scontrol" in " ".join(c[0]) for c in fake.calls)
+    assert "--reservation" not in " ".join(fake.calls[1][0])
 
 
 def test_submit_job_the_scripts_own_sbatch_lines_block_the_defaults():
