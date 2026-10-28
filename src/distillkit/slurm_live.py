@@ -533,10 +533,10 @@ class SlurmLive:
         rc, out, _ = self.run(["sstat", "--allsteps", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
         rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()] if rc == 0 else []
         rows = [r for r in rows if not r["JobID"].endswith(".extern")]  # the extern step has no useful numbers
-        for r in rows:  # '5918748772K' was read as 5.9 GB (it is 5.6 TB): give memory in GB, like job_accounting
+        for r in rows:  # '5918748772K' was read as 5.9 GB (it is 5.6 TB): give memory with its unit, like job_accounting
             for k in ("MaxRSS", "AveRSS", "MaxVMSize"):
                 if r.get(k):
-                    r[k] = f"{_mem_gb(r[k]):.1f}G"
+                    r[k] = _mem_text(_mem_gb(r[k]))
         if not rows:
             return {"error": f"no live usage for job {job_id}: it is not running (sstat only covers running jobs). "
                              "For finished jobs use job_accounting."}
@@ -752,10 +752,10 @@ class SlurmLive:
                 "exit_code": main["ExitCode"], "partition": main["Partition"], "elapsed": main["Elapsed"],
                 "time_limit": main["Timelimit"], "node_list": main["NodeList"]}
         if rss:
-            acct["max_rss"] = f"{max(rss):.1f}G"
+            acct["max_rss"] = _mem_text(max(rss))
         mem = re.search(r"\bmem=([\d.]+[KMGT]?)", main["AllocTRES"])
         if mem:  # requested vs used, like seff: a job that asked for 120G and used 4G should ask for less
-            acct["memory_requested"] = f"{_mem_gb(mem.group(1)):.1f}G"
+            acct["memory_requested"] = _mem_text(_mem_gb(mem.group(1)))
             if rss and _mem_gb(mem.group(1)):
                 acct["memory_efficiency"] = f"{100 * max(rss) / _mem_gb(mem.group(1)):.0f}%"
         el, cpu, n = _secs(main["Elapsed"]), _secs(main["TotalCPU"]), int(main["AllocCPUS"] or 0)
@@ -901,6 +901,12 @@ def _mem_gb(v):
     if not m:
         return 0.0
     return float(m.group(1)) * {"": 1 / 2**30, "K": 1 / 2**20, "M": 1 / 1024, "G": 1, "T": 1024}[m.group(2)]
+
+
+def _mem_text(gb):
+    """Memory for the model to read: '135.9 GB', or '5.51 TB' from 1024 GB on. The model read '5644.6G' as 5.6 GB
+    (a QA sweep on curiosity, Oct 28), so large values get the larger unit and every value names its unit."""
+    return f"{gb / 1024:.2f} TB" if gb >= 1024 else f"{gb:.1f} GB"
 
 
 def describe(name, args):
