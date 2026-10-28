@@ -348,6 +348,8 @@ def chunks(text, size=2200):
         cur = (cur + '\n\n' + para).strip()
     if cur:
         out.append(cur)
+    if len(out) == 1 and len(out[0]) >= 20:  # a short note is one whole document, not a stray fragment: keep it
+        return out
     return [c for c in out if len(c) >= 80]
 
 

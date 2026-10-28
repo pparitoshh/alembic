@@ -473,3 +473,20 @@ def test_model_errors_become_messages_and_agent_mode_needs_slurm(tmp_path, monke
         assert 'no Slurm' in str(e) and '--ssh' in str(e)
     else:
         raise AssertionError('agent mode without Slurm must stop')
+
+
+def test_short_documents_are_indexed_and_empty_uploads_are_refused(tmp_path):
+    from distillkit import assistant_web as web
+    assert assistant.chunks('Cluster X storage: scratch is purged after 30 days.') == [
+        'Cluster X storage: scratch is purged after 30 days.']
+    assert assistant.chunks('p. 3') == []  # too short to be useful
+    long = '\n\n'.join(['header'] + ['word ' * 60] * 3)
+    assert all(len(c) >= 80 for c in assistant.chunks(long))  # stray fragments of long manuals are still dropped
+    bot = assistant.Assistant(_indexes(tmp_path))
+    assert web.save_upload(bot, 'notes.txt', b'Cluster X storage: scratch is purged after 30 days.') == ('notes.txt', 1)
+    try:
+        web.save_upload(bot, 'empty.txt', b'   \n')
+    except ValueError as e:
+        assert 'no text found in empty.txt' in str(e) and not (tmp_path / 'uploads' / 'empty.txt').exists()
+    else:
+        raise AssertionError('an empty upload must be refused')

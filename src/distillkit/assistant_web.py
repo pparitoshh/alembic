@@ -34,7 +34,11 @@ def save_upload(bot, name, data):
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / name
     path.write_bytes(data)
-    return name, bot.add(path)
+    n = bot.add(path)
+    if not n:  # nothing to search: say so instead of listing an empty document
+        path.unlink()
+        raise ValueError(f'no text found in {name} (for a scanned PDF install tesseract and poppler)')
+    return name, n
 
 
 def user_documents(bot):
