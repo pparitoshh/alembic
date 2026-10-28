@@ -437,12 +437,12 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995"
+      "sha256": "8dbe7ef7ff96339a41f385f7701c2c7197019547557092bec1661657421bb4fe"
     },
     {
       "root": "repository",
       "path": "src/distillkit/evaluate.py",
-      "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+      "sha256": "48afccdfafea069146eb814bf593d2a7d41c5f35fcb5b84d53250d9c22ff0175"
     },
     {
       "root": "repository",
@@ -793,6 +793,34 @@
       "source_evidence_changed": false,
       "reason": "Add opt-in train.val_fraction and train.report_to for validation loss and MLflow tracking. Only the config.py code binding changes; retain previous hash and all existing history.",
       "compatibility": "Only TrainCfg gains two optional fields. EvalCfg, evaluation answering inputs/schemas/scorers, tool definitions and judge verdict schema/protocol remain unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified.",
+      "pre_binding_validation": {
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused prior config.py hash."
+      },
+      "validation_scope": "Metadata-only binding update is followed by the full suite."
+    },
+    {
+      "version": "command-check-binding-v1",
+      "created_utc": "2026-10-28T16:16:09.351031+00:00",
+      "base_revision": "093925361fa7feed154f4c6a8df61b5f1cc507e2",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "e7b05db1cc29b5c5d2f737c22a013dcdada7a88dda6f1aac9f3247d841065860",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "c15a7e6c7c684a494e9bdd67e387d8e2a3fc7a1bc7dea053eb6c330076bd3995",
+          "after": "8dbe7ef7ff96339a41f385f7701c2c7197019547557092bec1661657421bb4fe"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "before": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d",
+          "after": "48afccdfafea069146eb814bf593d2a7d41c5f35fcb5b84d53250d9c22ff0175"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Issue #110: add opt-in verify.check_commands/verify.command_list and report answers_with_command_problems in evaluate.py. Only the config.py and evaluate.py code bindings change; retain previous hashes and all existing history.",
+      "compatibility": "VerifyCfg gains two optional fields (off by default). evaluate.py adds one reported count; check_pass_rate, bad_flag_rate, answers_with_bad_flags, EvalCfg, tool SCHEMAS, scorers, judge protocol and the mock scheduler (tools.py, unchanged) are unchanged. No questions, references, source spans, calibration pairs or scoring fixtures are modified.",
       "pre_binding_validation": {
         "full_failed": 1,
         "full_failure": "Strict151 release validation refused prior config.py hash."

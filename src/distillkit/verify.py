@@ -5,7 +5,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from .checks import check_answer, load_flags
+from .checks import check_answer, load_commands, load_flags
 from .config import Config
 from .io import read_jsonl, write_jsonl
 from .records import final_answer, messages
@@ -35,6 +35,7 @@ def run(cfg: Config) -> Path:
                any(r.get('workflow_version') == WORKFLOW_VERSION for r in rows)) else None
     valid_flags = load_flags(vcfg.flag_list)
     set_valid_flags(valid_flags)  # tool checks run submit_job on the mock sbatch
+    commands = load_commands(vcfg.command_list) if vcfg.check_commands else None
     eval_shingles = [_shingles(r["question"]) for r in read_jsonl(cfg.eval.file)]
 
     kept, rejected, pending_review = [], [], []
@@ -74,12 +75,14 @@ def run(cfg: Config) -> Path:
             elif any(_jaccard(sh, k) >= vcfg.dedup_threshold for k in kept_questions.values()):
                 reason = "near_duplicate"
         if reason is None:
-            checks = check_answer(a, valid_flags)
+            checks = check_answer(a, valid_flags, commands)
             r = {**r, "checks": checks}
             if checks["bad_flags"]:
                 reason = "bad_flags"
             elif not checks["bash_ok"]:
                 reason = "bash_syntax"
+            elif checks.get("command_problems"):
+                reason = "unknown_command_option"
         transcript = messages(r)
         tool_shaped = (r.get('tools') is not None or r.get('workflow_version') is not None or
                        r.get('tool_policy') is not None or
