@@ -363,7 +363,8 @@ class Assistant:
         self.slurm = slurm  # agent mode: a slurm_live.SlurmLive whose tools the model can call
         self.extra_body = {}  # merged into OpenAI-compatible requests, e.g. {'chat_template_kwargs': {'enable_thinking': False}}
         self.retriever = retriever  # 'e' (default): b + relevance header; 'f': d + relevance header (the default with a general index); 'b': improved; 'd': b + general index; 'classic': the original 3
-        self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+        self.history = [{'role': 'system', 'content': SYSTEM_PROMPT + (
+            '\nPrefer a specific tool. Use run_readonly_command only when no tool fits.' if self.slurm else '')}]
         self.titles = {}  # source url -> page title, for the Sources list
 
     # --- documents -----------------------------------------------------------------------------
@@ -469,6 +470,7 @@ class Assistant:
         max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
         user, sources = self.prompt(question)
         self.history.append({'role': 'user', 'content': user})
+        last_call = None
         for _ in range(max_tool_rounds + 1):
             answer, calls = [], []
             for piece in self._stream(self.history):
@@ -482,6 +484,7 @@ class Assistant:
                 break
             for i, c in enumerate(calls):  # OpenAI-compatible servers (vLLM) require ids linking calls and results
                 c['id'] = c.get('id') or f'call_{len(self.history)}_{i}'
+            last_call = calls[-1]
             self.history.append({'role': 'assistant', 'content': ''.join(answer), 'tool_calls': [
                 {'id': c['id'], 'type': 'function', 'function': {
                     'name': c['name'],
@@ -507,6 +510,17 @@ class Assistant:
                 out.write(f"\n[searched: {args.get('query', '')}]\n")
                 self.history.append({'role': 'tool', 'tool_call_id': c['id'],
                                      'content': with_context('Results:', docs) if docs else 'No results.'})
+        else:  # the round limit is used up while the model still wanted tools
+            name = (last_call or {}).get('name', '?')
+            args = (last_call or {}).get('arguments', '{}')
+            if not isinstance(args, str):
+                args = json.dumps(args)
+            self.history.append({'role': 'assistant', 'content': (
+                f'I stopped here after {max_tool_rounds} tool rounds without a final answer. The last tool I tried '
+                f'was {name} with arguments {args}.')})
+            notice = (f'(stopped after {max_tool_rounds} tool rounds; last call: {name})')
+            out.write('\n' + notice + '\n')
+            return notice, sources
         self.history.append({'role': 'assistant', 'content': ''.join(answer)})
         if sources:
             out.write('\n\nSources:\n' + '\n'.join('- ' + u + (f' ({self.titles[u]})' if self.titles.get(u) else '')
