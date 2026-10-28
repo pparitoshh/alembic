@@ -74,8 +74,8 @@ def test_job_accounting_efficiency_memory_and_gpus():
     s, _ = live({"sacct": (0, "7|job|COMPLETED|0:0|p|01:00:00|02:00:00|n1||02:00:00|4|cpu=4,gres/gpu:a100=2,mem=12G,node=1\n"
                               "7.batch|batch|COMPLETED|0:0||01:00:00||n1|3145728K|02:00:00|4|\n", "")})
     a = s.execute("job_accounting", {"job_id": "7"})
-    assert a["cpu_efficiency"] == "50%" and a["max_rss"] == "3.0G" and a["gpus"] == 2
-    assert a["memory_requested"] == "12.0G" and a["memory_efficiency"] == "25%" and a["time_limit_used"] == "50%"
+    assert a["cpu_efficiency"] == "50%" and a["max_rss"] == "3.0 GB" and a["gpus"] == 2
+    assert a["memory_requested"] == "12.0 GB" and a["memory_efficiency"] == "25%" and a["time_limit_used"] == "50%"
 
 
 def test_submit_writes_the_script_then_sbatch_and_test_only():
@@ -554,8 +554,8 @@ def test_job_usage_argv_rows_and_error_for_non_running_jobs():
     s, fake = live({"sstat&MaxVMSize": (0, "9|01:30:00|3145728K|1048576K|4194304K\n9.ext|01:00:00|||2097152K\n", "")})
     r = s.execute("job_usage", {"job_id": "9"})
     assert fake.calls[0][0] == ["sstat", "--allsteps", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
-    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3.0G", "AveRSS": "1.0G",
-                             "MaxVMSize": "4.0G"} and r["steps"][1]["JobID"] == "9.ext"
+    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3.0 GB", "AveRSS": "1.0 GB",
+                             "MaxVMSize": "4.0 GB"} and r["steps"][1]["JobID"] == "9.ext"
     s, _ = live({"sstat": (1, "", "error: Pending job")})
     r = s.execute("job_usage", {"job_id": "9"})
     assert "not running" in r["error"] and "job_accounting" in r["error"]
@@ -895,3 +895,13 @@ def test_agent_stops_at_the_first_login_error(tmp_path, monkeypatch):
     answer, _ = bot.ask("Show my jobs", out=out)
     assert len(rounds) == 1 and len(calls) == 1 and "Log in again" in answer
     assert bot.history[-1] == {"role": "assistant", "content": answer}
+
+
+@pytest.mark.parametrize("raw, text", [
+    ("3145728K", "3.0 GB"), ("512M", "0.5 GB"), ("1023.9G", "1023.9 GB"), ("1024G", "1.00 TB"),
+    ("5918748772K", "5.51 TB"),  # the live value the model misread as 5.9 GB
+    ("2T", "2.00 TB"), ("", "0.0 GB"),
+])
+def test_memory_names_its_unit(raw, text):
+    from distillkit.slurm_live import _mem_gb, _mem_text
+    assert _mem_text(_mem_gb(raw)) == text
