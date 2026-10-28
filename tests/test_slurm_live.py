@@ -44,10 +44,16 @@ ReservationName=s_tra_ncc3 StartTime=2026-10-29T08:00:00 EndTime=2026-10-29T15:0
 
 
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
-    assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
-    assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == \
-        ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
-         "run_readonly_command", "reservation_info"]
+    extras = ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
+              "run_readonly_command", "reservation_info"]
+    assert [t["name"] for t in slurm_live.LIVE_SCHEMAS] == [t["name"] for t in SCHEMAS] + extras
+    gpu = next(t for t in slurm_live.LIVE_SCHEMAS if t["name"] == "gpu_availability")
+    trained = next(t for t in SCHEMAS if t["name"] == "gpu_availability")
+    assert gpu["description"] == trained["description"] + " It also shows your team's QOS limits."
+    assert gpu["parameters"] == trained["parameters"]
+    others = [t for t in slurm_live.LIVE_SCHEMAS if t["name"] != "gpu_availability"]
+    assert others == [t for t in SCHEMAS if t["name"] != "gpu_availability"] + slurm_live.LIVE_SCHEMAS[len(SCHEMAS):]
+    assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == extras
 
 
 def test_job_status_running_pending_and_finished():
@@ -277,14 +283,90 @@ def test_read_job_log_patterns_for_array_tasks_relative_paths_and_defaults():
     assert s._log_path("42", "stdout") == "/w/slurm-42.out"
 
 
-def test_gpu_availability_counts_free_gpus_on_usable_nodes():
-    out = ("lrdn0001 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:4(IDX:0-3) mixed\n"
-           "lrdn0002 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:1(IDX:0) mixed\n"
-           "lrdn0003 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) idle\n"
-           "lrdn0004 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) drained\n")
-    s, _ = live({"sinfo": (0, out, "")})
-    assert s.execute("gpu_availability", {}) == {"partitions": [
-        {"partition": "boost_usr_prod", "gpu_type": "a100", "gpus_total": 16, "gpus_free": 7, "idle_nodes": 1}]}
+def test_gpu_availability_counts_free_gpus_marks_allowed_partitions_and_shows_qos_limits():
+    out = ("lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n"
+           "lrdn0002 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) drained\n"
+           "lrdn0003 maint gpu:a100:4(S:0-1) gpu:a100:1(IDX:0) mixed\n")
+    s, fake = live({"sinfo": (0, out, ""), "id": (0, "u04\n", ""),
+                    "assoc&user=": (0, "eai-hackathon|hackathon|eai-team04\n", ""),
+                    "show&qos": (0, "eai-team04|cpu=256,gres/gpu=8||30-12:00:00\n", ""),
+                    "squeue&-q": (0, "gres/gpu=4|1\n", "")})
+    assert s.execute("gpu_availability", {}) == {
+        "partitions": [
+            {"partition": "hackathon", "gpu_type": "h100", "gpus_total": 16, "gpus_free": 8, "idle_nodes": 1,
+             "allowed_for_you": True},
+            {"partition": "maint", "gpu_type": "a100", "gpus_total": 4, "gpus_free": 3, "idle_nodes": 0,
+             "allowed_for_you": False}],
+        "your_limits": {"qos": "eai-team04", "gpu_limit": 8, "cpu_limit": 256, "max_wall": "30-12:00:00",
+                        "gpus_in_use": 4, "gpus_you_can_request": 4}}
+    r2 = s.execute("gpu_availability", {})
+    assert r2["your_limits"]["gpus_you_can_request"] == 4
+    assoc = [c for c in fake.calls if c[0][0] == "sacctmgr" and "assoc" in " ".join(c[0])]
+    assert len(assoc) == 1 and len([c for c in fake.calls if c[0][0] == "id"]) == 1  # cached per instance
+
+
+def test_gpu_availability_empty_assoc_partition_allows_all_and_lists_several_qos():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""),
+                 "assoc&user=": (0, "acc||boost_qos_bprod,boost_qos_dbg,boost_qos_lprod,normal\n", ""),
+                 "show&qos&boost_qos_bprod": (0, "boost_qos_bprod|cpu=512,gres/gpu=16||30-12:00:00\n", ""),
+                 "show&qos&boost_qos_dbg": (0, "boost_qos_dbg|cpu=64,gres/gpu=2||4:00:00\n", ""),
+                 "show&qos&boost_qos_lprod": (0, "boost_qos_lprod|cpu=256,gres/gpu=8||30-12:00:00\n", ""),
+                 "show&qos&normal": (0, "normal|cpu=32||7-00:00:00\n", ""),
+                 "squeue&-q": (0, "", "")})
+    r = s.execute("gpu_availability", {})
+    assert r["partitions"][0]["allowed_for_you"] is True  # empty assoc partition field = all partitions
+    limits = r["your_limits"]
+    assert [l["qos"] for l in limits] == ["boost_qos_bprod", "boost_qos_dbg", "boost_qos_lprod", "normal"]
+    assert limits[0] == {"qos": "boost_qos_bprod", "gpu_limit": 16, "cpu_limit": 512, "max_wall": "30-12:00:00",
+                         "gpus_in_use": 0, "gpus_you_can_request": 16}
+    assert limits[3] == {"qos": "normal", "gpu_limit": None, "cpu_limit": 32, "max_wall": "7-00:00:00",
+                         "gpus_in_use": 0, "gpus_you_can_request": None,
+                         "note": "no group GPU limit in this QOS"}
+
+
+def test_gpu_availability_keeps_the_result_when_sacctmgr_fails():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""), "assoc&user=": (1, "", "sacctmgr: error: slurmdbd not responding")})
+    r = s.execute("gpu_availability", {})
+    assert r == {"partitions": [{"partition": "hackathon", "gpu_type": "h100", "gpus_total": 8, "gpus_free": 8,
+                                 "idle_nodes": 1}],
+                 "your_limits": {"error": "sacctmgr: error: slurmdbd not responding"}}
+
+
+def test_gpu_availability_gpus_in_use_sums_tres_times_nodes_and_is_null_when_unparseable():
+    base = {"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+            "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+            "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", "")}
+    s, fake = live({**base, "squeue&-t&RUNNING": (0, "cpu=4|1\ngres/gpu=2|2\n", ""),
+                    "squeue&-q": (0, "gres/gpu=8|1\n", "")})  # a pending job: only served without -t RUNNING
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpus_in_use"] == 4 and limits["gpus_you_can_request"] == 4  # 2 GPUs per node times 2 nodes
+    sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-q" in argv)
+    assert sq[sq.index("-t") + 1] == "RUNNING"  # pending jobs do not hold GPUs yet, so they are not counted
+    s, _ = live({**base, "squeue&-q": (0, "cpu=4|not-a-node-count\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpus_in_use"] is None and limits["gpus_you_can_request"] is None
+
+
+def test_gpu_availability_reports_max_gpu_per_user_when_the_qos_sets_it():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16,gres/gpu=4|gres/gpu=2|1:00:00\n", ""),
+                 "squeue&-q": (0, "gres/gpu=1|1\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits == {"qos": "q1", "gpu_limit": 4, "cpu_limit": 16, "max_wall": "1:00:00", "gpus_in_use": 1,
+                      "gpus_you_can_request": 1, "max_gpu_per_user": 2}
+
+
+def test_list_queue_empty_queue_reports_it_with_a_message():
+    s, _ = live({"squeue": (0, "", "")})
+    assert s.execute("list_queue", {}) == {"jobs": [], "message": "You have no running or pending jobs."}
+    s, _ = live({"squeue": (0, "", "")})
+    assert s.execute("list_queue", {"state": "RUNNING"}) == {"jobs": [], "message": "You have no RUNNING jobs."}
+    s, _ = live({"squeue": (0, "42|train|RUNNING|p|0:10|1:00:00|None\n", "")})
+    assert s.execute("list_queue", {}) == {"jobs": [{"job_id": "42", "name": "train", "state": "RUNNING",
+                                                     "partition": "p", "elapsed": "0:10", "time_limit": "1:00:00"}]}
 
 
 def test_invalid_calls():

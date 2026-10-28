@@ -80,6 +80,11 @@ RESERVATION_INFO_SCHEMA = {
 LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
                           HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA,
                           RESERVATION_INFO_SCHEMA]
+# the live gpu_availability also reports the user's team limits; the trained SCHEMAS stay byte-identical
+_GPU_SCHEMA = next(s for s in SCHEMAS if s["name"] == "gpu_availability")
+LIVE_SCHEMAS = [_GPU_SCHEMA | {"description": _GPU_SCHEMA["description"] +
+                               " It also shows your team's QOS limits."} if s["name"] == "gpu_availability" else s
+                for s in LIVE_SCHEMAS]
 ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
 # change the cluster: confirmed first (submit_job only without test_only)
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
@@ -130,6 +135,7 @@ class SlurmLive:
         self.confirm = confirm or (lambda name, args: False)
         self._runner = runner  # tests: callable(cmd, stdin) -> (rc, stdout, stderr)
         self._user = None
+        self._assoc_cache = None  # the user's sacctmgr associations, fetched once per instance
 
     # --- command execution ---------------------------------------------------------------------
     def run(self, argv, stdin=None):
@@ -212,6 +218,9 @@ class SlurmLive:
             if st == "PENDING":
                 j["reason"] = reason
             jobs.append(j)
+        if not jobs:
+            message = f"You have no {state} jobs." if state else "You have no running or pending jobs."
+            return {"jobs": jobs, "message": message}
         return {"jobs": jobs}
 
     def submit_job(self, script, test_only=False):
@@ -321,7 +330,9 @@ class SlurmLive:
                 p["idle_nodes"] += f[4].startswith("idle")
         if partition and not parts:
             return {"error": f"no GPU nodes in partition {partition} (or the partition does not exist)"}
-        return {"partitions": list(parts.values())}
+        res = {"partitions": list(parts.values())}
+        self._add_your_limits(res)
+        return res
 
     def partition_info(self, partition=None):
         argv = ["scontrol", "show", "partition", "-o"] + ([partition] if partition else [])
@@ -448,6 +459,85 @@ class SlurmLive:
         return {"command": command, "exit_code": rc, "stdout": out, "stderr": err}
 
     # --- helpers ---------------------------------------------------------------------------------
+    def _add_your_limits(self, res):
+        """Extend a gpu_availability result with the user's association and QOS limits. The limits part never
+        fails the tool: problems land in the result as {'error': ...} instead."""
+        try:
+            rc, assoc = self._assoc()
+            if rc != 0:
+                res["your_limits"] = {"error": assoc}
+                return
+            allowed, all_parts, qoses = assoc
+            for p in res["partitions"]:
+                p["allowed_for_you"] = all_parts or p["partition"] in allowed
+            limits = [self._qos_limit(q) for q in qoses]
+            res["your_limits"] = limits[0] if len(limits) == 1 else limits
+        except Exception as e:  # never fail the tool because of the limits part
+            res["your_limits"] = {"error": str(e)}
+
+    def _assoc(self):
+        """(rc, parsed) `sacctmgr show assoc` of the user, cached per instance: the partitions the user may use
+        (empty field = all), and the QOS names. On failure the second slot is the error text."""
+        if self._assoc_cache is None:
+            rc, out, err = self.run(["sacctmgr", "-nP", "show", "assoc", f"user={self.user()}",
+                                     "format=account,partition,qos"])
+            if rc != 0:
+                self._assoc_cache = (rc, err.strip() or "sacctmgr failed")
+            else:
+                allowed, all_parts, qoses = set(), False, []
+                for line in out.strip().splitlines():
+                    f = line.split("|")
+                    part = f[1].strip() if len(f) > 1 else ""
+                    if part:
+                        allowed.add(part)
+                    else:  # empty partition field: the association is not limited to partitions
+                        all_parts = True
+                    for q in (f[2] if len(f) > 2 else "").split(","):
+                        if q.strip() and q.strip() not in qoses:
+                            qoses.append(q.strip())
+                self._assoc_cache = (0, (allowed, all_parts, qoses))
+        return self._assoc_cache
+
+    def _qos_limit(self, qos):
+        """The limits of one QOS plus the GPUs its jobs use now (gpus_in_use, null when they cannot be parsed)."""
+        limit = {"qos": qos, "gpu_limit": None, "cpu_limit": None, "max_wall": None, "gpus_in_use": None,
+                 "gpus_you_can_request": None}
+        rc, out, err = self.run(["sacctmgr", "-nP", "show", "qos", qos, "format=name,grptres,maxtresperuser,maxwall"])
+        if rc != 0:
+            limit["error"] = err.strip() or "sacctmgr failed"
+            return limit
+        row = (out.strip().splitlines() or [""])[0].split("|")
+        row += [""] * (4 - len(row))
+        grp, per_user = _tres(row[1]), _tres(row[2])
+        limit |= {"cpu_limit": grp.get("cpu"), "max_wall": row[3].strip() or None}
+        if per_user.get("gpu") is not None:
+            limit["max_gpu_per_user"] = per_user["gpu"]
+        if grp.get("gpu") is None:
+            limit["note"] = "no group GPU limit in this QOS"
+        else:
+            limit["gpu_limit"] = grp["gpu"]
+        used = self._gpus_in_use(qos)
+        limit["gpus_in_use"] = used
+        caps = [c for c in (grp.get("gpu"), per_user.get("gpu")) if c is not None]
+        if caps and used is not None:
+            limit["gpus_you_can_request"] = min(caps) - used
+        return limit
+
+    def _gpus_in_use(self, qos):
+        """GPUs in use by the RUNNING jobs of one QOS (pending jobs hold no GPUs yet): TRES per node (%b) times
+        nodes (%D), summed over the jobs."""
+        rc, out, _ = self.run(["squeue", "-h", "-q", qos, "-t", "RUNNING", "-o", "%b|%D"])
+        if rc != 0:
+            return None
+        total = 0
+        for line in out.strip().splitlines():
+            tres, _, nodes = line.partition("|")
+            try:
+                total += _tres(tres).get("gpu", 0) * int(nodes.strip())
+            except ValueError:
+                return None
+        return total
+
     def _active_reservation(self, prefix):
         """The names of the ACTIVE reservations whose name starts with prefix, or an error string in the second slot."""
         rc, out, err = self.run(["scontrol", "show", "reservation"])
@@ -528,6 +618,16 @@ def _gpus(gres):
         total += int(m.group(2))
         gtype = gtype or m.group(1)
     return total, gtype
+
+
+def _tres(text):
+    """TRES string 'cpu=256,gres/gpu=8' -> {'cpu': 256, 'gpu': 8}; also reads the 'gres/gpu:a100=2' (model) and
+    'gpu:2' (colon count) shapes. Missing names are absent from the dict."""
+    vals = {}
+    for m in re.finditer(r"((?:gres/)?[a-z]+)(?::[A-Za-z0-9_.-]+)?[:=](\d+)", text or ""):
+        key = "gpu" if m.group(1).endswith("gpu") else m.group(1)
+        vals[key] = vals.get(key, 0) + int(m.group(2))
+    return vals
 
 
 def _secs(t):
