@@ -306,7 +306,10 @@ class SlurmLive:
                 p["idle_nodes"] += f[4].startswith("idle")
         if partition and not parts:
             return {"error": f"no GPU nodes in partition {partition} (or the partition does not exist)"}
-        return {"partitions": list(parts.values())}
+        by_type = {}  # the model added A100 and Quadro GPUs together when asked for free A100s: give the sums per type
+        for p in parts.values():
+            by_type[p["gpu_type"] or "gpu"] = by_type.get(p["gpu_type"] or "gpu", 0) + p["gpus_free"]
+        return {"partitions": list(parts.values()), "free_gpus_by_type": by_type}
 
     def partition_info(self, partition=None):
         argv = ["scontrol", "show", "partition", "-o"] + ([partition] if partition else [])
