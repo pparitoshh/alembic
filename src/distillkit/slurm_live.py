@@ -361,6 +361,10 @@ class SlurmLive:
         rc, out, _ = self.run(["sstat", "--allsteps", "-j", job_id, f"--format={','.join(fields)}", "-P", "-n"])
         rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()] if rc == 0 else []
         rows = [r for r in rows if not r["JobID"].endswith(".extern")]  # the extern step has no useful numbers
+        for r in rows:  # '5918748772K' was read as 5.9 GB (it is 5.6 TB): give memory in GB, like job_accounting
+            for k in ("MaxRSS", "AveRSS", "MaxVMSize"):
+                if r.get(k):
+                    r[k] = f"{_mem_gb(r[k]):.1f}G"
         if not rows:
             return {"error": f"no live usage for job {job_id}: it is not running (sstat only covers running jobs). "
                              "For finished jobs use job_accounting."}
