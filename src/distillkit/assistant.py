@@ -334,6 +334,10 @@ def written_tool_call(text):
             continue
         if m.group(1) in names:
             found.append({'name': m.group(1), 'arguments': args})
+    if not found:  # a tool without required arguments written as a command: ```bash\nrecent_jobs\n``` (live test)
+        bare = {sc['name'] for sc in LIVE_SCHEMAS if not sc['parameters']['required']}
+        found = [{'name': m.group(1), 'arguments': {}}
+                 for m in re.finditer(r'```\w*\n\s*(\w+)\s*\n```', text) if m.group(1) in bare]
     return found if len(found) == 1 else []
 
 
