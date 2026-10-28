@@ -530,7 +530,7 @@ class SlurmLive:
             if free == 0:
                 note = (f"Your team uses all {limit['gpu_limit']} GPUs of QOS {qos} now "
                         f"({'unknown' if yours is None else yours} of them are yours). Slurm still accepts a new GPU "
-                        "job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs are free. "
+                        "job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) until team GPUs are free. "
                         "sbatch --test-only does not check this limit.")
             else:
                 note = f"{free} of {limit['gpu_limit']} team GPUs are free now. The limit is shared by your team."

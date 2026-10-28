@@ -373,8 +373,8 @@ def test_gpu_availability_your_gpus_in_use_counts_only_the_current_users_jobs():
     user_sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-u" in argv)
     assert user_sq[user_sq.index("-u") + 1] == "u04"  # the own sum filters squeue by the user
     assert limits["note"] == ("Your team uses all 8 GPUs of QOS q1 now (2 of them are yours). Slurm still accepts a "
-                              "new GPU job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs are free. "
-                              "sbatch --test-only does not check this limit.")
+                              "new GPU job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) until team "
+                              "GPUs are free. sbatch --test-only does not check this limit.")
 
 
 def test_gpu_availability_gpus_free_in_team_limit_is_clamped_to_zero_and_own_use_may_be_unknown():
@@ -386,8 +386,8 @@ def test_gpu_availability_gpus_free_in_team_limit_is_clamped_to_zero_and_own_use
     assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] is None
     assert limits["gpus_free_in_team_limit"] == 0  # 4 - 8, clamped with max(0, ...)
     assert limits["note"] == ("Your team uses all 4 GPUs of QOS q1 now (unknown of them are yours). Slurm still "
-                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs "
-                              "are free. sbatch --test-only does not check this limit.")
+                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) "
+                              "until team GPUs are free. sbatch --test-only does not check this limit.")
 
 
 def test_gpu_availability_your_gpus_in_use_is_unknown_when_the_user_name_is_unreadable():
@@ -400,8 +400,8 @@ def test_gpu_availability_your_gpus_in_use_is_unknown_when_the_user_name_is_unre
     assert limits["gpus_free_in_team_limit"] == 0
     assert all("-u" not in argv for argv, _ in fake.calls if argv[0] == "squeue")  # no squeue call filtered by user
     assert limits["note"] == ("Your team uses all 8 GPUs of QOS q1 now (unknown of them are yours). Slurm still "
-                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGpuLimit) until team GPUs "
-                              "are free. sbatch --test-only does not check this limit.")
+                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) "
+                              "until team GPUs are free. sbatch --test-only does not check this limit.")
 
 
 def test_gpu_availability_note_reports_the_free_share_of_the_team_limit_and_skips_it_when_unreadable():

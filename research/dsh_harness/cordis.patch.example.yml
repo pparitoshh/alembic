@@ -86,3 +86,20 @@
   name: '@deepseek-ai/dsh-agent-preset-registry'
   config:
     default: minimal
+
+# The approval plugin asks the user to approve each job action in the web UI.
+# A plain row with a NEW id is dropped with no message. A new row must be inside an insert entry.
+# Check after a restart that dsh loaded the row: dsh web --dump-config | grep approval-plugin
+# HPC_ALLOWED_ACTIONS: submit_job (in the mcp-hpc env above) must only be set together with this
+# plugin. Without the plugin, dsh submits the job and no approval panel appears.
+- insert:
+    - id: approval-plugin
+      name: <REPO>/research/dsh_harness/approval_plugin/index.mjs
+      config:
+        tools:
+          - mcp__hpc__submit_job
+          - mcp__hpc__cancel_job
+          - mcp__hpc__update_job
+          - mcp__hpc__hold_job
+          - mcp__hpc__release_job
+          - mcp__hpc__requeue_job

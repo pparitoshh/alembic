@@ -125,7 +125,7 @@ Tool status:
 - The environment variable `HPC_ALLOWED_ACTIONS` is an allowlist for the job actions (commit `527e6d5`).
 - The dsh approval plugin is at `research/dsh_harness/approval_plugin` (commit `3d616c8`). The web UI shows Approve and Reject for the six job actions (`submit_job`, `cancel_job`, `update_job`, `hold_job`, `release_job`, `requeue_job`). A `submit_job` call with `test_only` runs without a question.
 
-The smoke test on Curiosity used the SlurmLive submit path. It did not use the dsh UI yet.
+The first smoke test on Curiosity used the SlurmLive submit path.
 
 | Item | Result |
 | --- | --- |
@@ -137,13 +137,18 @@ The smoke test on Curiosity used the SlurmLive submit path. It did not use the d
 | GPU | NVIDIA B300 SXM6 AC 275040 MiB |
 | Driver | 580.126.20 |
 
-The headless UI test runs Playwright with visible Chrome. The model sometimes writes `mcp__hpc__` tool names as text in a bash code block. It does not call the tool in that case.
+The UI tests run Playwright with headless Chrome. The model sometimes writes `mcp__hpc__` tool names as text in a bash code block. It does not call the tool in that case.
 
-| Prompt variant | Rules | Turns with a tool call |
+Prompt variant scores. The useful score counts the runs of questions Q1, Q3 and Q4 that produced a tool call. Each variant ran 3 times per question, so 9 runs per variant.
+
+| Prompt variant | Rules | Useful score |
 | --- | --- | --- |
-| A | rules 0 to 7 | 7/12 |
-| B | no rule 0 | pending |
-| C | rule 8: never write a tool name in a code block | pending |
+| A | rules 0 to 7 | 7/9 |
+| B | no rule 0 | 9/9 |
+| C | rule 8: never write a tool name in a code block | 7/9 (all 3 Q3 answers gave the 8-GPU limit) |
+| D | no rule 0 + rule 8 | 8/9 |
+
+Chosen variant: D.
 
 Faults seen:
 
@@ -151,14 +156,17 @@ Faults seen:
 - The model made several tool calls in one turn. This is against rule 1.
 - The model reported free GPUs instead of the team limit.
 
+Safety tests in the dsh web UI (headless Chrome via Playwright):
+
+- Job 12299 was submitted without approval at 13:39. The plugin row was a plain row, and dsh dropped it. The same 5-min smoke script ran, and the job was COMPLETED in 1 s on dgx01. Fix: the row is now inside `- insert:`.
+- Local mode test (no ssh; local sbatch has no config): the approval panel opened, Reject stopped the call, and the MCP server got no call.
+- Curiosity Reject test: the approval panel opened, Reject stopped the call, and no job appeared in the queue.
+- Curiosity Approve test: the approval panel opened, Approve (allow once) submitted job 12323 through the dsh UI. The job stayed PENDING with reason QOSGrpGRES (a teammate uses all 8 team GPUs).
+- Model faults in these runs: the model wrote "submission initiated" without a tool call (one run). It invented the partitions `gpu` and `all`.
+
 Next steps:
 
-1. Pick the best prompt variant.
-2. Set `HPC_ALLOWED_ACTIONS=submit_job` in the profile.
-3. Load the approval plugin in the profile.
-4. Run the real smoke test through the dsh UI.
-5. Approve the submit action in the web UI.
-6. Run the Reject test.
+1. TASK idea: `gpu_availability` treats `all`, `*` and the empty partition field as all partitions.
 
 Commits (`git log --oneline -12`):
 

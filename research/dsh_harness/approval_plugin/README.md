@@ -70,21 +70,26 @@ So a row name can be:
    cascaded ESM loader, `cordis-plugin-loader/lib/index.js:594`). A direct import accepts an
    absolute POSIX path and a `file://` URL. Both forms were verified with node v24.22.1.
 
-This plugin uses form 3 with an absolute path. Add this row to
+This plugin uses form 3 with an absolute path. Add this insert entry to
 `~/.dsh/profiles/web/cordis.patch.yml` and replace `<REPO>` with this repository's path:
 
 ```yaml
-- id: approval-plugin
-  name: <REPO>/research/dsh_harness/approval_plugin/index.mjs
-  config:
-    tools:
-      - mcp__hpc__submit_job
-      - mcp__hpc__cancel_job
-      - mcp__hpc__update_job
-      - mcp__hpc__hold_job
-      - mcp__hpc__release_job
-      - mcp__hpc__requeue_job
+- insert:
+    - id: approval-plugin
+      name: <REPO>/research/dsh_harness/approval_plugin/index.mjs
+      config:
+        tools:
+          - mcp__hpc__submit_job
+          - mcp__hpc__cancel_job
+          - mcp__hpc__update_job
+          - mcp__hpc__hold_job
+          - mcp__hpc__release_job
+          - mcp__hpc__requeue_job
 ```
+
+The insert entry is required: dsh drops a plain row with a NEW id and prints no message. A new row
+must be inside an `- insert:` entry. After a restart, check that dsh loaded the row with
+`dsh web --dump-config | grep approval-plugin`.
 
 A `file://` URL works too: `name: 'file://<REPO>/research/dsh_harness/approval_plugin/index.mjs'`.
 Omit the `config` block to get the default tool list. A profile row patch replaces the whole config
@@ -101,6 +106,8 @@ not in `~/tools/node/bin`.
 
 ## Limits
 
+- dsh drops a plain profile row with a NEW id and prints no message. A new row must be inside an
+  `- insert:` entry (job 12299 ran with no approval because of this fault).
 - The plugin never sees a mode-collapsed call. The collapse denies the call before the pre-execute
   pipeline (`dsh-tools/lib/types/index.js:787-793`).
 - The ask degrades to deny without an approval service or without an agent on the call
