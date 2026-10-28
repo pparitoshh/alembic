@@ -22,7 +22,7 @@ def test_modelfile():
     mf = modelfile("model-Q4_K_M.gguf", "You are an HPC assistant.", "", 8192, ExportCfg().sampling)
     assert mf.startswith("FROM ./model-Q4_K_M.gguf\n")
     assert 'SYSTEM """You are an HPC assistant."""' in mf
-    for line in ("PARAMETER stop <|im_start|>", "PARAMETER stop <|im_end|>", "PARAMETER num_ctx 8192", "PARAMETER temperature 0.7", "PARAMETER top_k 20"):
+    for line in ("PARAMETER stop <|im_start|>", "PARAMETER stop <|im_end|>", "PARAMETER num_ctx 8192", "PARAMETER num_predict 4096", "PARAMETER temperature 0.7", "PARAMETER top_k 20"):
         assert line in mf
     # tool-calling section kept verbatim from Ollama's qwen3 template; no thinking left over
     assert "<tool_call>\n{\"name\": \"{{ .Function.Name }}\", \"arguments\": {{ .Function.Arguments }}}\n</tool_call>" in mf
