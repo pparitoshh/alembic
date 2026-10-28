@@ -73,7 +73,11 @@ AGENT_PROMPT = (" In this session you are connected to the user's Slurm cluster 
                 "state and for every action the user asks for. The user approves each action before it runs.")
 DEFAULT_INDEX = Path(os.environ.get('HPC_ASSISTANT_INDEX', Path.home() / '.local/share/hpc-assistant'))
 HF_RELEASE = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/gguf/'
-GGUF_FILE = 'hpc-assistant-qwen3-4b-Q4_K_M.gguf'
+# Q8_0 is the default: the Q4_K_M file loses 0.078 on the GPU/MPI test (paired 95% [-0.14, -0.02], gguf/
+# eval_PAIRED_gguf.json) and picks the right tool first in 28 of 37 live agent tasks (Q8_0: 33, Oct 28). --small
+# installs Q4_K_M (2.5 GB) for machines with little memory or without a GPU.
+GGUF_FILES = {'Q8_0': ('hpc-assistant-qwen3-4b-Q8_0.gguf', '4.3 GB'), 'Q4_K_M': ('hpc-assistant-qwen3-4b-Q4_K_M.gguf', '2.5 GB')}
+GGUF_FILE = GGUF_FILES['Q8_0'][0]
 HF_INDEX = 'https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b/resolve/main/index/'  # Slurm, LUMI, CSC docs
 HF_TREE = 'https://huggingface.co/api/models/VaibhavKKM/hpc-assistant-qwen3-4b/tree/main/gguf'  # file ids of the release
 
@@ -908,13 +912,13 @@ def _file_ids(tree_url):
         return {}
 
 
-def _release_id():
+def _release_id(gguf=GGUF_FILE):
     """Version of the published model (git ids of the GGUF and the Modelfile), or None when Hugging Face is unreachable."""
     ids = _file_ids(HF_TREE)
-    return ids[GGUF_FILE] + ':' + ids['Modelfile'] if GGUF_FILE in ids and 'Modelfile' in ids else None
+    return ids[gguf] + ':' + ids['Modelfile'] if gguf in ids and 'Modelfile' in ids else None
 
 
-def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
+def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant', gguf=GGUF_FILE):
     """Install the model from the Hugging Face release into Ollama, or update it when a newer release is out, and the
     docs index. Run again at any time: it does nothing when everything is current."""
     if not shutil.which('ollama'):
@@ -925,22 +929,29 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
     installed = re.search(r'^' + re.escape(model) + r'(:\S+)?\s', listed.stdout, re.M)
     cache = index_dir / 'model'
     stamp = cache / 'RELEASE'  # the release the cached files and the Ollama model were made from
-    latest = _release_id()
+    latest = _release_id(gguf)
     current = stamp.read_text().strip() if stamp.exists() else None
     outdated = latest is not None and latest != current
     if outdated:  # replace only the files that changed (a Modelfile fix does not re-download the 2.5 GB GGUF)
-        old = dict(zip((GGUF_FILE, 'Modelfile'), (current or ':').split(':')))
-        for name, new in zip((GGUF_FILE, 'Modelfile'), latest.split(':')):
+        old = dict(zip((gguf, 'Modelfile'), (current or ':').split(':')))
+        for name, new in zip((gguf, 'Modelfile'), latest.split(':')):
             if old.get(name) != new:
                 (cache / name).unlink(missing_ok=True)
     if not installed or outdated:
         if installed:
             print(f'[hpc-assistant] a newer model release is out: updating {model}', file=sys.stderr)
         cache.mkdir(parents=True, exist_ok=True)
-        for name in (GGUF_FILE, 'Modelfile'):
+        for other in cache.glob('*.gguf'):  # switching between Q8_0 and Q4_K_M: do not keep both on disk
+            if other.name != gguf:
+                other.unlink()
+        size = next((sz for name, sz in GGUF_FILES.values() if name == gguf), '')
+        for name in (gguf, 'Modelfile'):
             if not (cache / name).exists():
-                print(f'[hpc-assistant] downloading {name}' + (' (about 2.5 GB)' if name == GGUF_FILE else ''), file=sys.stderr)
+                print(f'[hpc-assistant] downloading {name}' + (f' (about {size})' if name == gguf and size else ''), file=sys.stderr)
                 _download(HF_RELEASE + name, cache / name)
+        modelfile = cache / 'Modelfile'  # the published Modelfile names one file: point it at the one installed here
+        modelfile.write_text(re.sub(r'(?m)^FROM .*$', f'FROM ./{gguf}', modelfile.read_text(encoding='utf-8'), count=1),
+                             encoding='utf-8')
         subprocess.run(['ollama', 'create', model, '-f', 'Modelfile'], cwd=cache, check=True)
         stamp.write_text(latest or '')
     print(f'[hpc-assistant] model ready in Ollama: {model}' + ('' if latest else
@@ -1008,6 +1019,9 @@ def main(argv=None):
                     help='offer the model a search_docs tool (only for releases trained with tool calls)')
     ap.add_argument('--setup', action='store_true',
                     help='install the model (and docs index), or update it to the latest release, then exit')
+    ap.add_argument('--small', action='store_true',
+                    help='with --setup: install the smaller Q4_K_M file (2.5 GB) instead of Q8_0 (4.3 GB), for machines '
+                         'with little memory or without a GPU (somewhat weaker on GPU/MPI questions and in agent mode)')
     ap.add_argument('--web', action='store_true', help='open the upload-and-chat page on http://127.0.0.1:PORT')
     ap.add_argument('--port', type=int, default=8765)
     ap.add_argument('--agent', action='store_true',
@@ -1021,7 +1035,7 @@ def main(argv=None):
         if hasattr(stream, 'reconfigure'):
             stream.reconfigure(errors='replace')
     if args.setup:
-        setup(Path(args.index), args.model)
+        setup(Path(args.index), args.model, GGUF_FILES['Q4_K_M' if args.small else 'Q8_0'][0])
         return
     slurm = None
     if args.agent and not args.ssh and not shutil.which('squeue'):
