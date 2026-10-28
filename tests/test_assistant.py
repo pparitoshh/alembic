@@ -707,3 +707,28 @@ def test_no_second_action_after_a_deny(tmp_path):
     text = out.getvalue()
     assert 'yours: #SBATCH -t 00:05:00' in text and 'now: #SBATCH -t 00:00:05' in text  # shown before the approval
     assert 'declined an action for this request' in text
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("On Kestrel, what is the GPU partition called?", {"kestrel", "gpu"}),
+    ("What is the maximum wall time of partition boost_usr_prod?", {"boost_usr_prod"}),
+    ("how many GPUs are free on Leonardo", {"gpus", "leonardo"}),
+    ("Submit this job for me:\n#SBATCH -A EUHPC_D30_031", {"euhpc_d30_031"}),
+    ("Why did job 12345 fail?", {"12345"}),
+    ("How long can a job run on kgpu?", set()),
+])
+def test_names(text, expected):
+    from distillkit.assistant import names
+    assert names(text) == expected
+
+
+def test_user_docs_match_needs_the_question_names(tmp_path):
+    from distillkit.assistant import Assistant
+    guide = tmp_path / 'kestrel_guide.md'
+    guide.write_text('# Kestrel cluster guide\n\nThe Kestrel GPU partition is called `kgpu`. Each kgpu node has 4 H100 '
+                     'GPUs. The maximum wall time on kgpu is 36 hours.\n')
+    bot = Assistant(tmp_path, docs=True)
+    bot.add(guide)
+    # shares "maximum wall time, GPUs per node, partition" with the guide, but names Leonardo's partition
+    assert not bot._user_docs_match('What is the maximum wall time and how many GPUs per node does partition '
+                                    'boost_usr_prod allow?')
