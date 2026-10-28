@@ -296,12 +296,20 @@ def fit_question(question):
             + question[-QUESTION_TAIL:]), cut
 
 
+# Measured with Ollama's prompt_eval_count on the demo laptop (Oct 28): a pasted training log took 0.68 tokens per
+# character (numbers and symbols), documentation excerpts 0.30 (5,585 tokens for 18,802 characters). The prompt keeps
+# about 11,000 tokens so that a ~1,500-token answer and the system prompt fit in the 16,384-token context.
+LOG_TOKENS_PER_CHAR, DOC_TOKENS_PER_CHAR, PROMPT_TOKENS = 0.7, 0.3, 11000
+SHORT_QUESTION, MIN_EXCERPTS = 4000, 8000  # characters: below SHORT_QUESTION the evaluation's budget is kept
+
+
 def excerpt_budget(question):
-    """Characters of doc excerpts that still fit with this question and an answer in a 16K-token context: the usual
-    40,000 for normal questions, less next to a long pasted text (about 11,000 prompt tokens in all)."""
-    if len(question) <= 4000:
+    """Characters of doc excerpts that still fit with this question and an answer in a 16K-token context: the
+    evaluation's 40,000 for normal questions, less next to a long pasted text, never under MIN_EXCERPTS."""
+    if len(question) <= SHORT_QUESTION:
         return VARIANT_BUDGET
-    return max(8000, min(VARIANT_BUDGET, int((11000 - 0.7 * len(question)) / 0.3)))
+    room = (PROMPT_TOKENS - LOG_TOKENS_PER_CHAR * len(question)) / DOC_TOKENS_PER_CHAR
+    return max(MIN_EXCERPTS, min(VARIANT_BUDGET, int(room)))
 
 
 class ModelServerError(OSError):
