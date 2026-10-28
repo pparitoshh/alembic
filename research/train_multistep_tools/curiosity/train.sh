@@ -14,4 +14,6 @@ if [ ! -s $OUT/model/model.safetensors ] && ! ls $OUT/model/model-*.safetensors 
 fi
 log "trained: $(cat $OUT/model/KD_TRAIN.json | tr -d '\n ')"
 if [ "${NOEVAL:-0}" = 1 ] || [ "$SMOKE" = 1 ]; then exit 0; fi
-bash $CB/eval.sh mt_${NAME}_s$SEED $OUT/model
+bash $CB/eval.sh mt_${NAME}_s$SEED $OUT/model || exit 1
+# eval.sh does not stop when answer.py fails (pipe to tee), so check that the candidate answered
+for l in v2 v3 d1; do [ -s $WORK/runs/mt_${NAME}_s$SEED/answers/${l}__cand.jsonl ] || { log "STOP: eval has no $l candidate answers"; exit 1; }; done

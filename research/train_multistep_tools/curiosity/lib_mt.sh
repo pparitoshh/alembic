@@ -13,6 +13,8 @@ export CUDA_HOME=$CP_RO/venv/lib/python3.12/site-packages/nvidia/cu13 CUDA_PATH=
 export PATH=$CUDA_HOME/bin:$PATH LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBRARY_PATH:-} LIBRARY_PATH=$CUDA_HOME/lib:${LIBRARY_PATH:-}
 export HF_HOME=$WORK/hf HF_HUB_OFFLINE=1 PYTHONPATH=$REPO/src:$REPO/research/rag65 VLLM_NO_USAGE_STATS=1
 mkdir -p $WORK/logs $WORK/exp $WORK/runs $HF_HOME
+# answer.py opens the retrieval indexes at the relative path runs/rag65/indexes (cwd $REPO); the rsync skips runs/
+mkdir -p $REPO/runs/rag65; [ -e $REPO/runs/rag65/indexes ] || ln -s $CP_RO/data/rag65/indexes $REPO/runs/rag65/indexes
 LOGS=$WORK/logs
 log() { echo "$(date -u +%FT%TZ) [${TASK:-mt}] $*" | tee -a $LOGS/tasks.log; }
 wait_models() { return 0; }                # eval.sh calls it; the team models are already complete
