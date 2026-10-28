@@ -34,7 +34,11 @@ def save_upload(bot, name, data):
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / name
     path.write_bytes(data)
-    return name, bot.add(path)
+    n = bot.add(path)
+    if not n:  # nothing to search: say so instead of listing an empty document
+        path.unlink()
+        raise ValueError(f'no text found in {name} (for a scanned PDF install tesseract and poppler)')
+    return name, n
 
 
 def user_documents(bot):
@@ -144,12 +148,7 @@ def make_handler(bot, approve_in_page=False):
                     out = _Stream(self.wfile)
                     with lock:
                         stream[0] = out
-                        try:
-                            bot.ask(question, out)
-                        except OSError as e:  # model server not reachable
-                            if len(bot.history) > 1 and bot.history[-1]['role'] == 'user':
-                                bot.history.pop()  # keep the conversation consistent for the next question
-                            out.write(f'\n\n[The model is not reachable: {e}. Is Ollama running?]')
+                        bot.safe_ask(question, out)
                     self.wfile.write(b'0\r\n\r\n')
                 else:
                     self._send(404, {'error': 'not found'})
@@ -163,7 +162,11 @@ APPROVAL_WAIT = 600  # seconds an action waits for a click before it counts as n
 
 
 def serve(bot, host='127.0.0.1', port=8765, approve_in_page=False):
-    server = ThreadingHTTPServer((host, port), make_handler(bot, approve_in_page))
+    try:
+        server = ThreadingHTTPServer((host, port), make_handler(bot, approve_in_page))
+    except OSError as e:  # most often another program (or an earlier clusterpilot --web) already uses the port
+        raise SystemExit(f'[hpc-assistant] cannot open the web page on port {port} ({e.strerror}): '
+                         f'stop the other program, or choose another port with --port')
     print(f'[hpc-assistant] web page on http://{host}:{port} (Ctrl+C to stop)')
     try:
         server.serve_forever()

@@ -55,6 +55,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -347,6 +348,8 @@ def chunks(text, size=2200):
         cur = (cur + '\n\n' + para).strip()
     if cur:
         out.append(cur)
+    if len(out) == 1 and len(out[0]) >= 20:  # a short note is one whole document, not a stray fragment: keep it
+        return out
     return [c for c in out if len(c) >= 80]
 
 
@@ -604,6 +607,26 @@ class Assistant:
                                                 for u in dict.fromkeys(sources)) + '\n')
         return ''.join(answer), sources
 
+    def explain(self, error):
+        """A plain-language message for a failed request to the model server (no traceback for the user)."""
+        server = self.openai or self.ollama
+        if isinstance(error, urllib.error.HTTPError) and error.code == 404:
+            return (f"the model '{self.model}' is not available at {server}: install it with `clusterpilot --setup`"
+                    f"{'' if self.openai else ' (see `ollama list`)'}, or choose another with --model")
+        return (f"cannot reach the model server at {server} ({getattr(error, 'reason', error)}): "
+                + ("check the --openai address" if self.openai else "start Ollama (the Ollama app, or `ollama serve`)"))
+
+    def safe_ask(self, question, out=sys.stdout):
+        """ask() for the command line and the web page: a server error becomes a message, and the conversation
+        stays as it was before the question."""
+        size = len(self.history)
+        try:
+            return self.ask(question, out)
+        except OSError as e:  # URLError, HTTPError, connection reset
+            del self.history[size:]
+            out.write(f'\n[hpc-assistant] {self.explain(e)}\n')
+            return None
+
     def reset(self):
         self.history = self.history[:1]
 
@@ -718,6 +741,9 @@ def main(argv=None):
         setup(Path(args.index), args.model)
         return
     slurm = None
+    if args.agent and not args.ssh and not shutil.which('squeue'):
+        raise SystemExit('[hpc-assistant] agent mode runs Slurm commands, but this machine has no Slurm (no squeue): '
+                         'run it on a cluster login node, or add --ssh <login node>, for example --ssh leonardo')
     if args.agent:
         def confirm(name, call):
             if args.yes:
@@ -739,7 +765,8 @@ def main(argv=None):
         serve(bot, port=args.port, approve_in_page=bool(slurm) and not args.yes)
         return
     if args.question:
-        bot.ask(' '.join(args.question))
+        if bot.safe_ask(' '.join(args.question)) is None:
+            raise SystemExit(1)
         print()
         return
     if args.add:
@@ -759,7 +786,7 @@ def main(argv=None):
         elif q == '/reset':
             bot.reset()
         elif q:
-            bot.ask(q)
+            bot.safe_ask(q)
             print()
 
 

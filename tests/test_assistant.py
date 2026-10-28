@@ -289,7 +289,7 @@ def test_web_failed_question_leaves_history_clean(tmp_path, monkeypatch):
 
     req = Fake(b'{"question": "How do I request GPUs on LUMI?"}')
     req.do_POST()
-    assert b'not reachable' in req.wfile.getvalue()
+    assert b'cannot reach the model server' in req.wfile.getvalue() and b'start Ollama' in req.wfile.getvalue()
     assert [m['role'] for m in bot.history] == ['system']
 
 
@@ -453,3 +453,40 @@ def test_community_pages_only_for_their_community():
     assert not assistant.community_ok(page, 'Which QOS should I use on Leonardo for a long job?')
     assert assistant.community_ok(page, 'I am a EUROfusion user: which QOS do I use on Leonardo?')
     assert assistant.community_ok({'url': 'https://docs.hpc.cineca.it/hpc/leonardo.html', 'text': ''}, 'QOS on Leonardo?')
+
+
+def test_model_errors_become_messages_and_agent_mode_needs_slurm(tmp_path, monkeypatch):
+    import urllib.error
+
+    def missing(self, messages):
+        raise urllib.error.HTTPError('http://127.0.0.1:11434/api/chat', 404, 'Not Found', {}, None)
+        yield  # pragma: no cover
+    monkeypatch.setattr(assistant.Assistant, '_stream', missing)
+    bot = assistant.Assistant(_indexes(tmp_path), model='no-such-model')
+    out = StringIO()
+    assert bot.safe_ask('hi', out) is None and len(bot.history) == 1
+    assert "the model 'no-such-model' is not available" in out.getvalue() and 'ollama list' in out.getvalue()
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
+    try:
+        assistant.main(['--agent', '--index', str(tmp_path), 'show my jobs'])
+    except SystemExit as e:
+        assert 'no Slurm' in str(e) and '--ssh' in str(e)
+    else:
+        raise AssertionError('agent mode without Slurm must stop')
+
+
+def test_short_documents_are_indexed_and_empty_uploads_are_refused(tmp_path):
+    from distillkit import assistant_web as web
+    assert assistant.chunks('Cluster X storage: scratch is purged after 30 days.') == [
+        'Cluster X storage: scratch is purged after 30 days.']
+    assert assistant.chunks('p. 3') == []  # too short to be useful
+    long = '\n\n'.join(['header'] + ['word ' * 60] * 3)
+    assert all(len(c) >= 80 for c in assistant.chunks(long))  # stray fragments of long manuals are still dropped
+    bot = assistant.Assistant(_indexes(tmp_path))
+    assert web.save_upload(bot, 'notes.txt', b'Cluster X storage: scratch is purged after 30 days.') == ('notes.txt', 1)
+    try:
+        web.save_upload(bot, 'empty.txt', b'   \n')
+    except ValueError as e:
+        assert 'no text found in empty.txt' in str(e) and not (tmp_path / 'uploads' / 'empty.txt').exists()
+    else:
+        raise AssertionError('an empty upload must be refused')
