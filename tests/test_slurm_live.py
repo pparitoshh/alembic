@@ -124,7 +124,11 @@ def test_gpu_availability_counts_free_gpus_on_usable_nodes():
            "lrdn0004 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) drained\n")
     s, _ = live({"sinfo": (0, out, "")})
     assert s.execute("gpu_availability", {}) == {"partitions": [
-        {"partition": "boost_usr_prod", "gpu_type": "a100", "gpus_total": 16, "gpus_free": 7, "idle_nodes": 1}]}
+        {"partition": "boost_usr_prod", "gpu_type": "a100", "gpus_total": 16, "gpus_free": 7, "idle_nodes": 1}],
+        "free_gpus_by_type": {"a100": 7}}
+    viz = out + "lrdn5001 lrd_all_viz gpu:quadro:2(S:0) gpu:quadro:0(IDX:N/A) idle\n"
+    s, _ = live({"sinfo": (0, viz, "")})
+    assert s.execute("gpu_availability", {})["free_gpus_by_type"] == {"a100": 7, "quadro": 2}
 
 
 def test_invalid_calls():
