@@ -82,7 +82,7 @@ New Hugging Face weights: `hf.co/VaibhavKKM/hpc-assistant-qwen3-4b:latest` (ID 8
 
 Web UI chat test "Show my queue": not tested yet.
 
-`src/distillkit/assistant.py` prompt-line removal: still uncommitted. It waits for the question-set review.
+`src/distillkit/assistant.py` prompt-line removal: committed as `cb33a89`.
 
 Earlier host check, 2026-10-27 (before the dsh install): `which llama-server dsh` found neither program. Both are not installed.
 
@@ -106,3 +106,73 @@ OPEN issues:
 3. The preset `minimal` still has a `bash` tool. This is a safety risk. Remove it or run it in a sandbox.
 4. The model gave a wrong expansion of "MCP". It said "Managed Command Platform". MCP means Model Context Protocol.
 5. The first-tool accuracy is 6/8 on the 8-question test and 40/41 on the 41-question set. Some misses remain, for example `job_accounting` and `partition_info`.
+
+### Status 2026-10-28
+
+The YAML cluster profiles define two clusters.
+
+| Cluster | Profile values | Note |
+| --- | --- | --- |
+| Leonardo | daily reservation `auto:s_tra_ncc` | The account `EUHPC_D30_031` used 105.8% of its budget. No submission is possible. |
+| Curiosity | account `eai-hackathon`, partition `hackathon`, QOS `eai-team04` | The QOS limit is 8 GPUs, 256 CPUs. |
+
+Tool status:
+
+- The MCP server tool list has 17 tools. The read-only tool `reservation_info` is in the list.
+- The action tools stay hidden without permission. 12 tools are visible.
+- The tool `list_queue` prints a message for an empty queue.
+- The tool `gpu_availability` reports the fields `your_limits` and `allowed_for_you`.
+- The environment variable `HPC_ALLOWED_ACTIONS` is an allowlist for the job actions (commit `527e6d5`).
+- The dsh approval plugin is at `research/dsh_harness/approval_plugin` (commit `3d616c8`). The web UI shows Approve and Reject for the six job actions (`submit_job`, `cancel_job`, `update_job`, `hold_job`, `release_job`, `requeue_job`). A `submit_job` call with `test_only` runs without a question.
+
+The smoke test on Curiosity used the SlurmLive submit path. It did not use the dsh UI yet.
+
+| Item | Result |
+| --- | --- |
+| Job | 12275 |
+| Resources | 1 GPU, 4 CPUs |
+| Time limit | 5 min |
+| State | COMPLETED |
+| Node | dgx13 |
+| GPU | NVIDIA B300 SXM6 AC 275040 MiB |
+| Driver | 580.126.20 |
+
+The headless UI test runs Playwright with visible Chrome. The model sometimes writes `mcp__hpc__` tool names as text in a bash code block. It does not call the tool in that case.
+
+| Prompt variant | Rules | Turns with a tool call |
+| --- | --- | --- |
+| A | rules 0 to 7 | 7/12 |
+| B | no rule 0 | pending |
+| C | rule 8: never write a tool name in a code block | pending |
+
+Faults seen:
+
+- The model invented partition names: `hackathon-gpu` and `gpudeep`.
+- The model made several tool calls in one turn. This is against rule 1.
+- The model reported free GPUs instead of the team limit.
+
+Next steps:
+
+1. Pick the best prompt variant.
+2. Set `HPC_ALLOWED_ACTIONS=submit_job` in the profile.
+3. Load the approval plugin in the profile.
+4. Run the real smoke test through the dsh UI.
+5. Approve the submit action in the web UI.
+6. Run the Reject test.
+
+Commits (`git log --oneline -12`):
+
+```text
+3d616c8 Add a dsh plugin that asks the user to approve HPC job actions
+527e6d5 Allow only selected job actions with HPC_ALLOWED_ACTIONS
+e36b6fe State an empty queue and show team GPU limits in gpu_availability
+092e6b8 Document prompt rules 0 and 7 in the example dsh profile
+af362e6 Document the HPC system prompt and the bash removal in the example dsh profile
+eb16f33 Hide job actions and give clear errors to a small model
+66fa601 Add the read-only tool reservation_info
+ff268b0 Resolve the daily reservation from auto:<prefix>
+e6e0a96 Add cluster profiles from a YAML file
+4628106 Add null-argument handling and a per-cluster remote setup
+fef732b Add an example dsh profile patch
+05d23ec Record the passed web UI test and the open issues
+```
