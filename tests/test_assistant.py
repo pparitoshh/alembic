@@ -626,3 +626,15 @@ def test_about_lists_only_what_this_session_can_do():
     user, sources = bot.prompt('What can you do?')
     assert sources == [] and user.startswith('What can you do?') and 'ClusterPilot-4B' in user
     assert bot.prompt('hello') == ('hello', [])
+
+
+@pytest.mark.parametrize("result, line", [
+    ({"error": "the user declined this action", "action": "submit_job"}, "submit_job: not done (the user declined this action)"),
+    ({"submitted": True, "job_id": "123", "message": "Submitted batch job 123"}, "submit_job: done (job 123)"),
+    ({"valid": True, "message": "Job 5 to start at now"}, "submit_job: test only, nothing submitted (Job 5 to start at now)"),
+    ({"error": "sbatch: error: Invalid partition name specified\nsbatch: error: Batch job submission failed"},
+     "submit_job: not done (sbatch: error: Invalid partition name specified)"),
+])
+def test_action_status_line(result, line):
+    from distillkit.assistant import action_status
+    assert action_status("submit_job", result).strip() == "[hpc-assistant] " + line

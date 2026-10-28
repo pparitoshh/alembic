@@ -59,7 +59,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from distillkit.slurm_live import LoginRequired, SlurmLive, describe, openai_tools
+from distillkit.slurm_live import ACTIONS, LoginRequired, SlurmLive, describe, openai_tools
 from distillkit.tools import ToolError
 
 # Same text as the training configs' student.system_prompt.
@@ -282,6 +282,18 @@ SMALL_TALK = re.compile(r"(?i)(hi|hello|hey|hallo|ciao|hola|good (morning|aftern
 
 
 ABOUT_QUESTION = re.compile(r"(?i)who are you|what are you|what can you do|help")
+
+
+def action_status(name, result):
+    """The app's own line on whether an action happened, so the user never depends on the model's wording: after a
+    declined submit the model wrote "I'll submit it now" (rehearsal, Oct 28)."""
+    if not isinstance(result, dict):
+        return ''
+    if result.get('error'):  # the first line only: an sbatch error can be many lines of stderr
+        return f"\n[hpc-assistant] {name}: not done ({str(result['error']).strip().splitlines()[0][:300]})\n"
+    if result.get('valid'):
+        return f"\n[hpc-assistant] {name}: test only, nothing submitted ({result.get('message', '')})\n"
+    return f"\n[hpc-assistant] {name}: done" + (f" (job {result['job_id']})" if result.get('job_id') else '') + '\n'
 
 
 def community_ok(doc, question):
@@ -700,6 +712,8 @@ class Assistant:
                         out.write(f'\n{e}\n')
                         return str(e), sources
                     self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
+                    if c['name'] in ACTIONS:
+                        out.write(action_status(c['name'], result))
                     continue
                 try:
                     args = c['arguments'] if isinstance(c['arguments'], dict) else json.loads(c['arguments'] or '{}')
