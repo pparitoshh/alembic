@@ -301,6 +301,34 @@ def action_status(name, result):
     return f"\n[hpc-assistant] {name}: done" + (f" (job {result['job_id']})" if result.get('job_id') else '') + '\n'
 
 
+def not_approved(result):
+    """The user said no (terminal y/N, the web page's Deny, or no terminal to ask in)."""
+    err = str(result.get('error', '')) if isinstance(result, dict) else ''
+    return any(s in err for s in ('declined', 'did not approve', 'no terminal'))
+
+
+USER_DOC_SHARE = 0.5  # share of the question's search words that the best excerpt of the user's manuals must contain
+
+
+SBATCH = re.compile(r'^\s*#SBATCH\s+(.+?)\s*$', re.M)
+
+
+def script_changes(question, arguments):
+    """A note when the script to submit differs from the #SBATCH lines the user gave: the model once copied
+    `-t 00:05:00` as `-t 00:00:05` (rehearsal, Oct 28). Shown before the approval request."""
+    mine = SBATCH.findall(question)
+    try:
+        args = arguments if isinstance(arguments, dict) else json.loads(arguments or '{}')
+    except json.JSONDecodeError:
+        return ''
+    theirs = SBATCH.findall(str(args.get('script', '')))
+    if not mine or not theirs or mine == theirs:
+        return ''
+    gone, new = [l for l in mine if l not in theirs], [l for l in theirs if l not in mine]
+    return ('\n[hpc-assistant] note: this is not exactly your script. '
+            + '; '.join(['yours: #SBATCH ' + l for l in gone] + ['now: #SBATCH ' + l for l in new]) + '\n')
+
+
 def community_ok(doc, question):
     """False for a page written for one user community when the question is not about that community."""
     return all(not doc['url'].startswith(prefix) or asks.search(question) for prefix, asks in COMMUNITY_PAGES.items())
@@ -511,6 +539,23 @@ class Assistant:
         db.close()
         return n
 
+    def _user_docs_match(self, question):
+        """True when the user's own manuals have an excerpt for this question. Agent mode then answers with the
+        excerpts instead of probing the cluster first: asked about an uploaded guide for another cluster, the agent
+        called partition_info on the live cluster and gave its partitions as the guide's (rehearsal, Oct 28)."""
+        terms = set(re.findall(r'[a-z0-9_]+', _query(question).lower())) - {'or'}
+        if not terms or not self.user_db.exists():
+            return False
+        db = sqlite3.connect('file:' + str(self.user_db) + '?mode=ro', uri=True)
+        try:
+            row = db.execute('SELECT c.text FROM search JOIN chunks c ON c.id = search.rowid WHERE search MATCH ? '
+                             'ORDER BY bm25(search) LIMIT 1', (_query(question),)).fetchone()
+        finally:
+            db.close()
+        # most of the question's words must be in the excerpt: a guide that only shares "GPU" with "Submit this job
+        # for me: ..." must not turn a submit request into a docs answer
+        return bool(row) and len(terms & set(re.findall(r'[a-z0-9_]+', row[0].lower()))) >= USER_DOC_SHARE * len(terms)
+
     def search(self, question, k=None):
         """Excerpts for one question: the user's manuals first (at most k-1 when built-in docs exist), then built-in.
 
@@ -645,7 +690,8 @@ class Assistant:
                       f'are used, {cut:,} characters in the middle are left out]\n\n')
         max_tool_rounds = max_tool_rounds if max_tool_rounds is not None else (12 if self.slurm else 3)
         small_talk = SMALL_TALK.fullmatch(question.strip())
-        first = self._agent_first(question) if self.slurm and self.docs and not small_talk else None
+        first = (self._agent_first(question) if self.slurm and self.docs and not small_talk
+                 and not self._user_docs_match(question) else None)
         user, sources = (question, []) if first else self.prompt(question)
         self._trim_history()
         turn = {'role': 'user', 'content': user}
@@ -668,7 +714,7 @@ class Assistant:
             del self.history[1:nxt]
 
     def _answer(self, question, sources, turn, first, out, max_tool_rounds):
-        last_call = None
+        last_call, declined = None, False
         for _ in range(max_tool_rounds + 1):
             answer, calls, checked = [], [], 0
             if first:  # the tool call from the probe above: no second request
@@ -706,8 +752,14 @@ class Assistant:
             for c in calls:
                 if c['name'] != 'search_docs' and self.slurm:
                     out.write(f"\n[{c['name']} {c['arguments'] if isinstance(c['arguments'], str) else json.dumps(c['arguments'])}]\n")
+                    if c['name'] == 'submit_job':
+                        out.write(script_changes(question, c['arguments']))
                     try:
-                        result = self.slurm.execute(c['name'], c['arguments'])
+                        if declined and c['name'] in ACTIONS:  # after a Deny the model retried with another account
+                            result = {'error': 'the user declined an action for this request; ask the user before '
+                                               'trying anything else', 'action': c['name']}
+                        else:
+                            result = self.slurm.execute(c['name'], c['arguments'])
                     except ToolError as e:
                         result = {'error': str(e)}
                     except LoginRequired as e:  # the user has to log in again: stop here, no retries (issue #101)
@@ -719,6 +771,7 @@ class Assistant:
                     self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
                     if c['name'] in ACTIONS:
                         out.write(action_status(c['name'], result))
+                        declined = declined or not_approved(result)
                     continue
                 try:
                     args = c['arguments'] if isinstance(c['arguments'], dict) else json.loads(c['arguments'] or '{}')
