@@ -73,9 +73,14 @@ def test_actions_need_confirmation_and_cancel_only_own_jobs():
     s, fake = live({"sbatch": (0, "1\n", "")}, confirm=lambda n, a: False)
     assert s.execute("submit_job", {"script": "#!/bin/bash\n"})["error"] == "the user declined this action"
     assert not any("sbatch" in " ".join(c[0]) for c in fake.calls)
-    s, fake = live({"squeue&--me": (0, "", "")})
-    assert s.execute("cancel_job", {"job_id": "5"})["cancelled"] is False
+    asked = []
+    s, fake = live({"squeue&--me": (0, "", ""), "squeue&-j&5": (0, "", ""), "sacct": (0, "5|x|COMPLETED|0:0|p|00:01:00|"
+                    "01:00:00|n1|||1|\n", "")}, confirm=lambda n, a: asked.append(n) or True)
+    r = s.execute("cancel_job", {"job_id": "5"})  # finished: refused before the user is asked
+    assert r["error"] == "job 5 is not one of your queued or running jobs (state: COMPLETED)" and not asked
     assert not any(c[0][0] == "scancel" for c in fake.calls)
+    s, _ = live({"squeue&--me&-j&5": (0, "PENDING\n", "")}, confirm=lambda n, a: "no terminal to ask")
+    assert s.execute("cancel_job", {"job_id": "5"}) == {"error": "no terminal to ask", "action": "cancel_job"}
     s, _ = live({"squeue&--me&%i": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
                  "scancel": (0, "", "")})
     assert s.execute("cancel_job", {"job_id": "5"}) == {"cancelled": True, "message": "Job 5 cancelled (was PENDING)"}
@@ -277,3 +282,4 @@ def test_guessed_partition_names_are_resolved_or_listed():
     assert r == {"error": "there is no partition 'booster'; partitions on this cluster: "
                           "boost_usr_prod, dcgp_usr_prod, lrd_all_serial"}
     assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": []}
+

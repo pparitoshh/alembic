@@ -142,8 +142,16 @@ class SlurmLive:
                 raise ToolError(f"{name}: argument {a!r} must be one of {props[a]['enum']}")
         if "job_id" in args and not _JOB_ID.match(args["job_id"]):
             return {"error": f"invalid job id {args['job_id']!r}"}
-        if name in ACTIONS and not (name == "submit_job" and args.get("test_only")) and not self.confirm(name, args):
-            return {"error": "the user declined this action", "action": name}
+        if name == "cancel_job":  # before asking: is there anything to cancel?
+            rc, out, _ = self.run(["squeue", "--me", "-h", "-j", args["job_id"].split("_")[0], "-o", "%T"])
+            if rc != 0 or not out.strip():
+                state = self.job_status(args["job_id"]).get("state")
+                return {"error": f"job {args['job_id']} is not one of your queued or running jobs"
+                                 + (f" (state: {state})" if state else " (not found)"), "action": name}
+        if name in ACTIONS and not (name == "submit_job" and args.get("test_only")):
+            ok = self.confirm(name, args)  # True, or False / a reason string when not approved
+            if ok is not True:
+                return {"error": ok if isinstance(ok, str) and ok else "the user declined this action", "action": name}
         note = None
         if args.get("partition"):
             args["partition"], note = self.resolve_partition(args["partition"], all_ok=name == "gpu_availability")
