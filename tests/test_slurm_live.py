@@ -326,3 +326,14 @@ def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
         t.join(5)
         assert expect in ask.wfile.getvalue()
     assert sum(c[0][0] == "scancel" for c in fake.calls) == 1
+
+
+@pytest.mark.parametrize(("command", "ok"), [("sacctmgr -P show assoc user=alice", True), ("scontrol -o show job 1", True),
+                                             ("sacctmgr -i delete user alice", False), ("sacctmgr -M show", True),
+                                             ("scontrol update show=1", False), ("man scontrol", False)])
+def test_run_readonly_command_allows_options_before_show(command, ok):
+    s, fake = live({"sacctmgr": (0, "x\n", ""), "scontrol": (0, "x\n", "")})
+    r = s.execute("run_readonly_command", {"command": command})
+    assert ("error" not in r) == ok
+    if not ok:
+        assert "search_docs" in r["error"]

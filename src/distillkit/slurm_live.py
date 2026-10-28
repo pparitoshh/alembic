@@ -72,6 +72,7 @@ LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHE
                           HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA]
 ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
 # change the cluster: confirmed first (submit_job only without test_only)
+DOCS_HINT = "; to read documentation (man pages, options), call search_docs instead"
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
 _TYPES = {"string": str, "integer": int, "boolean": bool}
 
@@ -393,12 +394,13 @@ class SlurmLive:
 
     def run_readonly_command(self, command):
         if self._SHELL_METACHARS.search(command):
-            return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed"}
+            return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed" + DOCS_HINT}
         try:
             argv = shlex.split(command)
         except ValueError as e:
             return {"error": f"refused: cannot parse the command ({e})"}
-        if argv[:2] == ["scontrol", "show"] or argv[:2] == ["sacctmgr", "show"]:
+        words = [a for a in argv[1:] if not a.startswith("-")]  # `sacctmgr -P show ...`: options may come first
+        if argv[:1] in (["scontrol"], ["sacctmgr"]) and words[:1] == ["show"]:
             ok = True
         elif argv and argv[0] in self.READONLY_OK:
             ok = True
@@ -406,7 +408,7 @@ class SlurmLive:
             ok = False
         if not ok:
             return {"error": "refused: only read-only commands are allowed "
-                             "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)"}
+                             "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)" + DOCS_HINT}
         rc, out, err = self.run(argv)
         if len(out) > 8000:
             out = out[:8000] + "[truncated]"
