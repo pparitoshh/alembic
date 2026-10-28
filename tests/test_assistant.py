@@ -531,3 +531,19 @@ def test_a_tool_call_written_as_json_text_is_run(tmp_path, monkeypatch):
     assert answer == 'Job 77 is running.' and ran and ran[0][0] == 'squeue'
     assert assistant.written_tool_call('{"name": "rm_rf", "arguments": {}}') == []
     assert assistant.written_tool_call('use {"name": "list_queue", "arguments": {}} or {"name": "job_status", "arguments": {"job_id": "1"}}') == []
+
+
+def test_server_errors_show_the_servers_reason(tmp_path, monkeypatch):
+    import urllib.error
+    bot = assistant.Assistant(_indexes(tmp_path))
+    err = urllib.error.HTTPError('http://127.0.0.1:11434/api/chat', 500, 'Internal Server Error', {},
+                                 io.BytesIO(b'{"error":"model requires more system memory (5.1 GiB) than is available (3.2 GiB)"}'))
+    assert bot.explain(err) == ('the model server at http://localhost:11434 refused the request: model requires more '
+                                'system memory (5.1 GiB) than is available (3.2 GiB)')
+
+    def stream(self, messages):
+        raise assistant.ModelServerError('CUDA error: out of memory')
+        yield  # pragma: no cover
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    out = StringIO()
+    assert bot.safe_ask('hi', out) is None and 'refused the request: CUDA error: out of memory' in out.getvalue()
