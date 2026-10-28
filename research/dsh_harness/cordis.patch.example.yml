@@ -75,6 +75,8 @@
           # Optional per-cluster overrides, they win over the cluster profile:
           # HPC_SSH: leonardo
           # HPC_REMOTE_SETUP: ". /etc/profile.d/modules.sh && module load slurm/slurm/25.05"
+          # Optional allowlist of job-changing actions, it wins over HPC_ALLOW_ACTIONS=1:
+          # HPC_ALLOWED_ACTIONS: submit_job
           # The login node needs an open ssh master (BatchMode ssh cannot ask for a password).
           # Put a folder with an "ssh" wrapper first in PATH if the master uses a custom ControlPath.
           PATH: /usr/local/bin:/usr/bin:/bin

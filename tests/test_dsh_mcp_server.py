@@ -2,11 +2,13 @@
 import importlib.util
 import json
 import os
+import pytest
 import subprocess
 import sys
 from pathlib import Path
 
-from distillkit.slurm_live import SlurmLive
+from distillkit.slurm_live import ACTIONS, SlurmLive
+from distillkit.tools import ToolError
 
 ROOT = Path(__file__).resolve().parents[1]
 _spec = importlib.util.spec_from_file_location("dsh_mcp_server", ROOT / "research" / "dsh_harness" / "mcp_server.py")
@@ -53,7 +55,7 @@ def test_ping():
 
 
 def test_tools_list_hides_actions_without_the_flag():
-    tools = srv.handle_message(req("tools/list"), SlurmLive(), allow=False)["result"]["tools"]
+    tools = srv.handle_message(req("tools/list"), SlurmLive(), allowed=set())["result"]["tools"]
     names = [t["name"] for t in tools]
     assert len(names) == 12 and not set(srv.HIDDEN_TOOLS) & set(names)
     submit = next(t for t in tools if t["name"] == "submit_job")
@@ -61,7 +63,7 @@ def test_tools_list_hides_actions_without_the_flag():
 
 
 def test_tools_list_keeps_all_17_tools_with_the_flag():
-    tools = srv.handle_message(req("tools/list"), SlurmLive(), allow=True)["result"]["tools"]
+    tools = srv.handle_message(req("tools/list"), SlurmLive(), allowed=set(ACTIONS))["result"]["tools"]
     assert len(tools) == 17
     for t in tools:
         assert t["name"] and t["description"] and t["inputSchema"]["type"] == "object"
@@ -158,6 +160,62 @@ def test_action_reaches_runner_when_allowed():
     assert ["scancel", "42"] in calls
 
 
+def test_allowed_actions_flag_1_without_the_new_var_allows_all_six():
+    assert srv.allowed_actions({"HPC_ALLOW_ACTIONS": "1"}) == set(ACTIONS)
+    assert srv.allowed_actions({}) == set()
+
+
+def test_allowed_actions_only_submit_job():
+    assert srv.allowed_actions({"HPC_ALLOWED_ACTIONS": "submit_job"}) == {"submit_job"}
+    assert srv.allowed_actions({"HPC_ALLOWED_ACTIONS": " submit_job , , cancel_job "}) == {"submit_job", "cancel_job"}
+
+
+def test_allowed_actions_empty_value_falls_back_to_hpc_allow_actions():
+    assert srv.allowed_actions({"HPC_ALLOWED_ACTIONS": "", "HPC_ALLOW_ACTIONS": "1"}) == set(ACTIONS)
+    assert srv.allowed_actions({"HPC_ALLOWED_ACTIONS": "   ", "HPC_ALLOW_ACTIONS": "1"}) == set(ACTIONS)
+    assert srv.allowed_actions({"HPC_ALLOWED_ACTIONS": ""}) == set()
+
+
+def test_allowed_actions_new_var_wins_over_hpc_allow_actions_1():
+    assert srv.allowed_actions({"HPC_ALLOWED_ACTIONS": "submit_job", "HPC_ALLOW_ACTIONS": "1"}) == {"submit_job"}
+
+
+def test_allowed_actions_unknown_name_fails_with_the_valid_list():
+    with pytest.raises(ToolError) as e:
+        srv.make_slurm({"HPC_ALLOWED_ACTIONS": "submit_job,bogus_action"})
+    assert "bogus_action" in str(e.value) and "submit_job" in str(e.value) and "requeue_job" in str(e.value)
+
+
+def test_submit_real_runs_when_only_submit_job_is_allowed():
+    slurm, calls = fake_slurm({"HPC_ALLOWED_ACTIONS": "submit_job"})
+    r = srv.handle_message(req("tools/call", name="submit_job",
+                               arguments={"script": "#!/bin/bash\necho hi\n", "test_only": False}), slurm)["result"]
+    assert r["isError"] is False
+    assert any("sbatch" in " ".join(c) for c in calls)
+
+
+def test_cancel_declined_when_only_submit_job_is_allowed():
+    slurm, calls = fake_slurm({"HPC_ALLOWED_ACTIONS": "submit_job"})
+    r = srv.handle_message(req("tools/call", name="cancel_job", arguments={"job_id": "42"}), slurm)["result"]
+    assert r["isError"] is True and r["content"][0]["text"] == srv.ACTIONS_DISABLED
+    assert not any(c[0] == "scancel" for c in calls)
+
+
+def test_tools_list_with_only_submit_job_hides_the_other_actions():
+    tools = srv.handle_message(req("tools/list"), SlurmLive(), allowed={"submit_job"})["result"]["tools"]
+    names = [t["name"] for t in tools]
+    assert "submit_job" in names and not set(srv.HIDDEN_TOOLS) & set(names)
+    submit = next(t for t in tools if t["name"] == "submit_job")
+    assert "test_only=true" in submit["description"]
+
+
+def test_tools_list_with_cancel_allowed_shows_cancel_and_hides_the_rest():
+    tools = srv.handle_message(req("tools/list"), SlurmLive(), allowed={"cancel_job"})["result"]["tools"]
+    names = [t["name"] for t in tools]
+    assert "cancel_job" in names and "submit_job" in names
+    assert set(srv.HIDDEN_TOOLS) & set(names) == {"cancel_job"}
+
+
 def test_make_slurm_passes_ssh_and_remote_setup_through():
     slurm = srv.make_slurm({"HPC_SSH": "c1", "HPC_REMOTE_SETUP": "x"})
     assert slurm.ssh == "c1" and slurm.remote_setup == "x" and slurm.job_defaults == {}
@@ -200,10 +258,16 @@ def _stdio_replies(env):
     return [json.loads(x) for x in p.stdout.splitlines()]
 
 
-def test_end_to_end_over_stdio():
+def _stdio_env():
     env = {k: v for k, v in os.environ.items()
-           if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS", "HPC_CLUSTER", "HPC_CLUSTERS_FILE")}
+           if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS", "HPC_ALLOWED_ACTIONS",
+                        "HPC_CLUSTER", "HPC_CLUSTERS_FILE")}
     env["PYTHONPATH"] = str(ROOT / "src")
+    return env
+
+
+def test_end_to_end_over_stdio():
+    env = _stdio_env()
     env["HPC_ALLOW_ACTIONS"] = "1"
     replies = _stdio_replies(env)
     assert [r["id"] for r in replies] == [1, 2]
@@ -211,10 +275,17 @@ def test_end_to_end_over_stdio():
 
 
 def test_end_to_end_over_stdio_without_the_flag_hides_the_actions():
-    env = {k: v for k, v in os.environ.items()
-           if k not in ("HPC_SSH", "HPC_ALLOW_ACTIONS", "HPC_CLUSTER", "HPC_CLUSTERS_FILE")}
-    env["PYTHONPATH"] = str(ROOT / "src")
+    env = _stdio_env()
     replies = _stdio_replies(env)
     tools = replies[1]["result"]["tools"]
     names = [t["name"] for t in tools]
     assert len(names) == 12 and not set(srv.HIDDEN_TOOLS) & set(names)
+
+
+def test_end_to_end_over_stdio_with_allowed_actions_hides_the_others():
+    env = _stdio_env()
+    env["HPC_ALLOWED_ACTIONS"] = "submit_job"
+    replies = _stdio_replies(env)
+    tools = replies[1]["result"]["tools"]
+    names = [t["name"] for t in tools]
+    assert "submit_job" in names and not set(srv.HIDDEN_TOOLS) & set(names)
