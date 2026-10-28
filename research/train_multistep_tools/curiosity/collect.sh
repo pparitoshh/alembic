@@ -3,8 +3,8 @@
 # Resumable: the script skips a step when its output file is complete. Outputs go to $RUN (lib_mt.sh).
 source $(dirname $(readlink -f $0))/lib_mt.sh; cd $REPO
 if [ ! -s $RUN/tasks.jsonl ]; then
-    log "task bank (seed 1)"
-    python $MT/task_bank.py $RUN/tasks.jsonl.tmp --seed 1 >> $LOGS/$TASK.collect.log 2>&1 \
+    log "task bank (seed ${TASK_SEED:-4}, as tasks_v2.jsonl)"
+    python $MT/task_bank.py $RUN/tasks.jsonl.tmp --seed ${TASK_SEED:-4} >> $LOGS/$TASK.collect.log 2>&1 \
         && mv $RUN/tasks.jsonl.tmp $RUN/tasks.jsonl || { log "STOP: task bank failed"; exit 1; }
 fi
 log "tasks: $(wc -l < $RUN/tasks.jsonl)"
