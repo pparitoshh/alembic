@@ -311,6 +311,7 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
     monkeypatch.setattr(assistant.subprocess, 'run', run)
     monkeypatch.setattr(assistant, '_download', download)
     monkeypatch.setattr(assistant, '_release_id', lambda: release[0])
+    monkeypatch.setattr(assistant, '_file_ids', lambda url: {})  # index side: offline
     assistant.setup(tmp_path, 'cp')
     assert created == [('cp', 'g1:m1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
     assistant.setup(tmp_path, 'cp')  # nothing new: nothing downloaded or created
@@ -384,3 +385,30 @@ def test_agent_mode_asks_without_excerpts_first(tmp_path, monkeypatch):
     answer, sources = bot.ask('How do I request GPUs on LUMI?', out=StringIO())
     assert sent[0] == 'How do I request GPUs on LUMI?' and 'Quoted retrieval results' in sent[1]
     assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == sent[1]
+
+
+def test_setup_refreshes_only_an_index_it_installed(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
+    monkeypatch.setattr(assistant.subprocess, 'run', lambda cmd, **kw: subprocess.CompletedProcess(
+        cmd, 0, 'NAME\ncp:latest x 2.5 GB now\n', ''))
+    monkeypatch.setattr(assistant, '_release_id', lambda: None)  # model side: offline, nothing to do
+    ids, fetched = {'documents.sqlite': 'd1', 'factory_docs.sqlite': 'f1'}, []
+    monkeypatch.setattr(assistant, '_file_ids', lambda url: dict(ids))
+
+    def download(url, dest):
+        fetched.append(dest.name)
+        dest.write_text(ids[dest.name])
+    monkeypatch.setattr(assistant, '_download', download)
+    own = tmp_path / 'own'
+    own.mkdir()
+    (own / 'documents.sqlite').write_text('hand-built')
+    (own / 'factory_docs.sqlite').write_text('hand-built')
+    assistant.setup(tmp_path, 'cp')  # fresh install: both files
+    assert sorted(fetched) == ['documents.sqlite', 'factory_docs.sqlite']
+    assistant.setup(tmp_path, 'cp')  # unchanged: nothing
+    assert len(fetched) == 2
+    ids['documents.sqlite'] = 'd2'
+    assistant.setup(tmp_path, 'cp')  # the published documents index changed: only that file
+    assert fetched[2:] == ['documents.sqlite'] and (tmp_path / 'documents.sqlite').read_text() == 'd2'
+    assistant.setup(own, 'cp')  # a hand-built index (no stamp) is never replaced
+    assert len(fetched) == 3 and (own / 'documents.sqlite').read_text() == 'hand-built'

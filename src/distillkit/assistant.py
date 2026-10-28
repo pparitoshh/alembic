@@ -582,14 +582,19 @@ def _download(url, dest):
     tmp.rename(dest)
 
 
+def _file_ids(tree_url):
+    """{file name: git id} of a folder of the Hugging Face repository, or {} when it is unreachable."""
+    try:
+        with urllib.request.urlopen(tree_url, timeout=20) as resp:
+            return {f['path'].rsplit('/', 1)[-1]: f['oid'] for f in json.load(resp)}
+    except (OSError, ValueError, KeyError):
+        return {}
+
+
 def _release_id():
     """Version of the published model (git ids of the GGUF and the Modelfile), or None when Hugging Face is unreachable."""
-    try:
-        with urllib.request.urlopen(HF_TREE, timeout=20) as resp:
-            ids = {f['path'].rsplit('/', 1)[-1]: f['oid'] for f in json.load(resp)}
-        return ids[GGUF_FILE] + ':' + ids['Modelfile']
-    except (OSError, ValueError, KeyError):
-        return None
+    ids = _file_ids(HF_TREE)
+    return ids[GGUF_FILE] + ':' + ids['Modelfile'] if GGUF_FILE in ids and 'Modelfile' in ids else None
 
 
 def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
@@ -617,19 +622,27 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
         cache.mkdir(parents=True, exist_ok=True)
         for name in (GGUF_FILE, 'Modelfile'):
             if not (cache / name).exists():
-                print(f'[hpc-assistant] downloading {name} (the model is about 2.5 GB)', file=sys.stderr)
+                print(f'[hpc-assistant] downloading {name}' + (' (about 2.5 GB)' if name == GGUF_FILE else ''), file=sys.stderr)
                 _download(HF_RELEASE + name, cache / name)
         subprocess.run(['ollama', 'create', model, '-f', 'Modelfile'], cwd=cache, check=True)
         stamp.write_text(latest or '')
     print(f'[hpc-assistant] model ready in Ollama: {model}' + ('' if latest else
           ' (Hugging Face not reachable: could not check for a newer release)'), file=sys.stderr)
     url = os.environ.get('HPC_ASSISTANT_INDEX_URL') or HF_INDEX
+    # The published index is updated (for example with new notes); an index that setup installed is refreshed when
+    # it changes. An index without setup's stamp (built or copied by hand) is never replaced.
+    ids = {} if os.environ.get('HPC_ASSISTANT_INDEX_URL') else _file_ids(HF_TREE.rsplit('/', 1)[0] + '/index')
+    stamp = index_dir / 'INDEX_RELEASE'
+    have = json.loads(stamp.read_text()) if stamp.exists() else {}
     for name in ('documents.sqlite', 'factory_docs.sqlite'):
-        if (index_dir / name).exists():
+        path = index_dir / name
+        if path.exists() and not (name in have and ids.get(name) and ids[name] != have[name]):
             continue
-        print(f'[hpc-assistant] downloading {name}', file=sys.stderr)
+        print(f'[hpc-assistant] {"updating" if path.exists() else "downloading"} {name}', file=sys.stderr)
         index_dir.mkdir(parents=True, exist_ok=True)
-        _download(url.rstrip('/') + '/' + name, index_dir / name)
+        _download(url.rstrip('/') + '/' + name, path)
+        have[name] = ids.get(name, '')
+        stamp.write_text(json.dumps(have))
     print('[hpc-assistant] ready: hpc-assistant "your question"', file=sys.stderr)
 
 
