@@ -94,12 +94,16 @@ _TYPES = {"string": str, "integer": int, "boolean": bool}
 # cluster default -> sbatch option (submit_job adds the ones the script does not set itself)
 _SBATCH_OPTS = {"account": "--account", "partition": "--partition", "qos": "--qos", "reservation": "--reservation",
                 "gres": "--gres", "time": "--time"}
-_SHORT_OPTS = {"A": "account", "p": "partition", "q": "qos", "t": "time"}
+_SHORT_OPTS = {"A": "account", "p": "partition", "q": "qos", "t": "time", "G": "gpus"}
+# every sbatch way to ask for GPUs: any of them in the script replaces the profile's default --gres
+_GPU_REQUESTS = {"gres", "gpus", "gpus-per-node", "gpus-per-task"}
 
 
 def _script_opts(script):
     """The sbatch options the script sets itself in its #SBATCH lines. Like sbatch, only read lines before the
-    first non-comment line. Long (--account=x, --account x) and short (-A x, -Ax) forms map to the same keys."""
+    first non-comment line. Long (--account=x, --account x) and short (-A x, -Ax) forms map to the same keys.
+    All GPU requests (--gres, --gpus, -G, --gpus-per-node, --gpus-per-task) map to the key 'gres': the script's
+    own GPU request replaces the profile's default --gres."""
     names = set()
     for line in script.splitlines():
         stripped = line.strip()
@@ -108,11 +112,15 @@ def _script_opts(script):
         if not stripped.upper().startswith("#SBATCH"):
             continue
         for token in stripped[7:].split():
+            name = None
             if token.startswith("--"):
-                if (name := token[2:].split("=")[0]) in _SBATCH_OPTS:
-                    names.add(name)
+                name = token[2:].split("=")[0]
+                if name not in _SBATCH_OPTS and name not in _GPU_REQUESTS:
+                    name = None
             elif token.startswith("-") and len(token) > 1 and token[1] in _SHORT_OPTS:
-                names.add(_SHORT_OPTS[token[1]])
+                name = _SHORT_OPTS[token[1]]
+            if name:
+                names.add("gres" if name in _GPU_REQUESTS else name)
     return names
 
 
@@ -604,9 +612,12 @@ class SlurmLive:
         user = self.user()
         yours = self._gpus_in_use(qos, user=user) if user else None
         limit["your_gpus_in_use"] = yours
-        caps = [c for c in (grp.get("gpu"), per_user.get("gpu")) if c is not None]
-        if caps and used is not None:
-            limit["gpus_free_in_team_limit"] = max(0, min(caps) - used)
+        free = grp.get("gpu") - used if grp.get("gpu") is not None and used is not None else None
+        if per_user.get("gpu") is not None and yours is not None:  # the per-user cap binds the user alone
+            yours_free = per_user["gpu"] - yours
+            free = yours_free if free is None else min(free, yours_free)
+        if free is not None:  # one cap missing: the other one alone decides
+            limit["gpus_free_in_team_limit"] = max(0, free)
         if limit["gpu_limit"] is not None and limit["gpus_free_in_team_limit"] is not None:
             free = limit["gpus_free_in_team_limit"]
             if free == 0:
@@ -621,18 +632,25 @@ class SlurmLive:
 
     def _gpus_in_use(self, qos, user=None):
         """GPUs in use by the RUNNING jobs of one QOS (pending jobs hold no GPUs yet), of all its users or only of
-        user: TRES per node (%b) times nodes (%D), summed over the jobs; null when they cannot be parsed."""
+        user: counted from the allocated TRES (tres-alloc, the only source that covers jobs submitted with --gpus=N
+        or --gpus-per-task, whose per-node gres %b shows N/A), falling back per job with no gpu TRES entry to the
+        per-node gres (%b) times the node count (%D); null when they cannot be parsed."""
         cmd = ["squeue", "-h", "-q", qos, "-t", "RUNNING"]
         if user:
             cmd += ["-u", user]
-        rc, out, _ = self.run(cmd + ["-o", "%b|%D"])
+        # tres-alloc has no %-token, so -o cannot print it: one -O row per job, the pipe is a suffix field
+        rc, out, _ = self.run(cmd + ["-O", "tres-alloc:|,gres:|,numnodes:|"])
         if rc != 0:
             return None
         total = 0
         for line in out.strip().splitlines():
-            tres, _, nodes = line.partition("|")
-            try:
-                total += _tres(tres).get("gpu", 0) * int(nodes.strip())
+            tres_alloc, gres, nodes = (line.split("|") + ["", ""])[:3]
+            gpu = _tres_gpu(tres_alloc)
+            if gpu is not None:  # the allocated TRES of the job, e.g. cpu=8,gres/gpu=2
+                total += gpu
+                continue
+            try:  # fallback: the per-node gres (%b, e.g. gpu:a100:2) times the node count
+                total += _tres(gres).get("gpu", 0) * int(nodes.strip())
             except ValueError:
                 return None
         return total
@@ -734,6 +752,19 @@ def _tres(text):
         key = "gpu" if m.group(1).endswith("gpu") else m.group(1)
         vals[key] = vals.get(key, 0) + int(m.group(2))
     return vals
+
+
+def _tres_gpu(text):
+    """The GPU count of a TRES string, or None without a gpu entry: the untyped gres/gpu=N entry counts alone (a
+    cluster with typed GPU TRES also lists gres/gpu:a100=N, which is the same GPUs a second time), and the typed
+    entries' sum only fills in when no untyped entry exists."""
+    untyped, typed = None, 0
+    for m in re.finditer(r"gres/gpu(?::([A-Za-z0-9_.-]+))?=(\d+)", text or ""):
+        if m.group(1):
+            typed += int(m.group(2))
+        else:
+            untyped = (untyped or 0) + int(m.group(2))
+    return untyped if untyped is not None else (typed or None)
 
 
 def _secs(t):
