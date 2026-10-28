@@ -139,12 +139,22 @@ def test_invalid_calls():
 def test_job_usage_argv_rows_and_error_for_non_running_jobs():
     s, fake = live({"sstat&MaxVMSize": (0, "9|01:30:00|3145728K|1048576K|4194304K\n9.ext|01:00:00|||2097152K\n", "")})
     r = s.execute("job_usage", {"job_id": "9"})
-    assert fake.calls[0][0] == ["sstat", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
+    assert fake.calls[0][0] == ["sstat", "--allsteps", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
     assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3145728K", "AveRSS": "1048576K",
                              "MaxVMSize": "4194304K"} and r["steps"][1]["JobID"] == "9.ext"
     s, _ = live({"sstat": (1, "", "error: Pending job")})
     r = s.execute("job_usage", {"job_id": "9"})
-    assert "sstat has no live usage" in r["error"] and "job_accounting" in r["error"]
+    assert "not running" in r["error"] and "job_accounting" in r["error"]
+    s, _ = live({"sstat": (0, "9.extern|9-00:00:00||\n9.batch|06:02:55|133615688K|1|2\n", "")})  # Curiosity's output
+    assert [x["JobID"] for x in s.execute("job_usage", {"job_id": "9"})["steps"]] == ["9.batch"]
+
+
+def test_job_script_of_a_finished_job_explains_why_it_is_missing():
+    gone = (1, "", "job script retrieval failed: Invalid job id specified")
+    s, _ = live({"scontrol&write": gone, "sacct&--batch-script": (0, "NONE\n", "")})
+    assert "does not keep the batch scripts" in s.execute("job_script", {"job_id": "5"})["error"]
+    s, _ = live({"scontrol&write": gone, "sacct&--batch-script": (0, "", "")})
+    assert s.execute("job_script", {"job_id": "5"})["error"] == "no job 5 found"
 
 
 def test_job_priority_sprio_and_sshare_outputs_with_exit_codes():
