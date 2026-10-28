@@ -315,6 +315,8 @@ def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
         def ask(self, question, out):
             out.write(json.dumps(self.slurm.execute("cancel_job", {"job_id": "5"})))
 
+        safe_ask = ask
+
     s, fake = live({"squeue&--me": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
                     "scancel": (0, "", "")})
     handler = make_handler(Bot(s), approve_in_page=True)

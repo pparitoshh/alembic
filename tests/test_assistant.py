@@ -289,7 +289,7 @@ def test_web_failed_question_leaves_history_clean(tmp_path, monkeypatch):
 
     req = Fake(b'{"question": "How do I request GPUs on LUMI?"}')
     req.do_POST()
-    assert b'not reachable' in req.wfile.getvalue()
+    assert b'cannot reach the model server' in req.wfile.getvalue() and b'start Ollama' in req.wfile.getvalue()
     assert [m['role'] for m in bot.history] == ['system']
 
 

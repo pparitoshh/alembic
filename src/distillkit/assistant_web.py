@@ -144,12 +144,7 @@ def make_handler(bot, approve_in_page=False):
                     out = _Stream(self.wfile)
                     with lock:
                         stream[0] = out
-                        try:
-                            bot.ask(question, out)
-                        except OSError as e:  # model server not reachable
-                            if len(bot.history) > 1 and bot.history[-1]['role'] == 'user':
-                                bot.history.pop()  # keep the conversation consistent for the next question
-                            out.write(f'\n\n[The model is not reachable: {e}. Is Ollama running?]')
+                        bot.safe_ask(question, out)
                     self.wfile.write(b'0\r\n\r\n')
                 else:
                     self._send(404, {'error': 'not found'})

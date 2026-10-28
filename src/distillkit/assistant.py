@@ -55,6 +55,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -604,6 +605,26 @@ class Assistant:
                                                 for u in dict.fromkeys(sources)) + '\n')
         return ''.join(answer), sources
 
+    def explain(self, error):
+        """A plain-language message for a failed request to the model server (no traceback for the user)."""
+        server = self.openai or self.ollama
+        if isinstance(error, urllib.error.HTTPError) and error.code == 404:
+            return (f"the model '{self.model}' is not available at {server}: install it with `clusterpilot --setup`"
+                    f"{'' if self.openai else ' (see `ollama list`)'}, or choose another with --model")
+        return (f"cannot reach the model server at {server} ({getattr(error, 'reason', error)}): "
+                + ("check the --openai address" if self.openai else "start Ollama (the Ollama app, or `ollama serve`)"))
+
+    def safe_ask(self, question, out=sys.stdout):
+        """ask() for the command line and the web page: a server error becomes a message, and the conversation
+        stays as it was before the question."""
+        size = len(self.history)
+        try:
+            return self.ask(question, out)
+        except OSError as e:  # URLError, HTTPError, connection reset
+            del self.history[size:]
+            out.write(f'\n[hpc-assistant] {self.explain(e)}\n')
+            return None
+
     def reset(self):
         self.history = self.history[:1]
 
@@ -739,7 +760,8 @@ def main(argv=None):
         serve(bot, port=args.port, approve_in_page=bool(slurm) and not args.yes)
         return
     if args.question:
-        bot.ask(' '.join(args.question))
+        if bot.safe_ask(' '.join(args.question)) is None:
+            raise SystemExit(1)
         print()
         return
     if args.add:
@@ -759,7 +781,7 @@ def main(argv=None):
         elif q == '/reset':
             bot.reset()
         elif q:
-            bot.ask(q)
+            bot.safe_ask(q)
             print()
 
 
