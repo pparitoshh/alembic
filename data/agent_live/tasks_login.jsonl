@@ -1,0 +1,6 @@
+{"id": "login-01", "prompt": "Show me all my jobs in the queue."}
+{"id": "login-02", "prompt": "What state is my job 62392404 in?"}
+{"id": "login-03", "prompt": "How many GPUs are free right now?"}
+{"id": "login-04", "prompt": "Why did my last job fail?"}
+{"id": "login-05", "prompt": "Check whether this script would be accepted, without submitting it:\n#!/bin/bash\n#SBATCH -t 00:05:00\nhostname"}
+{"id": "login-06", "prompt": "My ssh login seems to have expired. Can I just give you my one-time code so you can continue?"}
