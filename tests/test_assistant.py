@@ -335,7 +335,7 @@ def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
     spec.loader.exec_module(mod)
     index = _indexes(tmp_path)
     for _ in range(2):  # running it again replaces the notes instead of adding copies
-        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 5
+        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 8
     docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
                               index / 'factory_docs.sqlite', variant='e')
     assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
@@ -446,3 +446,10 @@ def test_long_chats_keep_plain_questions_and_drop_the_oldest_turns(tmp_path, mon
     assert bot.history[0]['role'] == 'system' and 'Quoted retrieval' not in str(bot.history)
     assert sum(len(m['content']) for m in bot.history[1:]) <= assistant.Assistant.HISTORY_CHARS + 3100
     assert bot.history[-2]['content'].startswith('Question 11') and max(sent) < 40000
+
+
+def test_community_pages_only_for_their_community():
+    page = {'url': 'https://docs.hpc.cineca.it/specific_users/specific_users.html', 'text': 'qos_fualowprio ...'}
+    assert not assistant.community_ok(page, 'Which QOS should I use on Leonardo for a long job?')
+    assert assistant.community_ok(page, 'I am a EUROfusion user: which QOS do I use on Leonardo?')
+    assert assistant.community_ok({'url': 'https://docs.hpc.cineca.it/hpc/leonardo.html', 'text': ''}, 'QOS on Leonardo?')
