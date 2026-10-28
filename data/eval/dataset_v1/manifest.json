@@ -427,7 +427,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/toolcheck.py",
-      "sha256": "14a11092a125267c1978bca713dbe06bfc6505316572a49e39343de00bc69fd8"
+      "sha256": "5f42c862516f67414b8803dafdbf6027297aaccd6a20c6aea71cf397a9bc800b"
     },
     {
       "root": "repository",
@@ -437,7 +437,7 @@
     {
       "root": "repository",
       "path": "src/distillkit/config.py",
-      "sha256": "8dbe7ef7ff96339a41f385f7701c2c7197019547557092bec1661657421bb4fe"
+      "sha256": "594b975427dfeca438ca5786fc81c8691c7c3a2a21b245d64591c42a5bf3f490"
     },
     {
       "root": "repository",
@@ -847,6 +847,34 @@
       "pre_binding_validation": {
         "full_failed": 1,
         "full_failure": "Strict151 release validation refused prior tools.py hash."
+      },
+      "validation_scope": "Metadata-only binding update is followed by the full suite."
+    },
+    {
+      "version": "mock-v2-selection-binding-v1",
+      "created_utc": "2026-10-28T21:58:46.721454+00:00",
+      "base_revision": "cabb9abf151415797adb2fa32770bfaac334df92",
+      "candidate_status": "uncommitted candidate; no model run",
+      "previous_manifest_sha256": "b1e0d4ba3cf91d7a9a2ea55674eb4c304043bd6631e84aeb91068e6e52bc28fd",
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "14a11092a125267c1978bca713dbe06bfc6505316572a49e39343de00bc69fd8",
+          "after": "5f42c862516f67414b8803dafdbf6027297aaccd6a20c6aea71cf397a9bc800b"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "before": "8dbe7ef7ff96339a41f385f7701c2c7197019547557092bec1661657421bb4fe",
+          "after": "594b975427dfeca438ca5786fc81c8691c7c3a2a21b245d64591c42a5bf3f490"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Issue #114 follow-up: opt-in generate.mock_version selects the mock cluster for new tool traces (default the frozen v1); toolcheck replays each trace with the mock version recorded in it, so v2 traces are no longer rejected.",
+      "compatibility": "Default stays isolated-actions-v1 for every archived config; v1 rows replay exactly as before. EvalCfg, tool SCHEMAS, scorers and judge protocol unchanged. No questions, references, source spans or fixtures modified.",
+      "pre_binding_validation": {
+        "full_failed": 1,
+        "full_failure": "Strict151 release validation refused the prior toolcheck.py hash."
       },
       "validation_scope": "Metadata-only binding update is followed by the full suite."
     }
