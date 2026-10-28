@@ -13,8 +13,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       - uses: astral-sh/setup-uv@v6
       - name: tests
-        run: uv run --python 3.12 --with pytest pytest -q tests/test_assistant.py tests/test_slurm_live.py tests/test_export.py
+        run: uv run --python 3.12 --with pytest pytest -q tests/test_assistant.py tests/test_slurm_live.py tests/test_export.py tests/test_dsh_approval_plugin.py
       - name: the clusterpilot command starts
         run: uv run --python 3.12 clusterpilot --help

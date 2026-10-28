@@ -455,8 +455,7 @@ class Assistant:
         self.slurm = slurm  # agent mode: a slurm_live.SlurmLive whose tools the model can call
         self.extra_body = {}  # merged into OpenAI-compatible requests, e.g. {'chat_template_kwargs': {'enable_thinking': False}}
         self.retriever = retriever  # 'e' (default): b + relevance header; 'f': d + relevance header (the default with a general index); 'b': improved; 'd': b + general index; 'classic': the original 3
-        self.history = [{'role': 'system', 'content': SYSTEM_PROMPT + (
-            '\nPrefer a specific tool. Use run_readonly_command only when no tool fits.' if self.slurm else '')}]
+        self.history = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         self.titles = {}  # source url -> page title, for the Sources list
 
     # --- documents -----------------------------------------------------------------------------

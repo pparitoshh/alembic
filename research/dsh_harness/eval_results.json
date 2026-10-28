@@ -1,0 +1,750 @@
+{
+  "base": {
+    "summary": "base: tool called 36/41, first tool correct 40/41 (97.6%, Wilson 95% [87.4%, 99.6%])",
+    "rows": [
+      {
+        "id": "q01",
+        "expected": "job_status",
+        "got": [
+          "job_status"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q02",
+        "expected": "job_status",
+        "got": [
+          "job_status"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q03",
+        "expected": "job_status",
+        "got": [
+          "job_status"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q04",
+        "expected": "list_queue",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q05",
+        "expected": "list_queue",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q06",
+        "expected": "list_queue",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q07",
+        "expected": "submit_job",
+        "got": [
+          "submit_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q08",
+        "expected": "submit_job",
+        "got": [
+          "submit_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q09",
+        "expected": "cancel_job",
+        "got": [
+          "cancel_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q10",
+        "expected": "cancel_job",
+        "got": [
+          "cancel_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q11",
+        "expected": "read_job_log",
+        "got": [
+          "read_job_log"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q12",
+        "expected": "read_job_log",
+        "got": [
+          "read_job_log"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q13",
+        "expected": "read_job_log",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": false
+      },
+      {
+        "id": "q14",
+        "expected": "job_accounting",
+        "got": [
+          "job_accounting"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q15",
+        "expected": "job_accounting",
+        "got": [
+          "job_accounting"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q16",
+        "expected": "gpu_availability",
+        "got": [
+          "gpu_availability"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q17",
+        "expected": "gpu_availability",
+        "got": [
+          "gpu_availability"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q18",
+        "expected": "partition_info",
+        "got": [
+          "partition_info"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q19",
+        "expected": "partition_info",
+        "got": [
+          "partition_info"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q20",
+        "expected": "job_script",
+        "got": [
+          "job_script"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q21",
+        "expected": "job_script",
+        "got": [
+          "job_script"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q22",
+        "expected": "job_usage",
+        "got": [
+          "job_usage"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q23",
+        "expected": "job_usage",
+        "got": [
+          "job_usage"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q24",
+        "expected": "job_priority",
+        "got": [
+          "job_priority"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q25",
+        "expected": "job_priority",
+        "got": [
+          "job_priority"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q26",
+        "expected": "update_job",
+        "got": [
+          "update_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q27",
+        "expected": "update_job",
+        "got": [
+          "update_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q28",
+        "expected": "hold_job",
+        "got": [
+          "hold_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q29",
+        "expected": "hold_job",
+        "got": [
+          "hold_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q30",
+        "expected": "release_job",
+        "got": [
+          "release_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q31",
+        "expected": "release_job",
+        "got": [
+          "release_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q32",
+        "expected": "requeue_job",
+        "got": [
+          "requeue_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q33",
+        "expected": "requeue_job",
+        "got": [
+          "requeue_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q34",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q35",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q36",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q37",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q38",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      },
+      {
+        "id": "q39",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      },
+      {
+        "id": "q40",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      },
+      {
+        "id": "q41",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      }
+    ]
+  },
+  "extra": {
+    "summary": "extra: tool called 35/41, first tool correct 38/41 (92.7%, Wilson 95% [80.6%, 97.5%])",
+    "rows": [
+      {
+        "id": "q01",
+        "expected": "job_status",
+        "got": [
+          "job_status"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q02",
+        "expected": "job_status",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": false
+      },
+      {
+        "id": "q03",
+        "expected": "job_status",
+        "got": [
+          "job_status"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q04",
+        "expected": "list_queue",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q05",
+        "expected": "list_queue",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q06",
+        "expected": "list_queue",
+        "got": [
+          "list_queue"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q07",
+        "expected": "submit_job",
+        "got": [
+          "submit_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q08",
+        "expected": "submit_job",
+        "got": [
+          "submit_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q09",
+        "expected": "cancel_job",
+        "got": [
+          "cancel_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q10",
+        "expected": "cancel_job",
+        "got": [
+          "cancel_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q11",
+        "expected": "read_job_log",
+        "got": [
+          "read_job_log"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q12",
+        "expected": "read_job_log",
+        "got": [
+          "read_job_log"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q13",
+        "expected": "read_job_log",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": false
+      },
+      {
+        "id": "q14",
+        "expected": "job_accounting",
+        "got": [
+          "job_accounting"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q15",
+        "expected": "job_accounting",
+        "got": [
+          "job_accounting"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q16",
+        "expected": "gpu_availability",
+        "got": [
+          "gpu_availability"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q17",
+        "expected": "gpu_availability",
+        "got": [
+          "gpu_availability"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q18",
+        "expected": "partition_info",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": false
+      },
+      {
+        "id": "q19",
+        "expected": "partition_info",
+        "got": [
+          "partition_info"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q20",
+        "expected": "job_script",
+        "got": [
+          "job_script"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q21",
+        "expected": "job_script",
+        "got": [
+          "job_script"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q22",
+        "expected": "job_usage",
+        "got": [
+          "job_usage"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q23",
+        "expected": "job_usage",
+        "got": [
+          "job_usage"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q24",
+        "expected": "job_priority",
+        "got": [
+          "job_priority"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q25",
+        "expected": "job_priority",
+        "got": [
+          "job_priority"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q26",
+        "expected": "update_job",
+        "got": [
+          "update_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q27",
+        "expected": "update_job",
+        "got": [
+          "update_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q28",
+        "expected": "hold_job",
+        "got": [
+          "hold_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q29",
+        "expected": "hold_job",
+        "got": [
+          "hold_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q30",
+        "expected": "release_job",
+        "got": [
+          "release_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q31",
+        "expected": "release_job",
+        "got": [
+          "release_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q32",
+        "expected": "requeue_job",
+        "got": [
+          "requeue_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q33",
+        "expected": "requeue_job",
+        "got": [
+          "requeue_job"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q34",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q35",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q36",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q37",
+        "expected": "run_readonly_command",
+        "got": [
+          "run_readonly_command"
+        ],
+        "called": true,
+        "correct": true
+      },
+      {
+        "id": "q38",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      },
+      {
+        "id": "q39",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      },
+      {
+        "id": "q40",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      },
+      {
+        "id": "q41",
+        "expected": "none",
+        "got": [
+          "TEXT"
+        ],
+        "called": false,
+        "correct": true
+      }
+    ]
+  }
+}
