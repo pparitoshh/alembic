@@ -46,6 +46,7 @@ A free-text Markdown file is also acceptable. We will convert it to the format b
 | `id` | yes | `<cluster>-<number>`, unique |
 | `cluster` | yes | `lumi`, `leonardo` or another cluster name |
 | `user_request` | yes | What the user asked, in the user's words |
+| `follow_up` | no | A second user message, sent after the assistant's first answer; `expected_answer` covers both turns |
 | `context` | no | Facts the assistant can know: partition, script parts, error text |
 | `expected_actions` | no | Tools or commands a good assistant uses (`job_status`, `sacct`, ...) |
 | `expected_answer` | no | The correct answer or the important points of it |
