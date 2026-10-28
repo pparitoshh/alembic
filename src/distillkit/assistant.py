@@ -565,9 +565,11 @@ def setup(index_dir=DEFAULT_INDEX, model='hpc-assistant'):
     latest = _release_id()
     current = stamp.read_text().strip() if stamp.exists() else None
     outdated = latest is not None and latest != current
-    if outdated:
-        for name in (GGUF_FILE, 'Modelfile'):  # files of an older release
-            (cache / name).unlink(missing_ok=True)
+    if outdated:  # replace only the files that changed (a Modelfile fix does not re-download the 2.5 GB GGUF)
+        old = dict(zip((GGUF_FILE, 'Modelfile'), (current or ':').split(':')))
+        for name, new in zip((GGUF_FILE, 'Modelfile'), latest.split(':')):
+            if old.get(name) != new:
+                (cache / name).unlink(missing_ok=True)
     if not installed or outdated:
         if installed:
             print(f'[hpc-assistant] a newer model release is out: updating {model}', file=sys.stderr)

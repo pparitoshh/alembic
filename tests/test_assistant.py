@@ -307,20 +307,23 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
         else:
             assert url == assistant.HF_INDEX + dest.name
         dest.write_text(release[0])
-    release = ['v1']
+    release = ['g1:m1']
     monkeypatch.setattr(assistant.subprocess, 'run', run)
     monkeypatch.setattr(assistant, '_download', download)
     monkeypatch.setattr(assistant, '_release_id', lambda: release[0])
     assistant.setup(tmp_path, 'cp')
-    assert created == [('cp', 'v1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
+    assert created == [('cp', 'g1:m1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
     assistant.setup(tmp_path, 'cp')  # nothing new: nothing downloaded or created
     assert len(created) == 1 and len(fetched) == 2
-    release[0] = 'v2'
+    release[0] = 'g2:m2'
     assistant.setup(tmp_path, 'cp')  # a new release replaces the cached files and the Ollama model
-    assert created[-1] == ('cp', 'v2') and len(fetched) == 4
+    assert created[-1] == ('cp', 'g2:m2') and len(fetched) == 4
+    release[0] = 'g2:m3'  # only the Modelfile changed: the GGUF is not downloaded again
+    assistant.setup(tmp_path, 'cp')
+    assert len(created) == 3 and fetched[-1] == 'Modelfile' and len(fetched) == 5
     monkeypatch.setattr(assistant, '_release_id', lambda: None)
     assistant.setup(tmp_path, 'cp')  # offline: the installed model stays
-    assert len(created) == 2
+    assert len(created) == 3
 
 
 def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
