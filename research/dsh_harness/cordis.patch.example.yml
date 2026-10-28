@@ -16,7 +16,21 @@
 #   - The MCP server declines all job-changing actions unless HPC_ALLOW_ACTIONS=1 is set in its env.
 #   - HPC_CLUSTER picks a profile from the clusters file (ssh, remote setup, job defaults). HPC_SSH and
 #     HPC_REMOTE_SETUP win over the profile when set. Leave HPC_SSH out to run the commands on this machine.
-#   - The preset "minimal" still has a bash tool. This is an open safety risk.
+#   - The local profile also replaces the row "preset-minimal" (copy it from `dsh web --dump-config`):
+#     it removes the nested row "persistent-bash", so the model has no bash tool, and it sets the system
+#     prompt in the "persona" row (complete: true, includeRuntimeContext: false) to:
+#       You are an HPC assistant for Slurm clusters. Your tools read the state of the connected cluster.
+#       Rules:
+#       1. Call one tool at a time. Wait for its result before you decide the next step.
+#       2. Use only job IDs, file names and values that the user or a tool result gave. Never invent them.
+#          If one is missing, ask the user.
+#       3. Before you submit, change or cancel a job, or run a new script: show the full script or command,
+#          say which resources it uses, and ask the user to confirm. Then stop and wait for the answer.
+#          Never propose and submit in the same reply.
+#       4. The submit_job script must be the full script text that starts with #! and #SBATCH lines. You
+#          cannot read local files or URLs. If you do not have the text, ask the user to paste it.
+#       5. If a tool returns an error two times, stop. Tell the user the error and what they can do.
+#       6. Answer in short, clear sentences.
 
 - id: llm-pi-ai
   name: '@deepseek-ai/dsh-llm-pi-ai'
