@@ -314,7 +314,7 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
     release = ['g1:m1']
     monkeypatch.setattr(assistant.subprocess, 'run', run)
     monkeypatch.setattr(assistant, '_download', download)
-    monkeypatch.setattr(assistant, '_release_id', lambda: release[0])
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: release[0])
     monkeypatch.setattr(assistant, '_file_ids', lambda url: {})  # index side: offline
     assistant.setup(tmp_path, 'cp')
     assert created == [('cp', 'g1:m1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
@@ -326,7 +326,7 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
     release[0] = 'g2:m3'  # only the Modelfile changed: the GGUF is not downloaded again
     assistant.setup(tmp_path, 'cp')
     assert len(created) == 3 and fetched[-1] == 'Modelfile' and len(fetched) == 5
-    monkeypatch.setattr(assistant, '_release_id', lambda: None)
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: None)
     assistant.setup(tmp_path, 'cp')  # offline: the installed model stays
     assert len(created) == 3
 
@@ -395,7 +395,7 @@ def test_setup_refreshes_only_an_index_it_installed(tmp_path, monkeypatch):
     monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
     monkeypatch.setattr(assistant.subprocess, 'run', lambda cmd, **kw: subprocess.CompletedProcess(
         cmd, 0, 'NAME\ncp:latest x 2.5 GB now\n', ''))
-    monkeypatch.setattr(assistant, '_release_id', lambda: None)  # model side: offline, nothing to do
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: None)  # model side: offline, nothing to do
     ids, fetched = {'documents.sqlite': 'd1', 'factory_docs.sqlite': 'f1'}, []
     monkeypatch.setattr(assistant, '_file_ids', lambda url: dict(ids))
 
@@ -758,3 +758,25 @@ def test_uncovered_site_note_reaches_model_and_user(tmp_path):
     bot.ask("Why is my job stuck in PENDING on the 'expanse' cluster?", out=out)
     assert 'does not cover Expanse' in seen[0] and 'not checked' in out.getvalue()
     assert bot.history[-2]['content'] == "Why is my job stuck in PENDING on the 'expanse' cluster?"  # plain question kept
+
+
+def test_setup_installs_q8_by_default_and_small_switches_to_q4(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
+    created = []
+
+    def run(cmd, **kw):
+        if cmd[:2] == ['ollama', 'create']:
+            created.append((kw['cwd'] / 'Modelfile').read_text().splitlines()[0])
+        return subprocess.CompletedProcess(cmd, 0, 'NAME ID SIZE MODIFIED\n', '')
+
+    def download(url, dest):
+        dest.write_text('FROM ./hpc-assistant-qwen3-4b-Q4_K_M.gguf\nTEMPLATE x\n' if dest.name == 'Modelfile' else 'gguf')
+    monkeypatch.setattr(assistant.subprocess, 'run', run)
+    monkeypatch.setattr(assistant, '_download', download)
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: gguf + ':m1')  # a different file id per quant
+    monkeypatch.setattr(assistant, '_file_ids', lambda url: {})
+    q8, q4 = assistant.GGUF_FILES['Q8_0'][0], assistant.GGUF_FILES['Q4_K_M'][0]
+    assistant.setup(tmp_path, 'cp')
+    assert created[-1] == f'FROM ./{q8}' and (tmp_path / 'model' / q8).exists()
+    assistant.setup(tmp_path, 'cp', q4)  # --small: the Modelfile points at Q4_K_M and the Q8_0 file is removed
+    assert created[-1] == f'FROM ./{q4}' and not (tmp_path / 'model' / q8).exists()

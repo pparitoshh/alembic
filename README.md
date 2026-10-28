@@ -19,7 +19,7 @@ offline on a laptop with [Ollama](https://ollama.com) (its tests run on macOS, L
 
 ```bash
 git clone https://github.com/pparitoshh/alembic && cd alembic
-uv run clusterpilot --setup                      # model + docs index from Hugging Face into Ollama; rerun to update
+uv run clusterpilot --setup                      # model (Q8_0, 4.3 GB; --small: Q4_K_M, 2.5 GB) + docs index from Hugging Face into Ollama; rerun to update
 uv run clusterpilot "How do I run 100 array tasks, at most 10 at a time?"
 uv run clusterpilot --web                        # chat page on http://127.0.0.1:8765; drop your own manuals in
 uv run clusterpilot --agent --ssh <login node>   # agent mode on your cluster (or --agent on a login node)
