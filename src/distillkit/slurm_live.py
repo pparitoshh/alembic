@@ -68,8 +68,18 @@ RUN_READONLY_COMMAND_SCHEMA = {
     "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
                    "required": ["command"]},
 }
+RESERVATION_INFO_SCHEMA = {
+    "name": "reservation_info",
+    "description": "Show one Slurm reservation (state, start, end, nodes) or all of them, plus the jobs that run in each.",
+    "parameters": {
+        "type": "object",
+        "properties": {"name": {"type": "string", "description": "Reservation name; omit for all reservations"}},
+        "required": [],
+    },
+}
 LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
-                          HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA]
+                          HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA,
+                          RESERVATION_INFO_SCHEMA]
 ACTIONS = ("submit_job", "cancel_job", "update_job", "hold_job", "release_job", "requeue_job")
 # change the cluster: confirmed first (submit_job only without test_only)
 _JOB_ID = re.compile(r"^[0-9]+(?:_[0-9]+)?$")
@@ -324,6 +334,19 @@ class SlurmLive:
             return res[0] if res else {"error": f"invalid partition {partition!r}"}
         return {"partitions": res}
 
+    def reservation_info(self, name=None):
+        rc, out, err = self.run(["scontrol", "show", "reservation"])
+        if rc != 0:
+            return {"error": err.strip() or out.strip() or "scontrol show reservation failed"}
+        found = [f for f in _parse_reservations(out) if not name or f.get("ReservationName") == name]
+        if name and not found:
+            return {"error": f"Reservation {name} not found"}
+        return {"reservations": [{"name": f["ReservationName"], "state": f.get("State"), "start": f.get("StartTime"),
+                                  "end": f.get("EndTime"), "partition": f.get("PartitionName"),
+                                  "node_count": int(f["NodeCnt"]) if f.get("NodeCnt", "").isdigit() else 0,
+                                  "accounts": f.get("Accounts"),
+                                  "jobs": self._reservation_jobs(f["ReservationName"])} for f in found]}
+
     def job_script(self, job_id):
         rc, out, err = self.run(["scontrol", "write", "batch_script", job_id, "-"])
         if rc == 0 and out.strip():
@@ -419,15 +442,16 @@ class SlurmLive:
         rc, out, err = self.run(["scontrol", "show", "reservation"])
         if rc != 0:
             return [], f"scontrol show reservation failed: {(err or out).strip() or 'scontrol failed'}"
-        out = out.strip()
-        if not out or "no reservations in the system" in out.lower():
-            return [], None
-        names = []
-        for record in out.split("\n\n"):  # records are separated by blank lines
-            fields = dict(f.split("=", 1) for f in record.split() if "=" in f)
-            if fields.get("State") == "ACTIVE" and fields.get("ReservationName", "").startswith(prefix):
-                names.append(fields["ReservationName"])
-        return names, None
+        return [f["ReservationName"] for f in _parse_reservations(out)
+                if f.get("State") == "ACTIVE" and f.get("ReservationName", "").startswith(prefix)], None
+
+    def _reservation_jobs(self, name):
+        """The queued or running jobs that hold resources in one reservation."""
+        rc, out, _ = self.run(["squeue", "-R", name, "-h", "-o", "%i|%j|%u|%T|%M"])
+        if rc != 0:
+            return []
+        return [{"job_id": i, "name": jname, "user": user, "state": state, "time": elapsed}
+                for i, jname, user, state, elapsed in (l.split("|") for l in out.strip().splitlines())]
 
     def _sacct(self, job_id):
         fields = "JobID,JobName,State,ExitCode,Partition,Elapsed,Timelimit,NodeList,MaxRSS,TotalCPU,AllocCPUS,AllocTRES"
@@ -476,6 +500,14 @@ def _expand(pattern, job_id, row):
     values = {"j": row.get("JobIDRaw") or array, "A": array, "a": index, "x": row.get("JobName", ""),
               "u": row.get("User", ""), "%": "%"}
     return re.sub(r"%(?:\d+)?([jAaxu%])", lambda m: values[m.group(1)], pattern)
+
+
+def _parse_reservations(out):
+    """'scontrol show reservation' text -> one {KEY: VALUE} dict per reservation (records split by blank lines)."""
+    out = out.strip()
+    if not out or "no reservations in the system" in out.lower():
+        return []
+    return [dict(f.split("=", 1) for f in record.split() if "=" in f) for record in out.split("\n\n")]
 
 
 def _gpus(gres):

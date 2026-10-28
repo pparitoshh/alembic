@@ -52,9 +52,9 @@ def test_ping():
     assert srv.handle_message(req("ping", id=7), SlurmLive())["result"] == {}
 
 
-def test_tools_list_has_16_tools():
+def test_tools_list_has_17_tools():
     tools = srv.handle_message(req("tools/list"), SlurmLive())["result"]["tools"]
-    assert len(tools) == 16
+    assert len(tools) == 17
     for t in tools:
         assert t["name"] and t["description"] and t["inputSchema"]["type"] == "object"
 
@@ -170,4 +170,4 @@ def test_end_to_end_over_stdio():
                        input="\n".join(lines) + "\n", capture_output=True, text=True, timeout=20, env=env)
     replies = [json.loads(x) for x in p.stdout.splitlines()]
     assert [r["id"] for r in replies] == [1, 2]
-    assert len(replies[1]["result"]["tools"]) == 16
+    assert len(replies[1]["result"]["tools"]) == 17

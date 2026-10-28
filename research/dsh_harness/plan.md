@@ -2,7 +2,7 @@
 
 ## Goal
 
-Run the HPC assistant student model behind a local harness with a web UI. Register our 16 Slurm tools. Keep telemetry local for debugging. First option: DeepSeek Harness (dsh). Second option: Hermes Agent (Nous Research).
+Run the HPC assistant student model behind a local harness with a web UI. Register our 17 Slurm tools. Keep telemetry local for debugging. First option: DeepSeek Harness (dsh). Second option: Hermes Agent (Nous Research).
 
 ## Background
 
@@ -20,7 +20,7 @@ The Hugging Face model `hf.co/VaibhavKKM/hpc-assistant-qwen3-4b` has a thinking-
 4. Install dsh (pin the version). Run `dsh --profile web --dump-config`.
 5. Read the `docs/` of the official repo `deepseek-ai/deepseek-harness` for tool registration and telemetry keys.
 6. Add provider rows in the profile patch `~/.dsh/profiles/web/cordis.patch.yml` (not in the legacy `~/.dsh/settings.yaml`) for the endpoint `http://127.0.0.1:11434/v1`.
-7. Write a dsh plugin that registers the 16 tools from `src/distillkit/slurm_live.py` (use `openai_tools()`). Actions that change jobs must ask for confirmation, same as the agent.
+7. Write a dsh plugin that registers the 17 tools from `src/distillkit/slurm_live.py` (use `openai_tools()`). Actions that change jobs must ask for confirmation, same as the agent.
 8. Turn on telemetry and check that it stays local.
 9. Compare with Hermes Agent if dsh does not fit.
 
@@ -72,7 +72,7 @@ Step 3 (test script): `test_toolcalls.py` is complete. The tool-call test has 8 
 - "Which partitions does this cluster have?" used `run_readonly_command`.
 - "Why is job 12345 still pending?" used `job_priority`.
 
-MCP server: `research/dsh_harness/mcp_server.py` lists 16 tools by a direct tools/list call. 12 unit tests pass.
+MCP server: `research/dsh_harness/mcp_server.py` lists 17 tools by a direct tools/list call. 12 unit tests pass.
 
 dsh config: the real config layer is the profile patch `~/.dsh/profiles/web/cordis.patch.yml`. Its rows are `llm-pi-ai` (route `ollama-local` at http://127.0.0.1:11434/v1), `agent-default-model` and `mcp-hpc`. The file `~/.dsh/settings.yaml` is a legacy file.
 
@@ -89,7 +89,7 @@ Earlier host check, 2026-10-27 (before the dsh install): `which llama-server dsh
 ### Update, 2026-10-27
 
 - dsh web runs on http://127.0.0.1:3080.
-- The MCP server `hpc` lists 16 tools. It works on Leonardo with read-only calls. The calls `list_queue`, `partition_info` and `gpu_availability` return data.
+- The MCP server `hpc` lists 17 tools. It works on Leonardo with read-only calls. The calls `list_queue`, `partition_info` and `gpu_availability` return data.
 - The 41-question result with the base prompt: tool called 36/41, first tool correct 40/41. With the extra prompt line: tool called 35/41, first tool correct 38/41.
 - The dsh model route sets an output cap of 2048 tokens and a context window of 8192 tokens.
 

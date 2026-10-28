@@ -1,4 +1,4 @@
-"""Local MCP server (stdio) for the 16 Slurm tools of `distillkit.slurm_live`, so DeepSeek Harness (dsh) and Hermes
+"""Local MCP server (stdio) for the 17 Slurm tools of `distillkit.slurm_live`, so DeepSeek Harness (dsh) and Hermes
 Agent can load them. Standard library only, plus distillkit.
 
 Transport: JSON-RPC 2.0, one JSON message per line on stdin and stdout. Logs go to stderr only.

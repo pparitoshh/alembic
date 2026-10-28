@@ -47,7 +47,7 @@ def test_live_schemas_are_the_trained_ones_plus_live_tools():
     assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
     assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == \
         ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
-         "run_readonly_command"]
+         "run_readonly_command", "reservation_info"]
 
 
 def test_job_status_running_pending_and_finished():
@@ -136,6 +136,44 @@ def test_submit_job_failing_scontrol_is_an_error():
     r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
     assert "scontrol show reservation failed" in r["error"] and "something broke" in r["error"]
     assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_reservation_info_lists_all_reservations_with_their_jobs():
+    s, fake = live({"scontrol&show&reservation": (0, RESERVATIONS, ""),
+                    "squeue&-R&s_tra_ncc2": (0, "101|train|alice|RUNNING|01:23:45\n102|eval|bob|PENDING|0:00\n", ""),
+                    "squeue&-R&s_tra_ncc3": (0, "", "")})
+    r = s.execute("reservation_info", {})
+    assert r == {"reservations": [
+        {"name": "s_tra_ncc2", "state": "ACTIVE", "start": "2026-10-28T08:00:00", "end": "2026-10-28T22:00:00",
+         "partition": "boost_usr_prod", "node_count": 32, "accounts": "EUHPC_D30_031",
+         "jobs": [{"job_id": "101", "name": "train", "user": "alice", "state": "RUNNING", "time": "01:23:45"},
+                  {"job_id": "102", "name": "eval", "user": "bob", "state": "PENDING", "time": "0:00"}]},
+        {"name": "s_tra_ncc3", "state": "INACTIVE", "start": "2026-10-29T08:00:00", "end": "2026-10-29T15:00:00",
+         "partition": "boost_usr_prod", "node_count": 32, "accounts": "EUHPC_D30_031", "jobs": []}]}
+    assert fake.calls[0][0] == ["scontrol", "show", "reservation"]
+
+
+def test_reservation_info_by_name_queries_squeue_with_R_and_lists_its_jobs():
+    s, fake = live({"scontrol&show&reservation": (0, RESERVATIONS, ""),
+                    "squeue&-R&s_tra_ncc2": (0, "101|train|alice|RUNNING|01:23:45\n102|eval|bob|PENDING|0:00\n", "")})
+    r = s.execute("reservation_info", {"name": "s_tra_ncc2"})
+    assert len(r["reservations"]) == 1 and r["reservations"][0]["state"] == "ACTIVE"
+    assert r["reservations"][0]["jobs"] == [
+        {"job_id": "101", "name": "train", "user": "alice", "state": "RUNNING", "time": "01:23:45"},
+        {"job_id": "102", "name": "eval", "user": "bob", "state": "PENDING", "time": "0:00"}]
+    assert [c[0] for c in fake.calls if c[0][0] == "squeue"] == \
+        [["squeue", "-R", "s_tra_ncc2", "-h", "-o", "%i|%j|%u|%T|%M"]]
+
+
+def test_reservation_info_with_no_reservations_returns_an_empty_list():
+    s, _ = live({"scontrol&show&reservation": (0, "No reservations in the system\n", "")})
+    assert s.execute("reservation_info", {}) == {"reservations": []}
+
+
+def test_reservation_info_unknown_name_is_an_error_without_a_squeue_call():
+    s, fake = live({"scontrol&show&reservation": (0, RESERVATIONS, "")})
+    assert s.execute("reservation_info", {"name": "s_tra_ncc9"}) == {"error": "Reservation s_tra_ncc9 not found"}
+    assert [c[0][0] for c in fake.calls] == ["scontrol"]
 
 
 def test_submit_job_test_only_resolves_the_auto_reservation_the_same_way():
