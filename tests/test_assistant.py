@@ -332,7 +332,7 @@ def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
     spec.loader.exec_module(mod)
     index = _indexes(tmp_path)
     for _ in range(2):  # running it again replaces the notes instead of adding copies
-        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 3
+        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 5
     docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
                               index / 'factory_docs.sqlite', variant='e')
     assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
