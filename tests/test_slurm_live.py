@@ -144,8 +144,8 @@ def test_job_usage_argv_rows_and_error_for_non_running_jobs():
     s, fake = live({"sstat&MaxVMSize": (0, "9|01:30:00|3145728K|1048576K|4194304K\n9.ext|01:00:00|||2097152K\n", "")})
     r = s.execute("job_usage", {"job_id": "9"})
     assert fake.calls[0][0] == ["sstat", "--allsteps", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
-    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3145728K", "AveRSS": "1048576K",
-                             "MaxVMSize": "4194304K"} and r["steps"][1]["JobID"] == "9.ext"
+    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3.0G", "AveRSS": "1.0G",
+                             "MaxVMSize": "4.0G"} and r["steps"][1]["JobID"] == "9.ext"
     s, _ = live({"sstat": (1, "", "error: Pending job")})
     r = s.execute("job_usage", {"job_id": "9"})
     assert "not running" in r["error"] and "job_accounting" in r["error"]
