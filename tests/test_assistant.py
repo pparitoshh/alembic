@@ -3,6 +3,8 @@ import importlib.util
 import io
 import json
 import sqlite3
+
+import pytest
 import subprocess
 from io import StringIO
 from pathlib import Path
@@ -547,3 +549,39 @@ def test_server_errors_show_the_servers_reason(tmp_path, monkeypatch):
     monkeypatch.setattr(assistant.Assistant, '_stream', stream)
     out = StringIO()
     assert bot.safe_ask('hi', out) is None and 'refused the request: CUDA error: out of memory' in out.getvalue()
+
+
+@pytest.mark.parametrize(('chars', 'budget'), [(100, 40000), (4000, 40000), (4001, 27331), (12000, 8666), (50000, 8000)])
+def test_excerpt_budget_shrinks_with_long_questions(chars, budget):
+    assert assistant.excerpt_budget('x' * chars) == budget
+
+
+@pytest.mark.parametrize(('size', 'cut'), [(11999, 0), (12000, 0), (12001, 1), (50000, 38000)])
+def test_fit_question_boundaries(size, cut):
+    text = 'Q' + 'x' * (size - 2) + 'E'
+    fitted, left_out = assistant.fit_question(text)
+    assert left_out == cut and fitted[0] == 'Q' and fitted[-1] == 'E'
+    assert fitted == text if not cut else f'[... {cut:,} characters' in fitted
+
+
+@pytest.mark.parametrize(('question', 'site'), [
+    ('What is the gpu partition time limit on Alps?', 'HEARTS'), ('on CSCS Daint', 'HEARTS'),
+    ('budget on ARCHER2', 'UKAIFA'), ('Cirrus GPU nodes', 'UKAIFA'), ('PLGrid grant on Athena', 'Gaia AI Factory'),
+    ('submit on Devana', 'SKAIAT'), ('VSC-5 queues', 'AI:AT'), ('Komondor GPUs', 'HunAIFA'),
+    ('MeluXina partitions', 'Luxembourg AI Factory'), ('JUWELS Booster', 'JUPITER AI Factory'),
+    ('a job on Leonardo', None), ('how do I use job arrays?', None), ('archer2023 results', None)])
+def test_site_routing_names(question, site):
+    assert assistant._site(question.lower()) == site
+
+
+@pytest.mark.parametrize(('text', 'name'), [
+    ('```json\n{"name": "list_queue", "arguments": {}}\n```', 'list_queue'),
+    ('{ "name" : "job_status" , "arguments" : {"job_id": "5"} }', 'job_status'),
+    ('{"name": "recent_jobs", "arguments": {"days": 3}}', 'recent_jobs'),
+    ("{'name': 'list_queue', 'arguments': {}}", None),                     # not JSON
+    ('{"name": "list_queue", "arguments": {"state": }}', None),           # broken arguments
+    ('{"name": "delete_everything", "arguments": {}}', None),             # not one of our tools
+    ('either {"name": "list_queue", "arguments": {}} or {"name": "list_queue", "arguments": {}}', None)])
+def test_written_tool_call_variants(text, name):
+    calls = assistant.written_tool_call(text)
+    assert (calls[0]['name'] if calls else None) == name

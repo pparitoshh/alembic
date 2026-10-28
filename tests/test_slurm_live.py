@@ -392,3 +392,39 @@ def test_recent_jobs_newest_first():
     s, fake = live({"sacct&now-7days": (0, out, "")})
     r = s.execute("recent_jobs", {})
     assert [j["job_id"] for j in r["jobs"]] == ["12", "11", "10"] and r["jobs"][1]["state"] == "FAILED"
+
+
+OUT12 = "".join(f"{i}|job{i}|{'FAILED' if i % 3 == 0 else 'COMPLETED'}\n" for i in range(1, 13))
+
+
+@pytest.mark.parametrize(("filters", "expected"), [
+    (["head -n 2"], ["1|job1|COMPLETED", "2|job2|COMPLETED"]),
+    (["head -2"], ["1|job1|COMPLETED", "2|job2|COMPLETED"]),
+    (["tail -n 1"], ["12|job12|FAILED"]),
+    (["tail"], [f"{i}|job{i}|{'FAILED' if i % 3 == 0 else 'COMPLETED'}" for i in range(3, 13)]),  # 10 lines
+    (["grep FAILED", "wc -l"], ["4"]),
+    (["grep -v COMPLETED", "head -1"], ["3|job3|FAILED"]),
+    (["grep -i failed", "tail -1"], ["12|job12|FAILED"]),
+    (["egrep '^(1|2)[|]'"], ["1|job1|COMPLETED", "2|job2|COMPLETED"]),
+    (["grep 'job10\\|job11'"], ["10|job10|COMPLETED", "11|job11|COMPLETED"]),
+    (["grep '(['"], []),  # an invalid regex is matched as plain text
+])
+def test_pipe_filter_variants(filters, expected):
+    out, note = slurm_live._apply_filters(OUT12, filters)
+    assert out.splitlines() == expected and note is None
+
+
+@pytest.mark.parametrize(("command", "stages"), [
+    ("sacct -X", ["sacct -X"]),
+    ("sacct -X | tail -3", ["sacct -X", "tail -3"]),
+    ("sacct -X | grep -E 'FAILED|TIMEOUT' | wc -l", ["sacct -X", "grep -E 'FAILED|TIMEOUT'", "wc -l"]),
+    ('squeue -o "%i|%j" | head -1', ['squeue -o "%i|%j"', "head -1"]),
+    ("sacct -X | grep 'unclosed", None),
+])
+def test_pipeline_split_respects_quotes(command, stages):
+    assert slurm_live._pipeline(command) == stages
+
+
+def test_unsupported_pipe_stages_are_named_and_not_run():
+    out, note = slurm_live._apply_filters(OUT12, ["sort -r", "head -1", "xargs rm"])
+    assert out == "1|job1|COMPLETED\n" and note.endswith("skipped: sort -r | xargs rm")
