@@ -734,20 +734,27 @@ def test_user_docs_match_needs_the_question_names(tmp_path):
                                     'boost_usr_prod allow?')
 
 
-@pytest.mark.parametrize("text, promise", [
-    ("I'll submit your job for you on the Leonardo cluster.", True), ("I will cancel job 123 now.", True),
-    ("Submitting your job now.", True), ("I'll go ahead and submit it.", True),
-    ("To submit it yourself, run sbatch job.sh.", False), ("I cannot submit the job because you declined.", False),
+@pytest.mark.parametrize("question, site", [
+    ("Why is my job stuck in PENDING on the 'expanse' cluster?", "Expanse"),
+    ("I'm getting 'CUDA error' on 'bridges-3'—could Slurm have assigned a GPU?", "Bridges-3"),
+    ("How do I use the debug QOS on Perlmutter?", "Perlmutter"),
+    ("My job on cluster 'hydra' fails with OOM", "hydra"), ("On the 'hydra' cluster my job fails", "hydra"),
+    ("My job on 'hackathon' partition is pending", None), ("Is the 'dragonfly' topology slower for MPI?", None),
+    ("How do I request GPUs on Leonardo?", None), ("What partitions does LUMI-G have?", None),
+    ("How do I submit on MareNostrum 5?", None), ("Explain ARCHER2's standard QoS", None),
+    ("How do I write a job array?", None), ("Why does srun say 'Requested node configuration is not available'?", None),
 ])
-def test_promise_pattern(text, promise):
-    from distillkit.assistant import PROMISE
-    assert bool(PROMISE.search(text)) is promise
+def test_uncovered_site(question, site):
+    from distillkit.assistant import uncovered_site
+    assert uncovered_site(question) == site
 
 
-def test_promise_without_action_gets_a_note(tmp_path):
+def test_uncovered_site_note_reaches_model_and_user(tmp_path):
     from distillkit.assistant import Assistant
-    bot = Assistant(tmp_path, docs=False, slurm=object())
-    bot._stream = lambda messages: iter(["I'll submit your job for you on the Leonardo cluster."])
+    bot = Assistant(tmp_path, docs=False)
+    seen = []
+    bot._stream = lambda messages: (seen.append(messages[-1]['content']), iter(['Use sinfo -s.']))[1]
     out = io.StringIO()
-    bot.ask('Submit this job for me:\n#!/bin/bash\n#SBATCH -t 00:05:00\nhostname', out=out)
-    assert 'no action was run for this request' in out.getvalue()
+    bot.ask("Why is my job stuck in PENDING on the 'expanse' cluster?", out=out)
+    assert 'does not cover Expanse' in seen[0] and 'not checked' in out.getvalue()
+    assert bot.history[-2]['content'] == "Why is my job stuck in PENDING on the 'expanse' cluster?"  # plain question kept

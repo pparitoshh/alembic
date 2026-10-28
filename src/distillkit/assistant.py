@@ -103,6 +103,43 @@ EXTRA_SITES = {
 }
 
 
+# Well-known systems the built-in documentation does not cover. For these (and for quoted cluster names we have no
+# docs for) the model stated invented details as facts in the Oct 28 sweeps: "Expanse has 8 cores per node", support
+# at computecanada.ca for Expanse, Lassen "at NERSC", an "accel" partition on Bridges-3.
+UNCOVERED_SITES = (
+    'expanse', 'bridges-2', 'bridges2', 'bridges-3', 'bridges', 'lassen', 'sierra', 'el capitan', 'perlmutter', 'cori', 'frontier',
+    'summit', 'andes', 'polaris', 'aurora', 'theta', 'delta', 'stampede2', 'stampede3', 'stampede', 'frontera', 'lonestar',
+    'anvil', 'sherlock', 'great lakes', 'kestrel', 'eagle', 'derecho', 'cheyenne', 'nersc', 'olcf', 'alcf', 'tacc', 'sdsc',
+    'ncsa', 'psc', 'llnl', 'fugaku', 'gadi', 'setonix', 'narval', 'cedar', 'graham', 'beluga', 'niagara', 'tianhe',
+)
+COVERED_NAMES = ('lumi', 'leonardo', 'cineca', 'marconi', 'galileo')
+# a quoted name next to the word cluster/system/supercomputer: "cluster 'hydra'", "the 'hydra' cluster" (a quoted
+# partition, QOS or topology like "on 'hackathon' partition" or "'dragonfly'" is not a cluster)
+QUOTED_CLUSTER = re.compile(r"""(?i)\b(?:cluster|system|supercomputer)\s+(?:called\s+|named\s+)?['"\u2018\u201c]([A-Za-z][\w.\-]{1,30})['"\u2019\u201d]"""
+                            r"""|['"\u2018\u201c]([A-Za-z][\w.\-]{1,30})['"\u2019\u201d]\s+(?:cluster|system|supercomputer)\b""")
+
+
+def uncovered_site(question):
+    """The name of a cluster the question asks about that the built-in documentation does not cover, else None."""
+    low = question.lower()
+    if _site(low) or any(re.search(r'\b' + re.escape(n) + r'\b', low) for n in COVERED_NAMES):
+        return None
+    for name in UNCOVERED_SITES:
+        if re.search(r'\b' + re.escape(name) + r'\b', low):
+            return name.title() if name not in ('nersc', 'olcf', 'alcf', 'tacc', 'sdsc', 'ncsa', 'psc', 'llnl') else name.upper()
+    m = QUOTED_CLUSTER.search(question)
+    return (m.group(1) or m.group(2)).strip() if m else None
+
+
+# The note names no app option: with "suggest adding the site's guide with --add" the model invented
+# `#SBATCH --add=--help` and `sacct --add=...` (Oct 28 measurement); the app's own line tells the user about --add.
+UNCOVERED_NOTE = ("\n\n(Note from the app: the built-in documentation does not cover {name}. Do not state {name}'s "
+                  "partition names, QOS names, limits, hardware, module names, web addresses or support contacts as facts. "
+                  "Give general Slurm advice and the standard commands that print the real values on that cluster: "
+                  "sinfo, scontrol show partition, sacctmgr show qos, module avail. Say that the site's user guide has "
+                  "the exact values.)")
+
+
 def _site(low):
     """The documentation set a question names: the evaluation's routing first, then the app's extra names."""
     return (next((name for key, name in FACTORY_SITES.items() if re.search(r'\b' + key + r'\b', low)), None)
@@ -317,9 +354,6 @@ def names(text):
     return {w for w in found if len(w) > 1}
 
 
-# "I'll submit it now" with no submit_job call (issue #113, rehearsal Oct 28): the app then says nothing happened
-PROMISE = re.compile(r"(?i)\bI(?:'ll| will| am going to)\s+(?:now\s+|go ahead and\s+)?(?:submit|resubmit|cancel|requeue|hold|"
-                     r"release|update)\b|\b(?:submitting|cancelling|canceling) (?:it|your job|the job|this job) now\b")
 USER_DOC_SHARE = 0.5  # share of the question's search words that the best excerpt of the user's manuals must contain
 
 
@@ -524,6 +558,7 @@ class Assistant:
         self.docs = docs
         self.k, self.model, self.openai, self.ollama, self.tools = k, model, openai, ollama, tools
         self.slurm = slurm  # agent mode: a slurm_live.SlurmLive whose tools the model can call
+        self.uncovered = None  # the uncovered cluster the last question named (see uncovered_site)
         self.extra_body = {}  # merged into OpenAI-compatible requests, e.g. {'chat_template_kwargs': {'enable_thinking': False}}
         self.retriever = retriever  # 'e' (default): b + relevance header; 'f': d + relevance header (the default with a general index); 'b': improved; 'd': b + general index; 'classic': the original 3
         self.history = [{'role': 'system', 'content': SYSTEM_PROMPT + (AGENT_PROMPT if slurm else '')}]
@@ -623,6 +658,10 @@ class Assistant:
         if SMALL_TALK.fullmatch(question.strip()):
             return (question + self.about() if ABOUT_QUESTION.search(question) else question), []
         docs = self.search(question) if self.docs else []
+        site = uncovered_site(question)
+        if site and not any(d.get('site') == 'Your documents' and site.lower() in (d.get('text') or '').lower() for d in docs):
+            self.uncovered = site
+            question += UNCOVERED_NOTE.format(name=site)
         self.titles.update({d['url']: d['title'] for d in docs if d.get('title')})
         return with_context(question, docs, relevance=self.retriever in ('e', 'f')), [d['url'] for d in docs]
 
@@ -694,9 +733,7 @@ class Assistant:
                 if isinstance(piece, dict):
                     return text, piece['tool_calls']
                 text += piece
-                # repeating the user's job script before calling submit_job is not "answering from the docs": the
-                # model wrote the script back, passed 300 characters and the submit never came (rehearsal, Oct 28)
-                if len(text) > self.AGENT_PROBE_CHARS + (len(question) if SBATCH.search(question) else 0):
+                if len(text) > self.AGENT_PROBE_CHARS:
                     return None
         finally:
             gen.close()  # closing the stream stops the model server
@@ -711,7 +748,11 @@ class Assistant:
         small_talk = SMALL_TALK.fullmatch(question.strip())
         first = (self._agent_first(question) if self.slurm and self.docs and not small_talk
                  and not self._user_docs_match(question) else None)
+        self.uncovered = None
         user, sources = (question, []) if first else self.prompt(question)
+        if self.uncovered:
+            out.write(f'[hpc-assistant] note: the built-in documentation does not cover {self.uncovered}; site details '
+                      f'in this answer are not checked. Add the site\'s user guide with --add (or in the web page).\n\n')
         self._trim_history()
         turn = {'role': 'user', 'content': user}
         self.history.append(turn)
@@ -733,7 +774,7 @@ class Assistant:
             del self.history[1:nxt]
 
     def _answer(self, question, sources, turn, first, out, max_tool_rounds):
-        last_call, declined, acted = None, False, False
+        last_call, declined = None, False
         for _ in range(max_tool_rounds + 1):
             answer, calls, checked = [], [], 0
             if first:  # the tool call from the probe above: no second request
@@ -789,7 +830,6 @@ class Assistant:
                         return str(e), sources
                     self.history.append({'role': 'tool', 'tool_call_id': c['id'], 'content': json.dumps(result)})
                     if c['name'] in ACTIONS:
-                        acted = True
                         out.write(action_status(c['name'], result))
                         declined = declined or not_approved(result)
                     continue
@@ -814,8 +854,6 @@ class Assistant:
             out.write('\n' + notice + '\n')
             return notice, sources
         self.history.append({'role': 'assistant', 'content': ''.join(answer)})
-        if self.slurm and not acted and PROMISE.search(''.join(answer)):  # issue #113: a promise and no action
-            out.write('\n[hpc-assistant] note: no action was run for this request: nothing was submitted or changed.\n')
         if sources:
             out.write('\n\nSources:\n' + '\n'.join('- ' + u + (f' ({self.titles[u]})' if self.titles.get(u) else '')
                                                 for u in dict.fromkeys(sources)) + '\n')
