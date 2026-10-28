@@ -124,6 +124,144 @@ test("update_job reason carries job_id, field and value", async () => {
   }
 });
 
+test("submit_job displayReason carries the full script past the 300-character cut", async () => {
+  const listener = makeListener(undefined);
+  const script = `#!/bin/bash\necho start\n${"X".repeat(400)}\necho done\n`;
+  const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+  assert.equal(result.kind, "ask");
+  assert.ok(result.displayReason.includes("Full script:"), "displayReason must mark the script block");
+  assert.ok(result.displayReason.includes(script), "displayReason must carry the whole script text");
+  assert.ok(result.displayReason.includes("X".repeat(400)), "displayReason must keep the >300-char tail");
+  assert.ok(!result.displayReason.includes("…(+"), "displayReason must not truncate the script");
+  assert.ok(result.reason.includes("…(+"), "reason keeps the truncation marker");
+});
+
+test("submit_job displayReason shows the check line and warns when sleeps exceed --time (job 12354 case)", async () => {
+  const listener = makeListener(undefined);
+  const script = [
+    "#!/bin/bash",
+    "#SBATCH --time=00:05:00",
+    "#SBATCH --mem=1G",
+    "echo start",
+    "sleep 60",
+    "sleep 120",
+    "sleep 180",
+    "sleep 240",
+    "sleep 300",
+    "sleep 60",
+    "echo done",
+  ].join("\n");
+  const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+  assert.ok(
+    result.displayReason.includes("script 11 lines; --time 5m0s; sleep total 16m0s"),
+    `check line missing in: ${result.displayReason}`,
+  );
+  assert.ok(
+    result.displayReason.includes("WARNING: sleep total 16m0s exceeds --time 5m0s"),
+    `warning missing in: ${result.displayReason}`,
+  );
+  assert.ok(result.displayReason.includes("sleep 300"), "the late sleeps past char 300 must be visible");
+});
+
+test("submit_job parses every Slurm --time form", async () => {
+  const listener = makeListener(undefined);
+  const cases = [
+    ["90", "1h30m0s"],
+    ["1:30", "1m30s"],
+    ["2:05", "2m5s"],
+    ["1:02:03", "1h2m3s"],
+    ["1-02", "1d2h0m0s"],
+    ["1-02:03", "1d2h3m0s"],
+    ["1-02:03:04", "1d2h3m4s"],
+  ];
+  for (const [value, formatted] of cases) {
+    const script = `#!/bin/bash\n#SBATCH --time=${value}\necho hi\n`;
+    const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+    assert.ok(
+      result.displayReason.includes(`--time ${formatted}`),
+      `--time=${value} must render as ${formatted}, got: ${result.displayReason}`,
+    );
+    assert.ok(!result.displayReason.includes("WARNING"), `--time=${value} must not warn without sleeps`);
+  }
+});
+
+test("submit_job accepts --time and -t directive spellings", async () => {
+  const listener = makeListener(undefined);
+  const directives = [
+    "#SBATCH --time=5:00",
+    "#SBATCH --time 5:00",
+    "#SBATCH -t 5:00",
+    "#SBATCH -t=5:00",
+    "#SBATCH -t5:00",
+  ];
+  for (const directive of directives) {
+    const script = `#!/bin/bash\n${directive}\necho hi\n`;
+    const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+    assert.ok(
+      result.displayReason.includes("--time 5m0s"),
+      `${directive} must render as --time 5m0s, got: ${result.displayReason}`,
+    );
+  }
+});
+
+test("submit_job sums sleep suffix forms N, Ns, Nm and Nh", async () => {
+  const listener = makeListener(undefined);
+  const script = ["#!/bin/bash", "#SBATCH --time=00:10:00", "sleep 30", "sleep 45s", "sleep 2m", "sleep 1h"].join("\n");
+  const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+  assert.ok(result.displayReason.includes("sleep total 1h3m15s"), `sleep sum wrong in: ${result.displayReason}`);
+  assert.ok(
+    result.displayReason.includes("WARNING: sleep total 1h3m15s exceeds --time 10m0s"),
+    `warning missing in: ${result.displayReason}`,
+  );
+});
+
+test("submit_job does not warn when sleeps fit the time limit", async () => {
+  const listener = makeListener(undefined);
+  const script = ["#!/bin/bash", "#SBATCH --time=00:10:00", "sleep 60", "sleep 60"].join("\n");
+  const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+  assert.ok(result.displayReason.includes("--time 10m0s"));
+  assert.ok(result.displayReason.includes("sleep total 2m0s"));
+  assert.ok(!result.displayReason.includes("WARNING"), `unexpected warning in: ${result.displayReason}`);
+});
+
+test("submit_job without --time reports no --time and never warns", async () => {
+  const listener = makeListener(undefined);
+  const script = "#!/bin/bash\nsleep 120\necho hi\n";
+  const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+  assert.ok(result.displayReason.includes("no --time"), `check line wrong in: ${result.displayReason}`);
+  assert.ok(result.displayReason.includes("sleep total 2m0s"));
+  assert.ok(!result.displayReason.includes("WARNING"), `unexpected warning in: ${result.displayReason}`);
+});
+
+test("submit_job with an unparsable --time shows the raw value and does not warn", async () => {
+  const listener = makeListener(undefined);
+  const script = "#!/bin/bash\n#SBATCH --time=unlimited\nsleep 120\necho hi\n";
+  const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", { script, test_only: false });
+  assert.ok(result.displayReason.includes("--time unlimited"), `raw value missing in: ${result.displayReason}`);
+  assert.ok(!result.displayReason.includes("WARNING"), `unexpected warning in: ${result.displayReason}`);
+});
+
+test("submit_job with an empty script keeps the old text and no check line", async () => {
+  const listener = makeListener(undefined);
+  for (const args of [{ script: "" }, {}]) {
+    const { result } = await passThroughResult(listener, "mcp__hpc__submit_job", args);
+    assert.equal(result.displayReason, "Approve mcp__hpc__submit_job? test_only=false; script: (no script text)");
+    assert.ok(!result.displayReason.includes("Full script:"));
+  }
+});
+
+test("non-submit tools keep the old short displayReason", async () => {
+  const listener = makeListener(undefined);
+  const cancel = await passThroughResult(listener, "mcp__hpc__cancel_job", { job_id: "42" });
+  assert.equal(cancel.result.displayReason, 'Approve mcp__hpc__cancel_job? job_id="42"');
+  const update = await passThroughResult(listener, "mcp__hpc__update_job", {
+    job_id: "42",
+    field: "Partition",
+    value: "gpu",
+  });
+  assert.equal(update.result.displayReason, 'Approve mcp__hpc__update_job? job_id="42", field="Partition", value="gpu"');
+});
+
 test("custom tools config asks only for the listed tools", async () => {
   const listener = makeListener({ tools: ["mcp__hpc__cancel_job"] });
   const submit = await passThroughResult(listener, "mcp__hpc__submit_job", { script: "#!/bin/bash" });

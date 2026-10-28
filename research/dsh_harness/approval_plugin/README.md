@@ -21,8 +21,28 @@ The watched tools are the HPC job-changing actions of the harness MCP server (`s
 The plugin reads the arguments from `exec.arguments`. This is the real field name; there is no
 `exec.args` (`dsh-tools/lib/types/index.js:826` and `:933`). The `reason` string names the tool and
 summarizes the arguments: for `submit_job` the `test_only` value and the first 300 characters of the
-script (the full script is too long), for the other tools the `job_id` and the optional `field` and
-`value`.
+script, for the other tools the `job_id` and the optional `field` and `value`.
+
+For `submit_job` only, the `displayReason` (the text the user reads in the approval panel) differs
+from `reason`. It carries the full script text with no cut, preceded by a check line and the script:
+
+```
+Approve mcp__hpc__submit_job? test_only=false; script 11 lines; --time 5m0s; sleep total 16m0s
+WARNING: sleep total 16m0s exceeds --time 5m0s
+Full script:
+#!/bin/bash
+#SBATCH --time=00:05:00
+...
+```
+
+The check line gives the script's line count, the `#SBATCH --time` / `-t` value (or `no --time`),
+and the sum of all literal `sleep N` values (`N` seconds, also `Ns`, `Nm`, `Nh`). Slurm time forms
+`MM`, `MM:SS`, `HH:MM:SS`, `D-HH`, `D-HH:MM`, `D-HH:MM:SS` are parsed. A single value is minutes.
+When the sleep total exceeds the time limit, the panel shows
+`WARNING: sleep total <S> exceeds --time <T>`. Without a parsable `--time` there is no warning.
+This check exists because in job 12354 the user approved a script whose long sleeps
+(60+120+180+240+300+60 s in a `--time=00:05:00` job) started after character 300 and were invisible.
+The other watched tools keep the plain `Approve <tool>? <summary>` text.
 
 ## The plugin exports
 
@@ -100,7 +120,10 @@ of the row with the same id, like the example patch in `research/dsh_harness/cor
 `test.mjs` runs hermetic with plain `node --test test.mjs`. It uses a fake `ctx` that records the
 listener, and checks: the ask for each listed tool, the `next()` pass-through for unlisted tools,
 the `next()` pass-through for `submit_job` with `test_only: true`, the reason text (tool name,
-`test_only` value, first 300 script characters), and a custom `tools` config.
+`test_only` value, first 300 script characters), the full script and the sleep/`--time` check line in
+the `submit_job` `displayReason` (including the warning, all Slurm time forms, `Ns`/`Nm`/`Nh` sleep
+suffixes, the within-limit and no-`--time` cases), the unchanged short text of the other tools, and a
+custom `tools` config.
 `tests/test_dsh_approval_plugin.py` runs `node --test` on it and skips when node is not on PATH and
 not in `~/tools/node/bin`.
 
@@ -116,6 +139,12 @@ not in `~/tools/node/bin`.
   this plugin: listeners run outermost-first, and this plugin's listener is appended last.
 - The tool names depend on the MCP `serverName: hpc` in the profile row. A different server name
   changes the `mcp__hpc__` prefix, and the `tools` config must then list the new names.
-- The argument summary trusts the model's arguments: the script is truncated for display, but a full
-  approval runs the full script.
+- The argument summary trusts the model's arguments: the `reason` string truncates the script at 300
+  characters, but a full approval runs the full script. For `submit_job` the panel text
+  (`displayReason`) now shows the full script, so nothing is hidden; the check line counts only
+  literal `sleep N` lines, so computed sleeps (`sleep "$X"`, loops, `usleep`) stay uncounted.
+- The approval panel renders `displayReason` as one text node in a headline div without
+  `white-space: pre-wrap` (`dsh-client-ui-approval/lib/client.js:109-111` and the
+  `.mna1RW_headline` rule in the same file). Newlines in the text collapse to single spaces on
+  screen, so the script shows as one wrapped block, not line-by-line. The full text is still there.
 - The plugin needs no services, so `inject` is empty. It never runs cluster commands itself.
