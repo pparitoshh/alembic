@@ -82,17 +82,20 @@ def openai_tools(include_script=True):
 
 
 class SlurmLive:
-    def __init__(self, ssh=None, workdir="~/.hpc-agent/jobs", confirm=None, timeout=60, runner=None):
+    def __init__(self, ssh=None, workdir="~/.hpc-agent/jobs", confirm=None, timeout=60, runner=None, remote_setup=None):
         self.ssh, self.workdir, self.timeout = ssh, workdir, timeout
+        self.remote_setup = remote_setup  # shell snippet (module load ...) to run before each remote command
         self.confirm = confirm or (lambda name, args: False)
-        self._runner = runner  # tests: callable(argv, stdin) -> (rc, stdout, stderr)
+        self._runner = runner  # tests: callable(cmd, stdin) -> (rc, stdout, stderr)
         self._user = None
 
     # --- command execution ---------------------------------------------------------------------
     def run(self, argv, stdin=None):
-        if self._runner:
-            return self._runner(argv, stdin)
         cmd = ["ssh", "-o", "BatchMode=yes", self.ssh, shlex.join(argv)] if self.ssh else argv
+        if self.ssh and self.remote_setup:  # per-cluster setup, e.g. ". /etc/profile.d/modules.sh && module load slurm"
+            cmd[-1] = self.remote_setup + " && " + cmd[-1]
+        if self._runner:
+            return self._runner(cmd, stdin)
         try:
             p = subprocess.run(cmd, input=stdin, capture_output=True, text=True, timeout=self.timeout)
         except FileNotFoundError:

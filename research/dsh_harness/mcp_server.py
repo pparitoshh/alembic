@@ -10,6 +10,7 @@ Otherwise it declines and nothing changes on the cluster.
 
 Environment:
   HPC_SSH            login node for ssh (default empty: run the commands locally)
+  HPC_REMOTE_SETUP   shell snippet to run before each remote command, e.g. "module load slurm" (default empty: none)
   HPC_ALLOW_ACTIONS  "1" to allow actions (default "0")
 
 Run: PYTHONPATH=src python research/dsh_harness/mcp_server.py
@@ -38,7 +39,7 @@ def make_slurm(env=None):
         log(f"action {name} {'allowed' if allow else 'declined'} (HPC_ALLOW_ACTIONS)")
         return allow
 
-    return SlurmLive(ssh=env.get("HPC_SSH") or None, confirm=confirm)
+    return SlurmLive(ssh=env.get("HPC_SSH") or None, remote_setup=env.get("HPC_REMOTE_SETUP") or None, confirm=confirm)
 
 
 def list_tools():
@@ -49,7 +50,10 @@ def list_tools():
 def call_tool(slurm, params):
     """Run one tools/call. Every failure comes back as isError true, never as an exception."""
     try:
-        result = slurm.execute(params.get("name"), params.get("arguments") or {})
+        # A null argument from the model means "not given": drop it, so an optional argument passes
+        # and a required one fails with the normal missing-argument error.
+        arguments = {k: v for k, v in (params.get("arguments") or {}).items() if v is not None}
+        result = slurm.execute(params.get("name"), arguments)
         return {"content": [{"type": "text", "text": json.dumps(result)}], "isError": False}
     except ToolError as e:
         text = str(e)
@@ -92,7 +96,7 @@ def handle_line(line, slurm):
 
 def main():
     slurm = make_slurm()
-    log("ready; ssh =", slurm.ssh or "(local)")
+    log(f"ready; ssh = {slurm.ssh or '(local)'}; remote setup = {'yes' if slurm.remote_setup else 'no'}")
     for line in sys.stdin:
         if not line.strip():
             continue

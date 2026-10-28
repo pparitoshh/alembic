@@ -30,6 +30,9 @@ def live(responses, confirm=lambda n, a: True):
     return SlurmLive(runner=fake, confirm=confirm, workdir="/w/jobs"), fake
 
 
+QUEUE_ARGV = ["squeue", "--me", "-h", "-o", "%i|%j|%T|%P|%M|%l|%r", "-t", "RUNNING"]
+
+
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
     assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
     assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == \
@@ -128,6 +131,27 @@ def test_invalid_calls():
     with pytest.raises(ToolError):
         s.execute("job_status", {})
     assert "invalid job id" in s.execute("job_status", {"job_id": "1; rm -rf ~"})["error"]
+
+
+def test_remote_setup_is_prepended_to_ssh_commands():
+    fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
+    s = SlurmLive(ssh="c1", remote_setup="module load slurm", runner=fake)
+    assert s.execute("list_queue", {"state": "RUNNING"})["jobs"][0]["job_id"] == "42"
+    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", "c1", "module load slurm && " + shlex.join(QUEUE_ARGV)]
+
+
+def test_without_remote_setup_the_ssh_command_stays_as_before():
+    fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
+    s = SlurmLive(ssh="c1", runner=fake)
+    s.execute("list_queue", {"state": "RUNNING"})
+    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", "c1", shlex.join(QUEUE_ARGV)]
+
+
+def test_remote_setup_is_ignored_for_local_runs():
+    fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
+    s = SlurmLive(remote_setup="module load slurm", runner=fake)
+    s.execute("list_queue", {"state": "RUNNING"})
+    assert fake.calls[0][0] == QUEUE_ARGV
 
 
 def test_job_usage_argv_rows_and_error_for_non_running_jobs():

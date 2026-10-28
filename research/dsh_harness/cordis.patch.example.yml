@@ -52,6 +52,8 @@
         env:
           PYTHONPATH: <REPO>/src
           HPC_SSH: leonardo
+          # Clusters that only put Slurm on PATH after a module load get a setup snippet, for example on Curiosity:
+          # HPC_REMOTE_SETUP: ". /etc/profile.d/modules.sh && module load slurm/slurm/25.05"
           # The login node needs an open ssh master (BatchMode ssh cannot ask for a password).
           # Put a folder with an "ssh" wrapper first in PATH if the master uses a custom ControlPath.
           PATH: /usr/local/bin:/usr/bin:/bin

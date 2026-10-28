@@ -74,6 +74,29 @@ def test_call_unknown_tool_and_bad_arguments_are_errors():
     assert r["isError"] is True
 
 
+def test_null_optional_argument_is_dropped():
+    calls = []
+
+    def runner(argv, stdin=None):  # list_queue parses a 7-field squeue line
+        calls.append(argv)
+        return 0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", ""
+
+    slurm = srv.make_slurm({})
+    slurm._runner = runner
+    args = {"state": "RUNNING", "partition": None}
+    r = srv.handle_message(req("tools/call", name="list_queue", arguments=args), slurm)["result"]
+    assert r["isError"] is False
+    assert json.loads(r["content"][0]["text"])["jobs"][0]["state"] == "RUNNING"
+    assert not any("-p" in c for c in calls)
+
+
+def test_null_required_argument_is_missing():
+    slurm, calls = fake_slurm()
+    r = srv.handle_message(req("tools/call", name="job_status", arguments={"job_id": None}), slurm)["result"]
+    assert r["isError"] is True and "missing" in r["content"][0]["text"]
+    assert calls == []
+
+
 def test_invalid_json_line():
     assert srv.handle_line("{not json", SlurmLive())["error"]["code"] == -32700
 
@@ -101,6 +124,12 @@ def test_action_reaches_runner_when_allowed():
     r = srv.handle_message(req("tools/call", name="cancel_job", arguments={"job_id": "42"}), slurm)["result"]
     assert r["isError"] is False
     assert ["scancel", "42"] in calls
+
+
+def test_make_slurm_passes_ssh_and_remote_setup_through():
+    slurm = srv.make_slurm({"HPC_SSH": "c1", "HPC_REMOTE_SETUP": "x"})
+    assert slurm.ssh == "c1" and slurm.remote_setup == "x"
+    assert srv.make_slurm({}).ssh is None and srv.make_slurm({}).remote_setup is None
 
 
 def test_end_to_end_over_stdio():
