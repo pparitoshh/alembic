@@ -739,6 +739,9 @@ def main(argv=None):
         setup(Path(args.index), args.model)
         return
     slurm = None
+    if args.agent and not args.ssh and not shutil.which('squeue'):
+        raise SystemExit('[hpc-assistant] agent mode runs Slurm commands, but this machine has no Slurm (no squeue): '
+                         'run it on a cluster login node, or add --ssh <login node>, for example --ssh leonardo')
     if args.agent:
         def confirm(name, call):
             if args.yes:

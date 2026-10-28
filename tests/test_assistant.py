@@ -453,3 +453,23 @@ def test_community_pages_only_for_their_community():
     assert not assistant.community_ok(page, 'Which QOS should I use on Leonardo for a long job?')
     assert assistant.community_ok(page, 'I am a EUROfusion user: which QOS do I use on Leonardo?')
     assert assistant.community_ok({'url': 'https://docs.hpc.cineca.it/hpc/leonardo.html', 'text': ''}, 'QOS on Leonardo?')
+
+
+def test_model_errors_become_messages_and_agent_mode_needs_slurm(tmp_path, monkeypatch):
+    import urllib.error
+
+    def missing(self, messages):
+        raise urllib.error.HTTPError('http://127.0.0.1:11434/api/chat', 404, 'Not Found', {}, None)
+        yield  # pragma: no cover
+    monkeypatch.setattr(assistant.Assistant, '_stream', missing)
+    bot = assistant.Assistant(_indexes(tmp_path), model='no-such-model')
+    out = StringIO()
+    assert bot.safe_ask('hi', out) is None and len(bot.history) == 1
+    assert "the model 'no-such-model' is not available" in out.getvalue() and 'ollama list' in out.getvalue()
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
+    try:
+        assistant.main(['--agent', '--index', str(tmp_path), 'show my jobs'])
+    except SystemExit as e:
+        assert 'no Slurm' in str(e) and '--ssh' in str(e)
+    else:
+        raise AssertionError('agent mode without Slurm must stop')
