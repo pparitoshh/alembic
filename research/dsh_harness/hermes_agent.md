@@ -42,7 +42,7 @@ mcp_servers:
   The docs show the `command` and `args` form with the `npx` filesystem server. The Slurm server is our example. Optional `tools: include/exclude` lists filter the tools. Hermes names each tool `mcp_<server>_<tool>`. Reload with `/reload-mcp`.
 - Python tool (official, developer guide): a file in `tools/*.py` calls `registry.register(name=..., toolset=..., schema=..., handler=..., check_fn=..., requires_env=[...])`. The registry finds it at import. This changes the Hermes source tree. No full example was available to me.
 - Plugin: the docs say plugins are the preferred route for custom tools. Details of plugin tool registration: not found. Install command: `hermes plugins install` (official).
-- Our 17 OpenAI-format schemas: the `schema` argument of `registry.register` probably takes a tool schema (our inference). The simplest path is a small MCP server that exposes the 17 tools. Loading OpenAI-format schemas directly from a JSON file: not found.
+- Our 18 OpenAI-format schemas: the `schema` argument of `registry.register` probably takes a tool schema (our inference). The simplest path is a small MCP server that exposes the 18 tools. Loading OpenAI-format schemas directly from a JSON file: not found.
 
 ## 5. Tool-call parsing
 - Hermes uses structured `tool_calls` from the provider. All API modes (chat_completions, codex_responses, anthropic_messages) convert to OpenAI-style `tool_calls`. (official, agent-loop page)
@@ -86,5 +86,5 @@ The dsh column uses the "dsh facts" table in `research/dsh_harness/plan.md`.
 1. Hermes is mature and supports a custom Ollama endpoint with simple YAML.
 2. It is large (more than 40 built-in tools, memory, gateway) and may fit a 4B model poorly.
 3. The 64k minimum context may stress Qwen3-4B on our hardware.
-4. Use a Slurm MCP server for the 17 tools and set `approvals.mode: manual`.
+4. Use a Slurm MCP server for the 18 tools and set `approvals.mode: manual`.
 5. Run a small test first. Decide after you read the dsh facts.

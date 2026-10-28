@@ -57,14 +57,14 @@ def test_ping():
 def test_tools_list_hides_actions_without_the_flag():
     tools = srv.handle_message(req("tools/list"), SlurmLive(), allowed=set())["result"]["tools"]
     names = [t["name"] for t in tools]
-    assert len(names) == 12 and not set(srv.HIDDEN_TOOLS) & set(names)
+    assert len(names) == 13 and not set(srv.HIDDEN_TOOLS) & set(names)
     submit = next(t for t in tools if t["name"] == "submit_job")
     assert "test_only=true" in submit["description"]
 
 
-def test_tools_list_keeps_all_17_tools_with_the_flag():
+def test_tools_list_keeps_all_18_tools_with_the_flag():
     tools = srv.handle_message(req("tools/list"), SlurmLive(), allowed=set(ACTIONS))["result"]["tools"]
-    assert len(tools) == 17
+    assert len(tools) == 18
     for t in tools:
         assert t["name"] and t["description"] and t["inputSchema"]["type"] == "object"
 
@@ -271,7 +271,7 @@ def test_end_to_end_over_stdio():
     env["HPC_ALLOW_ACTIONS"] = "1"
     replies = _stdio_replies(env)
     assert [r["id"] for r in replies] == [1, 2]
-    assert len(replies[1]["result"]["tools"]) == 17
+    assert len(replies[1]["result"]["tools"]) == 18
 
 
 def test_end_to_end_over_stdio_without_the_flag_hides_the_actions():
@@ -279,7 +279,7 @@ def test_end_to_end_over_stdio_without_the_flag_hides_the_actions():
     replies = _stdio_replies(env)
     tools = replies[1]["result"]["tools"]
     names = [t["name"] for t in tools]
-    assert len(names) == 12 and not set(srv.HIDDEN_TOOLS) & set(names)
+    assert len(names) == 13 and not set(srv.HIDDEN_TOOLS) & set(names)
 
 
 def test_end_to_end_over_stdio_with_allowed_actions_hides_the_others():

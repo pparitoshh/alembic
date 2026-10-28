@@ -44,8 +44,8 @@ ReservationName=s_tra_ncc3 StartTime=2026-10-29T08:00:00 EndTime=2026-10-29T15:0
 
 
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
-    extras = ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
-              "run_readonly_command", "reservation_info"]
+    extras = ["recent_jobs", "job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job",
+              "requeue_job", "run_readonly_command", "reservation_info"]
     assert [t["name"] for t in slurm_live.LIVE_SCHEMAS] == [t["name"] for t in SCHEMAS] + extras
     gpu = next(t for t in slurm_live.LIVE_SCHEMAS if t["name"] == "gpu_availability")
     trained = next(t for t in SCHEMAS if t["name"] == "gpu_availability")
@@ -608,7 +608,7 @@ def test_hold_release_and_requeue_use_scontrol_on_own_jobs():
 
 @pytest.mark.parametrize(("command", "ok"), [("squeue --me", True), ("scontrol show job 123", True),
                                              ("rm -rf /", False), ("scontrol update JobId=1 TimeLimit=1", False),
-                                             ("squeue | grep x", False), ("sinfo; ls", False)])
+                                             ("sinfo; ls", False), ("rm x | grep y", False)])
 def test_run_readonly_command_allowlist(command, ok):
     s, fake = live({"squeue&--me": (0, "1 job\n", ""), "scontrol&show": (0, "JobId=123\n", "")})
     r = s.execute("run_readonly_command", {"command": command})
@@ -779,3 +779,28 @@ def test_run_readonly_command_allows_options_before_show(command, ok):
 def test_no_ssh_connection_sharing_on_windows(monkeypatch):
     monkeypatch.setattr(slurm_live.os, "name", "nt")  # Windows OpenSSH has no ControlMaster
     assert SlurmLive(ssh="host").mux_options() == []
+
+
+def test_pending_array_ranges_from_squeue_work_in_read_only_tools():
+    s, fake = live({"squeue&-j&12345": (0, "12345_[3-10%2]|sweep|PENDING|JobArrayTaskLimit|p|1|0:00|1:00:00||N/A\n", "")})
+    assert s.execute("job_status", {"job_id": "12345_[3-10%2]"})["state"] == "PENDING"
+    assert ["squeue", "-h", "-j", "12345"] == fake.calls[-1][0][:4]
+    r = s.execute("cancel_job", {"job_id": "12345_[3-10%2]"})
+    assert "use 12345 for the whole array or 12345_<index>" in r["error"] and not any(c[0][0] == "scancel" for c in fake.calls)
+
+
+def test_pipes_are_applied_in_python_not_in_a_shell():
+    out = "1|a|FAILED\n2|b|COMPLETED\n3|c|TIMEOUT\n4|d|COMPLETED\n"
+    s, fake = live({"sacct": (0, out, "")})
+    r = s.execute("run_readonly_command", {"command": "sacct -X -n -P -S now-7days | grep -E 'FAILED|TIMEOUT' | tail -1"})
+    assert r["stdout"] == "3|c|TIMEOUT\n" and fake.calls[-1][0] == ["sacct", "-X", "-n", "-P", "-S", "now-7days"]
+    r = s.execute("run_readonly_command", {"command": "sacct -X | sh -c 'rm -rf /'"})
+    assert "skipped: sh -c 'rm -rf /'" in r["note"] and all(c[0][0] == "sacct" for c in fake.calls)
+
+
+def test_recent_jobs_newest_first():
+    out = ("10|old|COMPLETED|0:0|00:10:00|2026-10-26T10:00:00|p\n12|run|RUNNING|0:0|00:05:00|Unknown|p\n"
+           "11|bad|FAILED|1:0|00:01:00|2026-10-27T09:00:00|p\n")
+    s, fake = live({"sacct&now-7days": (0, out, "")})
+    r = s.execute("recent_jobs", {})
+    assert [j["job_id"] for j in r["jobs"]] == ["12", "11", "10"] and r["jobs"][1]["state"] == "FAILED"

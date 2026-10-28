@@ -65,9 +65,17 @@ REQUEUE_JOB_SCHEMA = {
 }
 RUN_READONLY_COMMAND_SCHEMA = {
     "name": "run_readonly_command",
-    "description": "Run one short read-only Slurm command and return its output, for anything the other tools do not cover. Examples: account and QOS limits `sacctmgr -P show assoc user=$USER format=account,qos,grptres,maxwall`; fairshare `sshare -U`; drained or down nodes `sinfo -R`; one node `scontrol show node lrdn0001`; reservations `scontrol show reservation`; the whole queue by priority `squeue --sort=-p`. Allowed: squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show. Run it yourself instead of telling the user to run it.",
+    "description": "Run one short read-only Slurm command and return its output, for anything the other tools do not cover. Use it for the user's recent or last jobs when no job id is given: `sacct -X -S now-7days -o jobid,jobname,state,exitcode,elapsed,end`. Other examples: account and QOS limits `sacctmgr -P show assoc user=$USER format=account,qos,grptres,maxwall`; fairshare `sshare -U`; drained or down nodes `sinfo -R`; one node `scontrol show node lrdn0001`; reservations `scontrol show reservation`; the whole queue by priority `squeue --sort=-p`. Allowed: squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show. Run it yourself instead of telling the user to run it.",
     "parameters": {"type": "object", "properties": {"command": {"type": "string", "description": "The read-only Slurm command to run"}},
                    "required": ["command"]},
+}
+RECENT_JOBS_SCHEMA = {
+    "name": "recent_jobs",
+    "description": "The user's most recent jobs (running, finished or failed), newest first, with state, exit code and "
+                   "run time, like `sacct -X -S now-7days`. Use it when the user asks about their last, latest or "
+                   "recent job or jobs without giving a job id, then look at the job it finds.",
+    "parameters": {"type": "object", "properties": {"days": {"type": "integer", "description": "How many days back (default 7)"}},
+                   "required": []},
 }
 RESERVATION_INFO_SCHEMA = {
     "name": "reservation_info",
@@ -78,7 +86,7 @@ RESERVATION_INFO_SCHEMA = {
         "required": [],
     },
 }
-LIVE_SCHEMAS = SCHEMAS + [JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
+LIVE_SCHEMAS = SCHEMAS + [RECENT_JOBS_SCHEMA, JOB_SCRIPT_SCHEMA, JOB_USAGE_SCHEMA, JOB_PRIORITY_SCHEMA, UPDATE_JOB_SCHEMA,
                           HOLD_JOB_SCHEMA, RELEASE_JOB_SCHEMA, REQUEUE_JOB_SCHEMA, RUN_READONLY_COMMAND_SCHEMA,
                           RESERVATION_INFO_SCHEMA]
 # the live gpu_availability also reports the user's team limits; the trained SCHEMAS stay byte-identical
@@ -206,6 +214,12 @@ class SlurmLive:
                 raise ToolError(f"{name}: argument {a!r} should be {props[a]['type']}")
             if "enum" in props[a] and v not in props[a]["enum"]:
                 raise ToolError(f"{name}: argument {a!r} must be one of {props[a]['enum']}")
+        pending = re.match(r"^([0-9]+)_\[[^\]]*\]$", args.get("job_id", ""))  # squeue shows pending array tasks so
+        if pending and name in ACTIONS:
+            return {"error": f"{args['job_id']} is a range of pending array tasks: use {pending.group(1)} for the "
+                             f"whole array or {pending.group(1)}_<index> for one task", "action": name}
+        if pending:  # read-only: report on the array
+            args["job_id"] = pending.group(1)
         if "job_id" in args and not _JOB_ID.match(args["job_id"]):
             return {"error": f"invalid job id {args['job_id']!r}"}
         if name in ("cancel_job", "hold_job", "release_job", "update_job"):  # before asking: is there anything to change?
@@ -458,6 +472,19 @@ class SlurmLive:
             return {"job_id": job_id, "error": f"no job {job_id} found"}
         return {"error": (err2.strip() or err.strip() or f"no batch script stored for job {job_id}")}
 
+    def recent_jobs(self, days=7):
+        fields = ["JobID", "JobName", "State", "ExitCode", "Elapsed", "End", "Partition"]
+        rc, out, err = self.run(["sacct", "-X", "-n", "-P", "-S", f"now-{max(1, min(days, 60))}days",
+                                 f"--format={','.join(fields)}"])
+        if rc != 0:
+            return {"error": err.strip() or "sacct failed"}
+        rows = [dict(zip(fields, l.split("|"))) for l in out.strip().splitlines() if l.strip()]
+        # newest first: running jobs (End 'Unknown') on top, then by end time
+        rows.sort(key=lambda r: ("9999" if not r["End"][:1].isdigit() else r["End"]), reverse=True)
+        jobs = [{"job_id": r["JobID"], "name": r["JobName"], "state": r["State"].split()[0], "exit_code": r["ExitCode"],
+                 "elapsed": r["Elapsed"], "end": r["End"], "partition": r["Partition"]} for r in rows[:10]]
+        return {"jobs": jobs, "days": days} if jobs else {"jobs": [], "note": f"no jobs in the last {days} days"}
+
     # --- own-jobs guard (same as cancel_job) -------------------------------------------------------
     def _own_job(self, job_id):
         """True if the job is one of the user's queued or running jobs."""
@@ -527,6 +554,12 @@ class SlurmLive:
     def run_readonly_command(self, command):
         if re.search(r"\$\{?USER\b", command) and self.user():  # the only variable allowed: the user's own name
             command = re.sub(r"\$\{USER\}|\$USER\b", self.user(), command)
+        # The model adds `| tail -5` or `| grep FAILED` and looped on the refusal (live test, Oct 28). Nothing runs in a
+        # shell: only the command before the first pipe runs; head, tail, grep and wc -l are applied here in Python.
+        stages = _pipeline(command)
+        if stages is None:
+            return {"error": "refused: cannot parse the command (unbalanced quotes)"}
+        command, filters = stages[0], stages[1:]
         if self._SHELL_METACHARS.search(command):
             return {"error": "refused: shell metacharacters ( | ; & > < $ ` ( ) newline ) are not allowed" + DOCS_HINT}
         try:
@@ -544,9 +577,10 @@ class SlurmLive:
             return {"error": "refused: only read-only commands are allowed "
                              "(squeue, sinfo, sacct, sstat, sprio, sshare, scontrol show, sacctmgr show)" + DOCS_HINT}
         rc, out, err = self.run(argv)
+        out, note = _apply_filters(out, filters)
         if len(out) > 8000:
             out = out[:8000] + "[truncated]"
-        return {"command": command, "exit_code": rc, "stdout": out, "stderr": err}
+        return {"command": command, "exit_code": rc, "stdout": out, "stderr": err, **({"note": note} if note else {})}
 
     # --- helpers ---------------------------------------------------------------------------------
     def _add_your_limits(self, res):
@@ -733,6 +767,55 @@ def _parse_reservations(out):
     if not out or "no reservations in the system" in out.lower():
         return []
     return [dict(f.split("=", 1) for f in record.split() if "=" in f) for record in out.split("\n\n")]
+
+
+def _pipeline(command):
+    """Split a command line at the pipes that are outside quotes: ['sacct ...', 'grep -E A|B', ...], or None."""
+    stages, cur, quote = [], "", None
+    for ch in command:
+        if quote:
+            quote = None if ch == quote else quote
+        elif ch in "'\"":
+            quote = ch
+        elif ch == "|":
+            stages.append(cur.strip())
+            cur = ""
+            continue
+        cur += ch
+    return None if quote else stages + [cur.strip()]
+
+
+def _apply_filters(out, filters):
+    """head/tail [-n] N, grep [-i] [-v] [-E] PATTERN and wc -l on command output, in Python (no shell); other
+    stages are skipped and named in the returned note."""
+    lines, skipped = out.splitlines(), []
+    for f in filters:
+        try:
+            argv = shlex.split(f)
+        except ValueError:
+            skipped.append(f)
+            continue
+        cmd, opts = (argv[0] if argv else ""), argv[1:]
+        nums = [int(x.lstrip("-")) for x in opts if x.lstrip("-").isdigit()]
+        if cmd in ("head", "tail") and all(x in ("-n",) or x.lstrip("-").isdigit() for x in opts):
+            n = nums[-1] if nums else 10
+            lines = lines[:n] if cmd == "head" else lines[-n:]
+        elif cmd in ("grep", "egrep") and opts and not opts[-1].startswith("-"):
+            flags = re.I if "-i" in opts else 0
+            pattern = opts[-1].replace("\\|", "|")
+            try:
+                rx = re.compile(pattern, flags)
+            except re.error:
+                rx = re.compile(re.escape(pattern), flags)
+            keep = "-v" not in opts
+            lines = [l for l in lines if bool(rx.search(l)) == keep]
+        elif cmd == "wc" and opts == ["-l"]:
+            lines = [str(len(lines))]
+        else:
+            skipped.append(f)
+    note = (f"only head, tail, grep and wc -l are applied after a pipe; skipped: {' | '.join(skipped)}"
+            if skipped else None)
+    return "\n".join(lines) + ("\n" if lines else ""), note
 
 
 def _gpus(gres):

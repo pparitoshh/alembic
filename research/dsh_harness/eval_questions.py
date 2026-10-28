@@ -50,7 +50,7 @@ def main():
     questions = [json.loads(line) for line in (HERE / "questions.jsonl").read_text().splitlines() if line.strip()]
     tools = openai_tools()
     print(f"tool count: {len(tools)}", flush=True)
-    assert len(tools) == 17, "expected 17 tools: set PYTHONPATH to a src with the full tool list"
+    assert len(tools) == 18, "expected 18 tools: set PYTHONPATH to a src with the full tool list"
     out = {}
     for pname, system in PROMPTS.items():
         rows = []
