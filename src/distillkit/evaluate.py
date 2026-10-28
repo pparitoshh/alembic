@@ -13,7 +13,7 @@ is a student, with the base model (does distillation still win after quantizatio
 import json
 
 from . import gguf_eval
-from .checks import check_answer, load_flags
+from .checks import check_answer, load_commands, load_flags
 from .config import Config
 from .io import read_jsonl, write_jsonl
 from .schemas import JudgeVerdict
@@ -190,19 +190,21 @@ def run(cfg: Config) -> dict:
     eval_rows, tool_rows = _eval_rows(cfg)
     valid_flags = load_flags(cfg.verify.flag_list)
     set_valid_flags(valid_flags)
+    commands = load_commands(cfg.verify.command_list)  # reported only; check_pass_rate keeps its meaning
     all_answers = run_answers(cfg)
     answers = {k: v[: len(eval_rows)] for k, v in all_answers.items()}
     tool_answers = {k: v[len(eval_rows) :] for k, v in all_answers.items()}
 
     summary = {}
     for name, outs in answers.items():
-        checks = [check_answer(o, valid_flags) for o in outs]
+        checks = [check_answer(o, valid_flags, commands) for o in outs]
         n_flags = sum(c["n_flags"] for c in checks)
         n_bad = sum(len(c["bad_flags"]) for c in checks)
         summary[name] = {
             "check_pass_rate": sum(c["passed"] for c in checks) / len(checks),
             "bad_flag_rate": n_bad / n_flags if n_flags else 0.0,
             "answers_with_bad_flags": sum(bool(c["bad_flags"]) for c in checks),
+            "answers_with_command_problems": sum(bool(c["command_problems"]) for c in checks),
         }
 
     per_q = [{**r, **{f"answer_{k}": v[i] for k, v in answers.items()}} for i, r in enumerate(eval_rows)]

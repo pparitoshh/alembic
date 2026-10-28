@@ -70,6 +70,10 @@ class GenerateCfg(_Section):
 class VerifyCfg(_Section):
     dedup_threshold: float = 0.8  # Jaccard on question word 3-grams
     flag_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_flags.txt)
+    # Explicit opt-in: archived configs keep their accept/reject results. Rejects answers that use options,
+    # scontrol subcommands or sacct/squeue fields the commands do not have (checks.command_problems).
+    check_commands: bool = False
+    command_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_commands.json)
     max_answer_chars: int = 4000
     require_grounding_review: bool = False
     grounding_reviews: Path | None = None  # separate, hash-bound model support reports; never generated answers
