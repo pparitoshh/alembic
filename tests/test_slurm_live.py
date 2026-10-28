@@ -177,7 +177,7 @@ def test_hold_release_and_requeue_use_scontrol_on_own_jobs():
     s, _ = live({"squeue&--me": (0, "", "")})  # not one of the user's own jobs: refused before any scontrol
     s2fake = s._runner
     r = s.execute("hold_job", {"job_id": "9"})
-    assert r == {"hold": False, "message": "job 9 is not one of your queued or running jobs"}
+    assert r == {"error": "job 9 is not one of your queued or running jobs (not found)", "action": "hold_job"}
     assert not any(c[0][0] == "scontrol" for c in s2fake.calls)
 
 
@@ -204,10 +204,10 @@ def test_new_actions_call_confirm_and_return_the_decline_error():
     for name, args in [("update_job", {"job_id": "9", "field": "TimeLimit", "value": "2:00:00"}),
                        ("hold_job", {"job_id": "9"}), ("release_job", {"job_id": "9"}),
                        ("requeue_job", {"job_id": "9"})]:
-        s, fake = live({}, confirm=lambda n, a: False)
+        s, fake = live({"squeue&--me&-j&9": (0, "PENDING\n", "")}, confirm=lambda n, a: False)
         r = s.execute(name, args)
         assert r["error"] == "the user declined this action" and r["action"] == name
-        assert not fake.calls
+        assert all(c[0][0] == "squeue" for c in fake.calls)  # only the check that the job is still queued
 
 
 def test_round_limit_appends_a_stop_notice_with_the_last_call(monkeypatch, tmp_path):

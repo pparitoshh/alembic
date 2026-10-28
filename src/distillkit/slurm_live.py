@@ -142,7 +142,7 @@ class SlurmLive:
                 raise ToolError(f"{name}: argument {a!r} must be one of {props[a]['enum']}")
         if "job_id" in args and not _JOB_ID.match(args["job_id"]):
             return {"error": f"invalid job id {args['job_id']!r}"}
-        if name == "cancel_job":  # before asking: is there anything to cancel?
+        if name in ("cancel_job", "hold_job", "release_job", "update_job"):  # before asking: is there anything to change?
             rc, out, _ = self.run(["squeue", "--me", "-h", "-j", args["job_id"].split("_")[0], "-o", "%T"])
             if rc != 0 or not out.strip():
                 state = self.job_status(args["job_id"]).get("state")
