@@ -1,0 +1,134 @@
+{
+  "run_dir": "runs/ai_factory_all_v2/shard_089",
+  "seeds": {
+    "dir": "runs/ai_factory_all_v2/shard_089/seeds",
+    "eval_docs": [
+      "slurm_job_arrays",
+      "slurm_requeue_signals"
+    ],
+    "chunk_chars": 2200,
+    "registry": "runs/ai_factory_all_v2/shard_089/source_registry.json"
+  },
+  "teacher": {
+    "base_url": "http://localhost:8000/v1",
+    "model": "Qwen/Qwen3-32B-AWQ",
+    "temperature": 0.5,
+    "max_tokens": 2048,
+    "concurrency": 48,
+    "top_logprobs": 20,
+    "extra_body": {
+      "return_tokens_as_token_ids": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "judge": {
+    "base_url": "http://127.0.0.1:8001/v1",
+    "model": "google/gemma-4-26B-A4B-it",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "concurrency": 32,
+    "extra_body": {
+      "repetition_penalty": 1.05
+    }
+  },
+  "generate": {
+    "questions_per_chunk": 1,
+    "answers_per_question": 1,
+    "personas": [
+      "a new PhD student who has never used a cluster",
+      "a research software engineer porting code to GPUs",
+      "an ML engineer running multi-GPU training jobs",
+      "a sysadmin debugging stuck or failing jobs"
+    ],
+    "task_types": [
+      "concept",
+      "howto",
+      "script",
+      "debug"
+    ],
+    "tool_fraction": 0.3,
+    "tool_mix": {
+      "call": 0.4,
+      "ask": 0.2,
+      "none": 0.4
+    },
+    "gold_dir": null,
+    "scenario_plan": "runs/ai_factory_all_v2/shard_089/scenario_plan.json",
+    "job_status_discovery": "clarify_first",
+    "job_status_policy_version": "job-status-policy-v4",
+    "tool_doc_ids": [
+      "fac_462000265-lumidata-eu_260935c203ad9fa2",
+      "fac_462000265-lumidata-eu_63f237d8398183b3",
+      "fac_462000265-lumidata-eu_a1915eccd1d249b1",
+      "fac_dci-dci-gitlab-cines-fr_3d74344cc0687e1c",
+      "fac_docs-csc-fi_248839028f4c5679",
+      "fac_docs-discoverer-bg_4d1239e2c6801268",
+      "fac_docs-discoverer-bg_6de268767cf83dee",
+      "fac_docs-discoverer-bg_7060c2c8a0f0de2c",
+      "fac_docs-hpc-gwdg-de_6ad7378454b00df5",
+      "fac_docs-slurm-science-cloud-hu_a89b0d486c9ff924",
+      "fac_docs-vsc-ac-at_a6005cc5fc26b6df",
+      "fac_eddylab-org_9e43e9a71b9f1dd5",
+      "fac_github-com_219ff6ac2864f074",
+      "fac_github-com_687dbe23e748e1dc",
+      "fac_github-com_6a5eb8d4d89039c0",
+      "fac_github-com_9fc5944bffef18f6",
+      "fac_github-com_a6f28e5619de5f0e",
+      "fac_github-com_cad2216ca22ce164",
+      "fac_github-com_dfe7e769ac9e9b8b",
+      "fac_lumi-supercomputer-github-io_2525dd7b6a96ecf2",
+      "fac_www-bsc-es_929e7cd3a9674f26",
+      "fac_www-c3se-chalmers-se_2fe1ccdb948db4f0",
+      "fac_www-nsc-liu-se_a04b24dc6ee76459",
+      "fac_www-nsc-liu-se_f4e7aa0e32128293"
+    ]
+  },
+  "verify": {
+    "dedup_threshold": 0.8,
+    "max_answer_chars": 7000,
+    "require_grounding_review": true,
+    "grounding_review_protocol": "source-support-v3",
+    "grounding_reviews": "runs/ai_factory_all_v2/shard_089/grounding_reviews.jsonl"
+  },
+  "student": {
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "system_prompt": "You are an HPC assistant. Use supplied source excerpts for site-specific facts and tool results for live state. Name the applicable cluster and ask for missing required details. Give a complete, clear answer without inventing commands, flags or cluster defaults. Put scripts in fenced code blocks."
+  },
+  "train": {
+    "method": "lora",
+    "load_in_4bit": false,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "learning_rate": 5e-05,
+    "epochs": 1,
+    "seed": 42,
+    "batch_size": 2,
+    "grad_accum": 8,
+    "max_length": 4096,
+    "bf16": true,
+    "save_steps": 500,
+    "val_fraction": 0.0,
+    "report_to": []
+  },
+  "eval": {
+    "file": "data/eval/eval_v3.jsonl",
+    "tool_file": "data/eval/dev_v3/tools.jsonl",
+    "calibration_file": "data/eval/judge_calibration.jsonl",
+    "max_new_tokens": 768,
+    "tool_protocol": "tool-first-response-v2",
+    "tool_application_policy": "hpc-tools-clarify-first-v1"
+  },
+  "export": {
+    "llama_cpp": "~/tools/llama.cpp",
+    "quants": [
+      "Q4_K_M",
+      "Q8_0",
+      "Q5_K_M",
+      "Q3_K_M"
+    ],
+    "ollama_name": "hpc-assistant"
+  }
+}

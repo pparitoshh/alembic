@@ -1,0 +1,122 @@
+{
+  "run_dir": "runs/ai_factory_all_v4/shard_110",
+  "seeds": {
+    "dir": "runs/ai_factory_all_v4/shard_110/seeds",
+    "eval_docs": [
+      "slurm_job_arrays",
+      "slurm_requeue_signals"
+    ],
+    "chunk_chars": 2200,
+    "registry": "runs/ai_factory_all_v4/shard_110/source_registry.json"
+  },
+  "teacher": {
+    "base_url": "http://localhost:8000/v1",
+    "model": "Qwen/Qwen3-32B-AWQ",
+    "temperature": 0.5,
+    "max_tokens": 2048,
+    "concurrency": 48,
+    "top_logprobs": 20,
+    "extra_body": {
+      "return_tokens_as_token_ids": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "judge": {
+    "base_url": "http://127.0.0.1:8001/v1",
+    "model": "google/gemma-4-26B-A4B-it",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "concurrency": 32,
+    "extra_body": {
+      "repetition_penalty": 1.05
+    }
+  },
+  "generate": {
+    "questions_per_chunk": 1,
+    "answers_per_question": 1,
+    "personas": [
+      "a new PhD student who has never used a cluster",
+      "a research software engineer porting code to GPUs",
+      "an ML engineer running multi-GPU training jobs",
+      "a sysadmin debugging stuck or failing jobs"
+    ],
+    "task_types": [
+      "concept",
+      "howto",
+      "script",
+      "debug"
+    ],
+    "tool_fraction": 0.3,
+    "tool_mix": {
+      "call": 0.4,
+      "ask": 0.2,
+      "none": 0.4
+    },
+    "gold_dir": null,
+    "scenario_plan": "runs/ai_factory_all_v4/shard_110/scenario_plan.json",
+    "job_status_discovery": "clarify_first",
+    "job_status_policy_version": "job-status-policy-v4",
+    "tool_doc_ids": [
+      "fac_dci-dci-gitlab-cines-fr_ea2a889725902d16",
+      "fac_docs-lumi-supercomputer-eu_ad278c709de77a38",
+      "fac_docs-lxp-lu_719d107c19efe46b",
+      "fac_doku-lrz-de_c977d3e3cfac3414",
+      "fac_github-com_2af04c5a42189a83",
+      "fac_github-com_81301745341c4eb1",
+      "fac_github-com_9f2052ae4fc7c92c",
+      "fac_github-com_d5fea41ac49a8584",
+      "fac_github-com_ed6e23089f48ec23",
+      "fac_lumi-supercomputer-github-io_5f0265559fea5491",
+      "fac_sdlaml-pages-jsc-fz-juelich-de_036e31f037dade4f",
+      "fac_www-nsc-liu-se_1b4b8b09244ecbd9"
+    ]
+  },
+  "verify": {
+    "dedup_threshold": 0.8,
+    "max_answer_chars": 7000,
+    "require_grounding_review": true,
+    "grounding_review_protocol": "source-support-v3",
+    "grounding_reviews": "runs/ai_factory_all_v4/shard_110/grounding_reviews.jsonl"
+  },
+  "student": {
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "system_prompt": "You are an HPC assistant. Use supplied source excerpts for site-specific facts and tool results for live state. Name the applicable cluster and ask for missing required details. Give a complete, clear answer without inventing commands, flags or cluster defaults. Put scripts in fenced code blocks."
+  },
+  "train": {
+    "method": "lora",
+    "load_in_4bit": false,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "learning_rate": 5e-05,
+    "epochs": 1,
+    "seed": 42,
+    "batch_size": 2,
+    "grad_accum": 8,
+    "max_length": 4096,
+    "bf16": true,
+    "save_steps": 500,
+    "val_fraction": 0.0,
+    "report_to": []
+  },
+  "eval": {
+    "file": "data/eval/eval_v3.jsonl",
+    "tool_file": "data/eval/dev_v3/tools.jsonl",
+    "calibration_file": "data/eval/judge_calibration.jsonl",
+    "max_new_tokens": 768,
+    "tool_protocol": "tool-first-response-v2",
+    "tool_application_policy": "hpc-tools-clarify-first-v1"
+  },
+  "export": {
+    "llama_cpp": "~/tools/llama.cpp",
+    "quants": [
+      "Q4_K_M",
+      "Q8_0",
+      "Q5_K_M",
+      "Q3_K_M"
+    ],
+    "ollama_name": "hpc-assistant"
+  }
+}
