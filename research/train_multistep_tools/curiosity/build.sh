@@ -1,6 +1,6 @@
 #!/bin/bash
 # Step 5 of PLAN.md: training examples (tool trajectories + replay rows) -> train_kd.py npz parts in $RUN/parts_$MODE.
-# env: MODE (onehot | teacher, default onehot), UPSAMPLE (default 2), N_REPLAY (default 3000)
+# env: MODE (onehot | teacher, default onehot), UPSAMPLE (default 3), N_REPLAY (default 4000)
 #
 # Replay rows: the 1.3 data is $KDALL = $CP_RO/exp/kdall (kdall.sh joined the kd1/kd2/kd3 teacher sets). teacher_gen.py made
 # each answer from the evaluation system prompt (configs/rag65_seed42.json student.system_prompt) and the
@@ -8,7 +8,7 @@
 # into chat rows {id, messages: [system, user, assistant]} without tools. The replay rows thus have the same
 # tokens as the 1.3 training data. build_agent_data.py then takes N_REPLAY of them.
 source $(dirname $(readlink -f $0))/lib_mt.sh; cd $REPO
-MODE=${MODE:-onehot}; UPSAMPLE=${UPSAMPLE:-2}; N_REPLAY=${N_REPLAY:-3000}
+MODE=${MODE:-onehot}; UPSAMPLE=${UPSAMPLE:-3}; N_REPLAY=${N_REPLAY:-4000}
 [ "$SMOKE" = 1 ] && { UPSAMPLE=1; N_REPLAY=${N_REPLAY_SMOKE:-50}; }
 [ -s $RUN/traj_verified.jsonl ] || { log "STOP: no verified trajectories (run collect.sh)"; exit 1; }
 if [ ! -s $RUN/replay_src.jsonl ]; then

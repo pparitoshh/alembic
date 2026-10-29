@@ -1,4 +1,5 @@
 """Hermetic checks for the fix 4 Curiosity shell glue (research/train_multistep_tools/curiosity)."""
+import json
 import re
 import shutil
 import subprocess
@@ -63,3 +64,21 @@ def test_build_calls_build_tool_kd():
     text = (D / 'build.sh').read_text()
     # data_src.jsonl is the file build_agent_data.py writes; $STUDENT is the tokenizer, not a positional
     assert '$MT/build_tool_kd.py $RUN/examples/data_src.jsonl $P --tokenizer $STUDENT --tool-prefix mcp__hpc__' in text
+
+
+def test_build_round2_defaults():
+    text = (D / 'build.sh').read_text()
+    assert 'UPSAMPLE=${UPSAMPLE:-3}' in text and 'N_REPLAY=${N_REPLAY:-4000}' in text
+
+
+def test_collect_teacher_retries_round2():
+    text = (D / 'collect.sh').read_text()
+    assert '--samples $SAMPLES' in text and '${SAMPLES:-1}' in text  # env SAMPLES (default 1) -> collect_sim
+    assert '[ "$SAMPLES" -gt 1 ] && VFLAGS="--first-pass-per-task"' in text  # verification keeps the first pass
+    assert 'verify_traj.py $RUN/traj.jsonl $RUN/traj_verified.jsonl.tmp $VFLAGS' in text
+
+
+def test_collect_seed_reproduces_tasks_v3():
+    first = json.loads((D.parent / 'tasks_v3.jsonl').read_text(encoding='utf-8').splitlines()[0])
+    seed = int(first['id'].split('-')[1])  # the file's own seed decides the collect default
+    assert f'task_bank.py $RUN/tasks.jsonl.tmp --seed ${{TASK_SEED:-{seed}}}' in (D / 'collect.sh').read_text()

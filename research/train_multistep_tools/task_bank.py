@@ -1,6 +1,6 @@
 """Training fix 4, step 2 (research/train_multistep_tools/PLAN.md): a task bank for teacher collection.
 
-Writes a JSONL file of randomized user requests for the 18 tools of distillkit.slurm_live, on Curiosity and
+Writes a JSONL file of randomized user requests for the 19 tools of distillkit.slurm_live, on Curiosity and
 on Leonardo. One JSON object per line:
 
     {"id", "cluster": "curiosity"|"leonardo", "family", "user_request", "expected_tools": [ordered tool names],
@@ -25,6 +25,9 @@ Rules this bank follows (PLAN.md step 2 and Rules):
   must get them from tools.
 - Action tools (submit_job, cancel_job, update_job, hold_job, release_job, requeue_job) appear only when the
   request asks for the action in plain words.
+- Round 2 (PLAN_round2.md): two three-call families (three expected tools in the listed order), and three
+  "check first" families: a general request (is_implicit, no tool words) whose correct answer needs one read
+  tool first, because the advice depends on what the tool reports.
 - Multi-step requests come in two registers: at least 70% state only the goal (no step words such as
   first/then/afterwards, no tool-like words such as check/list/pull; see is_implicit), at most 30% spell the
   steps out. The mix is fixed per family by a quota, and the implicit pool is self-checked with is_implicit.
@@ -34,8 +37,9 @@ Rules this bank follows (PLAN.md step 2 and Rules):
 
 usage: .venv/bin/python3 research/train_multistep_tools/task_bank.py OUT.jsonl --seed 4 [--n-per-family N]
 
---n-per-family N: rows per multi-step family; the single-tool, no_tool and ask_job_id families get max(1, N//2)
-rows each, so multi-step tasks stay the majority (they must be at least 50%). The default N=81 gives ~1500 rows.
+--n-per-family N: rows per multi-step family; the single-tool, check-first, no_tool and ask_job_id families
+get max(1, N//2) rows each, so multi-step tasks stay the majority (they must be at least 50%). The default
+N=81 gives ~1800 rows.
 """
 import argparse
 import json
@@ -289,6 +293,77 @@ def f_status_then_update(rng, cl, explicit):
     ], h=rng.choice(HOURS), jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["pending", "running"])
 
 
+# ---- three-call families: three read calls, in the listed order (round 2: longer chains) ----------------------------
+def f_status_then_log_then_accounting(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Check job {JOB_ID}: tell me how it ended, then read its last {t} log lines, then pull its "
+            "accounting record and explain the failure with all three.",
+            "First the end state of job {JOB_ID}, then the tail of its log ({t} lines), then its accounting "
+            "record — I want state, error and resource numbers in one explanation.",
+            "Look at the state, the log tail ({t} lines) and the accounting data of my {jn} run {JOB_ID} and "
+            "tell me what went wrong and what it cost.",
+        ], t=rng.choice(TAILS), jn=jname(rng)), rng.choice(FIX_FAIL)
+    return pick(rng, [
+        "Job {JOB_ID} failed {when}. What went wrong, and how much wall time and memory did it waste?",
+        "Why did my {m} job {JOB_ID} die, and what should I change in the script for the retry?",
+        "My {jn} job {JOB_ID} failed: explain the error, and judge from the accounting whether the run was "
+        "sized sensibly at all.",
+        "What killed job {JOB_ID}, and was the failed run badly oversized in CPU or memory?",
+    ], jn=jname(rng), m=rng.choice(MODELS), when=rng.choice(WHEN)), rng.choice(FIX_FAIL)
+
+
+def f_gpu_then_partition_then_reservation(rng, cl, explicit):
+    if explicit:
+        return pick(rng, [
+            "Check the free {gpu}s on {part}, then pull the partition's limits and list the reservations "
+            "that could take nodes away from it, for my {n}-GPU {h}-hour {m} plan.",
+            "First show me how many {gpu}s are idle on {part}, then its time and resource limits, then the "
+            "upcoming reservations — I plan an {h}-hour {n}-GPU {m} run.",
+            "Three things about {part} before I submit my {n}-GPU {m} job: idle {gpu}s now, the partition's "
+            "limits, and reservations this week.",
+        ], part=rng.choice(cl["gpu_partitions"]), gpu=cl["gpu_short"], n=rng.choice(GPU_COUNTS),
+            m=rng.choice(MODELS)), None
+    return pick(rng, [
+        "Can I still fit a {n}-GPU {h}-hour {m} run on {part} this week, or should I plan around maintenance "
+        "and limits?",
+        "Is {part} workable for my {n}-GPU {m} run tomorrow and for the rest of the week as well?",
+        "What does a {n}-GPU {h}-hour {m} run on {part} face today, tomorrow and this week?",
+        "Do the GPUs, the settings and the plans of {part} allow my {n}-GPU {m} job before {until}?",
+    ], part=rng.choice(cl["gpu_partitions"]), gpu=cl["gpu_short"], m=rng.choice(MODELS),
+        n=rng.choice(GPU_COUNTS), h=rng.choice(HOURS), until=rng.choice(UNTIL)), None
+
+
+# ---- "check first" families: a general request (is_implicit: no tool words) whose correct answer needs one 
+# read tool first, because the advice depends on what the tool reports (round 2) --------------------------------------
+def f_check_first_partition_info(rng, cl):
+    return pick(rng, [
+        "What wall time should I give my {m} training job on {part}?",
+        "How should I set --mem for a {m} run on {part} so it is allowed but not oversized?",
+        "How many CPUs will one task of my {m} job get on {part}, so I can pick --cpus-per-task?",
+        "Is a {h}-hour wall time realistic for a {m} run on {part}, or does the partition stop it?",
+    ], part=rng.choice(cl["partitions"]), m=rng.choice(MODELS), h=rng.choice(HOURS)), None
+
+
+def f_check_first_gpu_availability(rng, cl):
+    return pick(rng, [
+        "Should I send my {n}-GPU {m} job to {part} this evening, or is all of it busy for now?",
+        "Is {part} a good target for {n} {gpu}s right now, or should I wait until tomorrow?",
+        "Can my {n}-GPU {m} run really start on {part} tonight?",
+        "Is there room on {part} for a quick {n}-GPU test of {m} right now?",
+    ], part=rng.choice(cl["gpu_partitions"]), gpu=cl["gpu_short"], m=rng.choice(MODELS),
+        n=rng.choice(GPU_COUNTS)), None
+
+
+def f_check_first_job_status(rng, cl):
+    return pick(rng, [
+        "Should I wait for my {jn} job {JOB_ID}, or can I book my {m} evaluation in the meantime?",
+        "Can I already start the postprocessing, or is my {jn} run {JOB_ID} still far from its results?",
+        "My {m} job {JOB_ID} has no results yet: do I still have a reason to keep waiting?",
+        "Is my {jn} job {JOB_ID} close enough to the end that I can plan my {m} follow-up for today?",
+    ], jn=jname(rng), m=rng.choice(MODELS)), rng.choice(["running", "pending", "completed"])
+
+
 # ---- single-tool families: one per read-only tool ------------------------------------------------------------------
 def f_single_job_status(rng, cl):
     return pick(rng, [
@@ -403,6 +478,16 @@ READONLY_CMDS = ["sinfo -o %P %a %l %D", "squeue -o %.10i %.9P %.20j %.2t %.10M"
                  "squeue -u $USER", "scontrol show reserv", "sinfo -O partition,cpus,memory,features"]
 
 
+def f_single_account_info(rng, cl):
+    return pick(rng, [
+        "Which QOS on this cluster can my account use?",
+        "Tell me my account and QOS situation here, with the limits of each QOS.",
+        "Show me my accounts, the QOS I may use in them and my fairshare on this cluster.",
+        "What does my QOS allow (GPUs, CPUs, wall time), and what is my fairshare in it?",
+        "My {m} job has waited since {when}: how strong is my fairshare in the QOS of my account?",
+    ], m=rng.choice(MODELS), when=rng.choice(WHEN)), None
+
+
 def f_single_run_readonly_command(rng, cl):
     return pick(rng, [
         "Run `{cmd}` for me and show me the raw output.",
@@ -484,6 +569,14 @@ MULTI_STEP_FAMILIES = {
     "usage_then_log": (["job_usage", "read_job_log"], f_usage_then_log),
     "status_then_hold": (["job_status", "hold_job"], f_status_then_hold),
     "status_then_update": (["job_status", "update_job"], f_status_then_update),
+    "status_then_log_then_accounting": (["job_status", "read_job_log", "job_accounting"],
+                                        f_status_then_log_then_accounting),
+    "gpu_then_partition_then_reservation": (["gpu_availability", "partition_info", "reservation_info"],
+                                            f_gpu_then_partition_then_reservation),
+}
+CHECK_FIRST_FAMILIES = {
+    f"check_first_{t}": ([t], globals()[f"f_check_first_{t}"])
+    for t in ("partition_info", "gpu_availability", "job_status")
 }
 SINGLE_TOOL_FAMILIES = {f"single_{t}": ([t], globals()[f"f_single_{t}"]) for t in READ_ONLY_TOOLS}
 NO_TOOL_FAMILIES = {
@@ -491,12 +584,14 @@ NO_TOOL_FAMILIES = {
     "ask_job_id_no_tool": ([], f_ask_job_id_no_tool),
     "ask_job_id_recent_jobs": (["recent_jobs"], f_ask_job_id_recent_jobs),
 }
-FAMILIES = {**MULTI_STEP_FAMILIES, **SINGLE_TOOL_FAMILIES, **NO_TOOL_FAMILIES}
+FAMILIES = {**MULTI_STEP_FAMILIES, **CHECK_FIRST_FAMILIES, **SINGLE_TOOL_FAMILIES, **NO_TOOL_FAMILIES}
 
 for _name, (_expected, _gen) in FAMILIES.items():  # validate against the real tool list at import time
     assert all(t in TOOL_NAMES for t in _expected), _name
     if _name.startswith("single_"):
         assert _expected == [_name[len("single_"):]] and _name[len("single_"):] in READ_ONLY_TOOLS, _name
+    if _name.startswith("check_first_"):
+        assert _expected == [_name[len("check_first_"):]] and _name[len("check_first_"):] in READ_ONLY_TOOLS, _name
 
 
 # ---- overlap check against the held-out mentor use cases -----------------------------------------------------------
