@@ -17,12 +17,16 @@ from .config import Config
 def admitted_training_rows(cfg: Config, *, evidence_dir: Path | None = None) -> list[dict]:
     if cfg.train.input_manifest is not None:
         from .training_inputs import admitted_rows
-        return admitted_rows(cfg, evidence_dir=evidence_dir)
-    from .io import read_jsonl
-    from .support import source_for_records
-    rows = read_jsonl(cfg.run_dir / 'verified.jsonl')
-    if getattr(cfg.seeds, 'registry', None) is not None:
-        source_for_records(cfg, rows)
+        rows = admitted_rows(cfg, evidence_dir=evidence_dir)
+    else:
+        from .io import read_jsonl
+        from .support import source_for_records
+        rows = read_jsonl(cfg.run_dir / 'verified.jsonl')
+        if getattr(cfg.seeds, 'registry', None) is not None:
+            source_for_records(cfg, rows)
+    if cfg.train.data_requirements is not None:
+        from .data_profile import enforce_requirements
+        enforce_requirements(rows, cfg.train.data_requirements, evidence_dir=evidence_dir)
     return rows
 
 
@@ -47,6 +51,8 @@ def length_report(lengths: list[int], max_length: int) -> str:
 def inputs_fingerprint(cfg: Config, examples: list[dict]) -> str:
     """What a checkpoint was trained on; resuming with other data or settings would mix two runs."""
     train = cfg.train.model_dump(mode="json", exclude={"save_steps", "save_total_limit", "report_to"})
+    if train.get('data_requirements') is None:
+        train.pop('data_requirements', None)  # preserve fingerprints of historical runs
     blob = json.dumps({"examples": examples, "student": cfg.student.model, "train": train},
                       sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode()).hexdigest()

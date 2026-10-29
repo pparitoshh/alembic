@@ -74,10 +74,12 @@ def run(cfg: Config) -> Path:
             elif any(_jaccard(sh, k) >= vcfg.dedup_threshold for k in kept_questions.values()):
                 reason = "near_duplicate"
         if reason is None:
-            checks = check_answer(a, valid_flags)
+            checks = check_answer(a, valid_flags, check_option_values=True)
             r = {**r, "checks": checks}
             if checks["bad_flags"]:
                 reason = "bad_flags"
+            elif checks["bad_option_values"]:
+                reason = "bad_option_value"
             elif not checks["bash_ok"]:
                 reason = "bash_syntax"
         transcript = messages(r)

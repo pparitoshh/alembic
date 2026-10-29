@@ -74,15 +74,23 @@ def bash_syntax_ok(script: str) -> bool:
     return r.returncode == 0
 
 
-def check_answer(answer: str, valid_flags: set[str]) -> dict:
+def check_answer(answer: str, valid_flags: set[str], *, check_option_values: bool = False) -> dict:
+    """Preserve legacy evaluation checks; training explicitly opts into value checks."""
     flags = slurm_flags_used(answer)
     bad = sorted({f for f in flags if f not in valid_flags})
     shell_blocks = [b for lang, b in code_blocks(answer) if lang in ("bash", "sh", "shell", "")]
     syntax_ok = all(bash_syntax_ok(b) for b in shell_blocks)
-    return {
+    result = {
         "n_flags": len(flags),
         "bad_flags": bad,
         "n_shell_blocks": len(shell_blocks),
         "bash_ok": syntax_ok,
         "passed": not bad and syntax_ok,
     }
+    if check_option_values:
+        from .slurm_values import PROTOCOL, check_distribution_values
+        from .slurm_time import check_time_comments
+        bad_values = check_distribution_values(answer) + check_time_comments(answer)
+        result.update(bad_option_values=bad_values, option_value_check_protocol=PROTOCOL,
+                      passed=result['passed'] and not bad_values)
+    return result

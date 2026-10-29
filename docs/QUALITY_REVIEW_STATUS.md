@@ -1,24 +1,41 @@
 # Quality review and training status
 
-**Current update, 2026-10-11:** The [14,304 certified Q&A release](../data/teacher/verified_qwen_14304/README.md) is published, adding 2,212 corrected admissions from the eighth advanced-document cohort. [Student training on the earlier 12,092-example snapshot](student_12092/README.md) and the [six-run controlled development comparison](student_experiments_12092/RESULTS.md) completed. Across both learning rates and three seeds, the trained student won only about 30–34% of pairwise development comparisons against its untrained base; G2 improvement has **not** been demonstrated. The final holdout remains separate. Dataset production continues toward the published 50,000-example milestone. The remaining sections below are the historical 2026-10-10 snapshot.
+**2026-10-11 — local corrective review. Broad-topic generation and milestone
+training are paused.** The prior row-count milestone did not establish that the
+data fits our Slurm/HPC assistant. See the [full workflow audit](audits/20261011_hpc_scope/README.md).
 
-As of 2026-10-10 19:03 UTC, **8,450/30,000** distinct Qwen teacher Q&A are accepted under the automated gates. The 10,000-row mark is an intermediate milestone; training on the final 30,000-row release has not yet run.
-
-| Area | Current result | Boundary |
+| Area | Verified state | Practical limit |
 |---|---|---|
-| Evaluation | 151 source-grounded tasks: 106 normal development, 23 first-response tool development, 22 frozen final | Tool tasks measure the first decision and arguments, not full multi-turn success. |
-| Certified teacher data | [8,450 released Q&A](../data/teacher/verified_qwen_8450/README.md): the prior 4,775-row release plus 3,675 newly certified from 5,307 source-bound questions | 1,632 second-batch answers were withheld. The release SHA-256 is `0f29b8b260aafd12bb1859e4727fb494502716609742f70e50785ddd84228a9f`. |
-| Active next cohort | A third Qwen answer batch completed 2,097 raw answers; independent gate job `59887941` is running | Raw answers are not verified Q&A until the corrected certificate passes. Twenty-five queued cohorts span 69,862 distinct source-section proposals; proposals are not acceptance commitments. |
-| Student training | An eight-record QDoRA sanity run passed in [PR #10](https://github.com/pparitoshh/alembic/pull/10). An interim Qwen3-4B QDoRA run on the 1,100-row release finished successfully on 2026-10-10: 207 optimizer steps and a saved adapter. | The 30,000-row run is held until a hash-validated certificate reaches the target. The interim adapter has no held-out improvement result yet. |
+| Published data | 14,304 rows, unique IDs, no normalized exact-question duplicates or empty final answers in the independent profile | Not established as a primary Slurm training set. Preserve as possible secondary material. |
+| Campaign data | 14,967 rows had cleared the recorded automated acceptance path before the pause; 663 more than the published snapshot | This is a pipeline count, not a relevance-approved count. No new data is being pushed. |
+| Tool use | 10 tool-decision rows in the published set: call 3, clarify 2, deliberate no-call 5 | 0.070% versus the configured roughly 30% target. |
+| Relevance | Broad libraries dominate; only 28 rows mention Slurm or common Slurm commands in the question/final answer | Keyword matching does not determine usefulness. The exact suitable subset remains unknown. |
+| Six-run training | Two learning rates, seeds 42/43/44, same 12,092 rows; all completed | Correct training execution did not produce a better model. |
+| Development comparison | Mean judge win rates about 30–34%; static and first-response tool scores also below base on average | G2 remains unmet; data mix is a plausible contributor, not a demonstrated sole cause. |
+| 11,167 pilot | Its evaluation is complete and [results are available](student_experiments_12092/results/evaluation/pilot11167/) | Single historical seed, excluded from the controlled six-run aggregate. |
+| Evaluation scope | 106 normal development tasks, 23 first-response tool tasks, 22 separate final tasks | First-response tool checks do not establish full multi-turn completion; final holdout remains untouched. |
 
-The second [corrected certification report](../data/teacher/verified_qwen_8450/certification_report.json) records Qwen3-32B-AWQ as teacher, Gemma 4 26B-A4B IT as the independent LLM gate, a GPT-OSS-20B high-risk audit, and 3,675 new rows checked through the real TRL loader. It rejected another 397 provisional passes. The first 4,775 rows remain byte-identical to the [prior release](../data/teacher/verified_qwen_4775/README.md), whose known Dask and RAJA false approvals were quarantined. LLM reviewers can still miss factual errors; lexical and model novelty gates cannot prove the absence of every semantic duplicate. The newer 7,350 rows carry pinned source origins in-row; the earlier 1,100 rows retain private-campaign source manifests and hashes but do not all carry a URL in-row.
+The newer cohorts used corrected independent Gemma review, GPT-OSS high-risk
+checks and loader certification. The inherited 1,100 rows have earlier review
+evidence; not every row passed the same newer path. No automated reviewer proves
+semantic correctness, relevance or the absence of every semantic duplicate.
 
-The pipeline uses parallel independent source and question reviews where useful, then evaluates answer cohorts against the cumulative accepted bank before promoting a new certificate. Each cohort is a candidate pool, not a promised acceptance count. Scheduling depends on live CINECA account allocation, Slurm policy and storage availability; no self-imposed campaign compute cap applies.
+Published 12,092-row training evidence records assistant-only loss masks, EOS and
+padding checks and no max-length boundary hit. That supports the mechanics of
+the run; it does not fix the training distribution or establish model quality.
 
-The interim run's private `interim-training-1100-v1/training_evidence.json` reports `PASS`, 1,100 loader-checked rows, 150,795 supervised tokens, 207 optimizer steps, and adapter SHA-256 `c96eb213cb17bf062d5f415cbbc7142584de9385e12d991820fc9a45ddee8072`. It ran from 09:09:23 to 09:22:11 UTC. This establishes training execution and adapter creation, not improvement over the base model.
+The project-readable development evaluation copy is at:
 
-Next: finish the third cohort's independent review and corrected certificate, then continue source-bound batches to 30,000. Full-release QDoRA training and held-out evaluation follow the certified target. A complete outcome claim requires the measured student result, not a queued job or an interim adapter.
+```text
+/leonardo_work/EUHPC_D30_031/alembic/campaign_evidence/student-evaluations-20261011-v1
+```
 
-## Controlled 12,092-example student comparison
+Checksums and project-group permission modes were verified. A teammate's login
+has not yet tested access. Public summaries and adapters remain in the
+[six-run release](https://github.com/pparitoshh/alembic/releases/tag/student-comparison-12092-v1).
 
-See [results and artifacts](student_experiments_12092/RESULTS.md). Status: **COMPLETE**. This is development evaluation, not a final held-out improvement claim.
+Next: review the source-to-evaluation workflow with the team, align with the
+existing Slurm corpus, establish task relevance and accepted mix, then compare
+a frozen suitable training snapshot against the base. Keep further collection
+paused and bulk artifacts outside Git. Local code includes an opt-in suitability
+gate draft; it is not deployed to the team's checkout or enabled in old configs.

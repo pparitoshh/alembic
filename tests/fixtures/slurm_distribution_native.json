@@ -1,0 +1,187 @@
+{
+  "at": "2026-10-16T17:09:34.221399Z",
+  "version": "slurm 25.05.7-BullSequana.1.2",
+  "mode": "argument parser followed by help; no submission or test-only RPC",
+  "results": [
+    {
+      "value": "fcyclic",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "fcyclic,NoPack",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "block:Pack",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "block:NoPack",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "block:block:Pack",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "block,fcyclic",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "block,Pack",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block,NoPack",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block:fcyclic",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block:block:fcyclic",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block:block:",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block:",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block::fcyclic",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": ":block",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "::fcyclic",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "plane=3",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "plane=0",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid plane size or size not specified\nsbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "plane",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid plane size or size not specified\nsbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "plane=3:block",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid plane size or size not specified\nsbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "cyclic,Pack",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "Block,PACK",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block,Pack,NoPack",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "block,",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block:block:block:block",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "arbitrary",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "*:*:*",
+      "returncode": 0,
+      "stderr": "",
+      "stdout_is_help": true
+    },
+    {
+      "value": "block:arbitrary",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "random",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "plane=foo",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid plane size or size not specified\nsbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    },
+    {
+      "value": "plane=-1",
+      "returncode": 255,
+      "stderr": "sbatch: error: Invalid plane size or size not specified\nsbatch: error: Invalid --distribution specification\n",
+      "stdout_is_help": false
+    }
+  ]
+}
