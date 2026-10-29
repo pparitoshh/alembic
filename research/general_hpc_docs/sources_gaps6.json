@@ -1,0 +1,312 @@
+[
+ {
+  "id": "g6_nccl_docs",
+  "topic": "gap6",
+  "leaves": [
+   "nccl_rccl",
+   "cuda_aware_mpi",
+   "multi_gpu_mig_mps"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA-proprietary-docs",
+  "license_basis": "NVIDIA documentation terms of use; training only, not redistributed",
+  "seeds": [
+   "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "g6_gpudirect_rdma",
+  "topic": "gap6",
+  "leaves": [
+   "cuda_aware_mpi",
+   "interconnects"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA-proprietary-docs",
+  "license_basis": "NVIDIA documentation terms of use; training only, not redistributed",
+  "seeds": [
+   "https://docs.nvidia.com/cuda/gpudirect-rdma/index.html"
+  ],
+  "prefixes": [
+   "https://docs.nvidia.com/cuda/gpudirect-rdma/"
+  ],
+  "max_pages": 30
+ },
+ {
+  "id": "g6_hpcx_docs",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_implementations",
+   "ucx_ofi_transports",
+   "interconnects"
+  ],
+  "kind": "technical_documentation",
+  "license": "NVIDIA-proprietary-docs",
+  "license_basis": "NVIDIA networking documentation terms of use; training only, not redistributed",
+  "seeds": [
+   "https://networking-docs.nvidia.com/hpcxum/2190"
+  ],
+  "prefixes": [
+   "https://networking-docs.nvidia.com/hpcxum/2190"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "g6_ucx_docs",
+  "topic": "gap6",
+  "leaves": [
+   "ucx_ofi_transports",
+   "cuda_aware_mpi"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "OpenUCX project licence (BSD-3-Clause); verify in licence review",
+  "seeds": [
+   "https://openucx.readthedocs.io/en/master/"
+  ],
+  "prefixes": [
+   "https://openucx.readthedocs.io/en/master/"
+  ],
+  "max_pages": 200
+ },
+ {
+  "id": "g6_libfabric_docs",
+  "topic": "gap6",
+  "leaves": [
+   "ucx_ofi_transports",
+   "interconnects"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-2-Clause-or-GPL-2.0",
+  "license_basis": "libfabric dual licence (BSD/GPLv2); verify in licence review",
+  "seeds": [
+   "https://ofiwg.github.io/libfabric/"
+  ],
+  "prefixes": [
+   "https://ofiwg.github.io/libfabric/"
+  ],
+  "max_pages": 250
+ },
+ {
+  "id": "g6_mpich_docs",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_p2p_basics",
+   "mpi_collectives",
+   "mpi_types_rma",
+   "mpi_io",
+   "mpi_implementations"
+  ],
+  "kind": "technical_documentation",
+  "license": "MPICH-permissive",
+  "license_basis": "MPICH COPYRIGHT (permissive, BSD-like); verify in licence review",
+  "seeds": [
+   "https://www.mpich.org/static/docs/latest/",
+   "https://www.mpich.org/documentation/guides/"
+  ],
+  "prefixes": [
+   "https://www.mpich.org/static/docs/latest/",
+   "https://www.mpich.org/documentation/"
+  ],
+  "max_pages": 600
+ },
+ {
+  "id": "g6_mvapich_docs",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_implementations",
+   "cuda_aware_mpi",
+   "hpc_benchmarks"
+  ],
+  "kind": "technical_documentation",
+  "license": "unspecified",
+  "license_basis": "MVAPICH user guide and OSU benchmark pages, no licence stated; training only, not redistributed",
+  "seeds": [
+   "https://mvapich.cse.ohio-state.edu/userguide/",
+   "https://mvapich.cse.ohio-state.edu/benchmarks/"
+  ],
+  "prefixes": [
+   "https://mvapich.cse.ohio-state.edu/userguide/",
+   "https://mvapich.cse.ohio-state.edu/benchmarks/",
+   "https://mvapich.cse.ohio-state.edu/static/media/mvapich/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "g6_intel_mpi_docs",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_implementations",
+   "mpi_placement",
+   "hybrid_mpi_openmp"
+  ],
+  "kind": "technical_documentation",
+  "license": "Intel-proprietary-docs",
+  "license_basis": "Intel documentation terms of use; training only, not redistributed",
+  "seeds": [
+   "https://www.intel.com/content/www/us/en/docs/mpi-library/developer-guide-linux/2021-13/overview.html",
+   "https://www.intel.com/content/www/us/en/docs/mpi-library/developer-reference-linux/2021-13/overview.html"
+  ],
+  "prefixes": [
+   "https://www.intel.com/content/www/us/en/docs/mpi-library/developer-guide-linux/2021-13/",
+   "https://www.intel.com/content/www/us/en/docs/mpi-library/developer-reference-linux/2021-13/"
+  ],
+  "max_pages": 400
+ },
+ {
+  "id": "g6_mpitutorial",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_p2p_basics",
+   "mpi_collectives"
+  ],
+  "kind": "tutorial",
+  "license": "MIT",
+  "license_basis": "mpitutorial.com site repository is MIT licensed; verify in licence review",
+  "seeds": [
+   "https://mpitutorial.com/tutorials/"
+  ],
+  "prefixes": [
+   "https://mpitutorial.com/tutorials/"
+  ],
+  "max_pages": 60
+ },
+ {
+  "id": "g6_llnl_mpi",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_p2p_basics",
+   "mpi_collectives",
+   "mpi_types_rma",
+   "hybrid_mpi_openmp"
+  ],
+  "kind": "tutorial",
+  "license": "LLNL-public-release",
+  "license_basis": "LLNL HPC tutorials (LLNL-WEB release); verify in licence review",
+  "seeds": [
+   "https://hpc-tutorials.llnl.gov/mpi/"
+  ],
+  "prefixes": [
+   "https://hpc-tutorials.llnl.gov/mpi/"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "g6_enccs_mpi_gpu",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_collectives",
+   "mpi_types_rma",
+   "cuda_aware_mpi",
+   "multi_gpu_mig_mps"
+  ],
+  "kind": "tutorial",
+  "license": "CC-BY-4.0",
+  "license_basis": "ENCCS lesson material, CC BY 4.0 (footer)",
+  "seeds": [
+   "https://enccs.github.io/intermediate-mpi/",
+   "https://enccs.github.io/gpu-programming/"
+  ],
+  "prefixes": [
+   "https://enccs.github.io/intermediate-mpi/",
+   "https://enccs.github.io/gpu-programming/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "g6_pytorch_distributed",
+  "topic": "gap6",
+  "leaves": [
+   "pytorch_ddp",
+   "fsdp_model_parallel",
+   "nccl_rccl"
+  ],
+  "kind": "technical_documentation",
+  "license": "BSD-3-Clause",
+  "license_basis": "PyTorch documentation and tutorials (BSD-3-Clause); verify in licence review",
+  "seeds": [
+   "https://docs.pytorch.org/docs/stable/distributed.html",
+   "https://docs.pytorch.org/docs/stable/fsdp.html",
+   "https://docs.pytorch.org/tutorials/beginner/dist_overview.html",
+   "https://docs.pytorch.org/tutorials/intermediate/ddp_tutorial.html"
+  ],
+  "prefixes": [
+   "https://docs.pytorch.org/docs/stable/distributed",
+   "https://docs.pytorch.org/docs/stable/fsdp",
+   "https://docs.pytorch.org/docs/stable/elastic/",
+   "https://docs.pytorch.org/tutorials/intermediate/ddp",
+   "https://docs.pytorch.org/tutorials/intermediate/FSDP",
+   "https://docs.pytorch.org/tutorials/intermediate/dist_",
+   "https://docs.pytorch.org/tutorials/beginner/dist_overview"
+  ],
+  "max_pages": 120
+ },
+ {
+  "id": "g6_deepspeed_docs",
+  "topic": "gap6",
+  "leaves": [
+   "deepspeed",
+   "fsdp_model_parallel"
+  ],
+  "kind": "technical_documentation",
+  "license": "Apache-2.0",
+  "license_basis": "DeepSpeed project (Apache-2.0); verify in licence review",
+  "seeds": [
+   "https://www.deepspeed.ai/docs/config-json/",
+   "https://www.deepspeed.ai/tutorials/"
+  ],
+  "prefixes": [
+   "https://www.deepspeed.ai/docs/",
+   "https://www.deepspeed.ai/tutorials/",
+   "https://www.deepspeed.ai/training/"
+  ],
+  "max_pages": 150
+ },
+ {
+  "id": "g6_rccl_docs",
+  "topic": "gap6",
+  "leaves": [
+   "nccl_rccl",
+   "hip_rocm"
+  ],
+  "kind": "technical_documentation",
+  "license": "MIT",
+  "license_basis": "ROCm RCCL documentation (MIT); verify in licence review",
+  "seeds": [
+   "https://rocm.docs.amd.com/projects/rccl/en/latest/"
+  ],
+  "prefixes": [
+   "https://rocm.docs.amd.com/projects/rccl/en/latest/"
+  ],
+  "max_pages": 80
+ },
+ {
+  "id": "g6_nersc_mpi_gpu",
+  "topic": "gap6",
+  "leaves": [
+   "mpi_placement",
+   "cuda_aware_mpi",
+   "nccl_rccl",
+   "scaling_studies"
+  ],
+  "kind": "site_documentation",
+  "license": "CC-BY-4.0",
+  "license_basis": "NERSC documentation (CC BY 4.0, docs repository); verify in licence review",
+  "seeds": [
+   "https://docs.nersc.gov/development/programming-models/mpi/",
+   "https://docs.nersc.gov/development/programming-models/mpi/cray-mpich/",
+   "https://docs.nersc.gov/machinelearning/distributed-training/"
+  ],
+  "prefixes": [
+   "https://docs.nersc.gov/development/programming-models/mpi/",
+   "https://docs.nersc.gov/machinelearning/",
+   "https://docs.nersc.gov/jobs/affinity/",
+   "https://docs.nersc.gov/performance/"
+  ],
+  "max_pages": 150
+ }
+]

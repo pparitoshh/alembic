@@ -1,0 +1,136 @@
+{
+  "run_dir": "runs/ai_factory_all_v2/shard_036",
+  "seeds": {
+    "dir": "runs/ai_factory_all_v2/shard_036/seeds",
+    "eval_docs": [
+      "slurm_job_arrays",
+      "slurm_requeue_signals"
+    ],
+    "chunk_chars": 2200,
+    "registry": "runs/ai_factory_all_v2/shard_036/source_registry.json"
+  },
+  "teacher": {
+    "base_url": "http://localhost:8000/v1",
+    "model": "Qwen/Qwen3-32B-AWQ",
+    "temperature": 0.5,
+    "max_tokens": 2048,
+    "concurrency": 48,
+    "top_logprobs": 20,
+    "extra_body": {
+      "return_tokens_as_token_ids": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "judge": {
+    "base_url": "http://127.0.0.1:8001/v1",
+    "model": "google/gemma-4-26B-A4B-it",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "concurrency": 32,
+    "extra_body": {
+      "repetition_penalty": 1.05
+    }
+  },
+  "generate": {
+    "questions_per_chunk": 1,
+    "answers_per_question": 1,
+    "personas": [
+      "a new PhD student who has never used a cluster",
+      "a research software engineer porting code to GPUs",
+      "an ML engineer running multi-GPU training jobs",
+      "a sysadmin debugging stuck or failing jobs"
+    ],
+    "task_types": [
+      "concept",
+      "howto",
+      "script",
+      "debug"
+    ],
+    "tool_fraction": 0.3,
+    "tool_mix": {
+      "call": 0.4,
+      "ask": 0.2,
+      "none": 0.4
+    },
+    "gold_dir": null,
+    "scenario_plan": "runs/ai_factory_all_v2/shard_036/scenario_plan.json",
+    "job_status_discovery": "clarify_first",
+    "job_status_policy_version": "job-status-policy-v4",
+    "tool_doc_ids": [
+      "fac_462000265-lumidata-eu_5fb95d250ace9d30",
+      "fac_462000265-lumidata-eu_91121fdba1df08fb",
+      "fac_docs-csc-fi_98c590a407da019a",
+      "fac_docs-cscs-ch_854d7be13a206c0e",
+      "fac_docs-eidf-ac-uk_897ee8f975a0f190",
+      "fac_docs-lumi-supercomputer-eu_1201a39cf916c059",
+      "fac_docs-vscentrum-be_cd6f076ef086092a",
+      "fac_doku-lrz-de_2b96d140057c17e4",
+      "fac_doku-lrz-de_5487ffb2783c0d3b",
+      "fac_github-com_03578fd42d1cbb92",
+      "fac_github-com_314ac8af03182e80",
+      "fac_github-com_95a083d7502d6d55",
+      "fac_github-com_a53814262e6165dd",
+      "fac_github-com_c969f7618c658f82",
+      "fac_github-com_e2b09e7118b3a702",
+      "fac_github-com_f4bfa0b18b07f559",
+      "fac_lumi-supercomputer-github-io_78c72437f6d5c682",
+      "fac_mif-vu-lt_33e30d001da91f24",
+      "fac_raw-githubusercontent-com_0415d7fa8a8f6a51",
+      "fac_raw-githubusercontent-com_76db0e1be3729469",
+      "fac_raw-githubusercontent-com_cbb98da27074e5ad",
+      "fac_userdocs-hpc-sav-sk_060c3e8ff06561c8",
+      "fac_vegadocs-vega-izum-si_1c054e9bf4c66d59",
+      "fac_vegadocs-vega-izum-si_6baaeb994c226ca0",
+      "fac_www-nsc-liu-se_7f1c7cfb9df26b19",
+      "fac_www-nsc-liu-se_8ce3e0a6060f011c"
+    ]
+  },
+  "verify": {
+    "dedup_threshold": 0.8,
+    "max_answer_chars": 7000,
+    "require_grounding_review": true,
+    "grounding_review_protocol": "source-support-v3",
+    "grounding_reviews": "runs/ai_factory_all_v2/shard_036/grounding_reviews.jsonl"
+  },
+  "student": {
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "system_prompt": "You are an HPC assistant. Use supplied source excerpts for site-specific facts and tool results for live state. Name the applicable cluster and ask for missing required details. Give a complete, clear answer without inventing commands, flags or cluster defaults. Put scripts in fenced code blocks."
+  },
+  "train": {
+    "method": "lora",
+    "load_in_4bit": false,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "learning_rate": 5e-05,
+    "epochs": 1,
+    "seed": 42,
+    "batch_size": 2,
+    "grad_accum": 8,
+    "max_length": 4096,
+    "bf16": true,
+    "save_steps": 500,
+    "val_fraction": 0.0,
+    "report_to": []
+  },
+  "eval": {
+    "file": "data/eval/eval_v3.jsonl",
+    "tool_file": "data/eval/dev_v3/tools.jsonl",
+    "calibration_file": "data/eval/judge_calibration.jsonl",
+    "max_new_tokens": 768,
+    "tool_protocol": "tool-first-response-v2",
+    "tool_application_policy": "hpc-tools-clarify-first-v1"
+  },
+  "export": {
+    "llama_cpp": "~/tools/llama.cpp",
+    "quants": [
+      "Q4_K_M",
+      "Q8_0",
+      "Q5_K_M",
+      "Q3_K_M"
+    ],
+    "ollama_name": "hpc-assistant"
+  }
+}
