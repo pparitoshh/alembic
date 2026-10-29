@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from research.train_multistep_tools.task_bank import (
-    ACTION_TOOLS, CLUSTERS, FAMILIES, READ_ONLY_TOOLS, ROW_KEYS, TOOL_NAMES,
+    ACTION_TOOLS, CLUSTERS, IMPLICIT_SHARE, FAMILIES, READ_ONLY_TOOLS, ROW_KEYS, TOOL_NAMES,
     build_tasks, f_gpu_then_partition, f_single_gpu_availability, is_implicit,
     load_mentor_requests, main, max_overlap,
 )
@@ -32,7 +32,7 @@ def bank(n=6, seed=4, mentor=()):
 
 def test_schema_and_tool_names():
     tasks, _ = bank(n=6)
-    assert len(TOOL_NAMES) == 18
+    assert len(TOOL_NAMES) == 19
     assert {f"single_{t}" for t in READ_ONLY_TOOLS} == {f for f in FAMILIES if f.startswith("single_")}
     ids = set()
     for row in tasks:
@@ -179,3 +179,37 @@ def test_clusters_defined():
 def test_submit_cancel_release_requeue_never_expected(tool):
     tasks, _ = bank(n=6)
     assert all(tool not in row["expected_tools"] for row in tasks)
+
+
+def test_check_first_families_round2():
+    for name in ("check_first_partition_info", "check_first_gpu_availability", "check_first_job_status"):
+        expected, _ = FAMILIES[name]
+        assert expected == [name[len("check_first_"):]] and name[len("check_first_"):] in READ_ONLY_TOOLS
+    tasks, _ = bank(n=10)
+    rows = [row for row in tasks if row["family"].startswith("check_first_")]
+    assert rows
+    for row in rows:
+        assert row["needs_tool"] and not row["multi_step"]  # one read tool, so not counted as multi-step
+        assert row["expected_tools"] == [row["family"][len("check_first_"):]]
+        assert is_implicit(row["user_request"])  # goal-only wording: no tool words, no steps
+        if row["family"] == "check_first_job_status":
+            assert row["fixture"] is not None and "{JOB_ID}" in row["user_request"]
+        else:
+            assert row["fixture"] is None and "{JOB_ID}" not in row["user_request"]
+
+
+def test_three_call_families_round2():
+    assert FAMILIES["status_then_log_then_accounting"][0] == ["job_status", "read_job_log", "job_accounting"]
+    assert FAMILIES["gpu_then_partition_then_reservation"][0] == [
+        "gpu_availability", "partition_info", "reservation_info"]
+    tasks, _ = bank(n=10)
+    rows = [row for row in tasks if len(row["expected_tools"]) == 3]
+    assert rows and all(row["multi_step"] for row in rows)
+
+
+def test_implicit_share_still_seventy_percent_with_v3_families():
+    assert IMPLICIT_SHARE == 0.7
+    tasks, _ = bank(n=21)  # > 2 rows per multi family: the implicit quota and the explicit tail both sit in
+    multi = [row for row in tasks if row["multi_step"]]
+    implicit = sum(is_implicit(row["user_request"]) for row in multi) / len(multi)
+    assert implicit >= 0.7
