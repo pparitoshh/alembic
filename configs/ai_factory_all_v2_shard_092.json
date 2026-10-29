@@ -1,0 +1,132 @@
+{
+  "run_dir": "runs/ai_factory_all_v2/shard_092",
+  "seeds": {
+    "dir": "runs/ai_factory_all_v2/shard_092/seeds",
+    "eval_docs": [
+      "slurm_job_arrays",
+      "slurm_requeue_signals"
+    ],
+    "chunk_chars": 2200,
+    "registry": "runs/ai_factory_all_v2/shard_092/source_registry.json"
+  },
+  "teacher": {
+    "base_url": "http://localhost:8000/v1",
+    "model": "Qwen/Qwen3-32B-AWQ",
+    "temperature": 0.5,
+    "max_tokens": 2048,
+    "concurrency": 48,
+    "top_logprobs": 20,
+    "extra_body": {
+      "return_tokens_as_token_ids": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "judge": {
+    "base_url": "http://127.0.0.1:8001/v1",
+    "model": "google/gemma-4-26B-A4B-it",
+    "temperature": 0.0,
+    "max_tokens": 8192,
+    "concurrency": 32,
+    "extra_body": {
+      "repetition_penalty": 1.05
+    }
+  },
+  "generate": {
+    "questions_per_chunk": 1,
+    "answers_per_question": 1,
+    "personas": [
+      "a new PhD student who has never used a cluster",
+      "a research software engineer porting code to GPUs",
+      "an ML engineer running multi-GPU training jobs",
+      "a sysadmin debugging stuck or failing jobs"
+    ],
+    "task_types": [
+      "concept",
+      "howto",
+      "script",
+      "debug"
+    ],
+    "tool_fraction": 0.3,
+    "tool_mix": {
+      "call": 0.4,
+      "ask": 0.2,
+      "none": 0.4
+    },
+    "gold_dir": null,
+    "scenario_plan": "runs/ai_factory_all_v2/shard_092/scenario_plan.json",
+    "job_status_discovery": "clarify_first",
+    "job_status_policy_version": "job-status-policy-v4",
+    "tool_doc_ids": [
+      "fac_462000265-lumidata-eu_b6dc54b234f19107",
+      "fac_462000265-lumidata-eu_c208346f0553d292",
+      "fac_cesga-docs-gitlab-io_96fdd2ab106784ce",
+      "fac_doc-aris-grnet-gr_160ec257f8744a6b",
+      "fac_doc-slaif-si_7a332f320cf54129",
+      "fac_docs-csc-fi_29c71a12be9f465b",
+      "fac_docs-discoverer-bg_75101e8ee85c0581",
+      "fac_docs-discoverer-bg_7f419e46f9d53a6d",
+      "fac_docs-discoverer-bg_83716b3e6117bce4",
+      "fac_github-com_3585ae7f0dca8548",
+      "fac_github-com_8a679a16d04a47ed",
+      "fac_github-com_b4ff5a38228e7bbf",
+      "fac_github-com_be0ca6ad06702835",
+      "fac_github-com_e1f806bfd6b8c827",
+      "fac_github-com_ed6e23089f48ec23",
+      "fac_github-com_f63a9aba17e07408",
+      "fac_github-com_f76282edd621d236",
+      "fac_lumi-supercomputer-github-io_2c733479cc02b110",
+      "fac_lumi-supercomputer-github-io_e6f9bafb2fbc912f",
+      "fac_userdocs-hpc-sav-sk_b2e4366cda4b1b33",
+      "fac_www-bsc-es_98eeaa62f6058723",
+      "fac_www-bsc-es_d4e092158f018ea8"
+    ]
+  },
+  "verify": {
+    "dedup_threshold": 0.8,
+    "max_answer_chars": 7000,
+    "require_grounding_review": true,
+    "grounding_review_protocol": "source-support-v3",
+    "grounding_reviews": "runs/ai_factory_all_v2/shard_092/grounding_reviews.jsonl"
+  },
+  "student": {
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "system_prompt": "You are an HPC assistant. Use supplied source excerpts for site-specific facts and tool results for live state. Name the applicable cluster and ask for missing required details. Give a complete, clear answer without inventing commands, flags or cluster defaults. Put scripts in fenced code blocks."
+  },
+  "train": {
+    "method": "lora",
+    "load_in_4bit": false,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "learning_rate": 5e-05,
+    "epochs": 1,
+    "seed": 42,
+    "batch_size": 2,
+    "grad_accum": 8,
+    "max_length": 4096,
+    "bf16": true,
+    "save_steps": 500,
+    "val_fraction": 0.0,
+    "report_to": []
+  },
+  "eval": {
+    "file": "data/eval/eval_v3.jsonl",
+    "tool_file": "data/eval/dev_v3/tools.jsonl",
+    "calibration_file": "data/eval/judge_calibration.jsonl",
+    "max_new_tokens": 768,
+    "tool_protocol": "tool-first-response-v2",
+    "tool_application_policy": "hpc-tools-clarify-first-v1"
+  },
+  "export": {
+    "llama_cpp": "~/tools/llama.cpp",
+    "quants": [
+      "Q4_K_M",
+      "Q8_0",
+      "Q5_K_M",
+      "Q3_K_M"
+    ],
+    "ollama_name": "hpc-assistant"
+  }
+}
