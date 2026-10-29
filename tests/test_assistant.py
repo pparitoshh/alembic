@@ -853,3 +853,13 @@ def test_setup_installs_q8_by_default_and_small_switches_to_q4(tmp_path, monkeyp
     assert created[-1] == f'FROM ./{q8}' and (tmp_path / 'model' / q8).exists()
     assistant.setup(tmp_path, 'cp', q4)  # --small: the Modelfile points at Q4_K_M and the Q8_0 file is removed
     assert created[-1] == f'FROM ./{q4}' and not (tmp_path / 'model' / q8).exists()
+
+
+def test_web_question_box_grows_with_a_pasted_script():
+    """Demo recording, Oct 29: the question box had one fixed row, so a pasted job script showed only its first line.
+    The page now resizes the box on every input (up to 45% of the window) and again after sending."""
+    from distillkit.assistant_web import PAGE
+    assert "$('q').addEventListener('input', grow)" in PAGE
+    assert "q.style.height = q.scrollHeight + 2 + 'px'" in PAGE
+    assert "$('q').value = ''; grow(); ask(q);" in PAGE  # back to one row after sending
+    assert 'max-height: 45vh; overflow-y: auto' in PAGE and '.bar button { height: 48px; }' in PAGE
