@@ -47,7 +47,10 @@ build-backend = "hatchling.build"
 packages = ["src/distillkit"]
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = [
+    "numpy>=2.5.3",
+    "pytest>=8.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
