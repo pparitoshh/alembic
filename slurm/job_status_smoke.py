@@ -44,7 +44,8 @@ def preflight(root):
     assert set(plan['modes']) <= {'call','ask','none'}
     assert len({c['id'] for c in plan['cases']}) == len(plan['cases'])
     assert cfg.generate.job_status_discovery is not None and cfg.verify.require_grounding_review
-    assert plan['application_policy'] == JobStatusPolicy(cfg.generate.job_status_discovery).as_dict()
+    assert plan['application_policy'] == JobStatusPolicy(
+        cfg.generate.job_status_discovery, cfg.generate.job_status_policy_version).as_dict()
     assert plan['mock_catalog_version'] == CATALOG_VERSION
     assert plan['source_doc_id'] not in cfg.seeds.eval_docs
     source_path=cfg.seeds.dir/(plan['source_doc_id']+'.md')
@@ -92,7 +93,8 @@ def run(root,port):
             finally:
                 e['elapsed_seconds']=time.monotonic()-t;requests.append(e)
         teacher.client.chat.completions.create=capture
-        policy = JobStatusPolicy(cfg.generate.job_status_discovery or 'clarify_first')
+        policy = JobStatusPolicy(cfg.generate.job_status_discovery or 'clarify_first',
+                                 cfg.generate.job_status_policy_version)
         audit = {}
         row={**case,'teacher':cfg.teacher.model,'prompt_version':PROMPT_VERSION,'mock_version':MOCK_VERSION,
              'mock_catalog_version':CATALOG_VERSION,'mock_job_ids':plan['mock_job_ids'],'tools':SCHEMAS,

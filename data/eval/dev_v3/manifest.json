@@ -115,11 +115,11 @@
     },
     {
       "path": "src/distillkit/config.py",
-      "sha256": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
+      "sha256": "51069852b0d08d931c4be2758c02073b024f3b1072ce31f1564486eeac69f07b"
     },
     {
       "path": "src/distillkit/toolcheck.py",
-      "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+      "sha256": "14a11092a125267c1978bca713dbe06bfc6505316572a49e39343de00bc69fd8"
     },
     {
       "path": "src/distillkit/tools.py",
@@ -265,6 +265,71 @@
       "reason": "Integrate the existing opt-in source-family admission and explicit scenario planner. Only config.py binding changes to cover optional seeds.registry and generate.scenario_plan. Training audit hooks and existing support-review defaults are preserved.",
       "compatibility": "Evaluation schemas, prompts, first-response scorer, tool schemas and default mocks are unchanged. No evaluation rows, references, source spans or scoring fixtures are changed. Active pilot runtime snapshots remain separate and immutable.",
       "validation_scope": "Fresh full real-dependency CPU suite and both exact release validators are recorded under the campaign production_code_handoff evidence for the final snapshot; no model or training result is asserted by this metadata entry."
+    },
+    {
+      "version": "resource-request-policy-integration-binding-v1",
+      "created_utc": "2026-10-08T00:40:10.900249+00:00",
+      "base_revision": "973eb65c5443ef83ee911046d30d953371c2402c",
+      "integrated_source_revision": null,
+      "candidate_status": "uncommitted locally tested candidate",
+      "tested_source_snapshot_sha256": "f48d4c5e6e714fbd5378a66b56cdda7553d224b796cec9c133eeabaac6a6ffb7",
+      "tested_source_archive_sha256": "12468d07116210f741ad4a0e9364f024cf3a894e674534c65315536e4ab32624",
+      "previous_manifest_sha256": "a8af3beb1f4054ec4fbf91d2766abe047a0fb20179d66eaf819038d3f6b1d6eb",
+      "previous_code_bindings": [
+        {
+          "path": "src/distillkit/eval_tools_v2.py",
+          "sha256": "46dd91f391d63967f3ce5e7418f31506c36ee557008af101b43a5ec90ab0ecf6"
+        },
+        {
+          "path": "src/distillkit/evaluate.py",
+          "sha256": "04aece1deb6fa0ef9aa9b5de79e6ae0f2d603ce97b6132f7690bffa9c3c4241d"
+        },
+        {
+          "path": "src/distillkit/gguf_eval.py",
+          "sha256": "9cf09fb027d0bf7a83939bf92c4405e49b205dc8c706d12a8e3a898140497dc4"
+        },
+        {
+          "path": "src/distillkit/config.py",
+          "sha256": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "sha256": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989"
+        },
+        {
+          "path": "src/distillkit/tools.py",
+          "sha256": "80c6f6e61512bd395dac89d5e311df32f32d55e7d0c16bddd2f4cca976b03990"
+        },
+        {
+          "path": "tests/test_eval_dev_v3.py",
+          "sha256": "75fb38cdf07d1aad8fa24189348730de6dec4a49b1c024f2be08e424b5154dd4"
+        }
+      ],
+      "changed_code_bindings": [
+        {
+          "path": "src/distillkit/config.py",
+          "before": "518412f3bf708051cc37a9a2b9cad3d9cb6be32e119458630530b62317f3c6db",
+          "after": "51069852b0d08d931c4be2758c02073b024f3b1072ce31f1564486eeac69f07b"
+        },
+        {
+          "path": "src/distillkit/toolcheck.py",
+          "before": "33068e4cb17c62dca62ae57c302514cbea674ee679b097d5fdd24b3757647989",
+          "after": "14a11092a125267c1978bca713dbe06bfc6505316572a49e39343de00bc69fd8"
+        }
+      ],
+      "dataset_content_changed": false,
+      "source_evidence_changed": false,
+      "reason": "Add explicit opt-in job-status-policy-v3 parsing and replay while retaining v2 defaults for historical configurations. The Config gains the version field; toolcheck passes the selected policy into training-trace target/clarification reconstruction and versions that replay contract.",
+      "compatibility": "Evaluation schemas, prompts, first-response scoring, tool schemas and default mocks are unchanged. evaluate.py, eval_tools_v2.py, gguf_eval.py and tools.py are byte-identical to the base; score_tool_item has the same AST. No evaluation rows, references, source spans or scoring fixtures are changed.",
+      "pre_binding_validation": {
+        "focused_passed": 194,
+        "full_passed": 577,
+        "full_subtests_passed": 28,
+        "full_failed": 1,
+        "full_failure": "strict release binding rejected prior toolcheck.py hash",
+        "skipped": 0
+      },
+      "validation_scope": "CPU-001/002 evidence is preserved under tool_policy_parser_handoff. The affected release test and both strict validators are recorded separately in CPU-003 after this manifest-only update. No real-model behavior or student-improvement result is asserted."
     }
   ]
 }
