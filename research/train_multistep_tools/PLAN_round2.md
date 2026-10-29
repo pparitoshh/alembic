@@ -1,6 +1,6 @@
 # Fix 4, round 2: more tool calls in each chain
 
-Round 1 (PR #117, model `gparitosh007/hpc-assistant-x0.2-gguf`) fixed the tool-call format. It did not reach the goals for the number of tool calls. Round 2 adds more and longer tool chains to the training data. It also keeps the HPC answers at the 1.3 level.
+Round 1 (PR #117, model `gparitosh007/hpc-assistant-fix4-gguf`) fixed the tool-call format. It did not reach the goals for the number of tool calls. Round 2 adds more and longer tool chains to the training data. It also keeps the HPC answers at the 1.3 level.
 
 ## Round 1 result
 
