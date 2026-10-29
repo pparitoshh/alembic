@@ -223,8 +223,9 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; white-space: nowrap; }
 .approve button { padding: 6px 14px; margin-right: 6px; }
 .empty { color: var(--muted); text-align: center; padding: 30px 10px; }
 form { position: fixed; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); padding: 20px 16px 16px; }
-.bar { max-width: 920px; margin: 0 auto; display: flex; gap: 8px; }
-textarea { flex: 1; resize: none; min-height: 48px; max-height: 160px; padding: 12px 14px; border-radius: 12px;
+.bar { max-width: 920px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
+.bar button { height: 48px; }  /* the buttons keep their size while the question box grows */
+textarea { flex: 1; resize: none; min-height: 48px; max-height: 45vh; overflow-y: auto; padding: 12px 14px; border-radius: 12px;
            border: 1px solid var(--line); background: var(--panel); color: var(--text); font: inherit; }
 textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 button { border: 0; border-radius: 12px; padding: 0 18px; font: inherit; font-weight: 600; cursor: pointer;
@@ -347,7 +348,11 @@ $('file').onchange = async e => { for (const f of e.target.files) await upload(f
 ['dragleave', 'drop'].forEach(t => $('drop').addEventListener(t, e => { e.preventDefault(); $('drop').classList.remove('over'); }));
 $('drop').addEventListener('drop', async e => { for (const f of e.dataTransfer.files) await upload(f); });
 $('form').onsubmit = e => {  // Enter while an answer is streaming must not queue another question
-  e.preventDefault(); const q = $('q').value.trim(); if (q && !$('send').disabled) { $('q').value = ''; ask(q); } };
+  e.preventDefault(); const q = $('q').value.trim(); if (q && !$('send').disabled) { $('q').value = ''; grow(); ask(q); } };
+// the question box grows with what is typed or pasted (up to 45% of the window, then it scrolls): with one fixed
+// row, a pasted job script showed only its first line (demo recording, Oct 29)
+const grow = () => { const q = $('q'); q.style.height = 'auto'; q.style.height = q.scrollHeight + 2 + 'px'; };
+$('q').addEventListener('input', grow);
 $('q').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('form').requestSubmit(); } };
 $('reset').onclick = async () => { await fetch('/api/reset', {method: 'POST'}); $('chat').innerHTML = '<div class="empty" id="empty">New conversation.</div>'; };
 loadDocs();
