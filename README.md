@@ -2,13 +2,65 @@
 
 **Modular teacher–student distillation for local, domain-specific assistants.**
 
+**HPC Assistant Guide** (set up the HPC assistant in the dsh web UI, store your cluster password safely, run a first test): https://claude.ai/artifact/SsLqjVJ3zqxU1dm13KW5Hk
+
 DistillKit turns a large open-weight **teacher** model into a compact **student** that runs on a laptop. The student learns from teacher-generated question/answer text and tool-calling traces (sequence-level distillation), so any teacher that emits text works with any student. The teacher's top-20 logprobs are saved as well, so logit-level distillation can be added later without re-running the teacher.
 
 The demo use case is an **HPC Assistant**: Qwen3-32B distilled into a **Qwen3-4B-Instruct-2507** student (QDoRA) specialised in Slurm, CUDA, MPI and profiling, with tool calling (job status, submission, logs, GPU availability). Target: runs offline on a laptop CPU in under 4 GB of RAM, as a streaming chat assistant (≥ 8 tok/s with 2,048 tokens of context; ≤ 3 s to the first token on follow-up questions).
 
 > **Status:** working prototype, built for the [European AI Hackathon](https://www.openhackathons.org/s/siteevent/a0CUP00003yKxcX2AS/se000475) (Oct 6–29, 2026). `generate → verify → train → evaluate → export` runs end to end on a laptop (RTX 2060 6 GB), including tool-calling traces against a mock Slurm cluster and an Ollama package whose tool calls Ollama parses. Slurm scripts for Leonardo are ready; laptop speed/RAM benchmarks of the 4B are in [research/](research/README.md).
 
-## Quick start
+## Use ClusterPilot (the HPC assistant)
+
+ClusterPilot-4B answers supercomputer questions with sources from the documentation and, in agent mode, works on your
+real Slurm cluster (queue, GPUs, logs, accounting, test submissions; anything that changes a job asks first). It runs
+offline on a laptop with [Ollama](https://ollama.com) (its tests run on macOS, Linux and Windows). Model and docs index:
+[VaibhavKKM/hpc-assistant-qwen3-4b](https://huggingface.co/VaibhavKKM/hpc-assistant-qwen3-4b).
+
+```bash
+git clone https://github.com/pparitoshh/alembic && cd alembic
+uv run clusterpilot --setup                      # model (Q8_0, 4.3 GB; --small: Q4_K_M, 2.5 GB) + docs index from Hugging Face into Ollama; rerun to update
+uv run clusterpilot "How do I run 100 array tasks, at most 10 at a time?"
+uv run clusterpilot --web                        # chat page on http://127.0.0.1:8765; drop your own manuals in
+uv run clusterpilot --agent --ssh <login node>   # agent mode on your cluster (or --agent on a login node)
+```
+
+Only the model, in Ollama: `ollama pull hf.co/VaibhavKKM/hpc-assistant-qwen3-4b:Q4_K_M`. On a cluster without Ollama,
+serve the model with vLLM or llama-server and add `--openai http://127.0.0.1:PORT/v1 --model <name>`.
+Covered: Slurm in general and European systems (Leonardo, LUMI and the EuroHPC AI Factories); for other sites add
+their user guide with `--add FILE` or in the web page.
+
+### Logging in to the cluster (agent mode)
+
+The assistant never asks for passwords or one-time codes: ssh does the login, outside the model. Agent mode checks
+the login once at start and, if it is not valid, says so instead of calling tools.
+
+- **ssh keys:** nothing to do.
+- **Certificate logins (Leonardo):** renew the certificate first (`step ssh login`, valid 12 hours), then start the
+  agent.
+- **One-time codes (2FA):** start `clusterpilot --agent --ssh <host>` in a terminal. It offers to open a shared ssh
+  connection; ssh asks for your code, and the agent reuses that connection for 8 hours. If `~/.ssh/config` already
+  has a `ControlPath` for the host, the agent uses your own shared connection instead:
+
+  ```
+  Host mycluster
+      ControlMaster auto
+      ControlPath ~/.ssh/cm-%C
+      ControlPersist 8h
+  ```
+
+- **When the login expires** during a session, the agent stops with one message: log in again, then ask again.
+
+### In the dsh web UI, with approval of job actions
+
+The HPC assistant also runs in the DeepSeek Harness (dsh) web UI. An MCP server gives the model the Slurm tools,
+and a dsh plugin asks you to approve each job action. The setup, the safe storage of your cluster password and a
+first test are in the [HPC Assistant Guide](https://claude.ai/artifact/SsLqjVJ3zqxU1dm13KW5Hk). The files are in
+[`research/dsh_harness/`](research/dsh_harness/).
+
+## Train your own (DistillKit pipeline)
+
+### Quick start
 
 ```bash
 uv sync --extra train --extra export   # plain `uv sync` removes torch/trl/peft
@@ -134,6 +186,7 @@ Live test results are in `data/agent_live/results.md` (37 tasks on Leonardo, 202
 
 ## Documentation
 
+- **[HPC Assistant Guide](https://claude.ai/artifact/SsLqjVJ3zqxU1dm13KW5Hk):** how the dsh harness works (model, MCP server, approval of job actions) and a step-by-step setup, with safe password storage. Files: [research/dsh_harness/](research/dsh_harness/).
 - **[GOAL.md](GOAL.md):** mission, final model choices, goals, order of work, success metrics, deliverables, team roles and timeline.
 - **[RESEARCH.md](RESEARCH.md):** state-of-the-art survey and design rationale (teacher serving and logprobs, tool-calling data, verification, QDoRA + FSDP, RAG, quantization, evaluation).
 - **[slurm/README.md](slurm/README.md):** running on Leonardo: setup, day-1 smoke tests, the job pipeline.

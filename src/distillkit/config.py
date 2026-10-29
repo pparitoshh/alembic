@@ -65,11 +65,18 @@ class GenerateCfg(_Section):
     job_status_discovery: Literal['clarify_first', 'allow_readonly'] | None = None
     # Explicit opt-in: archived configs keep their original request-parser semantics.
     job_status_policy_version: Literal['job-status-policy-v2', 'job-status-policy-v3', 'job-status-policy-v4'] = 'job-status-policy-v2'
+    # Explicit opt-in: the mock cluster tool traces run against. v2 has Leonardo's partitions with QOS lists and rejects
+    # what Leonardo rejects (issue #114); archived configs keep v1 and their results.
+    mock_version: Literal['isolated-actions-v1', 'leonardo-qos-v2'] = 'isolated-actions-v1'
 
 
 class VerifyCfg(_Section):
     dedup_threshold: float = 0.8  # Jaccard on question word 3-grams
     flag_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_flags.txt)
+    # Explicit opt-in: archived configs keep their accept/reject results. Rejects answers that use options,
+    # scontrol subcommands or sacct/squeue fields the commands do not have (checks.command_problems).
+    check_commands: bool = False
+    command_list: Path | None = None  # None = the list shipped in the package (src/distillkit/data/slurm_commands.json)
     max_answer_chars: int = 4000
     require_grounding_review: bool = False
     grounding_reviews: Path | None = None  # separate, hash-bound model support reports; never generated answers

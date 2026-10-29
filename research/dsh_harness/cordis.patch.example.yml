@@ -1,0 +1,105 @@
+# Example dsh profile patch for the HPC assistant (profile "web").
+#
+# Use:
+#   1. Copy this file to ~/.dsh/profiles/web/cordis.patch.yml.
+#   2. Replace <REPO> with the path of this repository.
+#   3. Start dsh from the folder where dsh is installed:
+#        DSH_TELEMETRY_MODE=DISABLED OLLAMA_API_KEY=ollama npx --no-install dsh web --no-open
+#      OLLAMA_API_KEY can have any value. Ollama does not check it, but dsh needs a key.
+#   4. Open the URL with the token that dsh prints. Start a NEW chat session.
+#
+# A patch entry replaces the whole config of the row with the same id.
+# Facts that explain the values:
+#   - Ollama runs the model with 8192 tokens of context. A larger dsh request is cut by Ollama and the
+#     model does not see the tools. The preset "minimal" keeps the request near 4.2K tokens.
+#   - The output cap of 2048 tokens stops a model loop. Without a cap, a loop blocks Ollama.
+#   - The MCP server declines all job-changing actions unless HPC_ALLOW_ACTIONS=1 is set in its env.
+#   - HPC_CLUSTER picks a profile from the clusters file (ssh, remote setup, job defaults). HPC_SSH and
+#     HPC_REMOTE_SETUP win over the profile when set. Leave HPC_SSH out to run the commands on this machine.
+#   - The local profile also replaces the row "preset-minimal" (copy it from `dsh web --dump-config`):
+#     it removes the nested row "persistent-bash", so the model has no bash tool, and it sets the system
+#     prompt in the "persona" row (complete: true, includeRuntimeContext: false) to:
+#       You are an HPC assistant for Slurm clusters. Your tools read the state of the connected cluster.
+#       Rules:
+#       0. Answer the user's question first, in one sentence. Then give the details.
+#       1. Call one tool at a time. Wait for its result before you decide the next step.
+#       2. Use only job IDs, file names and values that the user or a tool result gave. Never invent them.
+#          If one is missing, ask the user.
+#       3. Before you submit, change or cancel a job, or run a new script: show the full script or command,
+#          say which resources it uses, and ask the user to confirm. Then stop and wait for the answer.
+#          Never propose and submit in the same reply.
+#       4. The submit_job script must be the full script text that starts with #! and #SBATCH lines. You
+#          cannot read local files or URLs. If you do not have the text, ask the user to paste it.
+#       5. If a tool returns an error two times, stop. Tell the user the error and what they can do.
+#       6. Answer in short, clear sentences.
+#       7. Free GPUs in a partition are not your limit. Use only partitions with allowed_for_you true,
+#          and respect your_limits.
+
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      ollama-local:
+        displayName: Ollama Local
+        api: openai-completions
+        baseURL: http://127.0.0.1:11434/v1
+        apiKeyEnv: OLLAMA_API_KEY
+        defaultContextWindow: 8192
+        defaultMaxTokens: 2048
+        models:
+          - id: 'hpc-assistant-vkkm-live:latest'
+            name: HPC Assistant (Ollama)
+            contextWindow: 8192
+            maxTokens: 2048
+
+- id: agent-default-model
+  name: '@deepseek-ai/dsh-agent-default-model'
+  config:
+    provider: ollama-local
+    model: 'hpc-assistant-vkkm-live:latest'
+
+- insert:
+    - id: mcp-hpc
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: hpc
+        transport: stdio
+        command: <REPO>/.venv/bin/python3
+        args:
+          - <REPO>/research/dsh_harness/mcp_server.py
+        env:
+          PYTHONPATH: <REPO>/src
+          HPC_CLUSTER: leonardo
+          # Optional path of the clusters file (default ~/.config/hpc-assistant/clusters.yaml):
+          # HPC_CLUSTERS_FILE: ~/.config/hpc-assistant/clusters.yaml
+          # Optional per-cluster overrides, they win over the cluster profile:
+          # HPC_SSH: leonardo
+          # HPC_REMOTE_SETUP: ". /etc/profile.d/modules.sh && module load slurm/slurm/25.05"
+          # Optional allowlist of job-changing actions, it wins over HPC_ALLOW_ACTIONS=1:
+          # HPC_ALLOWED_ACTIONS: submit_job
+          # The login node needs an open ssh master (BatchMode ssh cannot ask for a password).
+          # Put a folder with an "ssh" wrapper first in PATH if the master uses a custom ControlPath.
+          PATH: /usr/local/bin:/usr/bin:/bin
+        toolCallTimeoutMs: 120000
+
+- id: agent-preset-registry
+  name: '@deepseek-ai/dsh-agent-preset-registry'
+  config:
+    default: minimal
+
+# The approval plugin asks the user to approve each job action in the web UI.
+# A plain row with a NEW id is dropped with no message. A new row must be inside an insert entry.
+# Check after a restart that dsh loaded the row: dsh web --dump-config | grep approval-plugin
+# HPC_ALLOWED_ACTIONS: submit_job (in the mcp-hpc env above) must only be set together with this
+# plugin. Without the plugin, dsh submits the job and no approval panel appears.
+- insert:
+    - id: approval-plugin
+      name: <REPO>/research/dsh_harness/approval_plugin/index.mjs
+      config:
+        tools:
+          - mcp__hpc__submit_job
+          - mcp__hpc__cancel_job
+          - mcp__hpc__update_job
+          - mcp__hpc__hold_job
+          - mcp__hpc__release_job
+          - mcp__hpc__requeue_job

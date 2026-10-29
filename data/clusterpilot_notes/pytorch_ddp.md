@@ -1,7 +1,9 @@
-# Slurm: PyTorch distributed training (DDP) on several GPU nodes
+# Slurm: PyTorch distributed training (DDP) with torchrun on several GPU nodes
 
-Run one `torchrun` per node with `srun`; torchrun starts one process per GPU and gives each its own `RANK`,
-`LOCAL_RANK` and `WORLD_SIZE`:
+Rule: with torchrun use `#SBATCH --ntasks-per-node=1` and `torchrun --nproc_per_node=<GPUs per node>`. torchrun
+starts the processes itself, one per GPU, and gives each its own `RANK`, `LOCAL_RANK` and `WORLD_SIZE`.
+`--ntasks-per-node=4` together with `--nproc_per_node=4` would start 16 processes on each node, and the job hangs or
+fails. (`--ntasks-per-node=<GPUs>` is right only without torchrun, when srun itself starts one process per GPU.)
 
 ```bash
 #!/bin/bash

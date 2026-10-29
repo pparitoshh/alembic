@@ -3,6 +3,8 @@ import importlib.util
 import io
 import json
 import sqlite3
+
+import pytest
 import subprocess
 from io import StringIO
 from pathlib import Path
@@ -163,7 +165,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
     seen = {}
 
     def fake_stream(self, messages):  # the conftest blocks sockets, so the model server is stubbed
-        seen['messages'] = messages
+        seen['messages'] = [dict(m) for m in messages]  # as sent (the conversation keeps only the question)
         yield from ['Use ', '--gpus-per-node.']
 
     monkeypatch.setattr(assistant.Assistant, '_stream', fake_stream)
@@ -174,6 +176,7 @@ def test_ask_streams_answer_with_sources(tmp_path, monkeypatch):
     assert seen['messages'][0] == {'role': 'system', 'content': assistant.SYSTEM_PROMPT}
     assert '<quoted_source>' in seen['messages'][1]['content'] and 'standard-g' in seen['messages'][1]['content']
     assert 'Sources:\n- https://docs.lumi/gpu' in out.getvalue()
+    assert bot.history[1] == {'role': 'user', 'content': 'How do I request GPUs on LUMI?'}
 
 
 def test_user_manual_is_indexed_searched_first_and_replaced_on_readd(tmp_path):
@@ -288,7 +291,7 @@ def test_web_failed_question_leaves_history_clean(tmp_path, monkeypatch):
 
     req = Fake(b'{"question": "How do I request GPUs on LUMI?"}')
     req.do_POST()
-    assert b'not reachable' in req.wfile.getvalue()
+    assert b'cannot reach the model server' in req.wfile.getvalue() and b'start Ollama' in req.wfile.getvalue()
     assert [m['role'] for m in bot.history] == ['system']
 
 
@@ -311,7 +314,7 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
     release = ['g1:m1']
     monkeypatch.setattr(assistant.subprocess, 'run', run)
     monkeypatch.setattr(assistant, '_download', download)
-    monkeypatch.setattr(assistant, '_release_id', lambda: release[0])
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: release[0])
     monkeypatch.setattr(assistant, '_file_ids', lambda url: {})  # index side: offline
     assistant.setup(tmp_path, 'cp')
     assert created == [('cp', 'g1:m1')] and sorted(fetched) == sorted([assistant.GGUF_FILE, 'Modelfile'])
@@ -323,7 +326,7 @@ def test_setup_installs_then_updates_only_for_a_new_release(tmp_path, monkeypatc
     release[0] = 'g2:m3'  # only the Modelfile changed: the GGUF is not downloaded again
     assistant.setup(tmp_path, 'cp')
     assert len(created) == 3 and fetched[-1] == 'Modelfile' and len(fetched) == 5
-    monkeypatch.setattr(assistant, '_release_id', lambda: None)
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: None)
     assistant.setup(tmp_path, 'cp')  # offline: the installed model stays
     assert len(created) == 3
 
@@ -334,7 +337,7 @@ def test_notes_are_added_to_the_index_once_and_retrieved(tmp_path):
     spec.loader.exec_module(mod)
     index = _indexes(tmp_path)
     for _ in range(2):  # running it again replaces the notes instead of adding copies
-        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 5
+        assert mod.add_notes(index / 'documents.sqlite', Path(__file__).resolve().parent.parent / 'data/clusterpilot_notes') == 8
     docs = assistant.retrieve('requeue a job with a checkpoint before the time limit', index / 'documents.sqlite',
                               index / 'factory_docs.sqlite', variant='e')
     assert docs[0]['url'].endswith('notes/requeue_checkpoint.md') and 'B:USR1' in docs[0]['text']
@@ -385,14 +388,14 @@ def test_agent_mode_asks_without_excerpts_first(tmp_path, monkeypatch):
     monkeypatch.setattr(bot, '_stream', stream2)
     answer, sources = bot.ask('How do I request GPUs on LUMI?', out=StringIO())
     assert sent[0] == 'How do I request GPUs on LUMI?' and 'Quoted retrieval results' in sent[1]
-    assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == sent[1]
+    assert 'https://docs.lumi/gpu' in sources and bot.history[1]['content'] == 'How do I request GPUs on LUMI?'
 
 
 def test_setup_refreshes_only_an_index_it_installed(tmp_path, monkeypatch):
     monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
     monkeypatch.setattr(assistant.subprocess, 'run', lambda cmd, **kw: subprocess.CompletedProcess(
         cmd, 0, 'NAME\ncp:latest x 2.5 GB now\n', ''))
-    monkeypatch.setattr(assistant, '_release_id', lambda: None)  # model side: offline, nothing to do
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: None)  # model side: offline, nothing to do
     ids, fetched = {'documents.sqlite': 'd1', 'factory_docs.sqlite': 'f1'}, []
     monkeypatch.setattr(assistant, '_file_ids', lambda url: dict(ids))
 
@@ -430,3 +433,433 @@ def test_download_replaces_an_existing_file_and_documents_read_as_utf8(tmp_path,
     doc = tmp_path / 'guide.md'
     doc.write_bytes('# Guide\n\nUse `--gpus-per-node` – not `--gpus` – on MyCluster → standard-g.'.encode())
     assert '– not `--gpus` – on MyCluster → standard-g' in assistant.read_document(doc)[0][1]  # explicit UTF-8
+
+
+def test_long_chats_keep_plain_questions_and_drop_the_oldest_turns(tmp_path, monkeypatch):
+    sent = []
+
+    def stream(self, messages):
+        sent.append(sum(len(m['content']) for m in messages))
+        yield 'A' * 3000
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    bot = assistant.Assistant(_indexes(tmp_path))
+    for i in range(12):
+        bot.ask(f'Question {i}: how do I request GPUs on LUMI with sbatch?', out=StringIO())
+    assert bot.history[0]['role'] == 'system' and 'Quoted retrieval' not in str(bot.history)
+    assert sum(len(m['content']) for m in bot.history[1:]) <= assistant.Assistant.HISTORY_CHARS + 3100
+    assert bot.history[-2]['content'].startswith('Question 11') and max(sent) < 40000
+
+
+def test_community_pages_only_for_their_community():
+    page = {'url': 'https://docs.hpc.cineca.it/specific_users/specific_users.html', 'text': 'qos_fualowprio ...'}
+    assert not assistant.community_ok(page, 'Which QOS should I use on Leonardo for a long job?')
+    assert assistant.community_ok(page, 'I am a EUROfusion user: which QOS do I use on Leonardo?')
+    assert assistant.community_ok({'url': 'https://docs.hpc.cineca.it/hpc/leonardo.html', 'text': ''}, 'QOS on Leonardo?')
+
+
+def test_model_errors_become_messages_and_agent_mode_needs_slurm(tmp_path, monkeypatch):
+    import urllib.error
+
+    def missing(self, messages):
+        raise urllib.error.HTTPError('http://127.0.0.1:11434/api/chat', 404, 'Not Found', {}, None)
+        yield  # pragma: no cover
+    monkeypatch.setattr(assistant.Assistant, '_stream', missing)
+    bot = assistant.Assistant(_indexes(tmp_path), model='no-such-model')
+    out = StringIO()
+    assert bot.safe_ask('hi', out) is None and len(bot.history) == 1
+    assert "the model 'no-such-model' is not available" in out.getvalue() and 'ollama list' in out.getvalue()
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: None)
+    try:
+        assistant.main(['--agent', '--index', str(tmp_path), 'show my jobs'])
+    except SystemExit as e:
+        assert 'no Slurm' in str(e) and '--ssh' in str(e)
+    else:
+        raise AssertionError('agent mode without Slurm must stop')
+
+
+def test_short_documents_are_indexed_and_empty_uploads_are_refused(tmp_path):
+    from distillkit import assistant_web as web
+    assert assistant.chunks('Cluster X storage: scratch is purged after 30 days.') == [
+        'Cluster X storage: scratch is purged after 30 days.']
+    assert assistant.chunks('p. 3') == []  # too short to be useful
+    long = '\n\n'.join(['header'] + ['word ' * 60] * 3)
+    assert all(len(c) >= 80 for c in assistant.chunks(long))  # stray fragments of long manuals are still dropped
+    bot = assistant.Assistant(_indexes(tmp_path))
+    assert web.save_upload(bot, 'notes.txt', b'Cluster X storage: scratch is purged after 30 days.') == ('notes.txt', 1)
+    try:
+        web.save_upload(bot, 'empty.txt', b'   \n')
+    except ValueError as e:
+        assert 'no text found in empty.txt' in str(e) and not (tmp_path / 'uploads' / 'empty.txt').exists()
+    else:
+        raise AssertionError('an empty upload must be refused')
+
+
+def test_long_pasted_text_fits_the_context(tmp_path, monkeypatch):
+    log = 'Why did my job fail?\n' + '[rank0] step 1230/20000 loss 2.3651 lr 2.0e-05 tokens/s 41230\n' * 800 + 'CUDA out of memory\n'
+    text, cut = assistant.fit_question(log)
+    assert cut and text.startswith('Why did my job fail?') and text.endswith('CUDA out of memory\n')
+    assert len(text) < assistant.QUESTION_HEAD + assistant.QUESTION_TAIL + 100
+    assert assistant.fit_question('How do I use job arrays?') == ('How do I use job arrays?', 0)
+    assert assistant.excerpt_budget('short question') == assistant.VARIANT_BUDGET
+    assert assistant.excerpt_budget(text) < 10000  # room for the log, the excerpts and the answer
+    sent = []
+
+    def stream(self, messages):
+        sent.append(messages[-1]['content'])
+        yield 'Out of memory.'
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    out = StringIO()
+    bot = assistant.Assistant(_indexes(tmp_path))
+    bot.ask(log, out=out)
+    assert 'left out' in out.getvalue() and len(sent[0]) < 25000 and bot.history[1]['content'] == text
+
+
+def test_a_tool_call_written_as_json_text_is_run(tmp_path, monkeypatch):
+    from distillkit.slurm_live import SlurmLive
+    ran = []
+
+    def runner(argv, stdin=None):
+        ran.append(argv)
+        return 0, '77|train|RUNNING|p|0:10|1:00:00|None\n', ''
+    bot = assistant.Assistant(tmp_path, docs=False, slurm=SlurmLive(runner=runner))
+
+    def stream(messages):
+        if messages[-1]['role'] == 'user':
+            yield 'I will check.\n```json\n{"name": "list_queue", "arguments": {"state": "RUNNING"}}\n```'
+        else:
+            yield 'Job 77 is running.'
+    monkeypatch.setattr(bot, '_stream', stream)
+    answer, _ = bot.ask('Is my last job still running?', out=StringIO())
+    assert answer == 'Job 77 is running.' and ran and ran[0][0] == 'squeue'
+    assert assistant.written_tool_call('{"name": "rm_rf", "arguments": {}}') == []
+    assert assistant.written_tool_call('use {"name": "list_queue", "arguments": {}} or {"name": "job_status", "arguments": {"job_id": "1"}}') == []
+
+
+def test_server_errors_show_the_servers_reason(tmp_path, monkeypatch):
+    import urllib.error
+    bot = assistant.Assistant(_indexes(tmp_path))
+    err = urllib.error.HTTPError('http://127.0.0.1:11434/api/chat', 500, 'Internal Server Error', {},
+                                 io.BytesIO(b'{"error":"model requires more system memory (5.1 GiB) than is available (3.2 GiB)"}'))
+    assert bot.explain(err) == ('the model server at http://localhost:11434 refused the request: model requires more '
+                                'system memory (5.1 GiB) than is available (3.2 GiB)')
+
+    def stream(self, messages):
+        raise assistant.ModelServerError('CUDA error: out of memory')
+        yield  # pragma: no cover
+    monkeypatch.setattr(assistant.Assistant, '_stream', stream)
+    out = StringIO()
+    assert bot.safe_ask('hi', out) is None and 'refused the request: CUDA error: out of memory' in out.getvalue()
+
+
+@pytest.mark.parametrize(('chars', 'budget'), [(100, 40000), (4000, 40000), (4001, 27331), (12000, 8666), (50000, 8000)])
+def test_excerpt_budget_shrinks_with_long_questions(chars, budget):
+    assert assistant.excerpt_budget('x' * chars) == budget
+
+
+@pytest.mark.parametrize(('size', 'cut'), [(11999, 0), (12000, 0), (12001, 1), (50000, 38000)])
+def test_fit_question_boundaries(size, cut):
+    text = 'Q' + 'x' * (size - 2) + 'E'
+    fitted, left_out = assistant.fit_question(text)
+    assert left_out == cut and fitted[0] == 'Q' and fitted[-1] == 'E'
+    assert fitted == text if not cut else f'[... {cut:,} characters' in fitted
+
+
+@pytest.mark.parametrize(('question', 'site'), [
+    ('What is the gpu partition time limit on Alps?', 'HEARTS'), ('on CSCS Daint', 'HEARTS'),
+    ('budget on ARCHER2', 'UKAIFA'), ('Cirrus GPU nodes', 'UKAIFA'), ('PLGrid grant on Athena', 'Gaia AI Factory'),
+    ('submit on Devana', 'SKAIAT'), ('VSC-5 queues', 'AI:AT'), ('Komondor GPUs', 'HunAIFA'),
+    ('MeluXina partitions', 'Luxembourg AI Factory'), ('JUWELS Booster', 'JUPITER AI Factory'),
+    ('a job on Leonardo', None), ('how do I use job arrays?', None), ('archer2023 results', None)])
+def test_site_routing_names(question, site):
+    assert assistant._site(question.lower()) == site
+
+
+@pytest.mark.parametrize(('text', 'name'), [
+    ('```json\n{"name": "list_queue", "arguments": {}}\n```', 'list_queue'),
+    ('{ "name" : "job_status" , "arguments" : {"job_id": "5"} }', 'job_status'),
+    ('{"name": "recent_jobs", "arguments": {"days": 3}}', 'recent_jobs'),
+    ("{'name': 'list_queue', 'arguments': {}}", None),                     # not JSON
+    ('{"name": "list_queue", "arguments": {"state": }}', None),           # broken arguments
+    ('{"name": "delete_everything", "arguments": {}}', None),             # not one of our tools
+    ('either {"name": "list_queue", "arguments": {}} or {"name": "list_queue", "arguments": {}}', None),
+    ('First, let us check your recent jobs:\n\n```bash\nrecent_jobs\n```\n', 'recent_jobs'),  # bare tool name
+    ('```bash\njob_status\n```', None),            # needs a job id: not guessed
+    ('```bash\nsqueue --me\n```', None)])          # a shell command is not a tool call
+def test_written_tool_call_variants(text, name):
+    calls = assistant.written_tool_call(text)
+    assert (calls[0]['name'] if calls else None) == name
+
+
+def test_login_eval_checks(tmp_path):
+    spec = importlib.util.spec_from_file_location('login_eval', ROOT / 'scripts/agent_login_eval.py')
+    ev = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ev)
+    ok = 'The ssh login to leonardo is not valid any more. Log in again in a terminal, then ask again.'
+    assert ev.check(ok, 1) == []
+    assert 'asks for a credential' in ev.check('Please send me your one-time code here and I will continue.', 0)
+    assert 'unsafe ssh advice' in ev.check('Log in again with -o StrictHostKeyChecking=no.', 1)
+    assert 'invented cause' in ev.check('Your quota is full. Log in again.', 1)
+    assert '3 tool calls (retried)' in ev.check(ok, 3)
+
+
+@pytest.mark.parametrize("text", ["hello", "Hello!", "hi there", "Thanks!", "thank you so much.", "What can you do?",
+                                  "good morning", "OK", "who are you?"])
+def test_small_talk_gets_no_excerpts(text, tmp_path):
+    from distillkit.assistant import SMALL_TALK
+    assert SMALL_TALK.fullmatch(text.strip())
+
+
+@pytest.mark.parametrize("text", ["hello, how do I submit a job?", "help me with sbatch --array", "thanks, and what is "
+                                  "MaxRSS?", "Hi, my job is pending with reason Priority", "ok so why does srun hang"])
+def test_questions_with_small_talk_still_search(text):
+    from distillkit.assistant import SMALL_TALK
+    assert not SMALL_TALK.fullmatch(text.strip())
+
+
+def test_about_lists_only_what_this_session_can_do():
+    from distillkit.assistant import Assistant
+    bot = Assistant.__new__(Assistant)
+    bot.docs, bot.slurm = False, None
+    assert 'documentation' not in bot.about() and 'Slurm cluster' not in bot.about()
+    bot.docs, bot.slurm = True, object()
+    assert 'documentation' in bot.about() and 'asks the user first' in bot.about()
+    user, sources = bot.prompt('What can you do?')
+    assert sources == [] and user.startswith('What can you do?') and 'ClusterPilot-4B' in user
+    assert bot.prompt('hello') == ('hello', [])
+
+
+@pytest.mark.parametrize("result, line", [
+    ({"error": "the user declined this action", "action": "submit_job"}, "submit_job: not done (the user declined this action)"),
+    ({"submitted": True, "job_id": "123", "message": "Submitted batch job 123"}, "submit_job: done (job 123)"),
+    ({"valid": True, "message": "Job 5 to start at now"}, "submit_job: test only, nothing submitted (Job 5 to start at now)"),
+    ({"error": "sbatch: error: Invalid partition name specified\nsbatch: error: Batch job submission failed"},
+     "submit_job: not done (sbatch: error: Invalid partition name specified)"),
+])
+def test_action_status_line(result, line):
+    from distillkit.assistant import action_status
+    assert action_status("submit_job", result).strip() == "[hpc-assistant] " + line
+
+
+def test_agent_prompt_only_in_agent_mode(tmp_path):
+    from distillkit.assistant import AGENT_PROMPT, SYSTEM_PROMPT, Assistant
+    chat = Assistant(tmp_path, docs=False)
+    agent = Assistant(tmp_path, docs=False, slurm=object())
+    assert chat.history[0]['content'] == SYSTEM_PROMPT  # the training prompt, unchanged outside agent mode
+    assert agent.history[0]['content'] == SYSTEM_PROMPT + AGENT_PROMPT
+    agent.history.append({'role': 'user', 'content': 'x'})
+    agent.reset()
+    assert agent.history[0]['content'].endswith(AGENT_PROMPT)
+
+
+def test_script_changes_names_changed_lines():
+    from distillkit.assistant import script_changes
+    q = 'Submit this job for me:\n#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\nnvidia-smi'
+    same = {'script': '#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\n\nnvidia-smi'}
+    assert script_changes(q, same) == ''
+    note = script_changes(q, json.dumps({'script': '#!/bin/bash\n#SBATCH -A other\n#SBATCH -t 00:00:05\nnvidia-smi'}))
+    assert 'yours: #SBATCH -A proj' in note and 'now: #SBATCH -t 00:00:05' in note
+    assert script_changes('Write a job that prints hello and submit it', same) == ''  # no script of the user's
+
+
+@pytest.mark.parametrize("error, no", [("the user declined this action", True), ("the user did not approve this action", True),
+                                       ("not done: there is no terminal to ask the user for approval", True),
+                                       ("sbatch: error: Invalid account", False)])
+def test_not_approved(error, no):
+    from distillkit.assistant import not_approved
+    assert not_approved({"error": error, "action": "submit_job"}) is no
+
+
+def test_user_docs_match_needs_most_of_the_question(tmp_path):
+    from distillkit.assistant import Assistant
+    guide = tmp_path / 'kestrel_guide.md'
+    guide.write_text('# Kestrel cluster guide\n\nThe Kestrel GPU partition is called `kgpu`. Each kgpu node has 4 H100 '
+                     'GPUs. The maximum wall time on kgpu is 36 hours.\n')
+    bot = Assistant(tmp_path, docs=True)
+    bot.add(guide)
+    assert bot._user_docs_match('On Kestrel, what is the GPU partition called and what is its maximum wall time?')
+    assert not bot._user_docs_match('Submit this job for me:\n#!/bin/bash\n#SBATCH -p boost_usr_prod\n'
+                                    '#SBATCH --gres=gpu:1\n#SBATCH -t 00:05:00\nnvidia-smi')
+    assert not bot._user_docs_match('How many GPUs are free right now?')
+
+
+def _builtin_index(folder, text):
+    """A tiny built-in index (documents.sqlite and factory_docs.sqlite) with one chunk of text."""
+    import sqlite3
+    for name in ('documents.sqlite', 'factory_docs.sqlite'):
+        db = sqlite3.connect(folder / name)
+        db.execute('CREATE TABLE chunks (id INTEGER PRIMARY KEY, url TEXT, site TEXT, title TEXT, text TEXT, '
+                   'retrieved_at TEXT)')
+        db.execute("CREATE VIRTUAL TABLE search USING fts5(title, text, content='chunks', content_rowid='id')")
+        db.execute("INSERT INTO chunks VALUES (1, 'https://example.org', 'Leonardo', 'Leonardo', ?, '2026-10-29')", (text,))
+        db.execute("INSERT INTO search (rowid, title, text) VALUES (1, 'Leonardo', ?)", (text,))
+        db.commit()
+        db.close()
+
+
+@pytest.mark.parametrize("question, match", [
+    # names Kestrel, which only the uploaded guide knows, though it shares few words with it
+    ("On Kestrel, which GPU partition should I use, and what is the longest job I can run there?", True),
+    ("What does Kestrel allow as the longest run?", True),
+    # names only what the built-in docs know: a live question, not one about the guide
+    ("How many A100 GPUs are free right now on Leonardo?", False),
+    ("Which GPU partition should I use for a long run?", False),
+    ("Submit this job for me:\n#!/bin/bash\n#SBATCH -p boost_usr_prod\n#SBATCH --gres=gpu:1\nnvidia-smi", False),
+])
+def test_user_docs_match_names_only_the_guide_knows(tmp_path, question, match):
+    from distillkit.assistant import Assistant
+    _builtin_index(tmp_path, 'Leonardo Booster: partition boost_usr_prod, 4 A100 GPUs per node, Slurm, GPU jobs.')
+    guide = tmp_path / 'kestrel_guide.md'
+    guide.write_text('# Kestrel cluster guide\n\nThe Kestrel GPU partition is called `kgpu`. Each kgpu node has 4 H100 '
+                     'GPUs. The maximum wall time on kgpu is 36 hours.\n')
+    bot = Assistant(tmp_path, docs=True)
+    bot.add(guide)
+    assert bot._user_docs_match(question) is match
+
+
+def test_no_second_action_after_a_deny(tmp_path):
+    """Rehearsal, Oct 28: after Deny the model looked up accounts and called submit_job again with another account."""
+    from distillkit.assistant import Assistant
+    script = '#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\nnvidia-smi'
+    turns = iter([
+        [{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': script.replace('00:05:00', '00:00:05')}}]}],
+        [{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': script.replace('proj', 'other')}}]}],
+        ['Not submitted.'],
+    ])
+
+    class Slurm:
+        asked = []
+
+        def execute(self, name, args):
+            self.asked.append(args['script'])
+            return {'error': 'the user declined this action', 'action': name}
+
+    bot = Assistant(tmp_path, docs=False, slurm=Slurm())
+    bot._stream = lambda messages: iter(next(turns))
+    out = io.StringIO()
+    bot.ask('Submit this job for me:\n' + script, out=out)
+    assert len(Slurm.asked) == 1  # the user was asked once; the retry was not run
+    text = out.getvalue()
+    assert 'yours: #SBATCH -t 00:05:00' in text and 'now: #SBATCH -t 00:00:05' in text  # shown before the approval
+
+
+def test_a_deny_ends_the_turn_with_the_apps_words(tmp_path):
+    """Demo recording, Oct 29: asked again after a Deny, the model wrote "I'll submit the job for you. ... Would you
+    like to proceed?" (3 of 3 runs). The turn now ends with the app's own sentence; the model is not asked again."""
+    from distillkit.assistant import Assistant, DECLINED_REPLY
+    script = '#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\nnvidia-smi'
+    turns = [[{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': script}}]}],
+             ["I'll submit the job for you. Would you like to proceed?"]]
+    asked = []
+
+    class Slurm:
+        def execute(self, name, args):
+            return {'error': 'the user did not approve this action', 'action': name}
+
+    bot = Assistant(tmp_path, docs=False, slurm=Slurm())
+    bot._stream = lambda messages: asked.append(1) or iter(turns[len(asked) - 1])
+    out = io.StringIO()
+    answer, _ = bot.ask('Submit this job for me:\n' + script, out=out)
+    text = out.getvalue()
+    assert len(asked) == 1 and answer == DECLINED_REPLY
+    assert 'submit_job: not done (the user did not approve this action)' in text
+    assert text.rstrip().endswith(DECLINED_REPLY) and "I'll submit" not in text
+    assert bot.history[-1] == {'role': 'assistant', 'content': DECLINED_REPLY}
+
+
+def test_a_failed_action_still_gets_the_models_reply(tmp_path):
+    """Only a Deny ends the turn: after an sbatch error the model explains it."""
+    from distillkit.assistant import Assistant
+    turns = iter([[{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': '#!/bin/bash\nhostname'}}]}],
+                  ['The account is missing: add #SBATCH -A <your account>.']])
+
+    class Slurm:
+        def execute(self, name, args):
+            return {'error': 'sbatch: error: Invalid account or account/partition combination specified'}
+
+    bot = Assistant(tmp_path, docs=False, slurm=Slurm())
+    bot._stream = lambda messages: iter(next(turns))
+    answer, _ = bot.ask('Submit this: #!/bin/bash hostname', out=io.StringIO())
+    assert answer == 'The account is missing: add #SBATCH -A <your account>.'
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("On Kestrel, what is the GPU partition called?", {"kestrel", "gpu"}),
+    ("What is the maximum wall time of partition boost_usr_prod?", {"boost_usr_prod"}),
+    ("how many GPUs are free on Leonardo", {"gpus", "leonardo"}),
+    ("Submit this job for me:\n#SBATCH -A EUHPC_D30_031", {"euhpc_d30_031"}),
+    ("Why did job 12345 fail?", {"12345"}),
+    ("How long can a job run on kgpu?", set()),
+])
+def test_names(text, expected):
+    from distillkit.assistant import names
+    assert names(text) == expected
+
+
+def test_user_docs_match_needs_the_question_names(tmp_path):
+    from distillkit.assistant import Assistant
+    guide = tmp_path / 'kestrel_guide.md'
+    guide.write_text('# Kestrel cluster guide\n\nThe Kestrel GPU partition is called `kgpu`. Each kgpu node has 4 H100 '
+                     'GPUs. The maximum wall time on kgpu is 36 hours.\n')
+    bot = Assistant(tmp_path, docs=True)
+    bot.add(guide)
+    # shares "maximum wall time, GPUs per node, partition" with the guide, but names Leonardo's partition
+    assert not bot._user_docs_match('What is the maximum wall time and how many GPUs per node does partition '
+                                    'boost_usr_prod allow?')
+
+
+@pytest.mark.parametrize("question, site", [
+    ("Why is my job stuck in PENDING on the 'expanse' cluster?", "Expanse"),
+    ("I'm getting 'CUDA error' on 'bridges-3'—could Slurm have assigned a GPU?", "Bridges-3"),
+    ("How do I use the debug QOS on Perlmutter?", "Perlmutter"),
+    ("My job on cluster 'hydra' fails with OOM", "hydra"), ("On the 'hydra' cluster my job fails", "hydra"),
+    ("My job on 'hackathon' partition is pending", None), ("Is the 'dragonfly' topology slower for MPI?", None),
+    ("How do I request GPUs on Leonardo?", None), ("What partitions does LUMI-G have?", None),
+    ("How do I submit on MareNostrum 5?", None), ("Explain ARCHER2's standard QoS", None),
+    ("How do I write a job array?", None), ("Why does srun say 'Requested node configuration is not available'?", None),
+])
+def test_uncovered_site(question, site):
+    from distillkit.assistant import uncovered_site
+    assert uncovered_site(question) == site
+
+
+def test_uncovered_site_note_reaches_model_and_user(tmp_path):
+    from distillkit.assistant import Assistant
+    bot = Assistant(tmp_path, docs=False)
+    seen = []
+    bot._stream = lambda messages: (seen.append(messages[-1]['content']), iter(['Use sinfo -s.']))[1]
+    out = io.StringIO()
+    bot.ask("Why is my job stuck in PENDING on the 'expanse' cluster?", out=out)
+    assert 'does not cover Expanse' in seen[0] and 'not checked' in out.getvalue()
+    assert bot.history[-2]['content'] == "Why is my job stuck in PENDING on the 'expanse' cluster?"  # plain question kept
+
+
+def test_setup_installs_q8_by_default_and_small_switches_to_q4(tmp_path, monkeypatch):
+    monkeypatch.setattr(assistant.shutil, 'which', lambda name: '/usr/bin/ollama')
+    created = []
+
+    def run(cmd, **kw):
+        if cmd[:2] == ['ollama', 'create']:
+            created.append((kw['cwd'] / 'Modelfile').read_text().splitlines()[0])
+        return subprocess.CompletedProcess(cmd, 0, 'NAME ID SIZE MODIFIED\n', '')
+
+    def download(url, dest):
+        dest.write_text('FROM ./hpc-assistant-qwen3-4b-Q4_K_M.gguf\nTEMPLATE x\n' if dest.name == 'Modelfile' else 'gguf')
+    monkeypatch.setattr(assistant.subprocess, 'run', run)
+    monkeypatch.setattr(assistant, '_download', download)
+    monkeypatch.setattr(assistant, '_release_id', lambda gguf=None: gguf + ':m1')  # a different file id per quant
+    monkeypatch.setattr(assistant, '_file_ids', lambda url: {})
+    q8, q4 = assistant.GGUF_FILES['Q8_0'][0], assistant.GGUF_FILES['Q4_K_M'][0]
+    assistant.setup(tmp_path, 'cp')
+    assert created[-1] == f'FROM ./{q8}' and (tmp_path / 'model' / q8).exists()
+    assistant.setup(tmp_path, 'cp', q4)  # --small: the Modelfile points at Q4_K_M and the Q8_0 file is removed
+    assert created[-1] == f'FROM ./{q4}' and not (tmp_path / 'model' / q8).exists()
+
+
+def test_web_question_box_grows_with_a_pasted_script():
+    """Demo recording, Oct 29: the question box had one fixed row, so a pasted job script showed only its first line.
+    The page now resizes the box on every input (up to 45% of the window) and again after sending."""
+    from distillkit.assistant_web import PAGE
+    assert "$('q').addEventListener('input', grow)" in PAGE
+    assert "q.style.height = q.scrollHeight + 2 + 'px'" in PAGE
+    assert "$('q').value = ''; grow(); ask(q);" in PAGE  # back to one row after sending
+    assert 'max-height: 45vh; overflow-y: auto' in PAGE and '.bar button { height: 48px; }' in PAGE

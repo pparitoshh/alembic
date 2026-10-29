@@ -30,11 +30,30 @@ def live(responses, confirm=lambda n, a: True):
     return SlurmLive(runner=fake, confirm=confirm, workdir="/w/jobs"), fake
 
 
+QUEUE_ARGV = ["squeue", "--me", "-h", "-o", "%i|%j|%T|%P|%M|%l|%r", "-t", "RUNNING"]
+
+RESERVATIONS = """
+ReservationName=s_tra_ncc2 StartTime=2026-10-28T08:00:00 EndTime=2026-10-28T22:00:00 Duration=14:00:00
+   Nodes=lrdn[0066,0083] NodeCnt=32 CoreCnt=1024 Features=(null) PartitionName=boost_usr_prod Flags=
+   Users=(null) Groups=(null) Accounts=EUHPC_D30_031 Licenses=(null) State=ACTIVE BurstBuffer=(null)
+
+ReservationName=s_tra_ncc3 StartTime=2026-10-29T08:00:00 EndTime=2026-10-29T15:00:00 Duration=07:00:00
+   Nodes=lrdn[0066,0083] NodeCnt=32 CoreCnt=1024 Features=(null) PartitionName=boost_usr_prod Flags=
+   Users=(null) Groups=(null) Accounts=EUHPC_D30_031 Licenses=(null) State=INACTIVE BurstBuffer=(null)
+"""
+
+
 def test_live_schemas_are_the_trained_ones_plus_live_tools():
-    assert slurm_live.LIVE_SCHEMAS[:len(SCHEMAS)] == SCHEMAS
-    assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == \
-        ["job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job", "requeue_job",
-         "run_readonly_command"]
+    extras = ["recent_jobs", "job_script", "job_usage", "job_priority", "update_job", "hold_job", "release_job",
+              "requeue_job", "run_readonly_command", "reservation_info", "account_info"]
+    assert [t["name"] for t in slurm_live.LIVE_SCHEMAS] == [t["name"] for t in SCHEMAS] + extras
+    gpu = next(t for t in slurm_live.LIVE_SCHEMAS if t["name"] == "gpu_availability")
+    trained = next(t for t in SCHEMAS if t["name"] == "gpu_availability")
+    assert gpu["description"] == trained["description"] + " It also shows your team's QOS limits."
+    assert gpu["parameters"] == trained["parameters"]
+    others = [t for t in slurm_live.LIVE_SCHEMAS if t["name"] != "gpu_availability"]
+    assert others == [t for t in SCHEMAS if t["name"] != "gpu_availability"] + slurm_live.LIVE_SCHEMAS[len(SCHEMAS):]
+    assert [t["function"]["name"] for t in slurm_live.openai_tools()][len(SCHEMAS):] == extras
 
 
 def test_job_status_running_pending_and_finished():
@@ -55,8 +74,8 @@ def test_job_accounting_efficiency_memory_and_gpus():
     s, _ = live({"sacct": (0, "7|job|COMPLETED|0:0|p|01:00:00|02:00:00|n1||02:00:00|4|cpu=4,gres/gpu:a100=2,mem=12G,node=1\n"
                               "7.batch|batch|COMPLETED|0:0||01:00:00||n1|3145728K|02:00:00|4|\n", "")})
     a = s.execute("job_accounting", {"job_id": "7"})
-    assert a["cpu_efficiency"] == "50%" and a["max_rss"] == "3.0G" and a["gpus"] == 2
-    assert a["memory_requested"] == "12.0G" and a["memory_efficiency"] == "25%" and a["time_limit_used"] == "50%"
+    assert a["cpu_efficiency"] == "50%" and a["max_rss"] == "3.0 GB" and a["gpus"] == 2
+    assert a["memory_requested"] == "12.0 GB" and a["memory_efficiency"] == "25%" and a["time_limit_used"] == "50%"
 
 
 def test_submit_writes_the_script_then_sbatch_and_test_only():
@@ -68,6 +87,22 @@ def test_submit_writes_the_script_then_sbatch_and_test_only():
     t = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n", "test_only": True})
     assert t["valid"] and "start at" in t["message"]
     assert "error" in s.execute("submit_job", {"script": "echo no shebang"})
+
+
+def test_submit_job_rejects_a_path_or_url_as_the_script():
+    for script in ["/home/me/job.sh", "~/job.sbatch", "./run.py", "job.slurm",
+                   "http://example.com/job.sh", "https://example.com/job.sh"]:
+        s, fake = live({})
+        r = s.execute("submit_job", {"script": script})
+        assert r["error"] == ("script must be the full text of the batch script, starting with #! and #SBATCH lines. "
+                              "A path or URL does not work: the server cannot read your files. "
+                              "Ask the user for the script text."), script
+        assert fake.calls == []  # nothing written or run
+    # a one-line script that is none of those shapes keeps the old sbatch error
+    s, fake = live({})
+    r = s.execute("submit_job", {"script": "echo no shebang"})
+    assert "This does not look like a batch script" in r["error"]
+    assert fake.calls == []
 
 
 def test_actions_need_confirmation_and_cancel_only_own_jobs():
@@ -85,6 +120,160 @@ def test_actions_need_confirmation_and_cancel_only_own_jobs():
     s, _ = live({"squeue&--me&%i": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
                  "scancel": (0, "", "")})
     assert s.execute("cancel_job", {"job_id": "5"}) == {"cancelled": True, "message": "Job 5 cancelled (was PENDING)"}
+
+
+def test_submit_job_resolves_the_auto_reservation_to_the_one_active_match():
+    responses = {"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", ""),
+                 "scontrol&show&reservation": (0, RESERVATIONS, "")}
+    fake = FakeSlurm(responses)
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1", "partition": "part1", "reservation": "auto:s_tra_ncc"},
+                  confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH -t 5\n"})
+    assert r["submitted"] and "note" not in r
+    assert r["defaults_applied"] == ["--account=acc1", "--partition=part1", "--reservation=s_tra_ncc2"]
+    assert "--reservation=s_tra_ncc2" in " ".join(fake.calls[2][0])  # scontrol, mkdir, then sbatch
+
+
+def test_submit_job_auto_reservation_with_no_active_match_is_an_error():
+    fake = FakeSlurm({"scontrol&show&reservation": (0, RESERVATIONS.replace("State=ACTIVE", "State=INACTIVE"), "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert r == {"error": "no ACTIVE reservation that starts with s_tra_ncc; the job was not submitted"}
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]  # no sbatch and no script write
+
+
+def test_submit_job_auto_reservation_with_two_actives_lists_them():
+    fake = FakeSlurm({"scontrol&show&reservation": (0, RESERVATIONS.replace("State=INACTIVE", "State=ACTIVE"), "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert "s_tra_ncc2, s_tra_ncc3" in r["error"]
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_submit_job_auto_reservation_with_no_reservations_at_all_is_an_error():
+    fake = FakeSlurm({"scontrol&show&reservation": (0, "No reservations in the system\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert r == {"error": "no ACTIVE reservation that starts with s_tra_ncc; the job was not submitted"}
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_submit_job_failing_scontrol_is_an_error():
+    fake = FakeSlurm({"scontrol&show&reservation": (1, "", "scontrol: error: something broke")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert "scontrol show reservation failed" in r["error"] and "something broke" in r["error"]
+    assert fake.calls == [(["scontrol", "show", "reservation"], None)]
+
+
+def test_reservation_info_lists_all_reservations_with_their_jobs():
+    s, fake = live({"scontrol&show&reservation": (0, RESERVATIONS, ""),
+                    "squeue&-R&s_tra_ncc2": (0, "101|train|alice|RUNNING|01:23:45\n102|eval|bob|PENDING|0:00\n", ""),
+                    "squeue&-R&s_tra_ncc3": (0, "", "")})
+    r = s.execute("reservation_info", {})
+    assert r == {"reservations": [
+        {"name": "s_tra_ncc2", "state": "ACTIVE", "start": "2026-10-28T08:00:00", "end": "2026-10-28T22:00:00",
+         "partition": "boost_usr_prod", "node_count": 32, "accounts": "EUHPC_D30_031",
+         "jobs": [{"job_id": "101", "name": "train", "user": "alice", "state": "RUNNING", "time": "01:23:45"},
+                  {"job_id": "102", "name": "eval", "user": "bob", "state": "PENDING", "time": "0:00"}]},
+        {"name": "s_tra_ncc3", "state": "INACTIVE", "start": "2026-10-29T08:00:00", "end": "2026-10-29T15:00:00",
+         "partition": "boost_usr_prod", "node_count": 32, "accounts": "EUHPC_D30_031", "jobs": []}]}
+    assert fake.calls[0][0] == ["scontrol", "show", "reservation"]
+
+
+def test_reservation_info_by_name_queries_squeue_with_R_and_lists_its_jobs():
+    s, fake = live({"scontrol&show&reservation": (0, RESERVATIONS, ""),
+                    "squeue&-R&s_tra_ncc2": (0, "101|train|alice|RUNNING|01:23:45\n102|eval|bob|PENDING|0:00\n", "")})
+    r = s.execute("reservation_info", {"name": "s_tra_ncc2"})
+    assert len(r["reservations"]) == 1 and r["reservations"][0]["state"] == "ACTIVE"
+    assert r["reservations"][0]["jobs"] == [
+        {"job_id": "101", "name": "train", "user": "alice", "state": "RUNNING", "time": "01:23:45"},
+        {"job_id": "102", "name": "eval", "user": "bob", "state": "PENDING", "time": "0:00"}]
+    assert [c[0] for c in fake.calls if c[0][0] == "squeue"] == \
+        [["squeue", "-R", "s_tra_ncc2", "-h", "-o", "%i|%j|%u|%T|%M"]]
+
+
+def test_reservation_info_with_no_reservations_returns_an_empty_list():
+    s, _ = live({"scontrol&show&reservation": (0, "No reservations in the system\n", "")})
+    assert s.execute("reservation_info", {}) == {"reservations": []}
+
+
+def test_reservation_info_unknown_name_is_an_error_without_a_squeue_call():
+    s, fake = live({"scontrol&show&reservation": (0, RESERVATIONS, "")})
+    assert s.execute("reservation_info", {"name": "s_tra_ncc9"}) == {"error": "Reservation s_tra_ncc9 not found"}
+    assert [c[0][0] for c in fake.calls] == ["scontrol"]
+
+
+def test_submit_job_test_only_resolves_the_auto_reservation_the_same_way():
+    responses = {"mkdir": (0, "", ""), "sbatch&--test-only": (0, "", "sbatch: Job 9 to start at 2026-10-28T09:00:00"),
+                 "scontrol&show&reservation": (0, RESERVATIONS, "")}
+    fake = FakeSlurm(responses)
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n", "test_only": True})
+    assert r["valid"] and r["defaults_applied"] == ["--reservation=s_tra_ncc2"]
+    assert "--reservation=s_tra_ncc2" in " ".join(fake.calls[2][0])
+
+
+def test_submit_job_the_scripts_own_reservation_skips_the_lookup():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"reservation": "auto:s_tra_ncc"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --reservation=x\necho hi\n"})
+    assert r["submitted"] and "defaults_applied" not in r
+    assert not any("scontrol" in " ".join(c[0]) for c in fake.calls)
+    assert "--reservation" not in " ".join(fake.calls[1][0])
+
+
+def test_submit_job_the_scripts_own_sbatch_lines_block_the_defaults():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "other", "partition": "part1"}, confirm=lambda n, a: True)
+    script = "#!/bin/bash\n#SBATCH --account=mine\n#SBATCH -p dbg\necho hi\n"
+    r = s.execute("submit_job", {"script": script})
+    sbatch = " ".join(fake.calls[1][0])
+    assert r["submitted"] and "defaults_applied" not in r
+    assert "--account" not in sbatch and "--partition" not in sbatch
+
+
+def test_submit_job_the_scripts_gpu_requests_block_the_default_gres():
+    # --gpus, -G, --gpus-per-node and --gpus-per-task each give the GPUs, so the profile default --gres must stay out
+    for line in ("#SBATCH --gres=gpu:2", "#SBATCH --gpus=2", "#SBATCH --gpus 2", "#SBATCH -G 2", "#SBATCH -G2",
+                 "#SBATCH --gpus-per-node=2", "#SBATCH --gpus-per-task=1"):
+        fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+        s = SlurmLive(runner=fake, job_defaults={"gres": "gpu:4"}, confirm=lambda n, a: True)
+        r = s.execute("submit_job", {"script": f"#!/bin/bash\n{line}\necho hi\n"})
+        sbatch = " ".join(fake.calls[1][0])
+        assert r["submitted"] and "defaults_applied" not in r, line
+        assert "--gres" not in sbatch, line
+    # a script without any GPU request of its own still gets the profile's default --gres
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"gres": "gpu:4"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n"})
+    assert r["defaults_applied"] == ["--gres=gpu:4"]
+
+
+def test_submit_job_adds_the_defaults_the_script_does_not_set():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1", "partition": "part1", "time": "30"},
+                  confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --time=10\necho hi\n"})
+    sbatch = " ".join(fake.calls[1][0])
+    assert r["submitted"] and r["defaults_applied"] == ["--account=acc1", "--partition=part1"]
+    assert "--account=acc1" in sbatch and "--partition=part1" in sbatch and "--time" not in sbatch
+
+
+def test_submit_job_ignores_sbatch_lines_after_the_first_command():
+    fake = FakeSlurm({"mkdir": (0, "", ""), "sbatch": (0, "123;cluster\n", "")})
+    s = SlurmLive(runner=fake, job_defaults={"partition": "part1"}, confirm=lambda n, a: True)
+    r = s.execute("submit_job", {"script": "#!/bin/bash\necho hi\n#SBATCH -p dbg\n"})
+    assert r["defaults_applied"] == ["--partition=part1"]
+    assert "--partition=part1" in " ".join(fake.calls[1][0])
+
+
+def test_submit_job_with_defaults_still_needs_confirmation():
+    fake = FakeSlurm({"mkdir": (0, "", "")})
+    s = SlurmLive(runner=fake, job_defaults={"account": "acc1"})  # the default confirm declines
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n"})
+    assert r["error"] == "the user declined this action"
+    assert not any("sbatch" in " ".join(c[0]) for c in fake.calls)
 
 
 def test_read_job_log_uses_the_jobs_own_paths():
@@ -117,14 +306,218 @@ def test_read_job_log_patterns_for_array_tasks_relative_paths_and_defaults():
     assert s._log_path("42", "stdout") == "/w/slurm-42.out"
 
 
+def test_gpu_availability_counts_free_gpus_marks_allowed_partitions_and_shows_qos_limits():
+    out = ("lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n"
+           "lrdn0002 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) drained\n"
+           "lrdn0003 maint gpu:a100:4(S:0-1) gpu:a100:1(IDX:0) mixed\n")
+    s, fake = live({"sinfo": (0, out, ""), "id": (0, "u04\n", ""),
+                    "assoc&user=": (0, "eai-hackathon|hackathon|eai-team04\n", ""),
+                    "show&qos": (0, "eai-team04|cpu=256,gres/gpu=8||30-12:00:00\n", ""),
+                    "squeue&-q": (0, "cpu=8,gres/gpu=4|N/A|1|\n", "")})
+    assert s.execute("gpu_availability", {}) == {
+        "partitions": [
+            {"partition": "hackathon", "gpu_type": "h100", "gpus_total": 16, "gpus_free": 8, "idle_nodes": 1,
+             "allowed_for_you": True},
+            {"partition": "maint", "gpu_type": "a100", "gpus_total": 4, "gpus_free": 3, "idle_nodes": 0,
+             "allowed_for_you": False}],
+        "free_gpus_by_type": {"h100": 8, "a100": 3},
+        "your_limits": {"qos": "eai-team04", "gpu_limit": 8, "cpu_limit": 256, "max_wall": "30-12:00:00",
+                        "team_gpus_in_use": 4, "your_gpus_in_use": 4, "gpus_free_in_team_limit": 4,
+                        "note": "4 of the 8 GPUs of QOS eai-team04 are free now. The limit is shared by all users of the QOS."}}
+    r2 = s.execute("gpu_availability", {})
+    assert r2["your_limits"]["gpus_free_in_team_limit"] == 4
+    assoc = [c for c in fake.calls if c[0][0] == "sacctmgr" and "assoc" in " ".join(c[0])]
+    assert len(assoc) == 1 and len([c for c in fake.calls if c[0][0] == "id"]) == 1  # cached per instance
+
+
+def test_gpu_availability_empty_assoc_partition_allows_all_and_lists_several_qos():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""),
+                 "assoc&user=": (0, "acc||boost_qos_bprod,boost_qos_dbg,boost_qos_lprod,normal\n", ""),
+                 "show&qos&boost_qos_bprod": (0, "boost_qos_bprod|cpu=512,gres/gpu=16||30-12:00:00\n", ""),
+                 "show&qos&boost_qos_dbg": (0, "boost_qos_dbg|cpu=64,gres/gpu=2||4:00:00\n", ""),
+                 "show&qos&boost_qos_lprod": (0, "boost_qos_lprod|cpu=256,gres/gpu=8||30-12:00:00\n", ""),
+                 "show&qos&normal": (0, "normal|cpu=32||7-00:00:00\n", ""),
+                 "squeue&-q": (0, "", "")})
+    r = s.execute("gpu_availability", {})
+    assert r["partitions"][0]["allowed_for_you"] is True  # empty assoc partition field = all partitions
+    limits = r["your_limits"]
+    assert [l["qos"] for l in limits] == ["boost_qos_bprod", "boost_qos_dbg", "boost_qos_lprod", "normal"]
+    assert limits[0] == {"qos": "boost_qos_bprod", "gpu_limit": 16, "cpu_limit": 512, "max_wall": "30-12:00:00",
+                         "team_gpus_in_use": 0, "your_gpus_in_use": 0, "gpus_free_in_team_limit": 16,
+                         "note": "16 of the 16 GPUs of QOS boost_qos_bprod are free now. The limit is shared by all users of the QOS."}
+    assert limits[3] == {"qos": "normal", "gpu_limit": None, "cpu_limit": 32, "max_wall": "7-00:00:00",
+                         "team_gpus_in_use": 0, "your_gpus_in_use": 0, "gpus_free_in_team_limit": None,
+                         "note": "no group GPU limit in this QOS"}
+
+
+def test_gpu_availability_keeps_the_result_when_sacctmgr_fails():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""), "assoc&user=": (1, "", "sacctmgr: error: slurmdbd not responding")})
+    r = s.execute("gpu_availability", {})
+    assert r == {"partitions": [{"partition": "hackathon", "gpu_type": "h100", "gpus_total": 8, "gpus_free": 8,
+                                 "idle_nodes": 1}],
+                 "free_gpus_by_type": {"h100": 8},
+                 "your_limits": {"error": "sacctmgr: error: slurmdbd not responding"}}
+
+
+def test_gpu_availability_team_gpus_in_use_sums_tres_times_nodes_and_is_null_when_unparseable():
+    base = {"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+            "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+            "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", "")}
+    s, fake = live({**base, "squeue&-t&RUNNING": (0, "cpu=4|N/A|1|\ncpu=8|gres/gpu=2|2|\n", ""),
+                    "squeue&-q": (0, "cpu=8,gres/gpu=8|N/A|1|\n", "")})  # a pending job: only served without -t RUNNING
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 4 and limits["gpus_free_in_team_limit"] == 4  # 2 GPUs per node times 2 nodes
+    sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-q" in argv and "-u" not in argv)
+    assert sq[sq.index("-t") + 1] == "RUNNING"  # pending jobs do not hold GPUs yet, so they are not counted
+    s, _ = live({**base, "squeue&-q": (0, "cpu=4|N/A|not-a-node-count|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] is None and limits["gpus_free_in_team_limit"] is None
+
+
+def test_gpu_availability_counts_gpus_from_the_allocated_tres_and_falls_back_to_the_gres():
+    s, fake = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                    "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                    "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", ""),
+                    # row 1 was submitted with --gpus=N: its %b gres shows N/A, only the allocated TRES knows its
+                    # GPUs; row 2 has no gpu in the TRES, so the per-node gres (%b) times the nodes still counts
+                    "squeue&-q": (0, "cpu=8,gres/gpu=2|N/A|1|\ncpu=8,mem=60G|gres/gpu=2|2|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 6  # 2 from the allocated TRES + 2 GPUs on each of 2 nodes
+    assert limits["gpus_free_in_team_limit"] == 2
+    sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-O" in argv)
+    assert sq[sq.index("-O") + 1] == "tres-alloc:|,gres:|,numnodes:|"
+    assert sq[sq.index("-t") + 1] == "RUNNING"  # pending jobs do not hold GPUs yet, so they are not counted
+
+
+def test_gpu_availability_counts_the_untyped_gpu_tres_only_when_the_cluster_reports_typed_gpus_too():
+    # a typed cluster lists the same GPUs twice: gres/gpu=4 plus gres/gpu:a100=4 are 4 GPUs, not 8
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:a100:8(S:0-1) gpu:a100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", ""),
+                 "squeue&-q": (0, "cpu=8,gres/gpu=4,gres/gpu:a100=4|gres/gpu:4|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 4 and limits["gpus_free_in_team_limit"] == 4
+    assert slurm_live._tres_gpu("cpu=8,gres/gpu:a100=4,gres/gpu:h100=2") == 6  # no untyped entry: the typed sum
+    assert slurm_live._tres_gpu("cpu=8,mem=60G") is None  # no gpu entry: the job falls back to its per-node gres
+
+
+def test_gpu_availability_reports_max_gpu_per_user_when_the_qos_sets_it():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16,gres/gpu=4|gres/gpu=2|1:00:00\n", ""),
+                 "squeue&-q": (0, "cpu=8,gres/gpu=1|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits == {"qos": "q1", "gpu_limit": 4, "cpu_limit": 16, "max_wall": "1:00:00", "team_gpus_in_use": 1,
+                      "your_gpus_in_use": 1, "gpus_free_in_team_limit": 1, "max_gpu_per_user": 2,
+                      "note": "3 of the 4 GPUs of QOS q1 are free now (the limit is shared by all users of the QOS). "
+                              "You may use at most 2 GPUs at a time and use 1 now, so you can start 1 more."}
+
+
+def test_gpu_availability_gpus_free_in_team_limit_keeps_the_user_cap_clear_of_the_team_use():
+    # team cap 8 with 5 in use, user cap 4 with 1 in use: free for the user is min(8-5, 4-1) = 3,
+    # not min(8, 4) - 5 = 0 (the old code subtracted the team's GPUs from the per-user cap)
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16,gres/gpu=8|gres/gpu=4|1:00:00\n", ""),
+                 "squeue&-q&-u": (0, "cpu=8,gres/gpu=1|N/A|1|\n", ""),  # must win over the shorter team key below
+                 "squeue&-q": (0, "cpu=8,gres/gpu=5|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 5 and limits["your_gpus_in_use"] == 1
+    assert limits["gpu_limit"] == 8 and limits["max_gpu_per_user"] == 4
+    assert limits["gpus_free_in_team_limit"] == 3
+    assert limits["note"] == "3 of the 8 GPUs of QOS q1 are free now. The limit is shared by all users of the QOS."
+
+
+def test_gpu_availability_gpus_free_uses_the_per_user_cap_when_the_group_has_no_gpu_limit():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16|gres/gpu=4|1:00:00\n", ""),
+                 "squeue&-q&-u": (0, "cpu=8,gres/gpu=1|N/A|1|\n", ""), "squeue&-q": (0, "cpu=8,gres/gpu=2|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpu_limit"] is None and limits["max_gpu_per_user"] == 4
+    assert limits["team_gpus_in_use"] == 2 and limits["your_gpus_in_use"] == 1
+    assert limits["gpus_free_in_team_limit"] == 3  # 4 - 1: the team's other GPU does not touch the user's cap
+    assert limits["note"] == "no group GPU limit in this QOS"
+
+
+def test_gpu_availability_your_gpus_in_use_counts_only_the_current_users_jobs():
+    s, fake = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                    "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                    "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", ""),
+                    "squeue&-q&-u": (0, "cpu=8,gres/gpu=2|N/A|1|\n", ""),  # must win over the shorter team key below
+                    "squeue&-q": (0, "cpu=8,gres/gpu=4|N/A|1|\ncpu=8,gres/gpu=4|N/A|1|\n", "")})  # a teammate holds 6
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] == 2 and limits["gpus_free_in_team_limit"] == 0
+    user_sq = next(argv for argv, _ in fake.calls if argv[0] == "squeue" and "-u" in argv)
+    assert user_sq[user_sq.index("-u") + 1] == "u04"  # the own sum filters squeue by the user
+    assert limits["note"] == ("The users of QOS q1 use all 8 of its GPUs now (2 of them are yours). Slurm still "
+                              "accepts a new GPU job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) "
+                              "until GPUs of the QOS are free. sbatch --test-only does not check this limit.")
+
+
+def test_gpu_availability_gpus_free_in_team_limit_is_clamped_to_zero_and_own_use_may_be_unknown():
+    s, _ = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                 "show&qos": (0, "q1|cpu=16,gres/gpu=4||1:00:00\n", ""),
+                 "squeue&-q&-u": (1, "", "squeue: error"), "squeue&-q": (0, "cpu=8,gres/gpu=8|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] is None
+    assert limits["gpus_free_in_team_limit"] == 0  # 4 - 8, clamped with max(0, ...)
+    assert limits["note"] == ("The users of QOS q1 use all 4 of its GPUs now (unknown of them are yours). Slurm "
+                              "still accepts a new GPU job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) "
+                              "until GPUs of the QOS are free. sbatch --test-only does not check this limit.")
+
+
+def test_gpu_availability_your_gpus_in_use_is_unknown_when_the_user_name_is_unreadable():
+    s, fake = live({"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+                    "id": (1, "", "id: cannot find user name"), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+                    "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", ""),
+                    "squeue&-q": (0, "cpu=8,gres/gpu=8|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 8 and limits["your_gpus_in_use"] is None  # not the team total
+    assert limits["gpus_free_in_team_limit"] == 0
+    assert all("-u" not in argv for argv, _ in fake.calls if argv[0] == "squeue")  # no squeue call filtered by user
+    assert limits["note"] == ("The users of QOS q1 use all 8 of its GPUs now (unknown of them are yours). Slurm "
+                              "still accepts a new GPU job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) "
+                              "until GPUs of the QOS are free. sbatch --test-only does not check this limit.")
+
+
+def test_gpu_availability_note_reports_the_free_share_of_the_team_limit_and_skips_it_when_unreadable():
+    base = {"sinfo": (0, "lrdn0001 hackathon gpu:h100:8(S:0-1) gpu:h100:0(IDX:N/A) idle\n", ""),
+            "id": (0, "u04\n", ""), "assoc&user=": (0, "acc|hackathon|q1\n", ""),
+            "show&qos": (0, "q1|cpu=16,gres/gpu=8||1:00:00\n", "")}
+    s, _ = live({**base, "squeue&-q&-u": (0, "cpu=8,gres/gpu=1|N/A|1|\n", ""), "squeue&-q": (0, "cpu=8,gres/gpu=3|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpus_free_in_team_limit"] == 5
+    assert limits["note"] == "5 of the 8 GPUs of QOS q1 are free now. The limit is shared by all users of the QOS."
+    s, _ = live({**base, "squeue&-q": (0, "cpu=4|N/A|not-a-node-count|\n", "")})  # team use unreadable: no free share
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["gpus_free_in_team_limit"] is None and "note" not in limits
+
+
+def test_list_queue_empty_queue_reports_it_with_a_message():
+    s, _ = live({"squeue": (0, "", "")})
+    assert s.execute("list_queue", {}) == {"jobs": [], "message": "You have no running or pending jobs."}
+    s, _ = live({"squeue": (0, "", "")})
+    assert s.execute("list_queue", {"state": "RUNNING"}) == {"jobs": [], "message": "You have no RUNNING jobs."}
+    s, _ = live({"squeue": (0, "42|train|RUNNING|p|0:10|1:00:00|None\n", "")})
+    assert s.execute("list_queue", {}) == {"jobs": [{"job_id": "42", "name": "train", "state": "RUNNING",
+                                                     "partition": "p", "elapsed": "0:10", "time_limit": "1:00:00"}]}
 def test_gpu_availability_counts_free_gpus_on_usable_nodes():
     out = ("lrdn0001 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:4(IDX:0-3) mixed\n"
            "lrdn0002 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:1(IDX:0) mixed\n"
            "lrdn0003 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) idle\n"
            "lrdn0004 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) drained\n")
     s, _ = live({"sinfo": (0, out, "")})
-    assert s.execute("gpu_availability", {}) == {"partitions": [
-        {"partition": "boost_usr_prod", "gpu_type": "a100", "gpus_total": 16, "gpus_free": 7, "idle_nodes": 1}]}
+    r = s.execute("gpu_availability", {})
+    assert r["partitions"] == [
+        {"partition": "boost_usr_prod", "gpu_type": "a100", "gpus_total": 16, "gpus_free": 7, "idle_nodes": 1}]
+    assert r["free_gpus_by_type"] == {"a100": 7}
+    viz = out + "lrdn5001 lrd_all_viz gpu:quadro:2(S:0) gpu:quadro:0(IDX:N/A) idle\n"
+    s, _ = live({"sinfo": (0, viz, "")})
+    assert s.execute("gpu_availability", {})["free_gpus_by_type"] == {"a100": 7, "quadro": 2}
 
 
 def test_invalid_calls():
@@ -136,15 +529,47 @@ def test_invalid_calls():
     assert "invalid job id" in s.execute("job_status", {"job_id": "1; rm -rf ~"})["error"]
 
 
+def test_remote_setup_is_prepended_to_ssh_commands():
+    fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
+    s = SlurmLive(ssh="c1", remote_setup="module load slurm", runner=fake)
+    assert s.execute("list_queue", {"state": "RUNNING"})["jobs"][0]["job_id"] == "42"
+    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", *s.mux_options(), "c1",
+                                "module load slurm && " + shlex.join(QUEUE_ARGV)]
+
+
+def test_without_remote_setup_the_ssh_command_stays_as_before():
+    fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
+    s = SlurmLive(ssh="c1", runner=fake)
+    s.execute("list_queue", {"state": "RUNNING"})
+    assert fake.calls[0][0] == ["ssh", "-o", "BatchMode=yes", *s.mux_options(), "c1", shlex.join(QUEUE_ARGV)]
+
+
+def test_remote_setup_is_ignored_for_local_runs():
+    fake = FakeSlurm({"squeue": (0, "42|train|RUNNING|boost_usr_prod|1:02:03|4:00:00|None\n", "")})
+    s = SlurmLive(remote_setup="module load slurm", runner=fake)
+    s.execute("list_queue", {"state": "RUNNING"})
+    assert fake.calls[0][0] == QUEUE_ARGV
+
+
 def test_job_usage_argv_rows_and_error_for_non_running_jobs():
     s, fake = live({"sstat&MaxVMSize": (0, "9|01:30:00|3145728K|1048576K|4194304K\n9.ext|01:00:00|||2097152K\n", "")})
     r = s.execute("job_usage", {"job_id": "9"})
-    assert fake.calls[0][0] == ["sstat", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
-    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3145728K", "AveRSS": "1048576K",
-                             "MaxVMSize": "4194304K"} and r["steps"][1]["JobID"] == "9.ext"
+    assert fake.calls[0][0] == ["sstat", "--allsteps", "-j", "9", "--format=JobID,AveCPU,MaxRSS,AveRSS,MaxVMSize", "-P", "-n"]
+    assert r["steps"][0] == {"JobID": "9", "AveCPU": "01:30:00", "MaxRSS": "3.0 GB", "AveRSS": "1.0 GB",
+                             "MaxVMSize": "4.0 GB"} and r["steps"][1]["JobID"] == "9.ext"
     s, _ = live({"sstat": (1, "", "error: Pending job")})
     r = s.execute("job_usage", {"job_id": "9"})
-    assert "sstat has no live usage" in r["error"] and "job_accounting" in r["error"]
+    assert "not running" in r["error"] and "job_accounting" in r["error"]
+    s, _ = live({"sstat": (0, "9.extern|9-00:00:00||\n9.batch|06:02:55|133615688K|1|2\n", "")})  # Curiosity's output
+    assert [x["JobID"] for x in s.execute("job_usage", {"job_id": "9"})["steps"]] == ["9.batch"]
+
+
+def test_job_script_of_a_finished_job_explains_why_it_is_missing():
+    gone = (1, "", "job script retrieval failed: Invalid job id specified")
+    s, _ = live({"scontrol&write": gone, "sacct&--batch-script": (0, "NONE\n", "")})
+    assert "does not keep the batch scripts" in s.execute("job_script", {"job_id": "5"})["error"]
+    s, _ = live({"scontrol&write": gone, "sacct&--batch-script": (0, "", "")})
+    assert s.execute("job_script", {"job_id": "5"})["error"] == "no job 5 found"
 
 
 def test_job_priority_sprio_and_sshare_outputs_with_exit_codes():
@@ -184,7 +609,7 @@ def test_hold_release_and_requeue_use_scontrol_on_own_jobs():
 
 @pytest.mark.parametrize(("command", "ok"), [("squeue --me", True), ("scontrol show job 123", True),
                                              ("rm -rf /", False), ("scontrol update JobId=1 TimeLimit=1", False),
-                                             ("squeue | grep x", False), ("sinfo; ls", False)])
+                                             ("sinfo; ls", False), ("rm x | grep y", False)])
 def test_run_readonly_command_allowlist(command, ok):
     s, fake = live({"squeue&--me": (0, "1 job\n", ""), "scontrol&show": (0, "JobId=123\n", "")})
     r = s.execute("run_readonly_command", {"command": command})
@@ -277,13 +702,15 @@ def test_guessed_partition_names_are_resolved_or_listed():
                     "sinfo&-N": sinfo, "squeue&--me": (0, "", "")})
     r = s.execute("gpu_availability", {"partition": "boost"})
     assert r["partitions"][0]["partition"] == "boost_usr_prod" and "used 'boost_usr_prod'" in r["note"]
-    assert "-p" in fake.calls[-1][0] and "boost_usr_prod" in fake.calls[-1][0]
+    sinfo_argv = next(c[0] for c in reversed(fake.calls) if c[0][0] == "sinfo")  # your_limits queried sacctmgr after it
+    assert "-p" in sinfo_argv and "boost_usr_prod" in sinfo_argv
     r = s.execute("gpu_availability", {"partition": "leonardo"})
     assert "partitions" in r and "-p" not in fake.calls[-1][0] and "lrd_all_serial" in r["note"]
     r = s.execute("list_queue", {"partition": "booster"})
     assert r == {"error": "there is no partition 'booster'; partitions on this cluster: "
                           "boost_usr_prod, dcgp_usr_prod, lrd_all_serial"}
-    assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": []}
+    assert s.execute("list_queue", {"partition": "lrd_all_serial"}) == {"jobs": [],
+                                                                        "message": "You have no running or pending jobs."}
 
 
 def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
@@ -304,6 +731,8 @@ def test_web_page_approves_agent_actions_with_buttons(monkeypatch):
 
         def ask(self, question, out):
             out.write(json.dumps(self.slurm.execute("cancel_job", {"job_id": "5"})))
+
+        safe_ask = ask
 
     s, fake = live({"squeue&--me": (0, "5\n", ""), "squeue&-j&5": (0, "5|x|PENDING|Priority|p|1|0:00|1:00||N/A\n", ""),
                     "scancel": (0, "", "")})
@@ -351,3 +780,182 @@ def test_run_readonly_command_allows_options_before_show(command, ok):
 def test_no_ssh_connection_sharing_on_windows(monkeypatch):
     monkeypatch.setattr(slurm_live.os, "name", "nt")  # Windows OpenSSH has no ControlMaster
     assert SlurmLive(ssh="host").mux_options() == []
+
+
+def test_pending_array_ranges_from_squeue_work_in_read_only_tools():
+    s, fake = live({"squeue&-j&12345": (0, "12345_[3-10%2]|sweep|PENDING|JobArrayTaskLimit|p|1|0:00|1:00:00||N/A\n", "")})
+    assert s.execute("job_status", {"job_id": "12345_[3-10%2]"})["state"] == "PENDING"
+    assert ["squeue", "-h", "-j", "12345"] == fake.calls[-1][0][:4]
+    r = s.execute("cancel_job", {"job_id": "12345_[3-10%2]"})
+    assert "use 12345 for the whole array or 12345_<index>" in r["error"] and not any(c[0][0] == "scancel" for c in fake.calls)
+
+
+def test_pipes_are_applied_in_python_not_in_a_shell():
+    out = "1|a|FAILED\n2|b|COMPLETED\n3|c|TIMEOUT\n4|d|COMPLETED\n"
+    s, fake = live({"sacct": (0, out, "")})
+    r = s.execute("run_readonly_command", {"command": "sacct -X -n -P -S now-7days | grep -E 'FAILED|TIMEOUT' | tail -1"})
+    assert r["stdout"] == "3|c|TIMEOUT\n" and fake.calls[-1][0] == ["sacct", "-X", "-n", "-P", "-S", "now-7days"]
+    r = s.execute("run_readonly_command", {"command": "sacct -X | sh -c 'rm -rf /'"})
+    assert "skipped: sh -c 'rm -rf /'" in r["note"] and all(c[0][0] == "sacct" for c in fake.calls)
+
+
+def test_recent_jobs_newest_first():
+    out = ("10|old|COMPLETED|0:0|00:10:00|2026-10-26T10:00:00|p\n12|run|RUNNING|0:0|00:05:00|Unknown|p\n"
+           "11|bad|FAILED|1:0|00:01:00|2026-10-27T09:00:00|p\n")
+    s, fake = live({"sacct&now-7days": (0, out, "")})
+    r = s.execute("recent_jobs", {})
+    assert [j["job_id"] for j in r["jobs"]] == ["12", "11", "10"] and r["jobs"][1]["state"] == "FAILED"
+
+
+OUT12 = "".join(f"{i}|job{i}|{'FAILED' if i % 3 == 0 else 'COMPLETED'}\n" for i in range(1, 13))
+
+
+@pytest.mark.parametrize(("filters", "expected"), [
+    (["head -n 2"], ["1|job1|COMPLETED", "2|job2|COMPLETED"]),
+    (["head -2"], ["1|job1|COMPLETED", "2|job2|COMPLETED"]),
+    (["tail -n 1"], ["12|job12|FAILED"]),
+    (["tail"], [f"{i}|job{i}|{'FAILED' if i % 3 == 0 else 'COMPLETED'}" for i in range(3, 13)]),  # 10 lines
+    (["grep FAILED", "wc -l"], ["4"]),
+    (["grep -v COMPLETED", "head -1"], ["3|job3|FAILED"]),
+    (["grep -i failed", "tail -1"], ["12|job12|FAILED"]),
+    (["egrep '^(1|2)[|]'"], ["1|job1|COMPLETED", "2|job2|COMPLETED"]),
+    (["grep 'job10\\|job11'"], ["10|job10|COMPLETED", "11|job11|COMPLETED"]),
+    (["grep '(['"], []),  # an invalid regex is matched as plain text
+])
+def test_pipe_filter_variants(filters, expected):
+    out, note = slurm_live._apply_filters(OUT12, filters)
+    assert out.splitlines() == expected and note is None
+
+
+@pytest.mark.parametrize(("command", "stages"), [
+    ("sacct -X", ["sacct -X"]),
+    ("sacct -X | tail -3", ["sacct -X", "tail -3"]),
+    ("sacct -X | grep -E 'FAILED|TIMEOUT' | wc -l", ["sacct -X", "grep -E 'FAILED|TIMEOUT'", "wc -l"]),
+    ('squeue -o "%i|%j" | head -1', ['squeue -o "%i|%j"', "head -1"]),
+    ("sacct -X | grep 'unclosed", None),
+])
+def test_pipeline_split_respects_quotes(command, stages):
+    assert slurm_live._pipeline(command) == stages
+
+
+def test_unsupported_pipe_stages_are_named_and_not_run():
+    out, note = slurm_live._apply_filters(OUT12, ["sort -r", "head -1", "xargs rm"])
+    assert out == "1|job1|COMPLETED\n" and note.endswith("skipped: sort -r | xargs rm")
+
+
+@pytest.mark.parametrize("stderr", [
+    "a08trc09@login02-ext.leonardo.cineca.it: Permission denied (publickey).",
+    "Received disconnect from 1.2.3.4 port 22:2: Too many authentication failures",
+    "Certificate invalid: expired",
+    "Host key verification failed.",
+])
+def test_expired_ssh_login_stops_with_one_message(monkeypatch, stderr):
+    class P:
+        returncode, stdout = 255, ""
+
+    P.stderr = stderr
+    monkeypatch.setattr(slurm_live.subprocess, "run", lambda cmd, **kw: P())
+    s = SlurmLive(ssh="leonardo")
+    s._mux = []
+    with pytest.raises(slurm_live.LoginRequired) as e:
+        s.execute("list_queue", {})
+    assert "log in again" in str(e.value).lower() and "never asks for passwords" in str(e.value)
+
+
+def test_network_errors_and_timeouts_after_login_are_not_login_errors(monkeypatch):
+    class P:
+        returncode, stdout, stderr = 255, "", "ssh: connect to host x port 22: Connection refused"
+    monkeypatch.setattr(slurm_live.subprocess, "run", lambda cmd, **kw: P())
+    s = SlurmLive(ssh="x")
+    s._mux = []
+    assert s.run(["squeue"])[0] == 255  # a network problem: reported as an error, the model may explain it
+
+    def slow(cmd, **kw):
+        raise slurm_live.subprocess.TimeoutExpired(cmd, 60)
+    monkeypatch.setattr(slurm_live.subprocess, "run", slow)
+    with pytest.raises(slurm_live.LoginRequired):  # first call never answered: a login that waits (browser, code)
+        s.run(["squeue"])
+    s._logged_in = True
+    assert s.run(["squeue"])[0] == 124  # after a working call, a slow command is just slow
+
+
+def test_agent_stops_at_the_first_login_error(tmp_path, monkeypatch):
+    calls = []
+
+    def runner(argv, stdin=None):
+        calls.append(argv)
+        raise slurm_live.LoginRequired("The ssh login to leonardo is not valid any more (expired). Log in again.")
+    bot = assistant.Assistant(tmp_path, docs=False, slurm=SlurmLive(runner=runner))
+    rounds = []
+
+    def stream(messages):
+        rounds.append(1)
+        yield {"tool_calls": [{"name": "list_queue", "arguments": {}}]}  # the model would retry every round
+    monkeypatch.setattr(bot, "_stream", stream)
+    out = StringIO()
+    answer, _ = bot.ask("Show my jobs", out=out)
+    assert len(rounds) == 1 and len(calls) == 1 and "Log in again" in answer
+    assert bot.history[-1] == {"role": "assistant", "content": answer}
+
+
+@pytest.mark.parametrize("raw, text", [
+    ("3145728K", "3.0 GB"), ("512M", "0.5 GB"), ("1023.9G", "1023.9 GB"), ("1024G", "1.00 TB"),
+    ("5918748772K", "5.51 TB"),  # the live value the model misread as 5.9 GB
+    ("2T", "2.00 TB"), ("", "0.0 GB"),
+])
+def test_memory_names_its_unit(raw, text):
+    from distillkit.slurm_live import _mem_gb, _mem_text
+    assert _mem_text(_mem_gb(raw)) == text
+
+
+def test_account_info_gives_accounts_qos_limits_and_fairshare():
+    """Asked "what is my fairshare and which QOS can I use?" the model ran only sshare and invented QOS limits."""
+    s, fake = live({"id": (0, "u04\n", ""),
+                    "assoc&user=": (0, "eai-hackathon|hackathon|eai-team04\n", ""),
+                    "show&qos": (0, "eai-team04|cpu=256,gres/gpu=8||30-12:00:00\n", ""),
+                    "squeue&-q": (0, "cpu=8,gres/gpu=4|N/A|1|\n", ""),
+                    "sshare&-U": (0, "Account User RawShares FairShare\neai-hackathon u04 1 0.122973\n", "")})
+    r = s.execute("account_info", {})
+    assert r["accounts"] == ["eai-hackathon"] and r["partitions"] == ["hackathon"]
+    assert r["qos"][0]["qos"] == "eai-team04" and r["qos"][0]["gpu_limit"] == 8 and r["qos"][0]["max_wall"] == "30-12:00:00"
+    assert "0.122973" in r["fairshare"]
+
+
+@pytest.mark.parametrize("failing, key", [("assoc&user=", "error"), ("sshare&-U", "fairshare")])
+def test_account_info_reports_failures(failing, key):
+    responses = {"id": (0, "u04\n", ""), "assoc&user=": (0, "acct||normal\n", ""),
+                 "show&qos": (0, "normal|||1-00:00:00\n", ""), "squeue&-q": (0, "", ""), "sshare&-U": (0, "x\n", "")}
+    responses[failing] = (1, "", "slurmdbd not responding")
+    r = live(responses)[0].execute("account_info", {})
+    assert "slurmdbd not responding" in json.dumps(r[key])
+
+
+def test_gpu_availability_note_separates_the_qos_limit_from_the_per_user_cap():
+    """Leonardo, Oct 29: boost_qos_dbg (512 GPUs for all its users, 32 per user) with 305 in use was reported as
+    "32 of 512 team GPUs are free now"."""
+    s, _ = live({"sinfo": (0, "lrdn0001 boost_usr_prod gpu:a100:4(S:0-1) gpu:a100:0(IDX:N/A) idle\n", ""),
+                 "id": (0, "u\n", ""), "assoc&user=": (0, "acc|boost_usr_prod|boost_qos_dbg\n", ""),
+                 "show&qos": (0, "boost_qos_dbg|cpu=4096,gres/gpu=512|gres/gpu=32|00:30:00\n", ""),
+                 "squeue&-q&-u": (0, "", ""), "squeue&-q": (0, "cpu=8,gres/gpu=305|N/A|1|\n", "")})
+    limits = s.execute("gpu_availability", {})["your_limits"]
+    assert limits["team_gpus_in_use"] == 305 and limits["gpus_free_in_team_limit"] == 32
+    assert limits["note"] == ("207 of the 512 GPUs of QOS boost_qos_dbg are free now (the limit is shared by all users "
+                              "of the QOS). You may use at most 32 GPUs at a time and use 0 now, so you can start 32 more.")
+
+
+@pytest.mark.parametrize("test_only", [True, False])
+def test_submit_job_budget_error_gets_a_hint(test_only):
+    """Leonardo, Oct 29: with the budget used up, sbatch (also --test-only) says "invalid account or expired budget";
+    the model then told the user to check the account name. The result now carries a hint."""
+    from distillkit.slurm_live import BUDGET_HINT
+    err = (1, "", "sbatch: error: invalid account or expired budget\nsbatch: error: Batch job submission failed: "
+                  "Unspecified error\n")
+    s, _ = live({"mkdir": (0, "", ""), "sbatch": err})
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH -A EUHPC_D30_031\nhostname", "test_only": test_only})
+    assert r["error"].startswith("sbatch: error: invalid account or expired budget") and r["hint"] == BUDGET_HINT
+
+
+def test_submit_job_other_errors_get_no_budget_hint():
+    s, _ = live({"mkdir": (0, "", ""), "sbatch": (1, "", "sbatch: error: Invalid generic resource (gres) specification\n")})
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --gres=gpu:9\nhostname", "test_only": True})
+    assert r == {"error": "sbatch: error: Invalid generic resource (gres) specification"}

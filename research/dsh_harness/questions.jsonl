@@ -1,0 +1,41 @@
+{"id": "q01", "question": "What state is job 12345 in right now?", "expected_tool": "job_status", "notes": "Expected first tool: job_status"}
+{"id": "q02", "question": "Is job 12345 still pending? When will it start?", "expected_tool": "job_status", "notes": "Expected first tool: job_status"}
+{"id": "q03", "question": "Tell me which node job 12345 runs on.", "expected_tool": "job_status", "notes": "Expected first tool: job_status"}
+{"id": "q04", "question": "Show me all my jobs in the queue.", "expected_tool": "list_queue", "notes": "Expected first tool: list_queue"}
+{"id": "q05", "question": "List only my pending jobs in partition gpu.", "expected_tool": "list_queue", "notes": "Expected first tool: list_queue"}
+{"id": "q06", "question": "Which of my jobs are running at the moment?", "expected_tool": "list_queue", "notes": "Expected first tool: list_queue"}
+{"id": "q07", "question": "Validate this script without submitting it: #!/bin/bash\n#SBATCH -t 00:10:00\n#SBATCH -p gpu\nhostname", "expected_tool": "submit_job", "notes": "Expected first tool: submit_job"}
+{"id": "q08", "question": "Do a dry run (test only) of this batch script and tell me the estimated start time: #!/bin/bash\n#SBATCH -N 1\nsleep 60", "expected_tool": "submit_job", "notes": "Expected first tool: submit_job"}
+{"id": "q09", "question": "Cancel job 12345 please.", "expected_tool": "cancel_job", "notes": "Expected first tool: cancel_job"}
+{"id": "q10", "question": "Kill my job 12345, it is stuck.", "expected_tool": "cancel_job", "notes": "Expected first tool: cancel_job"}
+{"id": "q11", "question": "Job 12345 failed. Show me the last lines of its stderr.", "expected_tool": "read_job_log", "notes": "Expected first tool: read_job_log"}
+{"id": "q12", "question": "Print the last 40 lines of stdout of job 12345.", "expected_tool": "read_job_log", "notes": "Expected first tool: read_job_log"}
+{"id": "q13", "question": "What does the output file of job 12345 say at the end?", "expected_tool": "read_job_log", "notes": "Expected first tool: read_job_log"}
+{"id": "q14", "question": "How much memory and elapsed time did the finished job 12345 use? What was its exit code?", "expected_tool": "job_accounting", "notes": "Expected first tool: job_accounting"}
+{"id": "q15", "question": "Give me the sacct summary for job 12345.", "expected_tool": "job_accounting", "notes": "Expected first tool: job_accounting"}
+{"id": "q16", "question": "How many GPUs are free right now?", "expected_tool": "gpu_availability", "notes": "Expected first tool: gpu_availability"}
+{"id": "q17", "question": "Are there free GPUs in the gpu partition?", "expected_tool": "gpu_availability", "notes": "Expected first tool: gpu_availability"}
+{"id": "q18", "question": "What is the maximum wall time of the gpu partition?", "expected_tool": "partition_info", "notes": "Expected first tool: partition_info"}
+{"id": "q19", "question": "Show the limits of partition debug: nodes, CPUs, memory per node.", "expected_tool": "partition_info", "notes": "Expected first tool: partition_info"}
+{"id": "q20", "question": "Show me the batch script that job 12345 was submitted with.", "expected_tool": "job_script", "notes": "Expected first tool: job_script"}
+{"id": "q21", "question": "I want to fix and resubmit job 12345. What script did it use?", "expected_tool": "job_script", "notes": "Expected first tool: job_script"}
+{"id": "q22", "question": "How much CPU time and memory is running job 12345 using right now?", "expected_tool": "job_usage", "notes": "Expected first tool: job_usage"}
+{"id": "q23", "question": "What is the peak memory of my running job 12345 so far?", "expected_tool": "job_usage", "notes": "Expected first tool: job_usage"}
+{"id": "q24", "question": "Why is job 12345 still waiting? Show the priority factors.", "expected_tool": "job_priority", "notes": "Expected first tool: job_priority"}
+{"id": "q25", "question": "What is the fairshare and age priority of job 12345?", "expected_tool": "job_priority", "notes": "Expected first tool: job_priority"}
+{"id": "q26", "question": "Change the time limit of pending job 12345 to 02:00:00.", "expected_tool": "update_job", "notes": "Expected first tool: update_job"}
+{"id": "q27", "question": "Move pending job 12345 to partition debug.", "expected_tool": "update_job", "notes": "Expected first tool: update_job"}
+{"id": "q28", "question": "Hold job 12345 so it does not start yet.", "expected_tool": "hold_job", "notes": "Expected first tool: hold_job"}
+{"id": "q29", "question": "Please pause pending job 12345 in the queue until I say otherwise.", "expected_tool": "hold_job", "notes": "Expected first tool: hold_job"}
+{"id": "q30", "question": "Release the held job 12345.", "expected_tool": "release_job", "notes": "Expected first tool: release_job"}
+{"id": "q31", "question": "Let job 12345 start again, I no longer need it held.", "expected_tool": "release_job", "notes": "Expected first tool: release_job"}
+{"id": "q32", "question": "Requeue job 12345 so it runs again.", "expected_tool": "requeue_job", "notes": "Expected first tool: requeue_job"}
+{"id": "q33", "question": "Put the finished job 12345 back in the queue.", "expected_tool": "requeue_job", "notes": "Expected first tool: requeue_job"}
+{"id": "q34", "question": "Run sshare for my user and show the output.", "expected_tool": "run_readonly_command", "notes": "Expected first tool: run_readonly_command"}
+{"id": "q35", "question": "Run sinfo -N -l and show me the result.", "expected_tool": "run_readonly_command", "notes": "Expected first tool: run_readonly_command"}
+{"id": "q36", "question": "Show the Slurm accounts and QOS using sacctmgr show.", "expected_tool": "run_readonly_command", "notes": "Expected first tool: run_readonly_command"}
+{"id": "q37", "question": "Run sprio -l and show me the output.", "expected_tool": "run_readonly_command", "notes": "Expected first tool: run_readonly_command"}
+{"id": "q38", "question": "How do I limit a job array to 3 running tasks?", "expected_tool": "none", "notes": "knowledge question, no tool"}
+{"id": "q39", "question": "What is the difference between --ntasks and --cpus-per-task?", "expected_tool": "none", "notes": "knowledge question, no tool"}
+{"id": "q40", "question": "How do I request one GPU in an sbatch script?", "expected_tool": "none", "notes": "knowledge question, no tool"}
+{"id": "q41", "question": "What does the PENDING reason Resources mean in Slurm?", "expected_tool": "none", "notes": "knowledge question, no tool"}
