@@ -706,7 +706,46 @@ def test_no_second_action_after_a_deny(tmp_path):
     assert len(Slurm.asked) == 1  # the user was asked once; the retry was not run
     text = out.getvalue()
     assert 'yours: #SBATCH -t 00:05:00' in text and 'now: #SBATCH -t 00:00:05' in text  # shown before the approval
-    assert 'declined an action for this request' in text
+
+
+def test_a_deny_ends_the_turn_with_the_apps_words(tmp_path):
+    """Demo recording, Oct 29: asked again after a Deny, the model wrote "I'll submit the job for you. ... Would you
+    like to proceed?" (3 of 3 runs). The turn now ends with the app's own sentence; the model is not asked again."""
+    from distillkit.assistant import Assistant, DECLINED_REPLY
+    script = '#!/bin/bash\n#SBATCH -A proj\n#SBATCH -t 00:05:00\nnvidia-smi'
+    turns = [[{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': script}}]}],
+             ["I'll submit the job for you. Would you like to proceed?"]]
+    asked = []
+
+    class Slurm:
+        def execute(self, name, args):
+            return {'error': 'the user did not approve this action', 'action': name}
+
+    bot = Assistant(tmp_path, docs=False, slurm=Slurm())
+    bot._stream = lambda messages: asked.append(1) or iter(turns[len(asked) - 1])
+    out = io.StringIO()
+    answer, _ = bot.ask('Submit this job for me:\n' + script, out=out)
+    text = out.getvalue()
+    assert len(asked) == 1 and answer == DECLINED_REPLY
+    assert 'submit_job: not done (the user did not approve this action)' in text
+    assert text.rstrip().endswith(DECLINED_REPLY) and "I'll submit" not in text
+    assert bot.history[-1] == {'role': 'assistant', 'content': DECLINED_REPLY}
+
+
+def test_a_failed_action_still_gets_the_models_reply(tmp_path):
+    """Only a Deny ends the turn: after an sbatch error the model explains it."""
+    from distillkit.assistant import Assistant
+    turns = iter([[{'tool_calls': [{'name': 'submit_job', 'arguments': {'script': '#!/bin/bash\nhostname'}}]}],
+                  ['The account is missing: add #SBATCH -A <your account>.']])
+
+    class Slurm:
+        def execute(self, name, args):
+            return {'error': 'sbatch: error: Invalid account or account/partition combination specified'}
+
+    bot = Assistant(tmp_path, docs=False, slurm=Slurm())
+    bot._stream = lambda messages: iter(next(turns))
+    answer, _ = bot.ask('Submit this: #!/bin/bash hostname', out=io.StringIO())
+    assert answer == 'The account is missing: add #SBATCH -A <your account>.'
 
 
 @pytest.mark.parametrize("text, expected", [
