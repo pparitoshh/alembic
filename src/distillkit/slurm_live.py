@@ -702,20 +702,30 @@ class SlurmLive:
         yours = self._gpus_in_use(qos, user=user) if user else None
         limit["your_gpus_in_use"] = yours
         free = grp.get("gpu") - used if grp.get("gpu") is not None and used is not None else None
+        qos_free, capped = free, False
         if per_user.get("gpu") is not None and yours is not None:  # the per-user cap binds the user alone
             yours_free = per_user["gpu"] - yours
+            capped = free is not None and yours_free < free
             free = yours_free if free is None else min(free, yours_free)
         if free is not None:  # one cap missing: the other one alone decides
             limit["gpus_free_in_team_limit"] = max(0, free)
         if limit["gpu_limit"] is not None and limit["gpus_free_in_team_limit"] is not None:
             free = limit["gpus_free_in_team_limit"]
-            if free == 0:
-                note = (f"Your team uses all {limit['gpu_limit']} GPUs of QOS {qos} now "
+            # the QOS limit is shared by all users of the QOS (on Leonardo's boost_qos_dbg that is every project, not
+            # only the user's team); with the per-user cap smaller, the note said "32 of 512 team GPUs are free" while
+            # 305 of 512 were in use (Oct 29)
+            if free == 0 and not capped:
+                note = (f"The users of QOS {qos} use all {limit['gpu_limit']} of its GPUs now "
                         f"({'unknown' if yours is None else yours} of them are yours). Slurm still accepts a new GPU "
-                        "job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) until team GPUs are free. "
-                        "sbatch --test-only does not check this limit.")
+                        "job, but it waits PENDING (reason QOSGrpGRES or QOSGrpGpuLimit) until GPUs of the QOS are "
+                        "free. sbatch --test-only does not check this limit.")
+            elif capped:
+                note = (f"{qos_free} of the {limit['gpu_limit']} GPUs of QOS {qos} are free now (the limit is shared by "
+                        f"all users of the QOS). You may use at most {per_user['gpu']} GPUs at a time and use {yours} "
+                        f"now, so you can start {free} more.")
             else:
-                note = f"{free} of {limit['gpu_limit']} team GPUs are free now. The limit is shared by your team."
+                note = (f"{free} of the {limit['gpu_limit']} GPUs of QOS {qos} are free now. The limit is shared by all "
+                        "users of the QOS.")
             limit["note"] = f"{limit['note']} {note}" if "note" in limit else note
         return limit
 
