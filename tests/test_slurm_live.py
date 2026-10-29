@@ -941,3 +941,21 @@ def test_gpu_availability_note_separates_the_qos_limit_from_the_per_user_cap():
     assert limits["team_gpus_in_use"] == 305 and limits["gpus_free_in_team_limit"] == 32
     assert limits["note"] == ("207 of the 512 GPUs of QOS boost_qos_dbg are free now (the limit is shared by all users "
                               "of the QOS). You may use at most 32 GPUs at a time and use 0 now, so you can start 32 more.")
+
+
+@pytest.mark.parametrize("test_only", [True, False])
+def test_submit_job_budget_error_gets_a_hint(test_only):
+    """Leonardo, Oct 29: with the budget used up, sbatch (also --test-only) says "invalid account or expired budget";
+    the model then told the user to check the account name. The result now carries a hint."""
+    from distillkit.slurm_live import BUDGET_HINT
+    err = (1, "", "sbatch: error: invalid account or expired budget\nsbatch: error: Batch job submission failed: "
+                  "Unspecified error\n")
+    s, _ = live({"mkdir": (0, "", ""), "sbatch": err})
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH -A EUHPC_D30_031\nhostname", "test_only": test_only})
+    assert r["error"].startswith("sbatch: error: invalid account or expired budget") and r["hint"] == BUDGET_HINT
+
+
+def test_submit_job_other_errors_get_no_budget_hint():
+    s, _ = live({"mkdir": (0, "", ""), "sbatch": (1, "", "sbatch: error: Invalid generic resource (gres) specification\n")})
+    r = s.execute("submit_job", {"script": "#!/bin/bash\n#SBATCH --gres=gpu:9\nhostname", "test_only": True})
+    assert r == {"error": "sbatch: error: Invalid generic resource (gres) specification"}

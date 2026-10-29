@@ -109,6 +109,20 @@ _AUTH_FAILED = re.compile(r"Permission denied|Too many authentication failures|c
 PERSIST = "8h"  # a shared connection outlives a working session, so one-time-code clusters ask once (issue #102)
 
 
+# Slurm's answer when the account is not the user's or its budget is used up. Asked to explain it, the model led with
+# "verify the account name" while the account was right and the budget was spent (Leonardo, Oct 29)
+_BUDGET_ERROR = re.compile(r"invalid account|expired budget|AssocGrpBillingMinutes|AssocGrpCPUMinutesLimit", re.I)
+BUDGET_HINT = ("Slurm gives this error when the account is not one of yours or when its budget (allocated hours) is "
+               "used up. If the account name is one the user has used before, the budget is the likely cause: say so, "
+               "and give the command that shows the remaining budget (on CINECA systems: saldo -b; elsewhere the "
+               "site's budget command or sacctmgr show assoc user=$USER). Do not tell the user to change the script.")
+
+
+def _sbatch_error(msg):
+    """sbatch's error, with a hint when it is the account/budget error."""
+    return {"error": msg, "hint": BUDGET_HINT} if _BUDGET_ERROR.search(msg) else {"error": msg}
+
+
 class LoginRequired(Exception):
     """The ssh login to the cluster is not valid: the user has to log in again; the model must not retry."""
 
@@ -389,11 +403,11 @@ class SlurmLive:
         if test_only:  # sbatch --test-only reports on stderr
             msg = (err or out).strip()
             if rc != 0:
-                return {"error": msg}
+                return _sbatch_error(msg)
             res = {"valid": True, "message": msg, "script_file": path}
         else:
             if rc != 0:
-                return {"error": err.strip() or out.strip() or "sbatch failed"}
+                return _sbatch_error(err.strip() or out.strip() or "sbatch failed")
             jid = out.strip().split(";")[0]
             res = {"submitted": True, "job_id": jid, "message": f"Submitted batch job {jid}", "script_file": path}
         if applied:
