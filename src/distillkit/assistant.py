@@ -342,6 +342,9 @@ def action_status(name, result):
     return f"\n[hpc-assistant] {name}: done" + (f" (job {result['job_id']})" if result.get('job_id') else '') + '\n'
 
 
+DECLINED_REPLY = 'OK, I did not do it: nothing was changed on the cluster. Tell me if you want to change something and try again.'
+
+
 def not_approved(result):
     """The user said no (terminal y/N, the web page's Deny, or no terminal to ask in)."""
     err = str(result.get('error', '')) if isinstance(result, dict) else ''
@@ -864,6 +867,11 @@ class Assistant:
                 out.write(f"\n[searched: {args.get('query', '')}]\n")
                 self.history.append({'role': 'tool', 'tool_call_id': c['id'],
                                      'content': with_context('Results:', docs) if docs else 'No results.'})
+            if declined:  # the turn ends with the app's own words: asked again, the model answered the Deny with
+                # "I'll submit the job for you. ... Would you like to proceed?" (3 of 3 runs, demo recording, Oct 29)
+                self.history.append({'role': 'assistant', 'content': DECLINED_REPLY})
+                out.write('\n' + DECLINED_REPLY + '\n')
+                return DECLINED_REPLY, sources
         else:  # the round limit is used up while the model still wanted tools
             name = (last_call or {}).get('name', '?')
             args = (last_call or {}).get('arguments', '{}')
