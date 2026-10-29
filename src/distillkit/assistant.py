@@ -610,7 +610,25 @@ class Assistant:
         # most of the question's words must be in the excerpt (a guide that only shares "GPU" with "Submit this job
         # for me: ..." does not count), and every name in it: a Kestrel guide shares "partition, wall time, GPUs per
         # node" with a question about boost_usr_prod, which is not about the guide
-        return len(terms & words) >= USER_DOC_SHARE * len(terms) and names(question) <= words
+        if len(terms & words) >= USER_DOC_SHARE * len(terms) and names(question) <= words:
+            return True
+        # or the question names something only the user's manuals know: "On Kestrel, which GPU partition should I
+        # use, and what is the longest job I can run there?" shares 3 of 7 words with the guide, and the agent gave
+        # Leonardo's partitions as Kestrel's (demo recording, Oct 29)
+        return any(not self._builtin_knows(n) for n in names(question) & words)
+
+    def _builtin_knows(self, name):
+        """True when the built-in documentation mentions this name (or there is no built-in index to ask)."""
+        if not self.builtin:
+            return True
+        for path in (self.pilot, self.factory):
+            db = sqlite3.connect('file:' + str(path) + '?mode=ro', uri=True)
+            try:
+                if db.execute('SELECT 1 FROM search WHERE search MATCH ? LIMIT 1', ('"' + name + '"',)).fetchone():
+                    return True
+            finally:
+                db.close()
+        return False
 
     def search(self, question, k=None):
         """Excerpts for one question: the user's manuals first (at most k-1 when built-in docs exist), then built-in.

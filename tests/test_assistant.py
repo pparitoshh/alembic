@@ -682,6 +682,40 @@ def test_user_docs_match_needs_most_of_the_question(tmp_path):
     assert not bot._user_docs_match('How many GPUs are free right now?')
 
 
+def _builtin_index(folder, text):
+    """A tiny built-in index (documents.sqlite and factory_docs.sqlite) with one chunk of text."""
+    import sqlite3
+    for name in ('documents.sqlite', 'factory_docs.sqlite'):
+        db = sqlite3.connect(folder / name)
+        db.execute('CREATE TABLE chunks (id INTEGER PRIMARY KEY, url TEXT, site TEXT, title TEXT, text TEXT, '
+                   'retrieved_at TEXT)')
+        db.execute("CREATE VIRTUAL TABLE search USING fts5(title, text, content='chunks', content_rowid='id')")
+        db.execute("INSERT INTO chunks VALUES (1, 'https://example.org', 'Leonardo', 'Leonardo', ?, '2026-10-29')", (text,))
+        db.execute("INSERT INTO search (rowid, title, text) VALUES (1, 'Leonardo', ?)", (text,))
+        db.commit()
+        db.close()
+
+
+@pytest.mark.parametrize("question, match", [
+    # names Kestrel, which only the uploaded guide knows, though it shares few words with it
+    ("On Kestrel, which GPU partition should I use, and what is the longest job I can run there?", True),
+    ("What does Kestrel allow as the longest run?", True),
+    # names only what the built-in docs know: a live question, not one about the guide
+    ("How many A100 GPUs are free right now on Leonardo?", False),
+    ("Which GPU partition should I use for a long run?", False),
+    ("Submit this job for me:\n#!/bin/bash\n#SBATCH -p boost_usr_prod\n#SBATCH --gres=gpu:1\nnvidia-smi", False),
+])
+def test_user_docs_match_names_only_the_guide_knows(tmp_path, question, match):
+    from distillkit.assistant import Assistant
+    _builtin_index(tmp_path, 'Leonardo Booster: partition boost_usr_prod, 4 A100 GPUs per node, Slurm, GPU jobs.')
+    guide = tmp_path / 'kestrel_guide.md'
+    guide.write_text('# Kestrel cluster guide\n\nThe Kestrel GPU partition is called `kgpu`. Each kgpu node has 4 H100 '
+                     'GPUs. The maximum wall time on kgpu is 36 hours.\n')
+    bot = Assistant(tmp_path, docs=True)
+    bot.add(guide)
+    assert bot._user_docs_match(question) is match
+
+
 def test_no_second_action_after_a_deny(tmp_path):
     """Rehearsal, Oct 28: after Deny the model looked up accounts and called submit_job again with another account."""
     from distillkit.assistant import Assistant
