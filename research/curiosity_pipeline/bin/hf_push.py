@@ -29,9 +29,11 @@ if keep not in refs and not dry:
 res = json.loads((d / 'eval_curiosity_result.json').read_text())
 r, name = res['result'], res['name']
 maj = r['majority']
-rows = '\n'.join(f"| {l} | {maj[l]['a']:.3f} | {maj[l]['b']:.3f} | {maj[l]['diff']:+.3f} [{maj[l]['paired_95'][0]:+.3f}, {maj[l]['paired_95'][1]:+.3f}] |"
+SETS = {'v2': 'Slurm dev (66)', 'v3': 'Slurm (200)', 'd1': 'GPU/MPI (106)'}  # plain names on the card, never v2/v3/d1
+JUDGES = {'judged': 'gpt-oss-20b', 'judged_gemma': 'Gemma 4 26B', 'judged_qwen': 'Qwen3-235B'}
+rows = '\n'.join(f"| {SETS[l]} | {maj[l]['a']:.3f} | {maj[l]['b']:.3f} | {maj[l]['diff']:+.3f} [{maj[l]['paired_95'][0]:+.3f}, {maj[l]['paired_95'][1]:+.3f}] |"
                  for l in ('v2', 'v3', 'd1') if l in maj)
-bj = '; '.join(f"{j.replace('judged_', '').replace('judged', 'gpt-oss-20b')}: " + ', '.join(f'{l} {v:+.3f}' for l, v in d2.items())
+bj = '; '.join(f"{JUDGES.get(j, j)} " + ' / '.join(f'{d2[l]:+.3f}' for l in SETS if l in d2)
                for j, d2 in r['by_judge'].items() if j != 'judged_majority')
 today = datetime.date.today().strftime('%b %-d')
 section = f"""## Latest update (version {new}, {today})
@@ -41,16 +43,18 @@ full-parameter training on 8 NVIDIA B300 GPUs (teacher answers with top-20 log-p
 documentation excerpts). Same 4B size, same chat format and GGUF files. Version {old} stays on the
 [`{keep}`](https://huggingface.co/{REPO}/tree/{keep}) branch, version 1.0 on [`v1.0`](https://huggingface.co/{REPO}/tree/v1.0).
 
-Win rate against closed-book Qwen3-4B (same setup as the tables below: answers at 1,536 tokens, retriever e, test sets
-v2, v3, d1, 3-judge majority), version {new} vs version 1.0 judged in the same run:
+Win rate against base Qwen3-4B answering without documents (same setup as the tables below: answers of up to 1,536
+tokens, the app's documentation search, majority of 3 judges), version {new} and version 1.0 judged in the same run, on
+three HPC test sets: Slurm dev (66 questions), Slurm (200 questions, the full set before the review below) and GPU/MPI
+(106 questions):
 
 | Test set | Version {new} | Version 1.0 | Difference [paired 95% interval] |
 |---|---:|---:|---:|
 {rows}
 | **Mean** | **{r['mean_cand']:.3f}** | **{r['mean_r27e']:.3f}** | **{r['mean_cand'] - r['mean_r27e']:+.3f}** |
 
-Per judge (difference vs version 1.0): {bj}. Judged on our B300 cluster with Qwen3-235B in FP8 instead of AWQ, so absolute
-numbers can differ slightly from the tables below, which are for version 1.0. A second check on Leonardo follows.
+Per judge (difference vs version 1.0, Slurm dev / Slurm / GPU/MPI): {bj}. Judged on our B300 cluster with Qwen3-235B in
+FP8 instead of AWQ, so absolute numbers can differ slightly from the tables below, which are for version 1.0.
 
 """
 card = Path(hf_hub_download(REPO, 'README.md', token=os.environ['HF_TOKEN'])).read_text()
@@ -66,6 +70,7 @@ card = card.replace(f'the current `main`, version {old},', f'the current `main`,
 card = card.replace(f'`main` is now {old}, see Latest update', f'`main` is now {new}, see Latest update')
 card = card.replace(f'| **ClusterPilot-4B {old}** (`main`) |', f'| ClusterPilot-4B {old} ([`{keep}`]({B}{keep})) |')  # leaderboard row: the new version gets its own row once scored
 assert not re.search(r'\bkd\d|kdall', card), 'internal run name on the card'
+assert not re.search(r'retriever [a-f]\b|\+ e\b|\b(v2|v3|d1)\b', section), 'internal label in the new section'
 (d / 'README.md').write_text(card)
 # Ollama's hf.co pulls ignore gguf/Modelfile and fall back to the stock qwen3 template, which puts tool calls into the
 # thinking field (agent mode answers empty); template, system and params at the repo root carry the Modelfile's own
