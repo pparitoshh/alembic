@@ -863,3 +863,22 @@ def test_web_question_box_grows_with_a_pasted_script():
     assert "q.style.height = q.scrollHeight + 2 + 'px'" in PAGE
     assert "$('q').value = ''; grow(); ask(q);" in PAGE  # back to one row after sending
     assert 'max-height: 45vh; overflow-y: auto' in PAGE and '.bar button { height: 48px; }' in PAGE
+
+
+@pytest.mark.parametrize("text, promise", [
+    ("I'll submit your job for you on the Leonardo cluster.", True), ("I will cancel job 123 now.", True),
+    ("Submitting your job now.", True), ("I'll go ahead and submit it.", True),
+    ("To submit it yourself, run sbatch job.sh.", False), ("I cannot submit the job because you declined.", False),
+])
+def test_promise_pattern(text, promise):
+    from distillkit.assistant import PROMISE
+    assert bool(PROMISE.search(text)) is promise
+
+
+def test_promise_without_action_gets_a_note(tmp_path):
+    from distillkit.assistant import Assistant
+    bot = Assistant(tmp_path, docs=False, slurm=object())
+    bot._stream = lambda messages: iter(["I'll submit your job for you on the Leonardo cluster."])
+    out = io.StringIO()
+    bot.ask('Submit this job for me:\n#!/bin/bash\n#SBATCH -t 00:05:00\nhostname', out=out)
+    assert 'no action was run for this request' in out.getvalue()
