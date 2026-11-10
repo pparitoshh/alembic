@@ -142,3 +142,52 @@ def test_cli(tmp_path, capsys):
     assert [r["pass"] for r in rows] == [True, False]
     text = capsys.readouterr().out
     assert "debug_failed_job" in text and "final" in text and "ALL" in text
+
+
+def test_coverage_with_three_expected_tools():
+    row = good()  # calls job_status and read_job_log: 2 of the 3 expected tools
+    row["task"]["expected_tools"] = ["job_status", "read_job_log", "job_accounting"]
+    assert reasons(row, "coverage") == []  # recall 2/3 >= 0.5 and 2 distinct tools
+    row["messages"] = row["messages"][:4] + row["messages"][-1:]  # only job_status
+    row["messages"][-1]["content"] = "Job 1234567 failed."
+    got = reasons(row, "coverage")
+    assert any("recall" in g for g in got) and any("multi_step" in g for g in got)
+
+
+def test_cli_first_pass_per_task(tmp_path, capsys):
+    answer = good()["messages"][-1]["content"]
+    rows = []
+    for aid, sample, content in [
+            ("t1", 0, "Let me check the log for job 1234567."),  # fails
+            ("t1", 1, answer),
+            ("t1", 2, answer),
+            ("t2", 0, "Let me check the log for job 1234567.")]:  # fails, and no passing sample at all
+        row = good()
+        row["id"], row["sample"] = aid, sample
+        row["messages"][-1]["content"] = content
+        rows.append(row)
+    src = tmp_path / "in.jsonl"
+    src.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    vt.main([str(src), str(tmp_path / "all.jsonl")])
+    all_rows = [json.loads(x) for x in (tmp_path / "all.jsonl").read_text().splitlines()]
+    assert [(r["id"], r["sample"], r["pass"]) for r in all_rows] == [
+        ("t1", 0, False), ("t1", 1, True), ("t1", 2, True), ("t2", 0, False)]  # the flag stays off: every row
+    vt.main([str(src), str(tmp_path / "first.jsonl"), "--first-pass-per-task"])
+    kept = [json.loads(x) for x in (tmp_path / "first.jsonl").read_text().splitlines()]
+    assert [(r["id"], r["sample"]) for r in kept] == [("t1", 1)]
+    assert "kept: 1 of 4" in capsys.readouterr().out
+
+
+def test_cli_first_pass_per_task_picks_the_smallest_sample(tmp_path, capsys):
+    answer = good()["messages"][-1]["content"]
+    rows = []
+    for sample in (2, 1):  # a later sample arrives first in the file (concurrent collection)
+        row = good()
+        row["id"], row["sample"] = "t1", sample
+        row["messages"][-1]["content"] = answer
+        rows.append(row)
+    src = tmp_path / "in.jsonl"
+    src.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    vt.main([str(src), str(tmp_path / "first.jsonl"), "--first-pass-per-task"])
+    kept = [json.loads(x) for x in (tmp_path / "first.jsonl").read_text().splitlines()]
+    assert [(r["id"], r["sample"]) for r in kept] == [("t1", 1)]

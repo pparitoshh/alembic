@@ -9,8 +9,12 @@ A row keeps "pass": true only if all rules hold; otherwise "pass": false and "fa
   action      action tools only when the family or the request asks for that action
   claim       "submitted/cancelled/held/..." only after the matching action tool returned success
 
-usage: verify_traj.py IN.jsonl OUT.jsonl
+With --first-pass-per-task (teacher retries, collected with --samples K), the output keeps for each task id
+only the first sample that passed; without the flag every row is written with its pass flags.
+
+usage: verify_traj.py IN.jsonl OUT.jsonl [--first-pass-per-task]
 """
+import argparse
 import json
 import re
 import sys
@@ -211,20 +215,30 @@ def verify(row):
 
 
 def main(argv=None):
-    argv = sys.argv[1:] if argv is None else argv
-    if len(argv) != 2:
-        sys.exit(__doc__)
-    fam, why = defaultdict(lambda: [0, 0]), Counter()
-    with open(argv[0], encoding="utf-8") as fi, open(argv[1], "w", encoding="utf-8") as fo:
+    ap = argparse.ArgumentParser(description="Verify multi-step tool trajectories before the data build.")
+    ap.add_argument("infile")
+    ap.add_argument("outfile")
+    ap.add_argument("--first-pass-per-task", action="store_true",
+                    help="keep only the first sample that passes per task id (teacher samples)")
+    args = ap.parse_args(argv)
+    fam, why, first = defaultdict(lambda: [0, 0]), Counter(), {}
+    with open(args.infile, encoding="utf-8") as fi, open(args.outfile, "w", encoding="utf-8") as fo:
         for line in fi:
             if not line.strip():
                 continue
             r = verify(json.loads(line))
-            fo.write(json.dumps(r, ensure_ascii=False) + "\n")
             f = fam[r.get("family") or "?"]
             f[0] += 1
             f[1] += r["pass"]
             why.update({x.split(":")[0] for x in r["fail_reasons"]})
+            if args.first_pass_per_task:
+                if r["pass"] and (r["id"] not in first or r.get("sample", 0) < first[r["id"]].get("sample", 0)):
+                    first[r["id"]] = r
+            else:
+                fo.write(json.dumps(r, ensure_ascii=False) + "\n")
+        if args.first_pass_per_task:  # the first passing sample per task id, in the order they first passed
+            for r in first.values():
+                fo.write(json.dumps(r, ensure_ascii=False) + "\n")
     tot = [sum(v[0] for v in fam.values()), sum(v[1] for v in fam.values())]
     print(f"{'family':<28}{'n':>6}{'pass':>6}{'rate':>8}")
     for k, (n, p) in sorted(fam.items()) + [("ALL", tot)]:
@@ -232,6 +246,8 @@ def main(argv=None):
     print(f"\n{'fail reason':<28}{'rows':>6}")
     for k, c in why.most_common():
         print(f"{k:<28}{c:>6}")
+    if args.first_pass_per_task:
+        print(f"\nkept: {len(first)} of {tot[0]} rows (first passing sample per task)")
     return 0
 
 

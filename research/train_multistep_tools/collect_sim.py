@@ -11,7 +11,12 @@ The teacher runs through an OpenAI-compatible endpoint (vLLM serve) with native 
 prompt, thinking off and at most 6 tool calls. Each output row carries the world facts, so a verifier can check the
 final answer. Rows have the format research/agent_train/build_agent_data.py reads.
 
+Teacher retries (--samples K, round 2): each task is run K times at temperature 0.7, one "sample" index
+per row; the world of a task stays the same in all samples. verify_traj.py --first-pass-per-task keeps the
+first sample of each task that passes.
+
 usage: collect_sim.py TASKS.jsonl OUT.jsonl ENDPOINT MODEL [--concurrency N] [--limit N]
+                          [--samples K] [--temperature T]
 """
 import argparse
 import copy
@@ -489,6 +494,10 @@ class SimSlurm(SlurmLive):
             return {"error": f"no GPU nodes in partition {partition} (or the partition does not exist)"}
         return {"partitions": parts, "free_gpus_by_type": by_type, "your_limits": self._limits()}
 
+    def account_info(self):
+        return {"accounts": [self.w["account"]], "partitions": "all", "qos": [self._limits()],
+                "fairshare": self._sshare().strip()}
+
     def _limits(self):
         q = self.w["qos"]
         lim = {"qos": q["name"], "gpu_limit": q["gpu_limit"], "cpu_limit": q["cpu_limit"], "max_wall": q["max_wall"],
@@ -669,7 +678,7 @@ def _dump_call(tc):
     return {"id": tc.id, "type": "function", "function": {"name": f.name, "arguments": f.arguments or "{}"}}
 
 
-def run_task(client, model, task, max_calls=MAX_CALLS):
+def run_task(client, model, task, max_calls=MAX_CALLS, temperature=0, sample=0):
     """One trajectory: the teacher solves the task on its simulated world. Returns the output row."""
     world = make_world(task)
     question = task["user_request"].replace("{JOB_ID}", world["job_id"] or "")
@@ -680,7 +689,7 @@ def run_task(client, model, task, max_calls=MAX_CALLS):
     try:
         while True:
             force_answer = n_calls >= max_calls
-            resp = client.chat.completions.create(model=model, messages=messages, tools=tools, temperature=0,
+            resp = client.chat.completions.create(model=model, messages=messages, tools=tools, temperature=temperature,
                                                   tool_choice="none" if force_answer else "auto", extra_body=extra)
             msg = resp.choices[0].message
             calls = list(msg.tool_calls or [])
@@ -703,9 +712,9 @@ def run_task(client, model, task, max_calls=MAX_CALLS):
                 messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(result)})
     except Exception as e:  # a server error: keep the row, the verifier drops it
         error = repr(e)
-    return {"id": task["id"], "family": task["family"], "question": question, "pass": None, "tools": sim.log,
-            "messages": messages, "world": facts(world), "task": task, "n_tool_calls": n_calls, "capped": capped,
-            "error": error}
+    return {"id": task["id"], "sample": sample, "family": task["family"], "question": question, "pass": None,
+            "tools": sim.log, "messages": messages, "world": facts(world), "task": task,
+            "n_tool_calls": n_calls, "capped": capped, "error": error}
 
 
 def done_ids(out_path):
@@ -715,22 +724,25 @@ def done_ids(out_path):
     ids = set()
     for line in p.read_text(encoding="utf-8").splitlines():
         try:
-            ids.add(json.loads(line)["id"])
+            r = json.loads(line)
+            ids.add((r["id"], r.get("sample", 0)))  # old rows without a sample count as sample 0
         except (ValueError, KeyError):
             continue  # a line cut by a killed run
     return ids
 
 
-def collect(client, model, tasks, out_path, concurrency=8, limit=None):
-    """Run the tasks not yet in out_path; append one row per task. Returns the number of new rows."""
+def collect(client, model, tasks, out_path, concurrency=8, limit=None, samples=1, temperature=0):
+    """Run the tasks not yet in out_path, one row per task and sample; append rows in the (task, sample) order.
+    Returns the number of new rows."""
     done = done_ids(out_path)
-    todo = [t for t in tasks if t["id"] not in done]
+    todo = [(s, t) for t in tasks for s in range(samples) if (t["id"], s) not in done]
     if limit is not None:
         todo = todo[:limit]
     lock = threading.Lock()
 
-    def one(task):
-        row = run_task(client, model, copy.deepcopy(task))
+    def one(item):
+        sample, task = item
+        row = run_task(client, model, copy.deepcopy(task), temperature=temperature, sample=sample)
         with lock, open(out_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
         return row
@@ -748,11 +760,16 @@ def main(argv=None):
     ap.add_argument("model")
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--samples", type=int, default=1,
+                    help="teacher attempts per task; 2 or more collect at temperature 0.7 (round 2)")
+    ap.add_argument("--temperature", type=float, default=None,
+                    help="sampling temperature (default: 0, or 0.7 with --samples > 1)")
     a = ap.parse_args(argv)
     from openai import OpenAI
     client = OpenAI(base_url=a.endpoint, api_key="EMPTY", timeout=600)
     tasks = [json.loads(l) for l in open(a.tasks, encoding="utf-8") if l.strip()]
-    n = collect(client, a.model, tasks, a.out, a.concurrency, a.limit)
+    temperature = a.temperature if a.temperature is not None else (0.7 if a.samples > 1 else 0.0)
+    n = collect(client, a.model, tasks, a.out, a.concurrency, a.limit, a.samples, temperature)
     print(f"collected {n} new trajectories -> {a.out}")
 
 
