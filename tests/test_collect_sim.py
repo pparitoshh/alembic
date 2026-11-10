@@ -34,7 +34,7 @@ def test_world_is_consistent_per_task_and_job_id_has_6_or_7_digits():
 
 def test_simulator_covers_every_live_tool():
     assert {s["name"] for s in LIVE_SCHEMAS} == {t["function"]["name"] for t in openai_tools()}
-    assert len(LIVE_SCHEMAS) == 18
+    assert len(LIVE_SCHEMAS) == 19
     for s in LIVE_SCHEMAS:
         assert callable(getattr(cs.SimSlurm, s["name"]))
 
@@ -49,12 +49,23 @@ def test_every_tool_answers_with_valid_arguments(cluster):
              "job_usage": {"job_id": jid}, "job_priority": {"job_id": jid},
              "update_job": {"job_id": jid, "field": "TimeLimit", "value": "00:30:00"}, "hold_job": {"job_id": jid},
              "release_job": {"job_id": jid}, "requeue_job": {"job_id": jid},
-             "run_readonly_command": {"command": "squeue --me"}, "reservation_info": {}}
+             "run_readonly_command": {"command": "squeue --me"}, "reservation_info": {}, "account_info": {}}
     assert set(calls) == {x["name"] for x in LIVE_SCHEMAS}
     for name, args in calls.items():
         res = s.execute(name, json.dumps(args))
         assert isinstance(res, dict) and json.dumps(res)
-    assert len(s.log) == 18
+    assert len(s.log) == 19
+
+
+def test_account_info():
+    w, s = sim("running", "leonardo")
+    a = s.execute("account_info", {})
+    assert a["accounts"] == [w["account"]] and a["partitions"] == "all"
+    assert a["qos"][0]["qos"] == "normal" and a["qos"][0]["gpu_limit"] is None  # no group GPU limit in this QOS
+    assert "FairShare" in a["fairshare"]
+    w, s = sim("running")
+    a = s.execute("account_info", {})
+    assert a["qos"][0]["gpu_limit"] == 8 and a["accounts"] == ["eai-team04"]
 
 
 def test_schema_validation_is_the_real_code():
@@ -254,4 +265,51 @@ def test_collect_resume(tmp_path):
     assert cs.collect(FakeClient([]), "m", tasks, out) == 0
     rows = [json.loads(l) for l in out.read_text().splitlines()]
     assert sorted(r["id"] for r in rows) == ["t0", "t1", "t2", "t3"]
-    assert set(rows[0]) >= {"id", "family", "question", "pass", "tools", "messages", "world", "task"}
+    assert set(rows[0]) >= {"id", "sample", "family", "question", "pass", "tools", "messages", "world", "task"}
+
+
+def answer(m):
+    return ("Done.", None)  # noqa: E731
+
+
+def test_samples_give_one_row_per_task_and_sample(tmp_path):
+    out = tmp_path / "out.jsonl"
+    tasks = [task("completed", tid="t1")]
+    assert cs.collect(FakeClient([answer, answer]), "m", tasks, out, concurrency=1, samples=2) == 2
+    rows = [json.loads(l) for l in out.read_text().splitlines()]
+    assert [(r["id"], r["sample"]) for r in rows] == [("t1", 0), ("t1", 1)]
+    assert rows[0]["world"] == rows[1]["world"]  # the world stays the same in all samples of a task
+    assert cs.collect(FakeClient([]), "m", tasks, out, samples=2) == 0  # resume skips both samples
+
+
+def test_run_task_passes_temperature_and_sample_index():
+    client = FakeClient([answer])
+    row = cs.run_task(client, "m", task("running"), temperature=0.5, sample=3)
+    assert row["sample"] == 3 and client.requests[0]["temperature"] == 0.5
+    row = cs.run_task(client, "m", task("running"))
+    assert row["sample"] == 0 and client.requests[1]["temperature"] == 0  # default stays temperature 0
+
+
+@pytest.mark.parametrize("flags,temps", [
+    (["--samples", "2"], [0.7, 0.7]),                       # teacher retries collect at 0.7 ...
+    (["--samples", "2", "--temperature", "0.25"], [0.25, 0.25]),  # ... unless --temperature says otherwise
+    ([], [0.0]),                                            # one sample per task: temperature 0, as now
+])
+def test_main_temperature_policy(flags, temps, tmp_path, monkeypatch):
+    seen = []
+
+    class StubClient:
+        def __init__(self, base_url, api_key, timeout):
+            self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
+
+        def create(self, **kw):
+            seen.append(kw["temperature"])
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="Done.", tool_calls=None))])
+
+    import openai
+    monkeypatch.setattr(openai, "OpenAI", StubClient)
+    tf = tmp_path / "tasks.jsonl"
+    tf.write_text(json.dumps(task("running")) + "\n", encoding="utf-8")
+    out = tmp_path / "traj.jsonl"
+    assert cs.main([str(tf), str(out), "http://e", "m", *flags]) is None
+    assert seen == temps
